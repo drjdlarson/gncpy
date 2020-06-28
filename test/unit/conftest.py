@@ -4,6 +4,7 @@ Created on Sun Apr 26 15:35:30 2020
 
 @author: ryan4
 """
+import os.path as path
 import pytest
 import numpy as np
 
@@ -65,3 +66,17 @@ def x_point():
 def u_point():
     return np.array([[-0.5],
                      [2]])
+
+
+@pytest.fixture(scope="session")
+def yaml_file():
+    root_dir = path.dirname(path.abspath(__file__))
+    return path.abspath(path.join(root_dir, '../fixtures/test_yaml1.yaml'))
+
+
+@pytest.fixture(scope="session")
+def yaml_file_lst():
+    root_dir = path.dirname(path.abspath(__file__))
+    f1 = path.abspath(path.join(root_dir, '../fixtures/test_yaml1.yaml'))
+    f2 = path.abspath(path.join(root_dir, '../fixtures/test_yaml2.yaml'))
+    return (f1, f2)
