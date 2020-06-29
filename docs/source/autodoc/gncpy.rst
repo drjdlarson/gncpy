@@ -6,14 +6,6 @@ gncpy package
    :undoc-members:
    :show-inheritance:
 
-Subpackages
------------
-
-.. toctree::
-   :maxdepth: 4
-
-   gncpy.sensors
-
 Submodules
 ----------
 
@@ -22,4 +14,5 @@ Submodules
 
    gncpy.control
    gncpy.math
+   gncpy.sensors
    gncpy.simulator

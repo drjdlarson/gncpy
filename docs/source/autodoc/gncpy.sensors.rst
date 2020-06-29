@@ -1,15 +1,7 @@
-gncpy.sensors package
-=====================
+gncpy.sensors module
+====================
 
 .. automodule:: gncpy.sensors
    :members:
    :undoc-members:
    :show-inheritance:
-
-Submodules
-----------
-
-.. toctree::
-   :maxdepth: 4
-
-   gncpy.sensors.inertials

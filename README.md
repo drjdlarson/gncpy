@@ -15,6 +15,6 @@ To run tests marked as slow, pass the `--runslow` option,
 ## Building documentation
 The documentation uses sphinx and autodoc to pull docstrings from the code. This process is run through a command line that has python 3 and tox installed. The built documentation is in the **docs/build/** sub-directory.
 The HTML version of the docs can be built using the following command:
-`tox -e docs --html`
+`tox -e docs -- html`
 
 Then they can be viewed by opening **docs/build/html/index.html**

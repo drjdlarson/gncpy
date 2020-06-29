@@ -90,7 +90,7 @@ class BaseELQR(BaseLQR):
         This implements an ELQR controller for cases where the dynamics are
         non-linear and the cost function is non-quadratic in terms of the
         state. This can be extended to include other forms of non-quadratic
-        cost functions.
+        cost functions. See :cite:`Berg2016_ExtendedLQRLocallyOptimalFeedbackControlforSystemswithNonLinearDynamicsandNonQuadraticCost`
 
     Args:
         max_iters (int): Max number of iterations for cost to converge
