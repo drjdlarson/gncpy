@@ -1,7 +1,6 @@
 import yaml
 import io
 import abc
-import inspect
 from warnings import warn
 
 
