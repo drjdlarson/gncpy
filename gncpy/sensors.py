@@ -1,4 +1,5 @@
 import abc
+import io
 import numpy as np
 
 
@@ -48,8 +49,7 @@ class InertialBase:
         """Returns measurements based on the true values.
 
         Applies scale factor/misalignments, adds bias, and adds noise to true
-        values. This assumes a Gauss-Markov model for the bias terms, see
-        :cite:`Quinchia2013_AComparisonbetweenDifferentErrorModelingofMEMSAppliedtoGPSINSIntegratedSystems`
+        values.
 
         Args:
             true (N x 1 numpy array): array of true sensor values, N <= 3
@@ -59,10 +59,15 @@ class InertialBase:
         """
 
         noise = np.sqrt(np.array(self.wn_var)) * np.random.randn(3)
-        sf = self._calculate_scale_factor()
-        return sf @ true + self._calculate_bias() + noise.reshape((3, 1))
+        sf = self.calculate_scale_factor()
+        return sf @ true + self.calculate_bias() + noise.reshape((3, 1))
 
-    def _calculate_bias(self):
+    def calculate_bias(self):
+        """ Calculates the bias for each axis.
+
+        This assumes a Gauss-Markov model for the bias terms, see
+        :cite:`Quinchia2013_AComparisonbetweenDifferentErrorModelingofMEMSAppliedtoGPSINSIntegratedSystems`
+        """
         if self._last_bias.size == 0:
             self._last_bias = (np.array(self.init_bias_var)
                                * np.random.randn(3))
@@ -80,7 +85,9 @@ class InertialBase:
         self._last_bias = bias
         return bias
 
-    def _calculate_scale_factor(self):
+    def calculate_scale_factor(self):
+        """ Calculates the scale factors and misalignment matrix.
+        """
         if self._sf.size == 0:
             sf = np.array(self.scale_factor_sig) * np.random.randn(1, 3)
             ma = np.zeros((3, 3))
@@ -101,16 +108,60 @@ class InertialBase:
 """
 
 
-class BaseConstellation(metaclass=abc.ABCMeta):
+class BaseSV(metaclass=abc.ABCMeta):
+    """ Base class for GNSS Space Vehicles.
+
+    Constellations should define their own SV class that properly accounts for
+    their propagation and error models. Inherited classes must define
+    :py:meth:`gncpy.sensors.BaseSV.propagate`
+
+    Attributes:
+        true_pos_ECEF (3 x 1 numpy array): Position of SV in ECEF coordinates
+            from orbital mechanics
+        real_pos_ECEF (3 x 1 numpy array): True position corrupted by errors
+    """
     def __init__(self, **kwargs):
-        self.sats = {}
+        self.true_pos_ECEF = np.array([[]])
+        self.real_pos_ECEF = np.array([[]])
 
     @abc.abstractmethod
-    def iterate(self, **kwargs):
+    def propagate(self, time, **kwargs):
+        """ Calculates SV position at a given time.
+
+        This must be defined by child classes.
+
+        Args:
+            time (float): Time to find position
+        """
         pass
 
 
+class BaseConstellation:
+    """ Base class for GNSS constellations.
+
+    Collects common functionality between different constellations and provides
+    a common interface.
+
+    Attributes:
+        sats (dict): Dictionary of :py:class:`gncpy.sensors.BaseSV` objects
+    """
+    def __init__(self, **kwargs):
+        self.sats = {}
+
+    def propagate(self, time, **kwargs):
+        """ Propagate all SV's to the given time.
+
+        Attributes:
+            time (float): Time to find position
+            **kwargs : passed through to :py:meth:`gncpy.sensors.BaseSV.propagate`
+        """
+        for k, v in self.sats.items():
+            self.sats[k].propagate(time, **kwargs)
+
+
 class BaseGNSSReceiver(metaclass=abc.ABCMeta):
+    """ Defines the interface for common GNSS Receiver functions.
+    """
     def __init__(self, **kwargs):
         pass
 
@@ -119,23 +170,103 @@ class BaseGNSSReceiver(metaclass=abc.ABCMeta):
         pass
 
 
-class GPSSat:
+class GPSSat(BaseSV):
+    """ Custom SV for GPS Constellation.
+
+    Attributes:
+        health (str): satellite health
+        ecc (float): eccentricity
+        toe (float): time of applicability/ephemeris in seconds
+        inc (float): Orbital inclination in radians
+        ascen_rate (float): Rate of right ascension in rad/s
+        sqrt_a (float): Square root of semi-major axis in m^1/2
+        ascen (float): Right ascension at week in radians
+        peri (float): Argument of perigee in radians
+        mean_anom (float): Mean anomaly in radians
+        af0 (float): Zeroth order clock correction in seconds
+        af1 (float): First order cloc correction in sec/sec
+        week (int): Week number
+    """
     def __init__(self):
+        self.health = ''
+        self.ecc = 0
+        self.toe = 0
+        self.inc = 0
+        self.ascen_rate = 0
+        self.sqrt_a = 0
+        self.ascen = 0
+        self.peri = 0
+        self.mean_anom = 0
+        self.af0 = 0
+        self.af1 = 0
+        self.week = 0
+
+    def propagate(self, time, **kwargs):
+        """ Calculates the GPS SV's position at the given time
+
+        Args:
+            time (float): Time of week to find position
+        """
         pass
 
 
 class GPSConstellation(BaseConstellation):
+    """ Handles the GPS constellation.
+
+    This maintains the satellite list, file parsing operations, and propagation
+    functions for the GPS satellite constellation.
+    """
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def iterate(self, **kwargs):
-        pass
-
     def parse_almanac(self, alm_f):
-        pass
+        cur_prn = ''
+        with io.open(alm_f, 'r') as fin:
+            line = fin.readline()
+            line = line.lower()
+
+            if "almanac" in line:
+                pass
+
+            elif "id" in line:
+                string = line.split(":")[1]
+                cur_prn = str(int(string.trim()))
+                self.sats[cur_prn] = GPSSat()
+
+            elif not cur_prn and not line:
+                val = line.split(":")[1].trim()
+                if "health" in line:
+                    self.sats[cur_prn].health = val
+                elif "eccentricity" in line:
+                    self.sats[cur_prn].ecc = float(val)
+                elif "applicability" in line:
+                    self.sats[cur_prn].toe = float(val)
+                elif "inclination" in line:
+                    self.sats[cur_prn].inc = float(val)
+                elif "rate of right" in line:
+                    self.sats[cur_prn].ascen_rate = float(val)
+                elif "sqrt" in line:
+                    self.sats[cur_prn].sqrt_a = float(val)
+                elif "right ascen" in line:
+                    self.sats[cur_prn].ascen = float(val)
+                elif "argument" in line:
+                    self.sats[cur_prn].peri = float(val)
+                elif "mean anom" in line:
+                    self.sats[cur_prn].mean_anom = float(val)
+                elif "af0" in line:
+                    self.sats[cur_prn].af0 = float(val)
+                elif "af1" in line:
+                    self.sats[cur_prn].af1 = float(val)
+                elif "week" in line:
+                    self.sats[cur_prn].week = int(val)
 
 
 class GPSReceiver(BaseGNSSReceiver):
+    """ Emulates a GPS receiver.
+
+    Manages the measurement functions for a GPS reciever, and models receiver
+    and signal noise.
+    """
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
