@@ -170,7 +170,7 @@ class BaseELQR(BaseLQR):
             timestep (int): Timestep number, starts at 0 and is relative to
                 the begining of the current time horizon
             **kwargs : any arguments needed by
-                :py:meth:`gasur.guidance.base.BaseELQR.quadratize_non_quad_state`
+                :py:meth:`gncpy.control.BaseELQR.quadratize_non_quad_state`
 
         Returns:
             tuple containing
@@ -449,7 +449,7 @@ class BaseELQR(BaseLQR):
             inv_dyn_fncs (list of functions): inverse dynamics functions,
                 one per state, must take in x, u as parameters
             **kwargs : passed through to
-                :py:meth:`gasur.guidance.base.BaseELQR.quadratize_cost`
+                :py:meth:`gncpy.control.BaseELQR.quadratize_cost`
 
         Returns:
             tuple containing
@@ -505,7 +505,7 @@ class BaseELQR(BaseLQR):
             inv_dyn_fncs (list of functions): inverse dynamics functions,
                 one per state, must take in x, u as parameters
             **kwargs : passed through to
-                :py:meth:`gasur.guidance.base.BaseELQR.quadratize_cost`
+                :py:meth:`gncpy.control.BaseELQR.quadratize_cost`
 
         Returns:
             tuple containing

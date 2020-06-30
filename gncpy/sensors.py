@@ -1,4 +1,12 @@
+import abc
 import numpy as np
+
+
+"""
+-------------------------------------------------------------------------------
+------------------------------ Inertial Sensors -------------------------------
+-------------------------------------------------------------------------------
+"""
 
 
 class InertialBase:
@@ -84,3 +92,52 @@ class InertialBase:
             self._sf = np.eye(3) + np.diag(sf) + ma
 
         return self._sf
+
+
+"""
+-------------------------------------------------------------------------------
+------------------------------- GNSS Sensors ----------------------------------
+-------------------------------------------------------------------------------
+"""
+
+
+class BaseConstellation(metaclass=abc.ABCMeta):
+    def __init__(self, **kwargs):
+        self.sats = {}
+
+    @abc.abstractmethod
+    def iterate(self, **kwargs):
+        pass
+
+
+class BaseGNSSReceiver(metaclass=abc.ABCMeta):
+    def __init__(self, **kwargs):
+        pass
+
+    @abc.abstractmethod
+    def measure_PR(self, true_pos, const, **kwargs):
+        pass
+
+
+class GPSSat:
+    def __init__(self):
+        pass
+
+
+class GPSConstellation(BaseConstellation):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def iterate(self, **kwargs):
+        pass
+
+    def parse_almanac(self, alm_f):
+        pass
+
+
+class GPSReceiver(BaseGNSSReceiver):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def measure_PR(self, true_pos, const, **kwargs):
+        pass
