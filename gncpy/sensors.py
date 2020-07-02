@@ -222,43 +222,43 @@ class GPSConstellation(BaseConstellation):
     def parse_almanac(self, alm_f):
         cur_prn = ''
         with io.open(alm_f, 'r') as fin:
-            line = fin.readline()
-            line = line.lower()
+            for line in fin:
+                line = line.lower()
 
-            if "almanac" in line:
-                pass
+                if "almanac" in line:
+                    pass
 
-            elif "id" in line:
-                string = line.split(":")[1]
-                cur_prn = str(int(string.trim()))
-                self.sats[cur_prn] = GPSSat()
+                elif "id" in line:
+                    string = line.split(":")[1]
+                    cur_prn = str(int(string.strip()))
+                    self.sats[cur_prn] = GPSSat()
 
-            elif not cur_prn and not line:
-                val = line.split(":")[1].trim()
-                if "health" in line:
-                    self.sats[cur_prn].health = val
-                elif "eccentricity" in line:
-                    self.sats[cur_prn].ecc = float(val)
-                elif "applicability" in line:
-                    self.sats[cur_prn].toe = float(val)
-                elif "inclination" in line:
-                    self.sats[cur_prn].inc = float(val)
-                elif "rate of right" in line:
-                    self.sats[cur_prn].ascen_rate = float(val)
-                elif "sqrt" in line:
-                    self.sats[cur_prn].sqrt_a = float(val)
-                elif "right ascen" in line:
-                    self.sats[cur_prn].ascen = float(val)
-                elif "argument" in line:
-                    self.sats[cur_prn].peri = float(val)
-                elif "mean anom" in line:
-                    self.sats[cur_prn].mean_anom = float(val)
-                elif "af0" in line:
-                    self.sats[cur_prn].af0 = float(val)
-                elif "af1" in line:
-                    self.sats[cur_prn].af1 = float(val)
-                elif "week" in line:
-                    self.sats[cur_prn].week = int(val)
+                elif cur_prn and ":" in line:
+                    val = line.split(":")[1].strip()
+                    if "health" in line:
+                        self.sats[cur_prn].health = val
+                    elif "eccentricity" in line:
+                        self.sats[cur_prn].ecc = float(val)
+                    elif "applicability" in line:
+                        self.sats[cur_prn].toe = float(val)
+                    elif "inclination" in line:
+                        self.sats[cur_prn].inc = float(val)
+                    elif "rate of right" in line:
+                        self.sats[cur_prn].ascen_rate = float(val)
+                    elif "sqrt" in line:
+                        self.sats[cur_prn].sqrt_a = float(val)
+                    elif "right ascen" in line:
+                        self.sats[cur_prn].ascen = float(val)
+                    elif "argument" in line:
+                        self.sats[cur_prn].peri = float(val)
+                    elif "mean anom" in line:
+                        self.sats[cur_prn].mean_anom = float(val)
+                    elif "af0" in line:
+                        self.sats[cur_prn].af0 = float(val)
+                    elif "af1" in line:
+                        self.sats[cur_prn].af1 = float(val)
+                    elif "week" in line:
+                        self.sats[cur_prn].week = int(val)
 
 
 class GPSReceiver(BaseGNSSReceiver):
