@@ -5,6 +5,7 @@ import numpy as np
 import gncpy.wgs84 as wgs84
 from gncpy.orbital_mechanics import ecc_anom_from_mean, true_anom_from_ecc, \
     correct_lon_ascend, ecef_from_orbit
+from gncpy.coordinate_transforms import ecef_to_NED
 
 
 """
@@ -172,7 +173,7 @@ class BaseGNSSReceiver(metaclass=abc.ABCMeta):
     """
     def __init__(self, **kwargs):
         self.max_channels = kwargs.get('max_channels', 12)
-        self.mask_angle = kwargs.get('mask_angle', 2)
+        self.mask_angle = kwargs.get('mask_angle', 0)
 
     @abc.abstractmethod
     def measure_PR(self, true_pos, const, **kwargs):
@@ -300,9 +301,53 @@ class GPSReceiver(BaseGNSSReceiver):
 
     Manages the measurement functions for a GPS reciever, and models receiver
     and signal noise.
+
+    Attributes:
+        tracked_SVs (list): The PRNs of all SVs currently tracked
+    Todo:
+        Add PR error models
     """
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.tracked_SVs = []
 
     def measure_PR(self, true_pos, const, **kwargs):
-        pass
+        """ Measures the pseudorange to each satellite in the constellation
+
+        Args:
+            true_pos (3 x 1 numpy array): True receiver position in ECEF
+            const (:py:class:`gncpy.sensors.GPSConstellation`): Constellation
+                to use, propagated to current time
+        Returns:
+            (dict): Keys are PRN's and values are pseudoranges in meters
+
+        Todo:
+            add error terms
+        """
+        new_SVs = {}
+        for prn, sv in const.sats.items():
+            diff = sv.real_pos_ECEF - true_pos
+            los_NED = ecef_to_NED(true_pos, sv.real_pos_ECEF)
+            los_NED = los_NED / np.sqrt(los_NED.T @ los_NED)
+            elev = -np.arctan2(los_NED[2] / np.sqrt(los_NED[0]**2
+                                                    + los_NED[1]**2))
+            if elev >= self.mask_angle:
+                pr = np.sqrt(diff.T @ diff)
+                new_SVs[prn] = pr
+
+        tracked = {}
+        if len(new_SVs) >= self.max_channels:
+            for prn in new_SVs.keys():
+                if prn in self.tracked_SVs:
+                    tracked[prn] = new_SVs[prn]
+                    del new_SVs[prn]
+
+        if len(tracked) < self.max_channels and len(new_SVs) > 0:
+            for prn in new_SVs.keys():
+                if prn not in tracked:
+                    tracked[prn] = new_SVs[prn]
+                    if len(tracked) == self.max_channels:
+                        break
+
+        self.tracked_SVs = tracked.keys()
+        return tracked

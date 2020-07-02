@@ -13,6 +13,7 @@ Submodules
    :maxdepth: 4
 
    gncpy.control
+   gncpy.coordinate_transforms
    gncpy.math
    gncpy.orbital_mechanics
    gncpy.sensors
