@@ -2,6 +2,10 @@ import abc
 import io
 import numpy as np
 
+import gncpy.wgs84 as wgs84
+from gncpy.orbital_mechanics import ecc_anom_from_mean, true_anom_from_ecc, \
+    correct_lon_ascend, ecef_from_orbit
+
 
 """
 -------------------------------------------------------------------------------
@@ -161,9 +165,14 @@ class BaseConstellation:
 
 class BaseGNSSReceiver(metaclass=abc.ABCMeta):
     """ Defines the interface for common GNSS Receiver functions.
+
+    Attributes:
+        max_channels (int): Maximum number of signals to track
+        mask_angle (float): Masking angle in degrees
     """
     def __init__(self, **kwargs):
-        pass
+        self.max_channels = kwargs.get('max_channels', 12)
+        self.mask_angle = kwargs.get('mask_angle', 2)
 
     @abc.abstractmethod
     def measure_PR(self, true_pos, const, **kwargs):
@@ -187,7 +196,8 @@ class GPSSat(BaseSV):
         af1 (float): First order cloc correction in sec/sec
         week (int): Week number
     """
-    def __init__(self):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.health = ''
         self.ecc = 0
         self.toe = 0
@@ -207,7 +217,26 @@ class GPSSat(BaseSV):
         Args:
             time (float): Time of week to find position
         """
-        pass
+        semimajor = self.sqrt_a**2
+        mean_motion = np.sqrt(wgs84.MU / semimajor**3)
+
+        tk = time - self.toe
+        if tk > 302400:
+            tk = tk - 604800
+        elif tk < -302400:
+            tk = tk + 604800
+
+        mean_anom = self.mean_anom + mean_motion * tk
+        ecc_anom = ecc_anom_from_mean(mean_anom, self.ecc, **kwargs)
+        true_anom = true_anom_from_ecc(ecc_anom, self.ecc)
+
+        arg_lat = true_anom + self.peri
+        cor_ascen = correct_lon_ascend(self.ascen, self.ascen_rate, tk,
+                                       self.toe)
+        rad = semimajor * (1 - self.ecc * np.cos(ecc_anom))
+
+        self.true_pos_ECEF = ecef_from_orbit(arg_lat, rad, cor_ascen, self.inc)
+        self.real_pos_ECEF = self.true_pos_ECEF.copy()
 
 
 class GPSConstellation(BaseConstellation):
@@ -220,6 +249,11 @@ class GPSConstellation(BaseConstellation):
         super().__init__(**kwargs)
 
     def parse_almanac(self, alm_f):
+        """ Parses an almanac file to setup constellation parameters.
+
+        Args:
+            alm_f (str): file path and name of almanac file
+        """
         cur_prn = ''
         with io.open(alm_f, 'r') as fin:
             for line in fin:

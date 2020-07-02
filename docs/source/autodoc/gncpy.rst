@@ -14,5 +14,7 @@ Submodules
 
    gncpy.control
    gncpy.math
+   gncpy.orbital_mechanics
    gncpy.sensors
    gncpy.simulator
+   gncpy.wgs84
