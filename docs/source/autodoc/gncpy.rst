@@ -14,6 +14,7 @@ Submodules
 
    gncpy.control
    gncpy.coordinate_transforms
+   gncpy.dynamics
    gncpy.math
    gncpy.orbital_mechanics
    gncpy.sensors

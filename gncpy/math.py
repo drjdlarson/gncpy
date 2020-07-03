@@ -121,3 +121,39 @@ def get_input_jacobian(x, u, fncs, **kwargs):
                                    lambda u_: fncs[row](x, u_, **kwargs),
                                    **kwargs).T
     return B
+
+
+def rk4(f, x, h, **kwargs):
+    """ Implements a classic Runge-Kutta integration RK4.
+
+    Args:
+        f (function): function to integrate, must take x as the first argument
+            and arbitrary kwargs after
+        x (numpy array, or float): state needed by function
+        h (float): step size
+    Returns:
+        (numpy array, or float): Integrated state
+    """
+    k1 = f(x, **kwargs)
+    k2 = f(x + 0.5 * h * k1, **kwargs)
+    k3 = f(x + 0.5 * h * k2, **kwargs)
+    k4 = f(x + h * k3, **kwargs)
+    return x + (h / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
+
+
+def rk4_backward(f, x, h, **kwargs):
+    """ Implements a backwards classic Runge-Kutta integration RK4.
+
+    Args:
+        f (function): function to reverse integrate, must take x as the first
+            argument and arbitrary kwargs after
+        x (numpy array, or float): state needed by function
+        h (float): step size
+    Returns:
+        (numpy array, or float): Reverse integrated state
+    """
+    k1 = f(x, **kwargs)
+    k2 = f(x - 0.5 * h * k1, **kwargs)
+    k3 = f(x - 0.5 * h * k2, **kwargs)
+    k4 = f(x - h * k3, **kwargs)
+    return x - (h / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
