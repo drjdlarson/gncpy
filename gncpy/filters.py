@@ -112,6 +112,8 @@ class BayesFilter(metaclass=abc.ABCMeta):
 
 class KalmanFilter(BayesFilter):
     """ Implementation of a discrete time Kalman Filter.
+
+    This is loosely based on :cite:`Crassidis2011_OptimalEstimationofDynamicSystems`
     """
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

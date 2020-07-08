@@ -8,6 +8,7 @@ Welcome to gncpy's documentation!
    autodoc/modules
    References
    Publications
+   license
 
 
 Indices and tables
