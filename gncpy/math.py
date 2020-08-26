@@ -157,3 +157,12 @@ def rk4_backward(f, x, h, **kwargs):
     k3 = f(x - 0.5 * h * k2, **kwargs)
     k4 = f(x - h * k3, **kwargs)
     return x - (h / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
+
+
+def log_sum_exp(lst):
+    m_val = max(lst)
+    tot = 0
+    for x in lst:
+        tot = tot + np.exp(x - m_val)
+    tot = np.log(tot) + m_val
+    return tot

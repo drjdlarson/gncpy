@@ -8,6 +8,8 @@ import os.path as path
 import pytest
 import numpy as np
 
+import gncpy.filters as filters
+
 
 @pytest.fixture(scope="session")
 def Q():
@@ -86,3 +88,17 @@ def yaml_file_lst():
 def alm_file():
     root_dir = path.dirname(path.abspath(__file__))
     return path.abspath(path.join(root_dir, '../fixtures/test_alm.alm'))
+
+
+@pytest.fixture(scope="function")
+def kalmanFilter():
+    filt = filters.KalmanFilter()
+    filt.set_state_mat(mat=np.array([[1, -1], [0, 1]]))
+    filt.set_input_mat(mat=np.array([[1], [0]]))
+    filt.set_proc_noise(mat=np.array([[1.00000033333333e-13, -5e-20],
+                                      [-5e-20, 1e-19]]))
+    filt.cov = np.diag(np.array([0.0001, 1e-12]))
+    filt.meas_mat = np.array([[1, 0]])
+    filt.meas_noise = np.array([[(17e-6)**2]])
+
+    return filt

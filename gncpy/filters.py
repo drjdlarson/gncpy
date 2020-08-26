@@ -157,7 +157,7 @@ class KalmanFilter(BayesFilter):
         inov = meas - self.meas_mat @ cur_state
         next_state = cur_state + kalman_gain @ inov
 
-        n_states = cur_state.shape[1]
+        n_states = cur_state.shape[0]
         self.cov = (np.eye(n_states) - kalman_gain @ self.meas_mat) @ self.cov
 
         return next_state
