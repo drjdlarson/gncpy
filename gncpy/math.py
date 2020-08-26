@@ -4,6 +4,7 @@ This file contains useful math utility functions.
 
 """
 import numpy as np
+import scipy.linalg as la
 
 
 def get_jacobian(x, fnc, **kwargs):
@@ -134,11 +135,11 @@ def rk4(f, x, h, **kwargs):
     Returns:
         (numpy array, or float): Integrated state
     """
-    k1 = f(x, **kwargs)
-    k2 = f(x + 0.5 * h * k1, **kwargs)
-    k3 = f(x + 0.5 * h * k2, **kwargs)
-    k4 = f(x + h * k3, **kwargs)
-    return x + (h / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
+    k1 = h * f(x, **kwargs)
+    k2 = h * f(x + 0.5 * k1, **kwargs)
+    k3 = h * f(x + 0.5 * k2, **kwargs)
+    k4 = h * f(x + k3, **kwargs)
+    return x + (1 / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
 
 
 def rk4_backward(f, x, h, **kwargs):
@@ -166,3 +167,13 @@ def log_sum_exp(lst):
         tot = tot + np.exp(x - m_val)
     tot = np.log(tot) + m_val
     return tot
+
+
+def disrw(F, G, dt, Rwpsd):
+    ME = np.vstack((np.hstack((-F, G @ Rwpsd @ G.T)),
+                    np.hstack((np.zeros(F.shape), F.T))))
+    phi = la.expm(ME * dt)
+    phi_12 = phi[0:F.shape[0], F.shape[1]:]
+    phi_22 = phi[F.shape[0]:, F.shape[1]:]
+
+    return phi_22.T @ phi_12

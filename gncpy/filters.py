@@ -1,6 +1,10 @@
 import numpy as np
 import numpy.linalg as la
+from scipy.linalg import expm
 import abc
+from warnings import warn
+
+from gncpy.math import rk4, get_state_jacobian, disrw
 
 
 class BayesFilter(metaclass=abc.ABCMeta):
@@ -159,5 +163,76 @@ class KalmanFilter(BayesFilter):
 
         n_states = cur_state.shape[0]
         self.cov = (np.eye(n_states) - kalman_gain @ self.meas_mat) @ self.cov
+
+        return next_state
+
+
+class ExtendedKalmanFilter(KalmanFilter):
+    def __init__(self, **kwargs):
+        self.dyn_fncs = []
+
+        self.proc_map = np.array([[]])
+        self.proc_cov = np.array([[]])
+        super().__init__(**kwargs)
+
+    def set_proc_mat(self, **kwargs):
+        warn("Extended Kalman filter does not use set_proc_mat")
+
+    def get_proc_noise(self, dt, cur_state, cur_input, **kwargs):
+        state_jac = kwargs.get('state_jac', None)
+        if state_jac is None:
+            state_jac = get_state_jacobian(cur_state, cur_input,
+                                                self.dyn_fncs,
+                                                **kwargs)
+        if state_jac.size == 0:
+            msg = "State jacobian must be set before getting process noise"
+        if self.proc_map.size == 0:
+            msg = "Process noise mapping must be set before getting " \
+                + "process noise"
+            warn(msg)
+            return np.array([[]])
+        if self.proc_cov.size == 0:
+            msg = "Process noise covariance must be set before getting " \
+                + "process noise"
+            warn(msg)
+            return np.array([[]])
+
+        return disrw(state_jac, self.proc_map, dt, self.proc_cov)
+
+    def set_input_mat(self, **kwargs):
+        warn("Extended Kalman filter does not use set_input_mat")
+
+    def get_input_mat(self, **kwargs):
+        warn("Extended Kalman filter does not use get_input_mat")
+        return np.array([[]])
+
+    def set_state_mat(self, **kwargs):
+        warn("Extended Kalman filter does not use set_state_mat")
+
+    def get_state_mat(self, **kwargs):
+        cur_state = kwargs['cur_state']
+        cur_input = kwargs['cur_input']
+        dt = kwargs['dt']
+
+        state_jac = get_state_jacobian(cur_state, cur_input, self.dyn_fncs,
+                                       **kwargs)
+        return expm(state_jac * dt)
+
+    def predict(self, **kwargs):
+        cur_state = kwargs['cur_state']
+        dt = kwargs['dt']
+
+        # numerical integration for each state
+        def comb_func(x, cur_input, **kwargs):
+            out = np.zeros(x.shape)
+            for ii, f in enumerate(self.dyn_fncs):
+                out[ii] = f(x, cur_input, **kwargs)
+            return out
+
+        next_state = rk4(comb_func, cur_state, dt, **kwargs)
+
+        state_mat = self.get_state_mat(**kwargs)
+        self.cov = state_mat @ self.cov @ state_mat.T \
+            + self.get_proc_noise(state_mat=state_mat, **kwargs)
 
         return next_state

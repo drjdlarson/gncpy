@@ -102,3 +102,24 @@ def kalmanFilter():
     filt.meas_noise = np.array([[(17e-6)**2]])
 
     return filt
+
+
+@pytest.fixture(scope="function")
+def extKalmanFilter():
+    filt = filters.ExtendedKalmanFilter()
+    filt.cov = np.array([[0.100116534585999, 10.0022808399544],
+                         [10.0022808399544, 1000.29294598339]])
+    filt.meas_mat = np.array([[1, 0]])
+    filt.meas_noise = np.array([[0.01**2]])
+    filt.proc_map = np.array([0, 1]).reshape((2, 1))
+    filt.proc_cov = np.diag(np.array([0.2]))
+
+    def f0(x, u, **kwargs):
+        return x[1]
+
+    def f1(x, u, **kwargs):
+        return -2 * 1.5 * (x[0]**2 - 1) * x[1] - 1.2 * x[0]
+
+    filt.dyn_fncs = [f0, f1]
+
+    return filt
