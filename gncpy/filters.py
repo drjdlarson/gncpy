@@ -179,11 +179,15 @@ class ExtendedKalmanFilter(KalmanFilter):
         warn("Extended Kalman filter does not use set_proc_mat")
 
     def get_proc_noise(self, dt, cur_state, cur_input, **kwargs):
+        # if the user is manually setting the process noise then return it
+        if self._proc_noise.size > 0:
+            return self._proc_noise
+
+        # check that we have everything to calculate the process noise
         state_jac = kwargs.get('state_jac', None)
         if state_jac is None:
             state_jac = get_state_jacobian(cur_state, cur_input,
-                                                self.dyn_fncs,
-                                                **kwargs)
+                                           self.dyn_fncs, **kwargs)
         if state_jac.size == 0:
             msg = "State jacobian must be set before getting process noise"
         if self.proc_map.size == 0:
@@ -197,6 +201,7 @@ class ExtendedKalmanFilter(KalmanFilter):
             warn(msg)
             return np.array([[]])
 
+        # discritize the process noise
         return disrw(state_jac, self.proc_map, dt, self.proc_cov)
 
     def set_input_mat(self, **kwargs):
