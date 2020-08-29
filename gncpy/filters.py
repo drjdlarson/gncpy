@@ -12,17 +12,17 @@ class BayesFilter(metaclass=abc.ABCMeta):
 
     Attributes:
         cov (N x N numpy array): Covariance matrix
-        meas_mat (Nm x N numpy array): Mapping from states to measurements
         meas_noise (Nm x Nm numpy array): Measurement noise matrix
     """
 
     def __init__(self, **kwargs):
         self.cov = np.array([[]])
-        self.meas_mat = np.array([[]])
         self.meas_noise = np.array([[]])
 
         self._state_mat = np.array([[]])
         self._input_mat = np.array([[]])
+        self._meas_mat = np.array([[]])
+        self._meas_fnc = None
         self._proc_noise = np.array([[]])
         super().__init__(**kwargs)
 
@@ -77,6 +77,49 @@ class BayesFilter(metaclass=abc.ABCMeta):
             mat (N x Nu numpy array): State matrix
         """
         self._input_mat = kwargs.get('mat', np.array([[]]))
+
+    def set_meas_mat(self, **kwargs):
+        """ Sets the measurement matrix.
+
+        This can specify a function of the current state and kwargs that 
+        returns the matrix, or it can directly give the matrix.
+
+        Keyword Args:
+            mat (Nm x N numpy array): Measurement matrix
+            fnc (function): Function that takes the state and kwargs and
+                returns an Nm x N numpy array
+        """
+        mat = kwargs.get('mat', None)
+        fnc = kwargs.get('fnc', None)
+        if mat is not None:
+            self._meas_mat = mat
+        elif fnc is not None:
+            self._meas_fnc = fnc
+        else:
+            warn('Must set a matrix or function for measurements')
+
+    def get_meas_mat(self, state, **kwargs):
+        """ Returns the measurement matrix.
+
+        First checks if a matrix is specified, if not then it evaluates the
+        a function at the current state to calculate the matrix.
+
+        Args:
+            state (N x 1 numpy array): current state
+
+        Returns:
+            (Nm x N numpy array): measurment matrix
+
+        Raises:
+            RuntimeError: if the set function hasn't been properly called
+        """
+        if self._meas_mat.size > 0:
+            return self._meas_mat
+        elif self._meas_fnc is not None:
+            return self._meas_fnc(state, **kwargs)
+        else:
+            msg = 'Must set the measurement matrix before getting it'
+            raise RuntimeError(msg)
 
     def get_proc_noise(self, **kwargs):
         """ Returns the process noise matrix.
@@ -155,16 +198,22 @@ class KalmanFilter(BayesFilter):
         cur_state = kwargs['cur_state']
         meas = kwargs['meas']
 
-        cov_meas_T = self.cov @ self.meas_mat.T
-        kalman_gain = cov_meas_T @ la.inv(self.meas_mat @ cov_meas_T
-                                          + self.meas_noise)
-        inov = meas - self.meas_mat @ cur_state
+        meas_mat = self.get_meas_mat(cur_state, **kwargs)
+        cov_meas_T = self.cov @ meas_mat.T
+        meas_pred_cov = meas_mat @ cov_meas_T + self.meas_noise
+        inv_meas_cov = la.inv(meas_pred_cov)
+        kalman_gain = cov_meas_T @ inv_meas_cov
+        inov = meas - meas_mat @ cur_state
         next_state = cur_state + kalman_gain @ inov
 
-        n_states = cur_state.shape[0]
-        self.cov = (np.eye(n_states) - kalman_gain @ self.meas_mat) @ self.cov
+        meas_fit_prob = np.exp(-0.5 * (len(meas) * np.log(2 * np.pi)
+                                       + np.log(la.det(meas_pred_cov))
+                                       + inov.T @ inv_meas_cov @ inov))
 
-        return next_state
+        n_states = cur_state.shape[0]
+        self.cov = (np.eye(n_states) - kalman_gain @ meas_mat) @ self.cov
+
+        return (next_state, meas_fit_prob)
 
 
 class ExtendedKalmanFilter(KalmanFilter):

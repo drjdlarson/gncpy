@@ -24,7 +24,7 @@ class TestKalmanFilter:
         x0 = np.array([0.00108929480785327, 0]).reshape((2, 1))
         y = np.array([[0.00112007982271341]])
 
-        x = kalmanFilter.correct(cur_state=x0, meas=y)
+        (x, _) = kalmanFilter.correct(cur_state=x0, meas=y)
 
         exp_x = np.array([0.00110471653118199,
                           -5.31601809674181e-08]).reshape((2, 1))
@@ -58,7 +58,7 @@ class TestExtendedKalmanFilter:
         x0 = np.array([0.996510171108603, -0.0119598396649277]).reshape((2, 1))
         y = np.array([[1.0166134908585]])
 
-        x = extKalmanFilter.correct(cur_state=x0, meas=y)
+        (x, _) = extKalmanFilter.correct(cur_state=x0, meas=y)
 
         exp_x = np.array([1.01659343097534, 1.99448601065866]).reshape((2, 1))
         exp_cov = np.array([[9.9900216066734e-05, 0.00998066923913823],
