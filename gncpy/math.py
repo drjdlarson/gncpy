@@ -161,6 +161,8 @@ def rk4_backward(f, x, h, **kwargs):
 
 
 def log_sum_exp(lst):
+    if len(lst) == 0:
+        return None
     m_val = max(lst)
     tot = 0
     for x in lst:
