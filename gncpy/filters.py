@@ -23,6 +23,7 @@ class BayesFilter(metaclass=abc.ABCMeta):
         self._input_mat = np.array([[]])
         self._meas_mat = np.array([[]])
         self._meas_fnc = None
+        self._meas_model = None
         self._proc_noise = np.array([[]])
         super().__init__(**kwargs)
 
@@ -121,6 +122,16 @@ class BayesFilter(metaclass=abc.ABCMeta):
             msg = 'Must set the measurement matrix before getting it'
             raise RuntimeError(msg)
 
+    def set_meas_model(self, fnc):
+        self._meas_model = fnc
+
+    def get_est_meas(self, state, **kwargs):
+        if self._meas_model is None:
+            m_mat = self.get_meas_mat(state, **kwargs)
+            return m_mat @ state
+        else:
+            return self._meas_model(state, **kwargs)
+
     def get_proc_noise(self, **kwargs):
         """ Returns the process noise matrix.
 
@@ -203,7 +214,7 @@ class KalmanFilter(BayesFilter):
         meas_pred_cov = meas_mat @ cov_meas_T + self.meas_noise
         inv_meas_cov = la.inv(meas_pred_cov)
         kalman_gain = cov_meas_T @ inv_meas_cov
-        inov = meas - meas_mat @ cur_state
+        inov = meas - self.get_est_meas(cur_state, **kwargs)
         next_state = cur_state + kalman_gain @ inov
 
         meas_fit_prob = np.exp(-0.5 * (len(meas) * np.log(2 * np.pi)
