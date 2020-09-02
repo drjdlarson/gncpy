@@ -220,7 +220,7 @@ class KalmanFilter(BayesFilter):
         meas_fit_prob = np.exp(-0.5 * (len(meas) * np.log(2 * np.pi)
                                        + np.log(la.det(meas_pred_cov))
                                        + inov.T @ inv_meas_cov @ inov))
-        meas_fit_prob = np.asscalar(meas_fit_prob)
+        meas_fit_prob = meas_fit_prob.item()
 
         n_states = cur_state.shape[0]
         self.cov = (np.eye(n_states) - kalman_gain @ meas_mat) @ self.cov
