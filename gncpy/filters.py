@@ -194,6 +194,7 @@ class KalmanFilter(BayesFilter):
         next_state = state_mat @ cur_state + input_mat @ cur_input
         self.cov = state_mat @ self.cov @ state_mat.T \
             + self.get_proc_noise(**kwargs)
+        self.cov = (self.cov + self.cov.T) * 0.5
         return next_state
 
     def correct(self, **kwargs):
@@ -212,7 +213,10 @@ class KalmanFilter(BayesFilter):
         meas_mat = self.get_meas_mat(cur_state, **kwargs)
         cov_meas_T = self.cov @ meas_mat.T
         meas_pred_cov = meas_mat @ cov_meas_T + self.meas_noise
-        inv_meas_cov = la.inv(meas_pred_cov)
+        meas_pred_cov = (meas_pred_cov + meas_pred_cov.T) * 0.5
+#        inv_meas_cov = la.inv(meas_pred_cov)
+        sqrt_inv_meas_cov = la.inv(la.cholesky(meas_pred_cov))
+        inv_meas_cov = sqrt_inv_meas_cov.T @ sqrt_inv_meas_cov
         kalman_gain = cov_meas_T @ inv_meas_cov
         inov = meas - self.get_est_meas(cur_state, **kwargs)
         next_state = cur_state + kalman_gain @ inov
