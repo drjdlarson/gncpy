@@ -4,7 +4,7 @@ from scipy.linalg import expm
 import abc
 from warnings import warn
 
-from gncpy.math import rk4, get_state_jacobian, disrw
+from gncpy.math import rk4, get_state_jacobian, disrw, gamma_fnc
 
 
 class BayesFilter(metaclass=abc.ABCMeta):
@@ -306,3 +306,76 @@ class ExtendedKalmanFilter(KalmanFilter):
             + self.get_proc_noise(state_mat=state_mat, **kwargs)
 
         return next_state
+
+
+class StudentsTFilter(BayesFilter):
+    """ Impplementation of a Students T filter.
+
+    This is based on :cite:`Straka2017_StochasticIntegrationStudentsTFilter`
+    and uses the moment matching approach
+    of :cite:`Roth2013_AStudentsTFilterforHeavyTailedProcessandMeasurementNoise`.
+    """
+
+    def __init__(self, **kwargs):
+        self.scale = np.array([[]])
+        self.dof = 3
+        self.proc_noise_dof = 3
+        self.meas_noise_dof = 3
+
+        super().__init__(**kwargs)
+
+    @property
+    def cov(self):
+        if self.dof <= 2:
+            msg = "Degrees of freedom ({}) must be > 2"
+            raise RuntimeError(msg.format(self.dof))
+        return self.dof / (self.dof - 2) * self.cov
+
+    def predict(self, **kwargs):
+        cur_state = kwargs['cur_state']
+
+        state_mat = self.get_state_mat(**kwargs)
+        next_state = state_mat @ cur_state
+        self.scale = state_mat.T @ self.scale @ state_mat \
+            + ((self.dof - 2) * self.proc_noise_dof /
+               (self.dof * (self.proc_noise_dof - 2))) \
+            * self.get_proc_noise(**kwargs)
+
+        return next_state
+
+    def correct(self, **kwargs):
+        def pdf(x, mu, sig, v):
+            d = x.size()
+            del2 = (x - mu).T @ sig @ (x - mu)
+            inv_det = 1 / np.sqrt(la.det(sig))
+            gam_rat = gamma_fnc((v + 2) / 2) / gamma_fnc(v / 2)
+            return gam_rat / (v * np.pi)**(d/2) * inv_det \
+                * (1 + del2 / v)**(-(v + 2) / 2)
+
+        cur_state = kwargs['cur_state']
+        meas = kwargs['meas']
+
+        meas_mat = self.get_meas_mat(cur_state, **kwargs)
+        scale_meas_T = self.scale @ meas_mat.T
+        scale_noise = ((self.dof - 2) * self.meas_noise_dof
+                       / (self.dof * (self.meas_noise_dof - 2))
+                       * self.meas_noise)
+        meas_pred_scale = meas_mat @ scale_meas_T \
+            + scale_noise
+        sqrt_inv_meas_scale = la.inv(la.cholesky(meas_pred_scale))
+        inv_meas_scale = sqrt_inv_meas_scale.T @ sqrt_inv_meas_scale
+        kalman_gain = scale_meas_T @ inv_meas_scale
+        inov = meas - self.get_est_meas(cur_state, **kwargs)
+        dz = meas.size()
+
+        next_state = cur_state + kalman_gain @ inov
+        meas_fit_prob = pdf(meas, meas_mat @ cur_state, meas_pred_scale,
+                            self.dof)
+        del2 = inov.T @ meas_mat @ scale_meas_T + scale_noise  @ inov
+        scale_p = (self.dof + del2) / (self.dof + dz) \
+            * (self.scale - kalman_gain @ meas_mat @ self.scale)
+        dof_p = self.dof + dz
+        self.scale = (self.dof - 2) * dof_p / (self.dof * (dof_p - 2)) \
+            * scale_p
+
+        return (next_state, meas_fit_prob)

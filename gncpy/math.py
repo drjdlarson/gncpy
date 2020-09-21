@@ -179,3 +179,8 @@ def disrw(F, G, dt, Rwpsd):
     phi_22 = phi[F.shape[0]:, F.shape[1]:]
 
     return phi_22.T @ phi_12
+
+
+def gamma_fnc(alpha):
+    return np.math.factorial(alpha - 1)
+
