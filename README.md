@@ -18,3 +18,16 @@ The HTML version of the docs can be built using the following command:
 `tox -e docs -- html`
 
 Then they can be viewed by opening **docs/build/html/index.html**
+
+# Cite
+Please cite the framework as follows
+
+```
+@misc{gncpy,
+  author       = {Jordan D. Larson, and Ryan W. Thomas},
+  title        = {GNCPy: A Python Library for Guidance, Navigation, and Control Algorithms},
+  howpublished = {Web page},
+  url          = {https://github.com/drjdlarson/gncpy},
+  year         = {2019}
+}
+```
