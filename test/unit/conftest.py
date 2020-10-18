@@ -123,3 +123,34 @@ def extKalmanFilter():
     filt.dyn_fncs = [f0, f1]
 
     return filt
+
+
+@pytest.fixture(scope="function")
+def stFilt():
+    filt = filters.StudentsTFilter()
+
+    T = 0.5
+    Id = np.eye(2)
+    Z = np.zeros((2, 2))
+
+    F = np.vstack((np.hstack((Id, T * Id)),
+                   np.hstack((Z, Id))))
+    H = np.hstack((Id, Z))
+    Q = np.vstack((np.hstack((T**3 / 3 * Id, T**2 / 2 * Id)),
+                  np.hstack((T**2 / 2 * Id, T * Id))))
+    R = 100 * Id.copy()
+
+    filt.set_state_mat(mat=F)
+    filt.set_input_mat(mat=np.zeros((4, 1)))
+    filt.set_proc_noise(mat=Q)
+
+    filt.set_meas_mat(mat=H)
+    filt.meas_noise = R
+
+    filt.dof = 3
+    filt.meas_noise_dof = 3
+    filt.proc_noise_dof = 3
+
+    filt.scale = 10 * Q
+
+    return filt
