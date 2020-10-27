@@ -1,4 +1,5 @@
 import numpy as np
+import numpy.random as rnd
 import numpy.linalg as la
 from scipy.linalg import expm
 import abc
@@ -440,3 +441,66 @@ class StudentsTFilter(BayesFilter):
             * scale_p
 
         return (next_state, meas_fit_prob)
+
+
+class ParticleFilter(BayesFilter):
+    def __init__(self, **kwargs):
+        self.dyn_fnc = None
+        self.meas_likelihood_fnc = None
+
+        self._particles = []
+        super().__init__(**kwargs)
+
+    @property
+    def cov(self):
+        return np.cov(np.hstack(self._particles))
+
+    @property
+    def num_particles(self):
+        return len(self._particles)
+
+    def predict(self, cur_state, **kwargs):
+        u = kwargs.get('cur_input', None)
+        if self.dyn_fnc is not None:
+            new_parts = [self.dyn_fnc(x, **kwargs) for x in self._particles]
+            self._particles = new_parts
+            return np.mean(self._particles, axis=0)
+        else:
+            state_trans = self.get_state_mat(**kwargs)
+            input_mat = self.get_input_mat(**kwargs)
+            if u is None:
+                u = np.zeros((input_mat.shape[1], 1))
+
+            new_parts = [state_trans @ x + input_mat @ u
+                         for x in self._particles]
+            self._particles = new_parts
+            return np.mean(self._particles, axis=0)
+
+    def correct(self, meas, **kwargs):
+        est_meas = [self.get_est_meas(x, **kwargs) for x in self._particles]
+        rel_likeli = self._calc_relative_likelihoods(meas, est_meas, **kwargs)
+        self._resample(rel_likeli, **kwargs)
+
+        return np.mean(self._particles, axis=0)
+
+    def _calc_relative_likelihoods(self, meas, est_meas, **kwargs):
+        weights = [self.meas_likelihood_fnc(meas, y, **kwargs)
+                   for y in est_meas]
+        tot = np.sum(weights)
+        weights = [qi / tot for qi in weights]
+
+        return weights
+
+    def _resample(self, rel_likelihoods, **kwargs):
+        rng = kwargs.get('rng', rnd.default_rng())
+        new_parts = []
+        for m in range(0, self.num_particles):
+            r = rng.random()
+            cumulative_weight = 0
+            n = -1
+            while cumulative_weight < r:
+                n += 1
+                cumulative_weight += rel_likelihoods[n]
+            new_parts.append(self._particles[n].copy())
+
+        self._particles = new_parts
