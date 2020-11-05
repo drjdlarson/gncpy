@@ -1,4 +1,5 @@
 import numpy as np
+import numpy.random as rnd
 import numpy.linalg as la
 from scipy.linalg import expm
 import abc
@@ -82,7 +83,7 @@ class BayesFilter(metaclass=abc.ABCMeta):
     def set_meas_mat(self, **kwargs):
         """ Sets the measurement matrix.
 
-        This can specify a function of the current state and kwargs that 
+        This can specify a function of the current state and kwargs that
         returns the matrix, or it can directly give the matrix.
 
         Keyword Args:
@@ -133,16 +134,16 @@ class BayesFilter(metaclass=abc.ABCMeta):
             return self._meas_model(state, **kwargs)
 
     def get_proc_noise(self, **kwargs):
-        """ Returns the process noise matrix.
+        r""" Returns the process noise matrix.
 
-        It returns the :math:`\\Upsilon Q \\Upsilon^T` matrix in the state
-        space system :math:`x_{k+1} = F x_k + G u_k + \\Upsilon w_k` where
+        It returns the :math:`\Upsilon Q \Upsilon^T` matrix in the state
+        space system :math:`x_{k+1} = F x_k + G u_k + \Upsilon w_k` where
 
         .. math::
-            E\{w_kw_j^T\} = \\begin{cases}
-                0 & k \\neq j \\\\
+            E\{w_kw_j^T\} = \begin{cases}
+                0 & k \neq j \\
                 Q_k & k = j
-                \\end{cases}
+                \end{cases}
 
         Returns:
             (N x N numpy array): Discrete process noise matrix
@@ -150,17 +151,17 @@ class BayesFilter(metaclass=abc.ABCMeta):
         return self._proc_noise
 
     def set_proc_noise(self, **kwargs):
-        """ Sets the process noise matrix.
+        r""" Sets the process noise matrix.
 
         This can be overridden in inherited classes. It sets
-        the :math:`\\Upsilon Q \\Upsilon^T` matrix in the state
-        space system :math:`x_{k+1} = F x_k + G u_k + \\Upsilon w_k` where
+        the :math:`\Upsilon Q \Upsilon^T` matrix in the state
+        space system :math:`x_{k+1} = F x_k + G u_k + \Upsilon w_k` where
 
         .. math::
-            E\{w_kw_j^T\} = \\begin{cases}
-                0 & k \\neq j \\\\
+            E\{w_kw_j^T\} = \begin{cases}
+                0 & k \neq j \\
                 Q_k & k = j
-                \\end{cases}
+                \end{cases}
 
         Keyword Args:
             mat (N x Nu numpy array): Discrete process noise matrix
@@ -173,6 +174,7 @@ class KalmanFilter(BayesFilter):
 
     This is loosely based on :cite:`Crassidis2011_OptimalEstimationofDynamicSystems`
     """
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -205,7 +207,10 @@ class KalmanFilter(BayesFilter):
             meas (Nm x 1 numpy array): Current measurements
 
         Returns:
-            (N x 1 numpy array): Corrected state
+            tuple containing
+
+                - (N x 1 numpy array): Corrected state
+                - (float): Measurement fit probability
         """
         cur_state = kwargs['cur_state']
         meas = kwargs['meas']
@@ -233,6 +238,19 @@ class KalmanFilter(BayesFilter):
 
 
 class ExtendedKalmanFilter(KalmanFilter):
+    r""" Implementation of a continuous-discrete time Extended Kalman Filter.
+
+    This is loosely based on :cite:`Crassidis2011_OptimalEstimationofDynamicSystems`
+
+    Attributes:
+        dyn_fncs (list): List of dynamics functions. One per state (in order)
+            and of the form :math:`\dot{x} = f(x, u)`
+        proc_map (N x N numpy array): Array mapping continuous process noise
+            to states
+        proc_cov (N x N numpy array): Continuous time covariance matrix for
+            the process noise
+    """
+
     def __init__(self, **kwargs):
         self.dyn_fncs = []
 
@@ -311,9 +329,16 @@ class ExtendedKalmanFilter(KalmanFilter):
 class StudentsTFilter(BayesFilter):
     """ Impplementation of a Students T filter.
 
-    This is based on :cite:`Straka2017_StochasticIntegrationStudentsTFilter`
-    and uses the moment matching approach
-    of :cite:`Roth2013_AStudentsTFilterforHeavyTailedProcessandMeasurementNoise`.
+    This is based on :cite:`Liu2018_AStudentsTMixtureProbabilityHypothesisDensityFilterforMultiTargetTrackingwithOutliers`
+    and :cite:`Roth2013_AStudentsTFilterforHeavyTailedProcessandMeasurementNoise`
+    and uses moment matching to limit the degree of freedom growth.
+
+    Attributes:
+        scale (N x N numpy array): Scaling matrix of the Students T
+            distribution
+        dof (int): Degree of freedom for the state distribution
+        proc_noise_dof (int): Degree of freedom for the process noise model
+        meas_noise_dof (int): Degree of freedom for the measurement noise model
     """
 
     def __init__(self, **kwargs):
@@ -326,16 +351,39 @@ class StudentsTFilter(BayesFilter):
 
     @property
     def cov(self):
+        """ Covariance matrix calculated from the scale matrix and degree of
+        freedom. This is read only
+
+        Raises:
+            RuntimeError: If the degree of freedom is less than or equal to 2
+
+        Returns:
+            N x 1 numpy array: Calcualted covariance matrix
+        """
         if self.dof <= 2:
             msg = "Degrees of freedom ({}) must be > 2"
             raise RuntimeError(msg.format(self.dof))
-        return self.dof / (self.dof - 2) * self.cov
+        return self.dof / (self.dof - 2) * self.scale
+
+    @cov.setter
+    def cov(self, cov):
+        pass
 
     def predict(self, **kwargs):
+        """ This implements the prediction step of the Students T filter.
+
+        Keyword Args:
+            cur_state (N x 1 numpy array): current state
+
+        Returns:
+            next_state (N x 1 numpy array): Next state
+
+        """
         cur_state = kwargs['cur_state']
 
         state_mat = self.get_state_mat(**kwargs)
         next_state = state_mat @ cur_state
+
         self.scale = state_mat.T @ self.scale @ state_mat \
             + ((self.dof - 2) * self.proc_noise_dof /
                (self.dof * (self.proc_noise_dof - 2))) \
@@ -344,11 +392,25 @@ class StudentsTFilter(BayesFilter):
         return next_state
 
     def correct(self, **kwargs):
+        """ Implements the correction step of the students T filter, and the
+        moment matching.
+
+        Keyword Args:
+            cur_state (N x 1 numpy array): current state
+            meas (M x 1 numpy array): current measurement
+
+        Returns:
+            tuple containing
+
+                - (N x 1 numpy array): Corrected state
+                - (float): Measurement fit probability
+        """
         def pdf(x, mu, sig, v):
-            d = x.size()
+            d = x.size
             del2 = (x - mu).T @ sig @ (x - mu)
             inv_det = 1 / np.sqrt(la.det(sig))
-            gam_rat = gamma_fnc((v + 2) / 2) / gamma_fnc(v / 2)
+            gam_rat = gamma_fnc(np.floor((v + 2) / 2)) \
+                / gamma_fnc(np.floor(v / 2))
             return gam_rat / (v * np.pi)**(d/2) * inv_det \
                 * (1 + del2 / v)**(-(v + 2) / 2)
 
@@ -366,12 +428,12 @@ class StudentsTFilter(BayesFilter):
         inv_meas_scale = sqrt_inv_meas_scale.T @ sqrt_inv_meas_scale
         kalman_gain = scale_meas_T @ inv_meas_scale
         inov = meas - self.get_est_meas(cur_state, **kwargs)
-        dz = meas.size()
+        dz = meas.size
 
         next_state = cur_state + kalman_gain @ inov
         meas_fit_prob = pdf(meas, meas_mat @ cur_state, meas_pred_scale,
                             self.dof)
-        del2 = inov.T @ meas_mat @ scale_meas_T + scale_noise  @ inov
+        del2 = inov.T @ inv_meas_scale @ inov
         scale_p = (self.dof + del2) / (self.dof + dz) \
             * (self.scale - kalman_gain @ meas_mat @ self.scale)
         dof_p = self.dof + dz
@@ -379,3 +441,66 @@ class StudentsTFilter(BayesFilter):
             * scale_p
 
         return (next_state, meas_fit_prob)
+
+
+class ParticleFilter(BayesFilter):
+    def __init__(self, **kwargs):
+        self.dyn_fnc = None
+        self.meas_likelihood_fnc = None
+
+        self._particles = []
+        super().__init__(**kwargs)
+
+    @property
+    def cov(self):
+        return np.cov(np.hstack(self._particles))
+
+    @property
+    def num_particles(self):
+        return len(self._particles)
+
+    def predict(self, cur_state, **kwargs):
+        u = kwargs.get('cur_input', None)
+        if self.dyn_fnc is not None:
+            new_parts = [self.dyn_fnc(x, **kwargs) for x in self._particles]
+            self._particles = new_parts
+            return np.mean(self._particles, axis=0)
+        else:
+            state_trans = self.get_state_mat(**kwargs)
+            input_mat = self.get_input_mat(**kwargs)
+            if u is None:
+                u = np.zeros((input_mat.shape[1], 1))
+
+            new_parts = [state_trans @ x + input_mat @ u
+                         for x in self._particles]
+            self._particles = new_parts
+            return np.mean(self._particles, axis=0)
+
+    def correct(self, meas, **kwargs):
+        est_meas = [self.get_est_meas(x, **kwargs) for x in self._particles]
+        rel_likeli = self._calc_relative_likelihoods(meas, est_meas, **kwargs)
+        self._resample(rel_likeli, **kwargs)
+
+        return np.mean(self._particles, axis=0)
+
+    def _calc_relative_likelihoods(self, meas, est_meas, **kwargs):
+        weights = [self.meas_likelihood_fnc(meas, y, **kwargs)
+                   for y in est_meas]
+        tot = np.sum(weights)
+        weights = [qi / tot for qi in weights]
+
+        return weights
+
+    def _resample(self, rel_likelihoods, **kwargs):
+        rng = kwargs.get('rng', rnd.default_rng())
+        new_parts = []
+        for m in range(0, self.num_particles):
+            r = rng.random()
+            cumulative_weight = 0
+            n = -1
+            while cumulative_weight < r:
+                n += 1
+                cumulative_weight += rel_likelihoods[n]
+            new_parts.append(self._particles[n].copy())
+
+        self._particles = new_parts

@@ -144,7 +144,7 @@ class TestExtendedKalmanFilter:
 
         test.assert_allclose(x, exp_x)
         test.assert_allclose(extKalmanFilter.cov, exp_cov)
-        
+
     def test_correct2(self):
         dt = 1.0
         filt = filters.ExtendedKalmanFilter()
@@ -229,3 +229,21 @@ class TestExtendedKalmanFilter:
         test.assert_allclose(x, exp_x)
         test.assert_allclose(filt.cov, exp_cov)
         test.assert_approx_equal(qz, exp_qz)
+
+
+class TestStudentsTFilter:
+    def test_predict(self, stFilt):
+        x0 = np.array([0, 1, 0.5, 2]).reshape((4, 1))
+
+        x = stFilt.predict(cur_state=x0)
+
+        test.assert_allclose(x.shape, x0.shape)
+
+    def test_correct(self, stFilt):
+        x0 = np.array([0, 1, 0.5, 2]).reshape((4, 1))
+        m = np.array([9, 0.3]).reshape((2, 1))
+
+        x, prob = stFilt.correct(cur_state=x0, meas=m)
+
+        test.assert_equal(prob.size, 1)
+        test.assert_allclose(x.shape, x0.shape)

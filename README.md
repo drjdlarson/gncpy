@@ -1,5 +1,5 @@
 # gncpy
-A python package for guidance, navigation, and control (GNC) algorithms developed by the Laboratory for Autonomy, GNC, and Estimation Research (LAGER) at the University of Alabama (UA).
+A python package for Guidance, Navigation, and Control (GNC) algorithms developed by the Laboratory for Autonomy, GNC, and Estimation Research (LAGER) at the University of Alabama (UA).
 
 ## Unit testing
 Unit tests make use **pytest** for the test runner, and tox for automation. The test scripts are located within the **test/** sub-directory.
@@ -18,3 +18,16 @@ The HTML version of the docs can be built using the following command:
 `tox -e docs -- html`
 
 Then they can be viewed by opening **docs/build/html/index.html**
+
+# Cite
+Please cite the framework as follows
+
+```
+@Misc{gncpy,
+  author       = {Jordan D. Larson and Ryan W. Thomas},
+  howpublished = {Web page},
+  title        = {{GNCPy}: A {P}ython library for {G}uidance, {N}avigation, and {C}ontrol algorithms},
+  year         = {2019},
+  url          = {https://github.com/drjdlarson/gncpy},
+}
+```
