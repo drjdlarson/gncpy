@@ -5,6 +5,7 @@ This file contains useful math utility functions.
 """
 import numpy as np
 import scipy.linalg as la
+from copy import deepcopy
 
 
 def get_jacobian(x, fnc, **kwargs):
@@ -184,3 +185,30 @@ def disrw(F, G, dt, Rwpsd):
 def gamma_fnc(alpha):
     return np.math.factorial(alpha - 1)
 
+
+def get_elem_sym_fnc(z):
+    """
+    Words
+    """
+    if len(z)==0:
+        esf = 1
+    else:
+        n_z = np.size(z, axis=0)
+        F = np.zeros((2, n_z))
+        
+        i_n = 0
+        i_nminus = 1
+        for ii in range(0, n_z):
+            F[i_n, 0] = F[i_nminus, 0] + z[ii]
+            for k in range(1, ii):
+                if k == ii:
+                    F[i_n, k] = z[ii] * F[i_nminus, k-1]
+                else:
+                    F[i_n, k] = F[i_nminus, k] + z[ii] * F[i_nminus, k-1]
+            tmp = deepcopy(i_n)
+            i_n = deepcopy(i_nminus)
+            i_nminus = deepcopy(tmp)
+    one = np.array([1.0])
+    Fin = F[i_nminus][:].T
+    esf = np.concatenate((one, Fin), axis=0)
+    return esf

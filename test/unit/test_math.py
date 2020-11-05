@@ -42,3 +42,10 @@ def test_get_hessian():
                        np.array([0., 1., 0.])))
     H = math.get_hessian(test_point, f)
     test.assert_allclose(H, exp_H)
+
+def test_get_elem_sym_fnc():
+    z = np.array([[1.2394e1], [1.5497e-5], [5.3683e-1], [5.2124e-16], [5.6417e-2]])
+    s = math.get_elem_sym_fnc(z)
+    ans = np.array([1.00000000e+00, 1.29872625e+01, 7.38299885e+00, 3.75369344e-01,
+       1.95657517e-16, 0.00000000e+00])
+    test.assert_allclose(s, ans)
