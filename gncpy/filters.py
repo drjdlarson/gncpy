@@ -444,6 +444,21 @@ class StudentsTFilter(BayesFilter):
 
 
 class ParticleFilter(BayesFilter):
+    """ This implements a basic Particle Filter.
+
+    The implementation is based on
+    :cite:`Simon2006_OptimalStateEstimationKalmanHInfinityandNonlinearApproaches`
+    other resampling methods can be added in derived classes.
+
+    Attributes:
+        dyn_fnc (function): Function that takes the current state and kwargs
+            and returns the next state. Leave as None to use the state
+            transition matrix
+        meas_likelihood_fnc (function): Function of the measurements,
+            estimated measurements, and kwargs and returns the relative
+            likelihood of the estimated measurement
+    """
+
     def __init__(self, **kwargs):
         self.dyn_fnc = None
         self.meas_likelihood_fnc = None
@@ -453,42 +468,80 @@ class ParticleFilter(BayesFilter):
 
     @property
     def cov(self):
-        return np.cov(np.hstack(self._particles))
+        """ The covariance of the particles
+        """
+        x_dim = self._particles[0].size
+        return np.cov(np.hstack(self._particles)).reshape((x_dim, x_dim))
+
+    @cov.setter
+    def cov(self, x):
+        pass
 
     @property
     def num_particles(self):
+        """ The number of particles used by the filter
+        """
         return len(self._particles)
 
-    def predict(self, cur_state, **kwargs):
-        u = kwargs.get('cur_input', None)
+    def init_particles(self, particle_lst):
+        """ Initializes the particles
+
+        Args:
+            particle_lst (list): List of numpy arrays, one for each particle.
+        """
+        self._particles = particle_lst
+
+    def predict(self, **kwargs):
+        """ Predicts the next state
+
+        Args:
+            **kwargs (kwargs): Passed through to the dynamics function.
+
+        Raises:
+            RuntimeError: If the dynamics function is not set.
+
+        Returns:
+            numpy array: The predicteed state.
+
+        """
         if self.dyn_fnc is not None:
             new_parts = [self.dyn_fnc(x, **kwargs) for x in self._particles]
             self._particles = new_parts
             return np.mean(self._particles, axis=0)
         else:
-            state_trans = self.get_state_mat(**kwargs)
-            input_mat = self.get_input_mat(**kwargs)
-            if u is None:
-                u = np.zeros((input_mat.shape[1], 1))
-
-            new_parts = [state_trans @ x + input_mat @ u
-                         for x in self._particles]
-            self._particles = new_parts
-            return np.mean(self._particles, axis=0)
+            msg = 'Predict function not implemented when dyn_fnc is None'
+            raise RuntimeError(msg)
 
     def correct(self, meas, **kwargs):
+        """ Corrects the state estimate
+
+        Args:
+            meas (N x 1 numpy array): The measurement.
+            **kwargs (kwargs): Passed through to the measurement, relative
+                likelihood, and resampling functions.
+
+        Todo:
+            Add the meas_fit_prob calculation
+
+        Returns:
+            Tuple containing
+
+                - (N x 1 numpy array): the corrected state
+                - (float): Measurement fit probability
+        """
         est_meas = [self.get_est_meas(x, **kwargs) for x in self._particles]
         rel_likeli = self._calc_relative_likelihoods(meas, est_meas, **kwargs)
         self._resample(rel_likeli, **kwargs)
 
-        return np.mean(self._particles, axis=0)
+        meas_fit_prob = 0
+
+        return (np.mean(self._particles, axis=0), meas_fit_prob)
 
     def _calc_relative_likelihoods(self, meas, est_meas, **kwargs):
         weights = [self.meas_likelihood_fnc(meas, y, **kwargs)
                    for y in est_meas]
         tot = np.sum(weights)
         weights = [qi / tot for qi in weights]
-
         return weights
 
     def _resample(self, rel_likelihoods, **kwargs):
@@ -502,5 +555,4 @@ class ParticleFilter(BayesFilter):
                 n += 1
                 cumulative_weight += rel_likelihoods[n]
             new_parts.append(self._particles[n].copy())
-
         self._particles = new_parts
