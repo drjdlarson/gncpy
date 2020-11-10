@@ -384,10 +384,10 @@ class StudentsTFilter(BayesFilter):
         state_mat = self.get_state_mat(**kwargs)
         next_state = state_mat @ cur_state
 
+        factor = self.proc_noise_dof * (self.dof - 2) \
+            / (self.dof * (self.proc_noise_dof - 2))
         self.scale = state_mat.T @ self.scale @ state_mat \
-            + ((self.dof - 2) * self.proc_noise_dof /
-               (self.dof * (self.proc_noise_dof - 2))) \
-            * self.get_proc_noise(**kwargs)
+            + factor * self.get_proc_noise(**kwargs)
 
         return next_state
 
@@ -418,27 +418,28 @@ class StudentsTFilter(BayesFilter):
         meas = kwargs['meas']
 
         meas_mat = self.get_meas_mat(cur_state, **kwargs)
-        scale_meas_T = self.scale @ meas_mat.T
-        scale_noise = ((self.dof - 2) * self.meas_noise_dof
-                       / (self.dof * (self.meas_noise_dof - 2))
-                       * self.meas_noise)
-        meas_pred_scale = meas_mat @ scale_meas_T \
-            + scale_noise
-        sqrt_inv_meas_scale = la.inv(la.cholesky(meas_pred_scale))
-        inv_meas_scale = sqrt_inv_meas_scale.T @ sqrt_inv_meas_scale
-        kalman_gain = scale_meas_T @ inv_meas_scale
-        inov = meas - self.get_est_meas(cur_state, **kwargs)
-        dz = meas.size
 
-        next_state = cur_state + kalman_gain @ inov
-        meas_fit_prob = pdf(meas, meas_mat @ cur_state, meas_pred_scale,
+        factor = self.meas_noise_dof * (self.dof - 2) \
+            / (self.dof * (self.meas_noise_dof - 2))
+        P_zz = meas_mat @ self.scale @ meas_mat.T + factor * self.meas_noise
+        gain = self.scale @ meas_mat @ la.inv(P_zz)
+        P_kk = self.scale - gain @ meas_mat @ self.scale
+        est_meas = self.get_est_meas(cur_state, **kwargs)
+        innov = (meas - est_meas)
+        delta_2 = innov.T @ P_zz @ innov
+        next_state = cur_state + gain @ innov
+
+        factor = (self.dof + delta_2) / (self.dof + meas.size)
+        P_k = factor * P_kk
+        dof_p = self.dof + meas.size
+
+        # moment matching
+        factor = dof_p * (self.dof - 2) / (self.dof * (dof_p - 2))
+        self.scale = factor * P_k
+
+        meas_fit_prob = pdf(meas, est_meas, P_zz,
                             self.dof)
-        del2 = inov.T @ inv_meas_scale @ inov
-        scale_p = (self.dof + del2) / (self.dof + dz) \
-            * (self.scale - kalman_gain @ meas_mat @ self.scale)
-        dof_p = self.dof + dz
-        self.scale = (self.dof - 2) * dof_p / (self.dof * (dof_p - 2)) \
-            * scale_p
+        meas_fit_prob = meas_fit_prob.item()
 
         return (next_state, meas_fit_prob)
 
