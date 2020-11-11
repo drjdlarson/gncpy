@@ -226,7 +226,7 @@ class KalmanFilter(BayesFilter):
         inov = meas - self.get_est_meas(cur_state, **kwargs)
         next_state = cur_state + kalman_gain @ inov
 
-        meas_fit_prob = np.exp(-0.5 * (len(meas) * np.log(2 * np.pi)
+        meas_fit_prob = np.exp(-0.5 * (meas.size * np.log(2 * np.pi)
                                        + np.log(la.det(meas_pred_cov))
                                        + inov.T @ inv_meas_cov @ inov))
         meas_fit_prob = meas_fit_prob.item()
@@ -407,12 +407,12 @@ class StudentsTFilter(BayesFilter):
         """
         def pdf(x, mu, sig, v):
             d = x.size
-            del2 = (x - mu).T @ sig @ (x - mu)
+            del2 = (x - mu).T @ la.inv(sig) @ (x - mu)
             inv_det = 1 / np.sqrt(la.det(sig))
-            gam_rat = gamma_fnc(np.floor((v + 2) / 2)) \
+            gam_rat = gamma_fnc(np.floor((v + d) / 2)) \
                 / gamma_fnc(np.floor(v / 2))
             return gam_rat / (v * np.pi)**(d/2) * inv_det \
-                * (1 + del2 / v)**(-(v + 2) / 2)
+                * (1 + del2 / v)**(-(v + d) / 2)
 
         cur_state = kwargs['cur_state']
         meas = kwargs['meas']
@@ -422,7 +422,7 @@ class StudentsTFilter(BayesFilter):
         factor = self.meas_noise_dof * (self.dof - 2) \
             / (self.dof * (self.meas_noise_dof - 2))
         P_zz = meas_mat @ self.scale @ meas_mat.T + factor * self.meas_noise
-        gain = self.scale @ meas_mat @ la.inv(P_zz)
+        gain = self.scale @ meas_mat.T @ la.inv(P_zz)
         P_kk = self.scale - gain @ meas_mat @ self.scale
         est_meas = self.get_est_meas(cur_state, **kwargs)
         innov = (meas - est_meas)
@@ -438,7 +438,7 @@ class StudentsTFilter(BayesFilter):
         self.scale = factor * P_k
 
         meas_fit_prob = pdf(meas, est_meas, P_zz,
-                            self.dof)
+                            self.meas_noise_dof)
         meas_fit_prob = meas_fit_prob.item()
 
         return (next_state, meas_fit_prob)
