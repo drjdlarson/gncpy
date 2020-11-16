@@ -24,7 +24,7 @@ Please cite the framework as follows
 
 ```
 @Misc{gncpy,
-  author       = {Jordan D. Larson and Ryan W. Thomas},
+  author       = {Jordan D. Larson and Ryan W. Thomas and Vincent W. Hill},
   howpublished = {Web page},
   title        = {{GNCPy}: A {P}ython library for {G}uidance, {N}avigation, and {C}ontrol algorithms},
   year         = {2019},

@@ -190,25 +190,28 @@ def get_elem_sym_fnc(z):
     """
     Words
     """
-    if len(z)==0:
-        esf = 1
+    if z.size == 0:
+        esf = np.array([[1]])
     else:
-        n_z = np.size(z, axis=0)
+        z_loc = deepcopy(z).reshape(z.size)
+        i_n = 1
+        i_nminus = 2
+
+        n_z = z_loc.size
         F = np.zeros((2, n_z))
-        
-        i_n = 0
-        i_nminus = 1
-        for ii in range(0, n_z):
-            F[i_n, 0] = F[i_nminus, 0] + z[ii]
-            for k in range(1, ii):
-                if k == ii:
-                    F[i_n, k] = z[ii] * F[i_nminus, k-1]
+
+        for n in range(1, n_z + 1):
+            F[i_n - 1, 0] = F[i_nminus - 1, 0] + z_loc[n - 1]
+            for k in range(2, n + 1):
+                if k == n:
+                    F[i_n - 1, k - 1] = z_loc[n - 1] * F[i_nminus - 1, k - 1 - 1]
                 else:
-                    F[i_n, k] = F[i_nminus, k] + z[ii] * F[i_nminus, k-1]
-            tmp = deepcopy(i_n)
-            i_n = deepcopy(i_nminus)
-            i_nminus = deepcopy(tmp)
-    one = np.array([1.0])
-    Fin = F[i_nminus][:].T
-    esf = np.concatenate((one, Fin), axis=0)
+                    F[i_n - 1, k - 1] = F[i_nminus - 1, k - 1] \
+                        + z_loc[n - 1] * F[i_nminus - 1, k - 1 - 1]
+            tmp = i_n;
+            i_n = i_nminus
+            i_nminus = tmp
+        esf = np.hstack((np.array([[1]]), F[[i_nminus - 1], :]))
+        esf = esf.reshape((esf.size, 1))
     return esf
+   
