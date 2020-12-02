@@ -531,22 +531,28 @@ class ParticleFilter(BayesFilter):
                 - (float): Measurement fit probability
         """
         est_meas = [self.get_est_meas(x, **kwargs) for x in self._particles]
-        rel_likeli = self._calc_relative_likelihoods(meas, est_meas, **kwargs)
-        self._resample(rel_likeli, **kwargs)
+        rel_likeli = self._calc_relative_likelihoods(meas, est_meas,
+                                                     renorm=False, **kwargs)
+        tot = sum(rel_likeli)
+        self._resample(rel_likelihoods=[x / tot for x in rel_likeli], **kwargs)
 
-        meas_fit_prob = 0
+        meas_fit_prob = tot
 
         return (np.mean(self._particles, axis=0), meas_fit_prob)
 
-    def _calc_relative_likelihoods(self, meas, est_meas, **kwargs):
+    def _calc_relative_likelihoods(self, meas, est_meas, renorm=True,
+                                   **kwargs):
         weights = [self.meas_likelihood_fnc(meas, y, **kwargs)
                    for y in est_meas]
-        tot = np.sum(weights)
-        weights = [qi / tot for qi in weights]
+        if renorm:
+            tot = np.sum(weights)
+            weights = [qi / tot for qi in weights]
         return weights
 
-    def _resample(self, rel_likelihoods, **kwargs):
+    def _resample(self, **kwargs):
+        rel_likelihoods = kwargs('rel_likelihoods')
         rng = kwargs.get('rng', rnd.default_rng())
+
         new_parts = []
         for m in range(0, self.num_particles):
             r = rng.random()
