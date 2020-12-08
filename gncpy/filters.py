@@ -528,17 +528,20 @@ class ParticleFilter(BayesFilter):
             Tuple containing
 
                 - (N x 1 numpy array): the corrected state
-                - (float): Measurement fit probability
+                - (list): Unnormalized relative likelihood of the particles
+                after resampling
         """
         est_meas = [self.get_est_meas(x, **kwargs) for x in self._particles]
         rel_likeli = self._calc_relative_likelihoods(meas, est_meas,
+                                                     renorm=True, **kwargs)
+
+        inds_removed = self._resample(rel_likelihoods=rel_likeli, **kwargs)
+
+        est_meas = [self.get_est_meas(x, **kwargs) for x in self._particles]
+        rel_likeli = self._calc_relative_likelihoods(meas, est_meas,
                                                      renorm=False, **kwargs)
-        tot = sum(rel_likeli)
-        self._resample(rel_likelihoods=[x / tot for x in rel_likeli], **kwargs)
 
-        meas_fit_prob = tot
-
-        return (np.mean(self._particles, axis=0), meas_fit_prob)
+        return (np.mean(self._particles, axis=0), rel_likeli, inds_removed)
 
     def _calc_relative_likelihoods(self, meas, est_meas, renorm=True,
                                    **kwargs):
@@ -550,10 +553,11 @@ class ParticleFilter(BayesFilter):
         return weights
 
     def _resample(self, **kwargs):
-        rel_likelihoods = kwargs('rel_likelihoods')
+        rel_likelihoods = kwargs['rel_likelihoods']
         rng = kwargs.get('rng', rnd.default_rng())
 
         new_parts = []
+        inds_removed = []
         for m in range(0, self.num_particles):
             r = rng.random()
             cumulative_weight = 0
@@ -562,4 +566,7 @@ class ParticleFilter(BayesFilter):
                 n += 1
                 cumulative_weight += rel_likelihoods[n]
             new_parts.append(self._particles[n].copy())
+            inds_removed.append(n)
         self._particles = new_parts
+
+        return inds_removed
