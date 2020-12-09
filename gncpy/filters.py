@@ -484,6 +484,9 @@ class ParticleFilter(BayesFilter):
         """
         return len(self._particles)
 
+    def set_meas_mat(self, **kwargs):
+        warn("Particle filter does not use set_meas_mat")
+
     def init_particles(self, particle_lst):
         """ Initializes the particles
 
@@ -549,7 +552,8 @@ class ParticleFilter(BayesFilter):
                    for y in est_meas]
         if renorm:
             tot = np.sum(weights)
-            weights = [qi / tot for qi in weights]
+            if tot > 0:
+                weights = [qi / tot for qi in weights]
         return weights
 
     def _resample(self, **kwargs):
@@ -562,7 +566,7 @@ class ParticleFilter(BayesFilter):
             r = rng.random()
             cumulative_weight = 0
             n = -1
-            while cumulative_weight < r:
+            while cumulative_weight < r and n < len(rel_likelihoods) - 1:
                 n += 1
                 cumulative_weight += rel_likelihoods[n]
             new_parts.append(self._particles[n].copy())
