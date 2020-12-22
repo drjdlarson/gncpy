@@ -93,8 +93,7 @@ def get_state_jacobian(x, u, fncs, **kwargs):
     A = np.zeros((n_states, n_states))
     for row in range(0, n_states):
         A[[row], :] = get_jacobian(x.copy(),
-                                   lambda x_: fncs[row](x_, u, **kwargs),
-                                   **kwargs).T
+                                   lambda x_: fncs[row](x_, u, **kwargs)).T
     return A
 
 
@@ -214,4 +213,3 @@ def get_elem_sym_fnc(z):
         esf = np.hstack((np.array([[1]]), F[[i_nminus - 1], :]))
         esf = esf.reshape((esf.size, 1))
     return esf
-   
