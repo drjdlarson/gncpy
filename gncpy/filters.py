@@ -571,3 +571,114 @@ class ParticleFilter(BayesFilter):
         self._particles = new_parts
 
         return inds_removed
+
+
+class UnscentedKalmanFilter(BayesFilter):
+    """
+
+    Attributes:
+        dyn_fnc (function): Function that takes the current state and kwargs
+            and returns the next state. Leave as None to use the state
+            transition matrix
+    """
+    class _SigmaPoints():
+        def __init__(self, **kwargs):
+            self.weights_mean = kwargs.get('weights_mean', [])
+            self.weights_cov = kwargs.get('weights_cov', [])
+            self.alpha = kwargs.get('alpha', 1)
+            self.kappa = kwargs.get('kappa', 0)
+            self.beta = kwargs.get('beta', 2)
+            self.n = kwargs.get('n', 0)
+            self.points = kwargs.get('points', [])
+
+        @property
+        def lam(self):
+            return self.alpha**2 * (self.n + self.kappa) - self.n
+
+        def init_weights(self):
+            lam = self.lam
+            self.weights_mean = [lam / (self.n + lam)]
+            self.weights_cov = [lam / (self.n + lam)
+                                + 1 - self.alpha**2 + self.beta]
+            w = 1 / (2 * (self.n + lam))
+            for ii in range(1, 2 * self.n):
+                self.weights_mean.append(w)
+                self.weights_cov.append(w.copy())
+
+        def update_points(self, x, cov):
+            S = la.chol((self.n + self._sigmaPoints.lam) * cov)
+
+            self.points = [x]
+
+            for ii in range(0, self.n):
+                self.points.append(x + S[:, [ii]])
+
+            for ii in range(self.n, 2 * self.n):
+                self.points.append(x + S[:, [ii - self.n]])
+
+    def __init__(self, **kwargs):
+        self.dyn_fnc = kwargs.get('dyn_fnc', None)
+
+        self._stateSigmaPoints = self._SigmaPoints()
+
+    def init_sigma_points(self, state0, cov0, alpha, kappa, beta=2):
+        n = state0.size
+        self._stateSigmaPoints = self._SigmaPoints('alpha', alpha,
+                                                   'kappa', kappa,
+                                                   'beta', beta, 'n', n)
+        self._stateSigmaPoints.init_weights()
+        self._stateSigmaPoints.update_points(state0, cov0)
+
+    def _weighted_sum_vec(self, w_lst, x_lst):
+        return np.sum([w * x for w, x in zip(w_lst, x_lst)], axis=0)
+
+    def _weighted_sum_mat(self, w_lst, P_lst):
+        return np.sum([w * P for w, P in zip(w_lst, P_lst)], axis=1)
+
+    def predict(self, **kwargs):
+        new_points = [self.dyn_fnc(x, **kwargs)
+                      for x in self._stateSigmaPoints.points]
+        next_state = self._weighted_sum_vec(self._stateSigmaPoints.weights_mean,
+                                            new_points)
+
+        proc_noise = self.get_proc_noise(**kwargs)
+        cov_lst = [(x - next_state) @ (x - next_state).T for x in new_points]
+        self.cov = proc_noise \
+            + self._weighted_sum_mat(self._stateSigmaPoints.weights_cov,
+                                     cov_lst)
+
+        self._stateSigmaPoints.update_points(next_state, self.cov)
+
+        return next_state
+
+    def correct(self, **kwargs):
+        cur_state = kwargs['cur_state']
+        meas = kwargs['meas']
+
+        est_points = [self.get_est_meas(x, **kwargs)
+                      for x in self._stateSigmaPoints.points]
+        est_meas = self._weighted_sum_vec(self._stateSigmaPoints.weights_mean,
+                                          est_points)
+        meas_cov_lst = [(z - est_meas) @ (z - est_meas).T
+                        for z in est_points]
+        meas_cov = self.meas_noise \
+            + self._weighted_sum_mat(self._stateSigmaPoints.weights_cov,
+                                     meas_cov_lst)
+
+        cross_cov_lst = [(x - cur_state) @ (z - est_meas).T
+                         for x, z in zip(self._stateSigmaPoints.points,
+                                         est_points)]
+        cross_cov = self._weighted_sum_mat(self._stateSigmaPoints.weights_cov,
+                                           cross_cov_lst)
+
+        gain = cross_cov @ la.inv(meas_cov)
+        inov = (meas - est_meas)
+
+        self.cov = self.cov - gain @ meas_cov @ gain.T
+        next_state = cur_state + gain @ inov
+
+        meas_fit_prob = np.exp(-0.5 * (meas.size * np.log(2 * np.pi)
+                                       + np.log(la.det(meas_cov))
+                                       + inov.T @ meas_cov @ inov))
+
+        return next_state, meas_fit_prob
