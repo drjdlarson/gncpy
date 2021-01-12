@@ -578,8 +578,7 @@ class UnscentedKalmanFilter(BayesFilter):
 
     Attributes:
         dyn_fnc (function): Function that takes the current state and kwargs
-            and returns the next state. Leave as None to use the state
-            transition matrix
+            and returns the next state.
     """
     class _SigmaPoints():
         def __init__(self, **kwargs):
@@ -601,12 +600,12 @@ class UnscentedKalmanFilter(BayesFilter):
             self.weights_cov = [lam / (self.n + lam)
                                 + 1 - self.alpha**2 + self.beta]
             w = 1 / (2 * (self.n + lam))
-            for ii in range(1, 2 * self.n):
+            for ii in range(1, 2 * self.n + 1):
                 self.weights_mean.append(w)
-                self.weights_cov.append(w.copy())
+                self.weights_cov.append(w)
 
         def update_points(self, x, cov):
-            S = la.chol((self.n + self._sigmaPoints.lam) * cov)
+            S = la.cholesky((self.n + self.lam) * cov)
 
             self.points = [x]
 
@@ -614,40 +613,58 @@ class UnscentedKalmanFilter(BayesFilter):
                 self.points.append(x + S[:, [ii]])
 
             for ii in range(self.n, 2 * self.n):
-                self.points.append(x + S[:, [ii - self.n]])
+                self.points.append(x - S[:, [ii - self.n]])
 
     def __init__(self, **kwargs):
         self.dyn_fnc = kwargs.get('dyn_fnc', None)
 
         self._stateSigmaPoints = self._SigmaPoints()
+        super().__init__(**kwargs)
 
-    def init_sigma_points(self, state0, cov0, alpha, kappa, beta=2):
+    def init_sigma_points(self, state0, alpha, kappa, beta=2):
+        """ Initializes the sigma points used by the filter
+
+        Args:
+            state0 (n x 1 numpy array): Initial state.
+            alpha (float): Tunig parameter, influences the spread of sigma
+                points about the mean. In range (0, 1].
+            kappa (float): Tunig parameter, influences the spread of sigma
+                points about the mean. In range [0, inf].
+            beta (float, optional): Tunig parameter for distribution type.
+                Defaults to 2 for gaussians.
+        """
         n = state0.size
-        self._stateSigmaPoints = self._SigmaPoints('alpha', alpha,
-                                                   'kappa', kappa,
-                                                   'beta', beta, 'n', n)
+        self._stateSigmaPoints = self._SigmaPoints(alpha=alpha,
+                                                   kappa=kappa,
+                                                   beta=beta, n=n)
         self._stateSigmaPoints.init_weights()
-        self._stateSigmaPoints.update_points(state0, cov0)
+        self._stateSigmaPoints.update_points(state0, self.cov)
 
     def _weighted_sum_vec(self, w_lst, x_lst):
         return np.sum([w * x for w, x in zip(w_lst, x_lst)], axis=0)
 
     def _weighted_sum_mat(self, w_lst, P_lst):
-        return np.sum([w * P for w, P in zip(w_lst, P_lst)], axis=1)
+        return np.sum([w * P for w, P in zip(w_lst, P_lst)], axis=0)
 
     def predict(self, **kwargs):
+        cur_state = kwargs['cur_state']
+        self._stateSigmaPoints.update_points(cur_state, self.cov)
+
+        # propagate points
         new_points = [self.dyn_fnc(x, **kwargs)
                       for x in self._stateSigmaPoints.points]
+        self._stateSigmaPoints.points = new_points
+
+        # estimate weighted state output
         next_state = self._weighted_sum_vec(self._stateSigmaPoints.weights_mean,
                                             new_points)
 
+        # update covariance
         proc_noise = self.get_proc_noise(**kwargs)
         cov_lst = [(x - next_state) @ (x - next_state).T for x in new_points]
         self.cov = proc_noise \
             + self._weighted_sum_mat(self._stateSigmaPoints.weights_cov,
                                      cov_lst)
-
-        self._stateSigmaPoints.update_points(next_state, self.cov)
 
         return next_state
 
