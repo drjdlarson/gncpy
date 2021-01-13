@@ -213,3 +213,31 @@ def get_elem_sym_fnc(z):
         esf = np.hstack((np.array([[1]]), F[[i_nminus - 1], :]))
         esf = esf.reshape((esf.size, 1))
     return esf
+
+
+def weighted_sum_vec(w_lst, x_lst):
+    """ Calculates the weighted sum of a list of vectors
+
+    Args:
+        w_lst (list of floats): list of weights.
+        x_lst (list of n x 1 numpy arrays): list of vectors to be weighted and
+            summed.
+
+    Returns:
+        n x 1 numpy array: weighted sum of inputs.
+    """
+    return np.sum([w * x for w, x in zip(w_lst, x_lst)], axis=0)
+
+
+def weighted_sum_mat(w_lst, P_lst):
+    """ Calculates the weighted sum of a list of matrices
+
+    Args:
+        w_lst (list of floats): list of weights.
+        P_lst (list of n x m numpy arrays): list of matrices to be weighted and
+            summed.
+
+    Returns:
+        n x m numpy array: weighted sum of inputs.
+    """
+    return np.sum([w * P for w, P in zip(w_lst, P_lst)], axis=0)

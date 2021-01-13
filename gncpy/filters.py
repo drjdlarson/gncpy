@@ -4,8 +4,11 @@ import numpy.linalg as la
 from scipy.linalg import expm
 import abc
 from warnings import warn
+from copy import deepcopy
+import matplotlib.pyplot as plt
 
-from gncpy.math import rk4, get_state_jacobian, disrw, gamma_fnc
+import gncpy.math as gmath
+import gncpy.plotting as pltUtil
 
 
 class BayesFilter(metaclass=abc.ABCMeta):
@@ -266,7 +269,7 @@ class ExtendedKalmanFilter(KalmanFilter):
         # check that we have everything to calculate the process noise
         state_jac = kwargs.get('state_jac', None)
         if state_jac is None:
-            state_jac = get_state_jacobian(cur_state, cur_input,
+            state_jac = gmath.get_state_jacobian(cur_state, cur_input,
                                            self.dyn_fncs, **kwargs)
         if state_jac.size == 0:
             msg = "State jacobian must be set before getting process noise"
@@ -282,7 +285,7 @@ class ExtendedKalmanFilter(KalmanFilter):
             return np.array([[]])
 
         # discritize the process noise
-        return disrw(state_jac, self.proc_map, dt, self.proc_cov)
+        return gmath.disrw(state_jac, self.proc_map, dt, self.proc_cov)
 
     def set_input_mat(self, **kwargs):
         warn("Extended Kalman filter does not use set_input_mat")
@@ -299,7 +302,7 @@ class ExtendedKalmanFilter(KalmanFilter):
         cur_input = kwargs['cur_input']
         dt = kwargs['dt']
 
-        state_jac = get_state_jacobian(cur_state, cur_input, self.dyn_fncs,
+        state_jac = gmath.get_state_jacobian(cur_state, cur_input, self.dyn_fncs,
                                        **kwargs)
         return expm(state_jac * dt)
 
@@ -314,13 +317,160 @@ class ExtendedKalmanFilter(KalmanFilter):
                 out[ii] = f(x, cur_input, **kwargs)
             return out
 
-        next_state = rk4(comb_func, cur_state, dt, **kwargs)
+        next_state = gmath.rk4(comb_func, cur_state, dt, **kwargs)
 
         state_mat = self.get_state_mat(**kwargs)
         self.cov = state_mat @ self.cov @ state_mat.T \
             + self.get_proc_noise(state_mat=state_mat, **kwargs)
 
         return next_state
+
+
+class SigmaPoints():
+    """ Helper class that defines sigma points.
+
+    Args:
+        state0 (n x 1 numpy array): Initial state.
+        alpha (float): Tunig parameter, influences the spread of sigma
+            points about the mean. In range (0, 1].
+        kappa (float): Tunig parameter, influences the spread of sigma
+            points about the mean. In range [0, inf].
+        beta (float, optional): Tunig parameter for distribution type.
+            In range [0, Inf]. Defaults to 2 for gaussians.
+    """
+
+    def __init__(self, **kwargs):
+        self.weights_mean = kwargs.get('weights_mean', [])
+        self.weights_cov = kwargs.get('weights_cov', [])
+        self.alpha = kwargs.get('alpha', 1)
+        self.kappa = kwargs.get('kappa', 0)
+        self.beta = kwargs.get('beta', 2)
+        self.n = kwargs.get('n', 0)
+        self.points = kwargs.get('points', [])
+
+    @property
+    def lam(self):
+        return self.alpha**2 * (self.n + self.kappa) - self.n
+
+    @property
+    def mean(self):
+        return gmath.weighted_sum_vec(self.weights_mean, self.points)
+
+    @property
+    def cov(self):
+        x_bar = self.mean
+        cov_lst = [(x - x_bar) @ (x - x_bar).T for x in self.points]
+        return gmath.weighted_sum_mat(self.weights_cov, cov_lst)
+
+    def init_weights(self):
+        lam = self.lam
+        self.weights_mean = [lam / (self.n + lam)]
+        self.weights_cov = [lam / (self.n + lam)
+                            + 1 - self.alpha**2 + self.beta]
+        w = 1 / (2 * (self.n + lam))
+        for ii in range(1, 2 * self.n + 1):
+            self.weights_mean.append(w)
+            self.weights_cov.append(w)
+
+    def update_points(self, x, cov):
+        S = la.cholesky((self.n + self.lam) * cov)
+
+        self.points = [x]
+
+        for ii in range(0, self.n):
+            self.points.append(x + S[:, [ii]])
+
+        for ii in range(self.n, 2 * self.n):
+            self.points.append(x - S[:, [ii - self.n]])
+
+
+class UnscentedKalmanFilter(BayesFilter):
+    """ This implements an unscented kalman filter.
+
+    For details on the filter see
+    :cite:`Wan2000_TheUnscentedKalmanFilterforNonlinearEstimation`. This
+    implementation assumes that the noise is purely addative and as such,
+    appropriate simplifications have been made.
+
+    Attributes:
+        dyn_fnc (function): Function that takes the current state and kwargs
+            and returns the next state.
+    """
+
+    def __init__(self, **kwargs):
+        self.dyn_fnc = kwargs.get('dyn_fnc', None)
+
+        self._stateSigmaPoints = SigmaPoints()
+        super().__init__(**kwargs)
+
+    def init_sigma_points(self, state0, alpha, kappa, beta=2):
+        """ Initializes the sigma points used by the filter
+
+        Args:
+            state0 (n x 1 numpy array): Initial state.
+            alpha (float): Tunig parameter, influences the spread of sigma
+                points about the mean. In range (0, 1].
+            kappa (float): Tunig parameter, influences the spread of sigma
+                points about the mean. In range [0, inf].
+            beta (float, optional): Tunig parameter for distribution type.
+                In range [0, Inf]. Defaults to 2 for gaussians.
+        """
+        n = state0.size
+        self._stateSigmaPoints = SigmaPoints(alpha=alpha,
+                                             kappa=kappa,
+                                             beta=beta, n=n)
+        self._stateSigmaPoints.init_weights()
+        self._stateSigmaPoints.update_points(state0, self.cov)
+
+    def predict(self, **kwargs):
+        cur_state = kwargs['cur_state']
+        self._stateSigmaPoints.update_points(cur_state, self.cov)
+
+        # propagate points
+        new_points = [self.dyn_fnc(x, **kwargs)
+                      for x in self._stateSigmaPoints.points]
+        self._stateSigmaPoints.points = new_points
+
+        # estimate weighted state output
+        next_state = self._stateSigmaPoints.mean
+
+        # update covariance
+        proc_noise = self.get_proc_noise(**kwargs)
+        self.cov = self._stateSigmaPoints.cov + proc_noise
+
+        return next_state
+
+    def correct(self, **kwargs):
+        cur_state = kwargs['cur_state']
+        meas = kwargs['meas']
+
+        est_points = [self.get_est_meas(x, **kwargs)
+                      for x in self._stateSigmaPoints.points]
+        est_meas = gmath.weighted_sum_vec(self._stateSigmaPoints.weights_mean,
+                                          est_points)
+        meas_cov_lst = [(z - est_meas) @ (z - est_meas).T
+                        for z in est_points]
+        meas_cov = self.meas_noise \
+            + gmath.weighted_sum_mat(self._stateSigmaPoints.weights_cov,
+                                     meas_cov_lst)
+
+        cross_cov_lst = [(x - cur_state) @ (z - est_meas).T
+                         for x, z in zip(self._stateSigmaPoints.points,
+                                         est_points)]
+        cross_cov = gmath.weighted_sum_mat(self._stateSigmaPoints.weights_cov,
+                                           cross_cov_lst)
+
+        gain = cross_cov @ la.inv(meas_cov)
+        inov = (meas - est_meas)
+
+        self.cov = self.cov - gain @ meas_cov @ gain.T
+        next_state = cur_state + gain @ inov
+
+        meas_fit_prob = np.exp(-0.5 * (meas.size * np.log(2 * np.pi)
+                                       + np.log(la.det(meas_cov))
+                                       + inov.T @ meas_cov @ inov))
+
+        return next_state, meas_fit_prob
 
 
 class StudentsTFilter(BayesFilter):
@@ -406,8 +556,8 @@ class StudentsTFilter(BayesFilter):
             d = x.size
             del2 = (x - mu).T @ la.inv(sig) @ (x - mu)
             inv_det = 1 / np.sqrt(la.det(sig))
-            gam_rat = gamma_fnc(np.floor((v + d) / 2)) \
-                / gamma_fnc(np.floor(v / 2))
+            gam_rat = gmath.gamma_fnc(np.floor((v + d) / 2)) \
+                / gmath.gamma_fnc(np.floor(v / 2))
             return gam_rat / (v * np.pi)**(d/2) * inv_det \
                 * (1 + del2 / v)**(-(v + d) / 2)
 
@@ -446,7 +596,8 @@ class ParticleFilter(BayesFilter):
 
     The implementation is based on
     :cite:`Simon2006_OptimalStateEstimationKalmanHInfinityandNonlinearApproaches`
-    other resampling methods can be added in derived classes.
+    and uses Sampling-Importance Resampling (SIR) sampling. Other resampling
+    methods can be added in derived classes.
 
     Attributes:
         dyn_fnc (function): Function that takes the current state and kwargs
@@ -558,7 +709,7 @@ class ParticleFilter(BayesFilter):
         rng = kwargs.get('rng', rnd.default_rng())
 
         new_parts = []
-        inds_removed = []
+        inds_kept = []
         for m in range(0, self.num_particles):
             r = rng.random()
             cumulative_weight = 0
@@ -567,135 +718,154 @@ class ParticleFilter(BayesFilter):
                 n += 1
                 cumulative_weight += rel_likelihoods[n]
             new_parts.append(self._particles[n].copy())
-            inds_removed.append(n)
+            inds_kept.append(n)
+
+        inds_removed = [ii for ii in range(0, self.num_particles)
+                        if ii not in inds_kept]
         self._particles = new_parts
 
         return inds_removed
 
+    def plot_particles(self, inds, title='Particle Distribution',
+                       x_lbl='State', y_lbl='Count', **kwargs):
+        opts = pltUtil.init_plotting_opts(**kwargs)
+        f_hndl = opts['f_hndl']
+        lgnd_loc = opts['lgnd_loc']
 
-class UnscentedKalmanFilter(BayesFilter):
+        if f_hndl is None:
+            f_hndl = plt.figure()
+            f_hndl.add_subplot(1, 1, 1)
+
+        h_opts = {"histtype":"stepfilled"}
+        if (not isinstance(inds, list)) or len(inds) == 1:
+            if isinstance(inds, list):
+                ii = inds[0]
+            else:
+                ii = inds
+            x = [x[ii, 0] for x in self._particles]
+            f_hndl.axes[0].hist(x, **h_opts)
+        else:
+            x = [p[inds[0], 0] for p in self._particles]
+            y = [p[inds[1], 0] for p in self._particles]
+            f_hndl.axes[0].hist2d(x, y, **h_opts)
+
+        pltUtil.set_title_label(f_hndl, 0, opts, ttl=title,
+                                x_lbl=x_lbl, y_lbl=y_lbl)
+        if lgnd_loc is not None:
+            plt.legend(loc=lgnd_loc)
+        plt.tight_layout()
+
+        return f_hndl
+
+
+class UnscentedParticleFilter(ParticleFilter):
+    """ This implements an unscented kalman filter.
+
+    For details on the filter see
+    :cite:`VanDerMerwe2000_TheUnscentedParticleFilter` and
+    :cite:`VanDerMerwe2001_TheUnscentedParticleFilter`.
     """
-
-    Attributes:
-        dyn_fnc (function): Function that takes the current state and kwargs
-            and returns the next state.
-    """
-    class _SigmaPoints():
-        def __init__(self, **kwargs):
-            self.weights_mean = kwargs.get('weights_mean', [])
-            self.weights_cov = kwargs.get('weights_cov', [])
-            self.alpha = kwargs.get('alpha', 1)
-            self.kappa = kwargs.get('kappa', 0)
-            self.beta = kwargs.get('beta', 2)
-            self.n = kwargs.get('n', 0)
-            self.points = kwargs.get('points', [])
-
-        @property
-        def lam(self):
-            return self.alpha**2 * (self.n + self.kappa) - self.n
-
-        def init_weights(self):
-            lam = self.lam
-            self.weights_mean = [lam / (self.n + lam)]
-            self.weights_cov = [lam / (self.n + lam)
-                                + 1 - self.alpha**2 + self.beta]
-            w = 1 / (2 * (self.n + lam))
-            for ii in range(1, 2 * self.n + 1):
-                self.weights_mean.append(w)
-                self.weights_cov.append(w)
-
-        def update_points(self, x, cov):
-            S = la.cholesky((self.n + self.lam) * cov)
-
-            self.points = [x]
-
-            for ii in range(0, self.n):
-                self.points.append(x + S[:, [ii]])
-
-            for ii in range(self.n, 2 * self.n):
-                self.points.append(x - S[:, [ii - self.n]])
 
     def __init__(self, **kwargs):
-        self.dyn_fnc = kwargs.get('dyn_fnc', None)
-
-        self._stateSigmaPoints = self._SigmaPoints()
+        self._filt = UnscentedKalmanFilter()
+        self._dyn_fnc = None
+        self._covs = []
+        self._sig_points = []
+        self._meas_noise = np.array([[]])
         super().__init__(**kwargs)
 
-    def init_sigma_points(self, state0, alpha, kappa, beta=2):
-        """ Initializes the sigma points used by the filter
+    def init_UKF(self, alpha, kappa, state_len, beta=2):
+        self._filt._stateSigmaPoints.alpha = alpha
+        self._filt._stateSigmaPoints.kappa = kappa
+        self._filt._stateSigmaPoints.beta = beta
+        self._filt._stateSigmaPoints.n = state_len
+
+        self._filt._stateSigmaPoints.init_weights()
+
+    def init_particles(self, particle_lst, cov_lst):
+        """ Initializes the particles and covariances
 
         Args:
-            state0 (n x 1 numpy array): Initial state.
-            alpha (float): Tunig parameter, influences the spread of sigma
-                points about the mean. In range (0, 1].
-            kappa (float): Tunig parameter, influences the spread of sigma
-                points about the mean. In range [0, inf].
-            beta (float, optional): Tunig parameter for distribution type.
-                Defaults to 2 for gaussians.
+            particle_lst (list): List of numpy arrays, one for each particle.
+            cov_lst (list): list of numpy arrays, one for each particle
         """
-        n = state0.size
-        self._stateSigmaPoints = self._SigmaPoints(alpha=alpha,
-                                                   kappa=kappa,
-                                                   beta=beta, n=n)
-        self._stateSigmaPoints.init_weights()
-        self._stateSigmaPoints.update_points(state0, self.cov)
+        self._covs = deepcopy(cov_lst)
+        super().init_particles(particle_lst)
 
-    def _weighted_sum_vec(self, w_lst, x_lst):
-        return np.sum([w * x for w, x in zip(w_lst, x_lst)], axis=0)
+    def set_meas_model(self, fnc):
+        self._filt.set_meas_model(fnc)
+        super().set_meas_model(fnc)
 
-    def _weighted_sum_mat(self, w_lst, P_lst):
-        return np.sum([w * P for w, P in zip(w_lst, P_lst)], axis=0)
+    def set_proc_noise(self, **kwargs):
+        self._filt.set_proc_noise(**kwargs)
+        super().set_proc_noise(**kwargs)
+
+    @property
+    def meas_noise(self):
+        return self._meas_noise
+
+    @meas_noise.setter
+    def meas_noise(self, meas_noise):
+        self._filt.meas_noise = meas_noise
+        self._meas_noise = meas_noise
+
+    @property
+    def dyn_fnc(self):
+        return self._dyn_fnc
+
+    @dyn_fnc.setter
+    def dyn_fnc(self, f):
+        self._filt.dyn_fnc = f
+        self._dyn_fnc = f
 
     def predict(self, **kwargs):
-        cur_state = kwargs['cur_state']
-        self._stateSigmaPoints.update_points(cur_state, self.cov)
+        new_parts = []
+        new_covs = []
+        new_sig_points = []
+        for x, P in zip(self._particles, self._covs):
+            self._filt.cov = P
+            new_parts.append(self._filt.predict(cur_state=x, **kwargs))
+            new_covs.append(self._filt.cov)
+            new_sig_points.append(self._filt._stateSigmaPoints.points)
 
-        # propagate points
-        new_points = [self.dyn_fnc(x, **kwargs)
-                      for x in self._stateSigmaPoints.points]
-        self._stateSigmaPoints.points = new_points
+        self._particles = new_parts
+        self._covs = new_covs
+        self._sig_points = new_sig_points
+        return np.mean(self._particles, axis=0)
 
-        # estimate weighted state output
-        next_state = self._weighted_sum_vec(self._stateSigmaPoints.weights_mean,
-                                            new_points)
+    def correct(self, meas, **kwargs):
+        rng = kwargs.get('rng', rnd.default_rng())
 
-        # update covariance
-        proc_noise = self.get_proc_noise(**kwargs)
-        cov_lst = [(x - next_state) @ (x - next_state).T for x in new_points]
-        self.cov = proc_noise \
-            + self._weighted_sum_mat(self._stateSigmaPoints.weights_cov,
-                                     cov_lst)
+        # call UKF correction on each particle
+        new_parts = []
+        new_covs = []
+        new_sig_points = []
+        for ii, (x, P) in enumerate(zip(self._particles, self._covs)):
+            self._filt.cov = P
+            self._filt._stateSigmaPoints.points = self._sig_points[ii]
+            ns = self._filt.correct(cur_state=x, meas=meas, **kwargs)[0]
+            cov = self._filt.cov
 
-        return next_state
+            samp = rng.multivariate_normal(ns.flatten(), cov).reshape(x.shape)
 
-    def correct(self, **kwargs):
-        cur_state = kwargs['cur_state']
-        meas = kwargs['meas']
+            new_parts.append(samp)
+            new_covs.append(self._filt.cov)
+            new_sig_points.append(self._filt._stateSigmaPoints.points)
 
-        est_points = [self.get_est_meas(x, **kwargs)
-                      for x in self._stateSigmaPoints.points]
-        est_meas = self._weighted_sum_vec(self._stateSigmaPoints.weights_mean,
-                                          est_points)
-        meas_cov_lst = [(z - est_meas) @ (z - est_meas).T
-                        for z in est_points]
-        meas_cov = self.meas_noise \
-            + self._weighted_sum_mat(self._stateSigmaPoints.weights_cov,
-                                     meas_cov_lst)
+        # update info for next UKF
+        self._particles = new_parts
+        self._covs = new_covs
+        self._sig_points = new_sig_points
 
-        cross_cov_lst = [(x - cur_state) @ (z - est_meas).T
-                         for x, z in zip(self._stateSigmaPoints.points,
-                                         est_points)]
-        cross_cov = self._weighted_sum_mat(self._stateSigmaPoints.weights_cov,
-                                           cross_cov_lst)
+        # resample
+        est_meas = [self.get_est_meas(x, **kwargs) for x in self._particles]
+        rel_likeli = self._calc_relative_likelihoods(meas, est_meas,
+                                                      renorm=True, **kwargs)
 
-        gain = cross_cov @ la.inv(meas_cov)
-        inov = (meas - est_meas)
+        inds_removed = self._resample(rel_likelihoods=rel_likeli, **kwargs)
 
-        self.cov = self.cov - gain @ meas_cov @ gain.T
-        next_state = cur_state + gain @ inov
+        est_meas = [self.get_est_meas(x, **kwargs) for x in self._particles]
+        rel_likeli = self._calc_relative_likelihoods(meas, est_meas,
+                                                      renorm=False, **kwargs)
 
-        meas_fit_prob = np.exp(-0.5 * (meas.size * np.log(2 * np.pi)
-                                       + np.log(la.det(meas_cov))
-                                       + inov.T @ meas_cov @ inov))
-
-        return next_state, meas_fit_prob
+        return (np.mean(self._particles, axis=0), rel_likeli, inds_removed)
