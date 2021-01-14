@@ -206,6 +206,65 @@ def test_UnscentedKalmanFilter():
     assert p_val > level_sig, "p-value too low, final state is unexpected"
 
 
+def test_MaxCorrEntUKF():
+    rng = rnd.default_rng()
+    level_sig = 0.05
+    max_time = 50
+
+    alpha = 1
+    kappa = 0
+    sigma_w = 0.1
+    sigma_v = 3
+
+    proc_noise = np.array([[sigma_w**2]])
+    meas_noise = np.array([[sigma_v**2]])
+
+    def dyn_fnc(x, **kwargs):
+        a = 0.5
+        t = kwargs['t']
+        return a * x + 25 * x / (1 + x**2) + 8 * np.cos(1.2 * t)
+
+    def meas_mod(x, **kwargs):
+        b = 1 / 20
+        return b * x**2
+
+    state0 = np.array([[5]])
+    cov0 = np.array([[2]])
+
+    ukf = filters.MaxCorrEntUKF()
+    ukf.cov = cov0.copy()
+    ukf.dyn_fnc = dyn_fnc
+    ukf.set_meas_model(meas_mod)
+    ukf.set_proc_noise(mat=proc_noise)
+    ukf.meas_noise = meas_noise
+    ukf.kernel_bandwidth = 10
+
+    ukf._stateSigmaPoints.alpha = alpha
+    ukf._stateSigmaPoints.kappa = kappa
+    ukf._stateSigmaPoints.beta = 2
+    ukf._stateSigmaPoints.n = state0.size
+    ukf._stateSigmaPoints.init_weights()
+
+    state = state0.copy()
+    pred_state = state0.copy()
+    for t in range(1, max_time):
+        orig_state = pred_state.copy()
+        pred_state = ukf.predict(cur_state=pred_state, t=t)
+
+        state = dyn_fnc(state, t=t) + sigma_w * rng.normal()
+        meas = meas_mod(state) + sigma_v * rng.normal()
+
+        pred_state = ukf.correct(past_state=orig_state, cur_state=pred_state,
+                                 meas=meas)[0]
+
+    exp_state = np.array([[3.46935396909752]])
+    z_stat = (pred_state - exp_state).T @ la.inv(ukf.cov)
+    z_stat = z_stat.item()
+    p_val = stats.norm.sf(abs(z_stat)) * 2
+
+    assert p_val > level_sig, "p-value too low, final state is unexpected"
+
+
 def test_UnscentedParticleFilter():
     rng = rnd.default_rng()
     num_parts = 1000

@@ -440,10 +440,7 @@ class UnscentedKalmanFilter(BayesFilter):
 
         return next_state
 
-    def correct(self, **kwargs):
-        cur_state = kwargs['cur_state']
-        meas = kwargs['meas']
-
+    def _calc_meas_cov(self, **kwargs):
         est_points = [self.get_est_meas(x, **kwargs)
                       for x in self._stateSigmaPoints.points]
         est_meas = gmath.weighted_sum_vec(self._stateSigmaPoints.weights_mean,
@@ -453,6 +450,14 @@ class UnscentedKalmanFilter(BayesFilter):
         meas_cov = self.meas_noise \
             + gmath.weighted_sum_mat(self._stateSigmaPoints.weights_cov,
                                      meas_cov_lst)
+
+        return meas_cov, est_points, est_meas
+
+    def correct(self, **kwargs):
+        cur_state = kwargs['cur_state']
+        meas = kwargs['meas']
+
+        meas_cov, est_points, est_meas = self._calc_meas_cov(**kwargs)
 
         cross_cov_lst = [(x - cur_state) @ (z - est_meas).T
                          for x, z in zip(self._stateSigmaPoints.points,
@@ -471,6 +476,64 @@ class UnscentedKalmanFilter(BayesFilter):
                                        + inov.T @ meas_cov @ inov))
 
         return next_state, meas_fit_prob
+
+
+class MaxCorrEntUKF(UnscentedKalmanFilter):
+    """ This implements a Macimum Correntropy Unscented Kalman filter.
+
+    This is based on
+    :cite:`Hou2018_MaximumCorrentropyUnscentedKalmanFilterforBallisticMissileNavigationSystemBasedonSINSCNSDeeplyIntegratedMode`
+
+    Attributes:
+        kernel_bandwidth (float): Bandwidth of the Gaussian Kernel
+    """
+
+    def __init__(self, **kwargs):
+        self.kernel_bandwidth = kwargs.get('kernel_bandwidth', 1)
+        super().__init__(**kwargs)
+
+    def _calc_meas_cov(self, **kwargs):
+        past_state = kwargs['past_state']  # before prediction step
+        cur_state = kwargs['cur_state']  # output from prediction step
+        meas = kwargs['meas']
+
+        est_points = [self.get_est_meas(x, **kwargs)
+                      for x in self._stateSigmaPoints.points]
+        est_meas = gmath.weighted_sum_vec(self._stateSigmaPoints.weights_mean,
+                                          est_points)
+        meas_cov_lst = [(z - est_meas) @ (z - est_meas).T
+                        for z in est_points]
+
+        # find square root of combined covariance matrix
+        n_state = self.cov.shape[0]
+        n_meas = est_meas.shape[0]
+        z_12 = np.zeros((n_state, n_meas))
+        z_21 = np.zeros((n_meas, n_state))
+        comb_cov = np.vstack((np.hstack((self.cov, z_12)),
+                              np.hstack((z_21, self.meas_noise))))
+        sqrt_comb = la.cholesky(comb_cov)
+        inv_sqrt_comb = la.inv(sqrt_comb)
+
+        # find error vector
+        pred_meas = self.get_est_meas(past_state, **kwargs)
+        g = inv_sqrt_comb @ np.vstack((past_state, pred_meas))
+        d = inv_sqrt_comb @ np.vstack((cur_state, meas))
+        e = (d - g).flatten()
+
+        # kernel function on error
+        kern_lst = [gmath.gaussian_kernel(e_ii, self.kernel_bandwidth)
+                    for e_ii in e]
+        c = np.diag(kern_lst)
+        c_inv = la.inv(c)
+
+        # calculate the measurement covariance
+        scaled_mat = sqrt_comb @ c_inv @ sqrt_comb.T
+        scaled_meas_noise = scaled_mat[n_state:, n_state:]
+        meas_cov = scaled_meas_noise \
+            + gmath.weighted_sum_mat(self._stateSigmaPoints.weights_cov,
+                                     meas_cov_lst)
+
+        return meas_cov, est_points, est_meas
 
 
 class StudentsTFilter(BayesFilter):
@@ -860,12 +923,67 @@ class UnscentedParticleFilter(ParticleFilter):
         # resample
         est_meas = [self.get_est_meas(x, **kwargs) for x in self._particles]
         rel_likeli = self._calc_relative_likelihoods(meas, est_meas,
-                                                      renorm=True, **kwargs)
+                                                     renorm=True, **kwargs)
 
         inds_removed = self._resample(rel_likelihoods=rel_likeli, **kwargs)
 
         est_meas = [self.get_est_meas(x, **kwargs) for x in self._particles]
         rel_likeli = self._calc_relative_likelihoods(meas, est_meas,
-                                                      renorm=False, **kwargs)
+                                                     renorm=False, **kwargs)
+
+        return (np.mean(self._particles, axis=0), rel_likeli, inds_removed)
+
+
+class MaxCorrEntUPF(UnscentedParticleFilter):
+    def __init__(self, **kwargs):
+        self.kernel_bandwidth = 1
+        super().__init__(**kwargs)
+
+    @property
+    def meas_noise(self):
+        return super().meas_noise
+
+    @meas_noise.setter
+    def meas_noise(self, meas_noise):
+        self._meas_noise = meas_noise
+
+    def correct(self, meas, **kwargs):
+        rng = kwargs.get('rng', rnd.default_rng())
+
+        # call UKF correction on each particle
+        new_parts = []
+        new_covs = []
+        new_sig_points = []
+        for ii, (x, P) in enumerate(zip(self._particles, self._covs)):
+            self._filt.cov = P
+            self._filt._stateSigmaPoints.points = self._sig_points[ii]
+
+            # update measurement noise matrix to match max corr ent
+            self._filt.meas_noise = self.meas_noise / 1
+
+            ns = self._filt.correct(cur_state=x, meas=meas, **kwargs)[0]
+            cov = self._filt.cov
+
+            samp = rng.multivariate_normal(ns.flatten(), cov).reshape(x.shape)
+
+            new_parts.append(samp)
+            new_covs.append(self._filt.cov)
+            new_sig_points.append(self._filt._stateSigmaPoints.points)
+
+        # update info for next UKF
+        self._particles = new_parts
+        self._covs = new_covs
+        self._sig_points = new_sig_points
+
+        # resample
+        est_meas = [self.get_est_meas(x, **kwargs) for x in self._particles]
+        rel_likeli = self._calc_relative_likelihoods(meas, est_meas,
+                                                     renorm=True, **kwargs)
+
+        inds_removed = self._resample(rel_likelihoods=rel_likeli, **kwargs)
+
+        est_meas = [self.get_est_meas(x, **kwargs) for x in self._particles]
+        rel_likeli = self._calc_relative_likelihoods(meas, est_meas,
+                                                     renorm=False, **kwargs)
 
         return (np.mean(self._particles, axis=0), rel_likeli, inds_removed)

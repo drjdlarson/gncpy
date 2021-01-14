@@ -241,3 +241,7 @@ def weighted_sum_mat(w_lst, P_lst):
         n x m numpy array: weighted sum of inputs.
     """
     return np.sum([w * P for w, P in zip(w_lst, P_lst)], axis=0)
+
+
+def gaussian_kernel(x, sig):
+    return np.exp(-x**2 / (2 * sig**2))
