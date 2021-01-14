@@ -706,6 +706,9 @@ class ParticleFilter(BayesFilter):
         """
         self._particles = particle_lst
 
+    def _calc_state(self, weights):
+        return gmath.weighted_sum_vec(weights, self._particles)
+
     def predict(self, **kwargs):
         """ Predicts the next state
 
@@ -755,7 +758,10 @@ class ParticleFilter(BayesFilter):
         rel_likeli = self._calc_relative_likelihoods(meas, est_meas,
                                                      renorm=False, **kwargs)
 
-        return (np.mean(self._particles, axis=0), rel_likeli, inds_removed)
+        tot = np.sum(rel_likeli)
+        w_norm = [x / tot for x in rel_likeli]
+
+        return (self._calc_state(w_norm), rel_likeli, inds_removed)
 
     def _calc_relative_likelihoods(self, meas, est_meas, renorm=True,
                                    **kwargs):
@@ -930,60 +936,34 @@ class UnscentedParticleFilter(ParticleFilter):
         est_meas = [self.get_est_meas(x, **kwargs) for x in self._particles]
         rel_likeli = self._calc_relative_likelihoods(meas, est_meas,
                                                      renorm=False, **kwargs)
+        tot = np.sum(rel_likeli)
+        w_norm = [x / tot for x in rel_likeli]
 
-        return (np.mean(self._particles, axis=0), rel_likeli, inds_removed)
+        return (self._calc_state(w_norm), rel_likeli, inds_removed)
 
 
 class MaxCorrEntUPF(UnscentedParticleFilter):
+    """ This implements a Maximum Correntropy Unscented Particle Filter.
+
+    This is based on
+    :cite:`Fan2018_MaximumCorrentropyBasedUnscentedParticleFilterforCooperativeNavigationwithHeavyTailedMeasurementNoises`
+
+    """
+
     def __init__(self, **kwargs):
-        self.kernel_bandwidth = 1
         super().__init__(**kwargs)
+        self._filt = MaxCorrEntUKF()
 
     @property
-    def meas_noise(self):
-        return super().meas_noise
+    def kernel_bandwidth(self):
+        """ Bandwidth for the Gaussian Kernel in the MCUKF
 
-    @meas_noise.setter
-    def meas_noise(self, meas_noise):
-        self._meas_noise = meas_noise
+        Returns:
+            float: bandwidth
 
-    def correct(self, meas, **kwargs):
-        rng = kwargs.get('rng', rnd.default_rng())
+        """
+        return self._filt.kernel_bandwidth
 
-        # call UKF correction on each particle
-        new_parts = []
-        new_covs = []
-        new_sig_points = []
-        for ii, (x, P) in enumerate(zip(self._particles, self._covs)):
-            self._filt.cov = P
-            self._filt._stateSigmaPoints.points = self._sig_points[ii]
-
-            # update measurement noise matrix to match max corr ent
-            self._filt.meas_noise = self.meas_noise / 1
-
-            ns = self._filt.correct(cur_state=x, meas=meas, **kwargs)[0]
-            cov = self._filt.cov
-
-            samp = rng.multivariate_normal(ns.flatten(), cov).reshape(x.shape)
-
-            new_parts.append(samp)
-            new_covs.append(self._filt.cov)
-            new_sig_points.append(self._filt._stateSigmaPoints.points)
-
-        # update info for next UKF
-        self._particles = new_parts
-        self._covs = new_covs
-        self._sig_points = new_sig_points
-
-        # resample
-        est_meas = [self.get_est_meas(x, **kwargs) for x in self._particles]
-        rel_likeli = self._calc_relative_likelihoods(meas, est_meas,
-                                                     renorm=True, **kwargs)
-
-        inds_removed = self._resample(rel_likelihoods=rel_likeli, **kwargs)
-
-        est_meas = [self.get_est_meas(x, **kwargs) for x in self._particles]
-        rel_likeli = self._calc_relative_likelihoods(meas, est_meas,
-                                                     renorm=False, **kwargs)
-
-        return (np.mean(self._particles, axis=0), rel_likeli, inds_removed)
+    @kernel_bandwidth.setter
+    def kernel_bandwidth(self, kernel_bandwidth):
+        self._filt.kernel_bandwidth = kernel_bandwidth

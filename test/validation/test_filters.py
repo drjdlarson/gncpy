@@ -331,3 +331,75 @@ def test_UnscentedParticleFilter():
     p_val = stats.norm.sf(abs(z_stat)) * 2
 
     assert p_val > level_sig, "p-value too low, final state is unexpected"
+
+
+def test_MaxCorrEntUPF():
+    rng = rnd.default_rng()
+    num_parts = 1000
+    max_time = 30
+    level_sig = 0.05
+
+    alpha = 1
+    kappa = 0
+
+    true_state = np.zeros((1, 1))
+    noise_state = true_state.copy()
+    proc_noise_std = np.array([[0.2]])
+    proc_mean = np.array([1.])
+    meas_noise_std = np.array([[1.]])
+    meas_cov = meas_noise_std**2
+    F = np.array([[0.75]])
+    H = np.array([[2]])
+
+    init_parts = [2 * rng.random(true_state.shape) - 1
+                  for ii in range(0, num_parts)]
+    init_covs = [np.array([[5]]).copy() for ii in range(0, num_parts)]
+
+    # define particle filter
+    upf = filters.MaxCorrEntUPF()
+    upf.kernel_bandwidth = 10
+
+    def f(x, **kwargs):
+        cov = kwargs['proc_cov']
+        rng = kwargs['rng']
+        return F @ x + rng.multivariate_normal(proc_mean,
+                                               cov).reshape(x.shape)
+
+    def meas_likelihood(meas, est, **kwargs):
+        m = meas.copy().reshape(meas.size)
+        meas_cov = kwargs['meas_cov']
+        return stats.multivariate_normal.pdf(m, mean=est,
+                                             cov=meas_cov)
+
+    def meas_mod(x, **kwargs):
+        return H @ x
+
+    upf.dyn_fnc = f
+    upf.meas_likelihood_fnc = meas_likelihood
+
+    upf.set_meas_model(meas_mod)
+    upf.set_proc_noise(mat=proc_noise_std**2)
+    upf.meas_noise = meas_cov
+
+    upf.init_particles(init_parts, init_covs)
+    upf.init_UKF(alpha, kappa, true_state.size)
+
+    pred_state = np.mean(init_parts, axis=0)
+    for tt in range(1, max_time):
+        orig_state = pred_state.copy()
+        upf.predict(proc_cov=proc_noise_std**2, rng=rng)
+
+        # calculate true state and measurement for this timestep
+        true_state = F @ true_state + proc_mean
+        noise = rng.multivariate_normal(proc_mean, proc_noise_std**2)
+        noise_state = F @ noise_state + noise.reshape(true_state.shape)
+        meas = H @ noise_state + meas_noise_std * rng.normal()
+
+        pred_state = upf.correct(meas, past_state=orig_state,
+                                 meas_cov=meas_cov)[0]
+
+    z_stat = (pred_state - true_state).T @ la.inv(upf.cov)
+    z_stat = z_stat.item()
+    p_val = stats.norm.sf(abs(z_stat)) * 2
+
+    assert p_val > level_sig, "p-value too low, final state is unexpected"
