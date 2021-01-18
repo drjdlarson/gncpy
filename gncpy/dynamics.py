@@ -165,6 +165,23 @@ class NonlinearDynamicsBase(LinearDynamicsBase):
                                         **kwargs)
 
 
+class DoubleIntegrator(LinearDynamicsBase()):
+    """ This implements a double integrator model
+    """
+    state_names = ('x pos', 'y pos', 'x vel', 'y vel')
+
+    def get_dis_process_noise_mat(self, dt, **kwargs):
+        x_dim = len(self.state_names)
+        return np.zeros((x_dim, x_dim))
+
+    def get_state_mat(self, **kwargs):
+        dt = kwargs['dt']
+        return np.array([[1., 0, dt, 0],
+                         [0., 1., 0, dt],
+                         [0, 0, 1., 0],
+                         [0, 0, 0, 1]])
+
+
 class CoordinatedTurn(NonlinearDynamicsBase):
     """ This implements the non-linear coordinated turn dynamics model.
     """

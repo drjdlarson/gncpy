@@ -6,6 +6,8 @@ import abc
 from warnings import warn
 from copy import deepcopy
 import matplotlib.pyplot as plt
+import scipy.stats as stats
+from scipy.interpolate import interpn
 
 import gncpy.math as gmath
 import gncpy.plotting as pltUtil
@@ -748,20 +750,12 @@ class ParticleFilter(BayesFilter):
                 - (list): Unnormalized relative likelihood of the particles
                 after resampling
         """
-        est_meas = [self.get_est_meas(x, **kwargs) for x in self._particles]
-        rel_likeli = self._calc_relative_likelihoods(meas, est_meas,
-                                                     renorm=True, **kwargs)
+        inds_removed, rel_likeli_unnorm = self._resample(meas=meas, **kwargs)
 
-        inds_removed = self._resample(rel_likelihoods=rel_likeli, **kwargs)
+        tot = np.sum(rel_likeli_unnorm)
+        w_norm = [x / tot for x in rel_likeli_unnorm]
 
-        est_meas = [self.get_est_meas(x, **kwargs) for x in self._particles]
-        rel_likeli = self._calc_relative_likelihoods(meas, est_meas,
-                                                     renorm=False, **kwargs)
-
-        tot = np.sum(rel_likeli)
-        w_norm = [x / tot for x in rel_likeli]
-
-        return (self._calc_state(w_norm), rel_likeli, inds_removed)
+        return (self._calc_state(w_norm), rel_likeli_unnorm, inds_removed)
 
     def _calc_relative_likelihoods(self, meas, est_meas, renorm=True,
                                    **kwargs):
@@ -774,8 +768,14 @@ class ParticleFilter(BayesFilter):
         return weights
 
     def _resample(self, **kwargs):
-        rel_likelihoods = kwargs['rel_likelihoods']
         rng = kwargs.get('rng', rnd.default_rng())
+        meas = kwargs['meas']
+        del kwargs['meas']
+
+        est_meas = [self.get_est_meas(x, **kwargs) for x in self._particles]
+        rel_likelihoods = self._calc_relative_likelihoods(meas, est_meas,
+                                                          renorm=True,
+                                                          **kwargs)
 
         new_parts = []
         inds_kept = []
@@ -793,7 +793,12 @@ class ParticleFilter(BayesFilter):
                         if ii not in inds_kept]
         self._particles = new_parts
 
-        return inds_removed
+        est_meas = [self.get_est_meas(x, **kwargs) for x in self._particles]
+        rel_likeli_unnorm = self._calc_relative_likelihoods(meas, est_meas,
+                                                            renorm=False,
+                                                            **kwargs)
+
+        return inds_removed, rel_likeli_unnorm
 
     def plot_particles(self, inds, title='Particle Distribution',
                        x_lbl='State', y_lbl='Count', **kwargs):
@@ -827,7 +832,25 @@ class ParticleFilter(BayesFilter):
         return f_hndl
 
 
-class UnscentedParticleFilter(ParticleFilter):
+class MCMCParticleFilterBase(ParticleFilter):
+    """ This provides a generic base class for Particle filters that have an
+    optional Markov Chain Monte Carlo move step.
+
+    Attributes:
+        use_MCMC (bool): Flag indicating if move step is run
+        sampler (:mod:`gncpy.sampling`): Class instance from the sampling
+            module. Must already be setup and have a sample method.
+    """
+
+    def __init__(self, **kwargs):
+        self.use_MCMC = False
+        self.sampler = None
+
+    def move_particles(self, **kwargs):
+        raise RuntimeError('Must implement thid function in derived class')
+
+
+class UnscentedParticleFilter(MCMCParticleFilterBase):
     """ This implements an unscented kalman filter.
 
     For details on the filter see
@@ -905,6 +928,11 @@ class UnscentedParticleFilter(ParticleFilter):
     def correct(self, meas, **kwargs):
         rng = kwargs.get('rng', rnd.default_rng())
 
+        if self.use_MCMC:
+            old_parts = deepcopy(self._particles)
+            old_covs = deepcopy(self._covs)
+            old_sig_points = deepcopy(self._sig_points)
+
         # call UKF correction on each particle
         new_parts = []
         new_covs = []
@@ -926,20 +954,43 @@ class UnscentedParticleFilter(ParticleFilter):
         self._covs = new_covs
         self._sig_points = new_sig_points
 
-        # resample
-        est_meas = [self.get_est_meas(x, **kwargs) for x in self._particles]
-        rel_likeli = self._calc_relative_likelihoods(meas, est_meas,
-                                                     renorm=True, **kwargs)
+        # resample/selection
+        inds_removed, rel_likeli_unnorm = self._resample(meas=meas, **kwargs)
 
-        inds_removed = self._resample(rel_likelihoods=rel_likeli, **kwargs)
+        tot = np.sum(rel_likeli_unnorm)
+        w_norm = [x / tot for x in rel_likeli_unnorm]
 
-        est_meas = [self.get_est_meas(x, **kwargs) for x in self._particles]
-        rel_likeli = self._calc_relative_likelihoods(meas, est_meas,
-                                                     renorm=False, **kwargs)
-        tot = np.sum(rel_likeli)
-        w_norm = [x / tot for x in rel_likeli]
+        if self.use_MCMC:
+            self.move_particles(old_parts, old_covs, old_sig_points,  meas,
+                                **kwargs)
 
-        return (self._calc_state(w_norm), rel_likeli, inds_removed)
+        return (self._calc_state(w_norm), rel_likeli_unnorm, inds_removed)
+
+    def move_particles(self, old_parts, old_covs, old_sig_points, meas,
+                       **kwargs):
+        new_parts = []
+        new_covs = []
+        new_sig_points = []
+        for ii, (x, P) in enumerate(zip(old_parts, old_covs)):
+            self._filt.cov = P
+            self._filt._stateSigmaPoints.points = old_sig_points[ii]
+            ns = self._filt.correct(cur_state=x, meas=meas, **kwargs)[0]
+            cov = self._filt.cov
+
+            samp, accept = self.sampler.sample(ns, mean=ns.copy(),
+                                               cov=cov, **kwargs)
+            if accept:
+                new_parts.append(samp)
+                new_covs.append(cov)
+                new_sig_points.append(self._filt._stateSigmaPoints.points)
+            else:
+                new_parts.append(self._particles[ii])
+                new_covs.append(self._covs[ii])
+                new_sig_points.append(self._sig_points)
+
+        self._particles = new_parts
+        self._covs = new_covs
+        self._sig_points = new_sig_points
 
 
 class MaxCorrEntUPF(UnscentedParticleFilter):

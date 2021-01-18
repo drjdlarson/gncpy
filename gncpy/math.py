@@ -245,3 +245,29 @@ def weighted_sum_mat(w_lst, P_lst):
 
 def gaussian_kernel(x, sig):
     return np.exp(-x**2 / (2 * sig**2))
+
+
+def epanechnikov_kernel(x):
+    """ Implements the Epanechnikov kernel
+
+    Args:
+        x (numpy array): state to evaluate the kernel at
+    """
+    def calc_vn(n):
+        if n == 1:
+            return 2
+        elif n == 2:
+            return np.pi
+        elif n == 3:
+            return 4 * np.pi / 3
+        else:
+            return 2 * calc_vn(n - 2) / n
+
+    n = x.size
+    mag2 = np.sum(x**2)
+    if mag2 < 1:
+        vn = calc_vn(n)
+        val = (x.size + 2) / (2 * vn) * (1 - mag2)
+    else:
+        val = 0
+    return val

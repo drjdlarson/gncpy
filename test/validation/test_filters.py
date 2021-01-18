@@ -6,6 +6,7 @@ import scipy.stats as stats
 from scipy.stats.distributions import chi2
 
 import gncpy.filters as filters
+import gncpy.sampling as sampling
 
 
 def test_ParticleFilter():
@@ -402,4 +403,100 @@ def test_MaxCorrEntUPF():
     z_stat = z_stat.item()
     p_val = stats.norm.sf(abs(z_stat)) * 2
 
+    assert p_val > level_sig, "p-value too low, final state is unexpected"
+
+
+def test_UnscentedParticleFilterMCMC():
+    rng = rnd.default_rng()
+    num_parts = 30
+    max_time = 30
+    level_sig = 0.05
+
+    alpha = 1
+    kappa = 0
+
+    true_state = np.zeros((1, 1))
+    noise_state = true_state.copy()
+    proc_noise_std = np.array([[0.2]])
+    proc_mean = np.array([1])
+    meas_noise_std = np.array([[1]])
+    meas_cov = meas_noise_std**2
+    F = np.array([[0.75]])
+    H = np.array([[2]])
+
+    init_parts = [2 * rng.random(true_state.shape) - 1
+                  for ii in range(0, num_parts)]
+    init_covs = [np.array([[5]]).copy() for ii in range(0, num_parts)]
+
+    # define particle filter
+    upf = filters.UnscentedParticleFilter()
+
+    def f(x, **kwargs):
+        cov = kwargs['proc_cov']
+        rng = kwargs['rng']
+        return F @ x + rng.multivariate_normal(proc_mean,
+                                               cov).reshape(x.shape)
+        # return F @ x
+
+    def meas_likelihood(meas, est, **kwargs):
+        m = meas.copy().reshape(meas.size)
+        meas_cov = kwargs['meas_cov']
+        return stats.multivariate_normal.pdf(m, mean=est,
+                                             cov=meas_cov)
+
+    def meas_mod(x, **kwargs):
+        return H @ x
+
+    def prop_sampling_fnc(**kwargs):
+        mean = kwargs['mean']
+        cov = kwargs['cov']
+        rng = kwargs.get('rng', rnd.default_rng())
+
+        x = rng.multivariate_normal(mean.flatten(), cov)
+        return x.reshape(mean.shape)
+
+    def proposal_fnc(state, given, **kwargs):
+        cov = kwargs['cov']
+        return meas_likelihood(state, given.copy(), meas_cov=cov)
+
+    def joint_density_fnc(state, **kwargs):
+        return 1
+
+    upf.use_MCMC = True
+
+    sampler = sampling.MetropolisHastings()
+    sampler.proposal_sampling_fnc = prop_sampling_fnc
+    sampler.proposal_fnc = proposal_fnc
+    sampler.joint_density_fnc = joint_density_fnc
+    sampler.max_iters = 1
+
+    upf.sampler = sampler
+
+    upf.dyn_fnc = f
+    upf.meas_likelihood_fnc = meas_likelihood
+
+    upf.set_meas_model(meas_mod)
+    upf.set_proc_noise(mat=proc_noise_std**2)
+    upf.meas_noise = meas_cov
+
+    upf.init_particles(init_parts, init_covs)
+    upf.init_UKF(alpha, kappa, true_state.size)
+
+    for tt in range(1, max_time):
+        upf.predict(proc_cov=proc_noise_std**2, rng=rng)
+
+        # calculate true state and measurement for this timestep
+        true_state = F @ true_state + proc_mean
+        noise = rng.multivariate_normal(proc_mean, proc_noise_std**2)
+        noise_state = F @ noise_state + noise.reshape(true_state.shape)
+        meas = H @ noise_state + meas_noise_std * rng.normal()
+
+        pred_state = upf.correct(meas, meas_cov=meas_cov)[0]
+
+    z_stat = (pred_state - true_state).T @ la.inv(upf.cov)
+    z_stat = z_stat.item()
+    p_val = stats.norm.sf(abs(z_stat)) * 2
+
+    print(pred_state)
+    print(true_state)
     assert p_val > level_sig, "p-value too low, final state is unexpected"
