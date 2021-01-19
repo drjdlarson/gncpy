@@ -11,16 +11,16 @@ import gncpy.sampling as sampling
 
 def test_ParticleFilter():
     rng = rnd.default_rng()
-    num_parts = 5000
+    num_parts = 2000
     max_time = 30
 
     true_state = np.zeros((1, 1))
     noise_state = true_state.copy()
     proc_noise_std = np.array([[0.2]])
-    proc_mean = np.array([1])
-    meas_noise_std = np.array([[1]])
+    proc_mean = np.array([1.0])
+    meas_noise_std = np.array([[1.0]])
     F = np.array([[0.75]])
-    H = np.array([[2]])
+    H = np.array([[2.0]])
 
     init_parts = [2 * rng.random(true_state.shape) - 1
                   for ii in range(0, num_parts)]
@@ -29,10 +29,7 @@ def test_ParticleFilter():
     particleFilter = filters.ParticleFilter()
 
     def f(x, **kwargs):
-        cov = kwargs['proc_cov']
-        rng = kwargs['rng']
-        return F @ x + rng.multivariate_normal(proc_mean,
-                                               cov).reshape(x.shape)
+        return F @ x
 
     def meas_likelihood(meas, est, **kwargs):
         m = meas.copy().reshape(meas.size)
@@ -43,8 +40,21 @@ def test_ParticleFilter():
     def meas_mod(x, **kwargs):
         return H @ x
 
+    def proposal_sampling_fnc(x, **kwargs):
+        cov = kwargs['proc_cov']
+        rng = kwargs['rng']
+        return rng.multivariate_normal(proc_mean, cov).reshape(x.shape)
+
+    def proposal_fnc(x_hat, cond, **kwargs):
+        cov = kwargs['proc_cov']
+        return stats.multivariate_normal.pdf((x_hat - cond), mean=proc_mean,
+                                             cov=cov)
+
     particleFilter.dyn_fnc = f
     particleFilter.meas_likelihood_fnc = meas_likelihood
+    particleFilter.proposal_sampling_fnc = proposal_sampling_fnc
+    particleFilter.proposal_fnc = proposal_fnc
+
     particleFilter.set_meas_model(meas_mod)
     particleFilter.init_particles(init_parts)
 
@@ -59,7 +69,8 @@ def test_ParticleFilter():
                                       proc_noise_std**2).reshape(true_state.shape)
         meas = H @ noise_state + meas_noise_std * rng.normal()
 
-        output = particleFilter.correct(meas, meas_cov=meas_noise_std**2)[0]
+        output = particleFilter.correct(meas, proc_cov=proc_noise_std**2,
+                                        meas_cov=meas_noise_std**2)[0]
 
     # check that particle distribution matches the expected mean assuming
     # that the covariance is the same and its normally distributed
@@ -200,7 +211,7 @@ def test_UnscentedKalmanFilter():
         pred_state = ukf.correct(cur_state=pred_state, meas=meas)[0]
 
     exp_state = np.array([[3.46935396909752]])
-    z_stat = (pred_state - exp_state).T @ la.inv(ukf.cov)
+    z_stat = (pred_state - exp_state).T @ la.inv(np.sqrt(ukf.cov))
     z_stat = z_stat.item()
     p_val = stats.norm.sf(abs(z_stat)) * 2
 
@@ -259,7 +270,7 @@ def test_MaxCorrEntUKF():
                                  meas=meas)[0]
 
     exp_state = np.array([[3.46935396909752]])
-    z_stat = (pred_state - exp_state).T @ la.inv(ukf.cov)
+    z_stat = (pred_state - exp_state).T @ la.inv(np.sqrt(ukf.cov))
     z_stat = z_stat.item()
     p_val = stats.norm.sf(abs(z_stat)) * 2
 
@@ -268,7 +279,7 @@ def test_MaxCorrEntUKF():
 
 def test_UnscentedParticleFilter():
     rng = rnd.default_rng()
-    num_parts = 1000
+    num_parts = 500
     max_time = 30
     level_sig = 0.05
 
@@ -278,11 +289,13 @@ def test_UnscentedParticleFilter():
     true_state = np.zeros((1, 1))
     noise_state = true_state.copy()
     proc_noise_std = np.array([[0.2]])
-    proc_mean = np.array([1])
-    meas_noise_std = np.array([[1]])
+    proc_cov = proc_noise_std**2
+    proc_mean = np.array([1.0])
+    meas_mean = np.array([0.0])
+    meas_noise_std = np.array([[0.1]])
     meas_cov = meas_noise_std**2
     F = np.array([[0.75]])
-    H = np.array([[2]])
+    H = np.array([[2.0]])
 
     init_parts = [2 * rng.random(true_state.shape) - 1
                   for ii in range(0, num_parts)]
@@ -292,22 +305,31 @@ def test_UnscentedParticleFilter():
     upf = filters.UnscentedParticleFilter()
 
     def f(x, **kwargs):
-        cov = kwargs['proc_cov']
-        rng = kwargs['rng']
-        return F @ x + rng.multivariate_normal(proc_mean,
-                                               cov).reshape(x.shape)
+        return F @ x
 
     def meas_likelihood(meas, est, **kwargs):
         m = meas.copy().reshape(meas.size)
-        meas_cov = kwargs['meas_cov']
         return stats.multivariate_normal.pdf(m, mean=est,
                                              cov=meas_cov)
 
     def meas_mod(x, **kwargs):
         return H @ x
 
+    def proposal_sampling_fnc(x, **kwargs):
+        rng = kwargs['rng']
+        cov = kwargs['cov']
+        mean = x.flatten()
+        return rng.multivariate_normal(mean, cov).reshape(x.shape)
+
+    def proposal_fnc(x_hat, cond, **kwargs):
+        cov = kwargs['cov']
+        return stats.multivariate_normal.pdf(x_hat, mean=cond,
+                                             cov=cov)
+
     upf.dyn_fnc = f
     upf.meas_likelihood_fnc = meas_likelihood
+    upf.proposal_sampling_fnc = proposal_sampling_fnc
+    upf.proposal_fnc = proposal_fnc
 
     upf.set_meas_model(meas_mod)
     upf.set_proc_noise(mat=proc_noise_std**2)
@@ -317,17 +339,23 @@ def test_UnscentedParticleFilter():
     upf.init_UKF(alpha, kappa, true_state.size)
 
     for tt in range(1, max_time):
-        upf.predict(proc_cov=proc_noise_std**2, rng=rng)
+        upf.predict(rng=rng)
 
         # calculate true state and measurement for this timestep
         true_state = F @ true_state + proc_mean
-        noise = rng.multivariate_normal(proc_mean, proc_noise_std**2)
+
+        noise = rng.multivariate_normal(proc_mean, proc_cov)
         noise_state = F @ noise_state + noise.reshape(true_state.shape)
-        meas = H @ noise_state + meas_noise_std * rng.normal()
 
-        pred_state = upf.correct(meas, meas_cov=meas_cov)[0]
+        m_noise = rng.multivariate_normal(meas_mean, meas_cov)
+        meas = H @ noise_state + m_noise
 
-    z_stat = (pred_state - true_state).T @ la.inv(upf.cov)
+        pred_state = upf.correct(meas)[0]
+
+    exp_cov = la.solve_discrete_are(F.T, H.T, proc_noise_std**2,
+                                    meas_noise_std**2)
+    exp_std = np.sqrt(exp_cov)
+    z_stat = (pred_state - true_state).T @ la.inv(exp_std)
     z_stat = z_stat.item()
     p_val = stats.norm.sf(abs(z_stat)) * 2
 
@@ -336,7 +364,7 @@ def test_UnscentedParticleFilter():
 
 def test_MaxCorrEntUPF():
     rng = rnd.default_rng()
-    num_parts = 1000
+    num_parts = 500
     max_time = 30
     level_sig = 0.05
 
@@ -346,11 +374,13 @@ def test_MaxCorrEntUPF():
     true_state = np.zeros((1, 1))
     noise_state = true_state.copy()
     proc_noise_std = np.array([[0.2]])
-    proc_mean = np.array([1.])
-    meas_noise_std = np.array([[1.]])
+    proc_cov = proc_noise_std**2
+    proc_mean = np.array([1.0])
+    meas_mean = np.array([0.0])
+    meas_noise_std = np.array([[0.1]])
     meas_cov = meas_noise_std**2
     F = np.array([[0.75]])
-    H = np.array([[2]])
+    H = np.array([[2.0]])
 
     init_parts = [2 * rng.random(true_state.shape) - 1
                   for ii in range(0, num_parts)]
@@ -361,22 +391,31 @@ def test_MaxCorrEntUPF():
     upf.kernel_bandwidth = 10
 
     def f(x, **kwargs):
-        cov = kwargs['proc_cov']
-        rng = kwargs['rng']
-        return F @ x + rng.multivariate_normal(proc_mean,
-                                               cov).reshape(x.shape)
+        return F @ x
 
     def meas_likelihood(meas, est, **kwargs):
         m = meas.copy().reshape(meas.size)
-        meas_cov = kwargs['meas_cov']
         return stats.multivariate_normal.pdf(m, mean=est,
                                              cov=meas_cov)
 
     def meas_mod(x, **kwargs):
         return H @ x
 
+    def proposal_sampling_fnc(x, **kwargs):
+        rng = kwargs['rng']
+        cov = kwargs['cov']
+        mean = x.flatten()
+        return rng.multivariate_normal(mean, cov).reshape(x.shape)
+
+    def proposal_fnc(x_hat, cond, **kwargs):
+        cov = kwargs['cov']
+        return stats.multivariate_normal.pdf(x_hat, mean=cond,
+                                             cov=cov)
+
     upf.dyn_fnc = f
     upf.meas_likelihood_fnc = meas_likelihood
+    upf.proposal_sampling_fnc = proposal_sampling_fnc
+    upf.proposal_fnc = proposal_fnc
 
     upf.set_meas_model(meas_mod)
     upf.set_proc_noise(mat=proc_noise_std**2)
@@ -388,18 +427,23 @@ def test_MaxCorrEntUPF():
     pred_state = np.mean(init_parts, axis=0)
     for tt in range(1, max_time):
         orig_state = pred_state.copy()
-        upf.predict(proc_cov=proc_noise_std**2, rng=rng)
+        upf.predict(rng=rng)
 
         # calculate true state and measurement for this timestep
         true_state = F @ true_state + proc_mean
-        noise = rng.multivariate_normal(proc_mean, proc_noise_std**2)
+
+        noise = rng.multivariate_normal(proc_mean, proc_cov)
         noise_state = F @ noise_state + noise.reshape(true_state.shape)
-        meas = H @ noise_state + meas_noise_std * rng.normal()
 
-        pred_state = upf.correct(meas, past_state=orig_state,
-                                 meas_cov=meas_cov)[0]
+        m_noise = rng.multivariate_normal(meas_mean, meas_cov)
+        meas = H @ noise_state + m_noise
 
-    z_stat = (pred_state - true_state).T @ la.inv(upf.cov)
+        pred_state = upf.correct(meas, orig_state)[0]
+
+    exp_cov = la.solve_discrete_are(F.T, H.T, proc_noise_std**2,
+                                    meas_noise_std**2)
+    exp_std = np.sqrt(exp_cov)
+    z_stat = (pred_state - true_state).T @ la.inv(exp_std)
     z_stat = z_stat.item()
     p_val = stats.norm.sf(abs(z_stat)) * 2
 
@@ -408,7 +452,7 @@ def test_MaxCorrEntUPF():
 
 def test_UnscentedParticleFilterMCMC():
     rng = rnd.default_rng()
-    num_parts = 30
+    num_parts = 300
     max_time = 30
     level_sig = 0.05
 
@@ -418,11 +462,13 @@ def test_UnscentedParticleFilterMCMC():
     true_state = np.zeros((1, 1))
     noise_state = true_state.copy()
     proc_noise_std = np.array([[0.2]])
-    proc_mean = np.array([1])
-    meas_noise_std = np.array([[1]])
+    proc_cov = proc_noise_std**2
+    proc_mean = np.array([1.0])
+    meas_mean = np.array([0.0])
+    meas_noise_std = np.array([[0.1]])
     meas_cov = meas_noise_std**2
     F = np.array([[0.75]])
-    H = np.array([[2]])
+    H = np.array([[2.0]])
 
     init_parts = [2 * rng.random(true_state.shape) - 1
                   for ii in range(0, num_parts)]
@@ -432,48 +478,33 @@ def test_UnscentedParticleFilterMCMC():
     upf = filters.UnscentedParticleFilter()
 
     def f(x, **kwargs):
-        cov = kwargs['proc_cov']
-        rng = kwargs['rng']
-        return F @ x + rng.multivariate_normal(proc_mean,
-                                               cov).reshape(x.shape)
-        # return F @ x
+        return F @ x
 
     def meas_likelihood(meas, est, **kwargs):
         m = meas.copy().reshape(meas.size)
-        meas_cov = kwargs['meas_cov']
-        return stats.multivariate_normal.pdf(m, mean=est,
+        return stats.multivariate_normal.pdf(m, mean=est.copy(),
                                              cov=meas_cov)
 
     def meas_mod(x, **kwargs):
         return H @ x
 
-    def prop_sampling_fnc(**kwargs):
-        mean = kwargs['mean']
+    def proposal_sampling_fnc(x, **kwargs):
+        rng = kwargs['rng']
         cov = kwargs['cov']
-        rng = kwargs.get('rng', rnd.default_rng())
+        mean = x.copy().flatten()
+        return rng.multivariate_normal(mean, cov).reshape(x.shape)
 
-        x = rng.multivariate_normal(mean.flatten(), cov)
-        return x.reshape(mean.shape)
-
-    def proposal_fnc(state, given, **kwargs):
+    def proposal_fnc(x_hat, cond, **kwargs):
         cov = kwargs['cov']
-        return meas_likelihood(state, given.copy(), meas_cov=cov)
-
-    def joint_density_fnc(state, **kwargs):
-        return 1
+        return stats.multivariate_normal.pdf(x_hat, mean=cond,
+                                             cov=cov)
 
     upf.use_MCMC = True
 
-    sampler = sampling.MetropolisHastings()
-    sampler.proposal_sampling_fnc = prop_sampling_fnc
-    sampler.proposal_fnc = proposal_fnc
-    sampler.joint_density_fnc = joint_density_fnc
-    sampler.max_iters = 1
-
-    upf.sampler = sampler
-
     upf.dyn_fnc = f
     upf.meas_likelihood_fnc = meas_likelihood
+    upf.proposal_sampling_fnc = proposal_sampling_fnc
+    upf.proposal_fnc = proposal_fnc
 
     upf.set_meas_model(meas_mod)
     upf.set_proc_noise(mat=proc_noise_std**2)
@@ -483,20 +514,24 @@ def test_UnscentedParticleFilterMCMC():
     upf.init_UKF(alpha, kappa, true_state.size)
 
     for tt in range(1, max_time):
-        upf.predict(proc_cov=proc_noise_std**2, rng=rng)
+        upf.predict(rng=rng)
 
         # calculate true state and measurement for this timestep
         true_state = F @ true_state + proc_mean
-        noise = rng.multivariate_normal(proc_mean, proc_noise_std**2)
+
+        noise = rng.multivariate_normal(proc_mean, proc_cov)
         noise_state = F @ noise_state + noise.reshape(true_state.shape)
-        meas = H @ noise_state + meas_noise_std * rng.normal()
 
-        pred_state = upf.correct(meas, meas_cov=meas_cov)[0]
+        m_noise = rng.multivariate_normal(meas_mean, meas_cov)
+        meas = H @ noise_state + m_noise
 
-    z_stat = (pred_state - true_state).T @ la.inv(upf.cov)
+        pred_state = upf.correct(meas)[0]
+
+    exp_cov = la.solve_discrete_are(F.T, H.T, proc_noise_std**2,
+                                    meas_noise_std**2)
+    exp_std = np.sqrt(exp_cov)
+    z_stat = (pred_state - true_state).T @ la.inv(exp_std)
     z_stat = z_stat.item()
     p_val = stats.norm.sf(abs(z_stat)) * 2
 
-    print(pred_state)
-    print(true_state)
     assert p_val > level_sig, "p-value too low, final state is unexpected"

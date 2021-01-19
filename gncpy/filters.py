@@ -6,11 +6,10 @@ import abc
 from warnings import warn
 from copy import deepcopy
 import matplotlib.pyplot as plt
-import scipy.stats as stats
-from scipy.interpolate import interpn
 
 import gncpy.math as gmath
 import gncpy.plotting as pltUtil
+import gncpy.distributions as gdistrib
 
 
 class BayesFilter(metaclass=abc.ABCMeta):
@@ -676,16 +675,18 @@ class ParticleFilter(BayesFilter):
     def __init__(self, **kwargs):
         self.dyn_fnc = None
         self.meas_likelihood_fnc = None
+        self.proposal_sampling_fnc = None
+        self.proposal_fnc = None
 
-        self._particles = []
+        self._particleDist = gdistrib.ParticleDistribution()
+        self._prop_parts = []
         super().__init__(**kwargs)
 
     @property
     def cov(self):
         """ The covariance of the particles
         """
-        x_dim = self._particles[0].size
-        return np.cov(np.hstack(self._particles)).reshape((x_dim, x_dim))
+        return self._particleDist.covariance
 
     @cov.setter
     def cov(self, x):
@@ -695,7 +696,7 @@ class ParticleFilter(BayesFilter):
     def num_particles(self):
         """ The number of particles used by the filter
         """
-        return len(self._particles)
+        return self._particleDist.num_particles
 
     def set_meas_mat(self, **kwargs):
         warn("Particle filter does not use set_meas_mat")
@@ -706,10 +707,20 @@ class ParticleFilter(BayesFilter):
         Args:
             particle_lst (list): List of numpy arrays, one for each particle.
         """
-        self._particles = particle_lst
+        num_parts = len(particle_lst)
+        if num_parts > 0:
+            w = 1.0 / num_parts
+        else:
+            warn('No particles to initialize. SKIPPING')
+            return
+        self._particleDist.particles = particle_lst
+        self._particleDist.weights = [w for ii in range(0, num_parts)]
 
-    def _calc_state(self, weights):
-        return gmath.weighted_sum_vec(weights, self._particles)
+    def _update_particles(self, particle_lst):
+        self.init_particles(particle_lst)
+
+    def _calc_state(self):
+        return self._particleDist.mean
 
     def predict(self, **kwargs):
         """ Predicts the next state
@@ -725,12 +736,16 @@ class ParticleFilter(BayesFilter):
 
         """
         if self.dyn_fnc is not None:
-            new_parts = [self.dyn_fnc(x, **kwargs) for x in self._particles]
-            self._particles = new_parts
-            return np.mean(self._particles, axis=0)
+            self._prop_parts = [self.dyn_fnc(x, **kwargs)
+                                for x in self._particleDist.particles]
         else:
             msg = 'Predict function not implemented when dyn_fnc is None'
             raise RuntimeError(msg)
+
+        new_parts = [x + self.proposal_sampling_fnc(x, **kwargs)
+                     for x in self._prop_parts]
+        self._update_particles(new_parts)
+        return self._calc_state()
 
     def correct(self, meas, **kwargs):
         """ Corrects the state estimate
@@ -738,7 +753,7 @@ class ParticleFilter(BayesFilter):
         Args:
             meas (N x 1 numpy array): The measurement.
             **kwargs (kwargs): Passed through to the measurement, relative
-                likelihood, and resampling functions.
+                likelihood, proposal, and selection functions.
 
         Todo:
             Add the meas_fit_prob calculation
@@ -750,12 +765,27 @@ class ParticleFilter(BayesFilter):
                 - (list): Unnormalized relative likelihood of the particles
                 after resampling
         """
-        inds_removed, rel_likeli_unnorm = self._resample(meas=meas, **kwargs)
 
-        tot = np.sum(rel_likeli_unnorm)
-        w_norm = [x / tot for x in rel_likeli_unnorm]
+        # calculate weights
+        est_meas = [self.get_est_meas(x, **kwargs)
+                    for x in self._particleDist.particles]
+        self._calc_weights(meas, est_meas, self._prop_parts)
 
-        return (self._calc_state(w_norm), rel_likeli_unnorm, inds_removed)
+        inds_removed = self._selection(**kwargs)
+
+        return (self._calc_state(), self._particleDist.weights,
+                inds_removed)
+
+    def _calc_weights(self, meas, est_meas, conditioned_lst, **kwargs):
+        rel_likeli = self._calc_relative_likelihoods(meas, est_meas,
+                                                     renorm=False, **kwargs)
+        prop_fit = [self.proposal_fnc(x_hat, cond, **kwargs)
+                    for x_hat, cond in zip(self._particleDist.particles,
+                                           conditioned_lst)]
+        weights = [p_ii / q_ii for p_ii, q_ii in zip(rel_likeli, prop_fit)]
+        tot = np.sum(weights)
+
+        self._particleDist.weights = [w / tot for w in weights]
 
     def _calc_relative_likelihoods(self, meas, est_meas, renorm=True,
                                    **kwargs):
@@ -767,15 +797,8 @@ class ParticleFilter(BayesFilter):
                 weights = [qi / tot for qi in weights]
         return weights
 
-    def _resample(self, **kwargs):
+    def _selection(self, **kwargs):
         rng = kwargs.get('rng', rnd.default_rng())
-        meas = kwargs['meas']
-        del kwargs['meas']
-
-        est_meas = [self.get_est_meas(x, **kwargs) for x in self._particles]
-        rel_likelihoods = self._calc_relative_likelihoods(meas, est_meas,
-                                                          renorm=True,
-                                                          **kwargs)
 
         new_parts = []
         inds_kept = []
@@ -783,22 +806,19 @@ class ParticleFilter(BayesFilter):
             r = rng.random()
             cumulative_weight = 0
             n = -1
-            while cumulative_weight < r and n < len(rel_likelihoods) - 1:
+            while cumulative_weight < r and n < self.num_particles - 1:
                 n += 1
-                cumulative_weight += rel_likelihoods[n]
-            new_parts.append(self._particles[n].copy())
-            inds_kept.append(n)
+                cumulative_weight += self._particleDist.weights[n]
+
+            new_parts.append(self._particleDist.particles[n].copy())
+            if n not in inds_kept:
+                inds_kept.append(n)
 
         inds_removed = [ii for ii in range(0, self.num_particles)
                         if ii not in inds_kept]
-        self._particles = new_parts
+        self._update_particles(new_parts)
 
-        est_meas = [self.get_est_meas(x, **kwargs) for x in self._particles]
-        rel_likeli_unnorm = self._calc_relative_likelihoods(meas, est_meas,
-                                                            renorm=False,
-                                                            **kwargs)
-
-        return inds_removed, rel_likeli_unnorm
+        return inds_removed
 
     def plot_particles(self, inds, title='Particle Distribution',
                        x_lbl='State', y_lbl='Count', **kwargs):
@@ -810,17 +830,17 @@ class ParticleFilter(BayesFilter):
             f_hndl = plt.figure()
             f_hndl.add_subplot(1, 1, 1)
 
-        h_opts = {"histtype":"stepfilled"}
+        h_opts = {"histtype": "stepfilled"}
         if (not isinstance(inds, list)) or len(inds) == 1:
             if isinstance(inds, list):
                 ii = inds[0]
             else:
                 ii = inds
-            x = [x[ii, 0] for x in self._particles]
+            x = [x[ii, 0] for x in self._particleDist.particles]
             f_hndl.axes[0].hist(x, **h_opts)
         else:
-            x = [p[inds[0], 0] for p in self._particles]
-            y = [p[inds[1], 0] for p in self._particles]
+            x = [p[inds[0], 0] for p in self._particleDist.particles]
+            y = [p[inds[1], 0] for p in self._particleDist.particles]
             f_hndl.axes[0].hist2d(x, y, **h_opts)
 
         pltUtil.set_title_label(f_hndl, 0, opts, ttl=title,
@@ -846,13 +866,14 @@ class MCMCParticleFilterBase(ParticleFilter):
         self.use_MCMC = False
         self.sampler = None
 
+        super().__init__(**kwargs)
+
     def move_particles(self, **kwargs):
         raise RuntimeError('Must implement thid function in derived class')
 
 
 class UnscentedParticleFilter(MCMCParticleFilterBase):
     """ This implements an unscented kalman filter.
-
     For details on the filter see
     :cite:`VanDerMerwe2000_TheUnscentedParticleFilter` and
     :cite:`VanDerMerwe2001_TheUnscentedParticleFilter`.
@@ -863,7 +884,7 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
         self._dyn_fnc = None
         self._covs = []
         self._sig_points = []
-        self._meas_noise = np.array([[]])
+
         super().__init__(**kwargs)
 
     def init_UKF(self, alpha, kappa, state_len, beta=2):
@@ -876,7 +897,6 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
 
     def init_particles(self, particle_lst, cov_lst):
         """ Initializes the particles and covariances
-
         Args:
             particle_lst (list): List of numpy arrays, one for each particle.
             cov_lst (list): list of numpy arrays, one for each particle
@@ -884,22 +904,22 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
         self._covs = deepcopy(cov_lst)
         super().init_particles(particle_lst)
 
+    def _update_particles(self, particle_lst):
+        super().init_particles(particle_lst)
+
     def set_meas_model(self, fnc):
         self._filt.set_meas_model(fnc)
-        super().set_meas_model(fnc)
 
     def set_proc_noise(self, **kwargs):
         self._filt.set_proc_noise(**kwargs)
-        super().set_proc_noise(**kwargs)
 
     @property
     def meas_noise(self):
-        return self._meas_noise
+        return self._filt.meas_noise
 
     @meas_noise.setter
     def meas_noise(self, meas_noise):
         self._filt.meas_noise = meas_noise
-        self._meas_noise = meas_noise
 
     @property
     def dyn_fnc(self):
@@ -914,81 +934,128 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
         new_parts = []
         new_covs = []
         new_sig_points = []
-        for x, P in zip(self._particles, self._covs):
+        for x, P in zip(self._particleDist.particles, self._covs):
             self._filt.cov = P
             new_parts.append(self._filt.predict(cur_state=x, **kwargs))
             new_covs.append(self._filt.cov)
             new_sig_points.append(self._filt._stateSigmaPoints.points)
 
-        self._particles = new_parts
+        self._update_particles(new_parts)
         self._covs = new_covs
         self._sig_points = new_sig_points
-        return np.mean(self._particles, axis=0)
+        return self._calc_state()
 
     def correct(self, meas, **kwargs):
         rng = kwargs.get('rng', rnd.default_rng())
+        prop_samp_kw = deepcopy(kwargs)
+        if 'rng' not in prop_samp_kw:
+            prop_samp_kw['rng'] = rng
 
         if self.use_MCMC:
-            old_parts = deepcopy(self._particles)
+            move_kw = deepcopy(kwargs)
+            if 'rng' not in move_kw:
+                move_kw['rng'] = rng
+            old_parts = deepcopy(self._particleDist.particles)
             old_covs = deepcopy(self._covs)
             old_sig_points = deepcopy(self._sig_points)
 
         # call UKF correction on each particle
+        self._prop_parts = []
         new_parts = []
         new_covs = []
         new_sig_points = []
-        for ii, (x, P) in enumerate(zip(self._particles, self._covs)):
+        for ii, (x, P) in enumerate(zip(self._particleDist.particles,
+                                        self._covs)):
             self._filt.cov = P
             self._filt._stateSigmaPoints.points = self._sig_points[ii]
             ns = self._filt.correct(cur_state=x, meas=meas, **kwargs)[0]
             cov = self._filt.cov
 
-            samp = rng.multivariate_normal(ns.flatten(), cov).reshape(x.shape)
+            self._prop_parts.append(ns)
+
+            samp = self.proposal_sampling_fnc(ns, cov=cov, **prop_samp_kw)
 
             new_parts.append(samp)
             new_covs.append(self._filt.cov)
             new_sig_points.append(self._filt._stateSigmaPoints.points)
 
         # update info for next UKF
-        self._particles = new_parts
+        self._update_particles(new_parts)
         self._covs = new_covs
         self._sig_points = new_sig_points
 
         # resample/selection
-        inds_removed, rel_likeli_unnorm = self._resample(meas=meas, **kwargs)
+        est_meas = [self._filt.get_est_meas(x, **kwargs)
+                    for x in self._particleDist.particles]
+        self._calc_weights(meas, est_meas, self._prop_parts, self._covs)
 
-        tot = np.sum(rel_likeli_unnorm)
-        w_norm = [x / tot for x in rel_likeli_unnorm]
+        inds_removed = self._selection(**kwargs)
 
         if self.use_MCMC:
             self.move_particles(old_parts, old_covs, old_sig_points,  meas,
-                                **kwargs)
+                                **move_kw)
 
-        return (self._calc_state(w_norm), rel_likeli_unnorm, inds_removed)
+        return (self._calc_state(), self._particleDist.weights,
+                inds_removed)
+
+    def _calc_weights(self, meas, est_meas, conditioned_lst, cov_lst):
+        rel_likeli = self._calc_relative_likelihoods(meas, est_meas,
+                                                     renorm=False)
+        prop_fit = [self.proposal_fnc(x_hat, cond, cov=p_hat)
+                    for x_hat, cond, p_hat in zip(self._particleDist.particles,
+                                                  conditioned_lst, cov_lst)]
+        weights = [p_ii / q_ii for p_ii, q_ii in zip(rel_likeli, prop_fit)]
+        tot = np.sum(weights)
+
+        self._particleDist.weights = [w / tot for w in weights]
 
     def move_particles(self, old_parts, old_covs, old_sig_points, meas,
                        **kwargs):
+        rng = kwargs['rng']
         new_parts = []
         new_covs = []
         new_sig_points = []
+
+        accept_prob = rng.random()
         for ii, (x, P) in enumerate(zip(old_parts, old_covs)):
             self._filt.cov = P
             self._filt._stateSigmaPoints.points = old_sig_points[ii]
             ns = self._filt.correct(cur_state=x, meas=meas, **kwargs)[0]
             cov = self._filt.cov
 
-            samp, accept = self.sampler.sample(ns, mean=ns.copy(),
-                                               cov=cov, **kwargs)
-            if accept:
-                new_parts.append(samp)
+            cand = self.proposal_sampling_fnc(ns, cov=cov, **kwargs)
+
+            est_cand_meas = self._filt.get_est_meas(cand, **kwargs)
+            cand_likeli = self._calc_relative_likelihoods(meas,
+                                                          [est_cand_meas],
+                                                          renorm=False)[0]
+            cand_fit = self.proposal_fnc(cand, ns, cov=cov)
+
+            part = self._particleDist.particles[ii].copy()
+            part_likeli = self._calc_relative_likelihoods(meas,
+                                                          [part],
+                                                          renorm=False)[0]
+            part_fit = self.proposal_fnc(part, ns, cov=cov)
+
+            num = cand_likeli * part_fit
+            den = part_likeli * cand_fit
+
+            if den < np.finfo(np.float32).eps:
+                ratio = 0.0
+            else:
+                ratio = num / den
+            accept_val = np.min((ratio, 1))
+
+            if accept_prob <= accept_val:
+                new_parts.append(cand)
                 new_covs.append(cov)
                 new_sig_points.append(self._filt._stateSigmaPoints.points)
             else:
-                new_parts.append(self._particles[ii])
+                new_parts.append(part)
                 new_covs.append(self._covs[ii])
                 new_sig_points.append(self._sig_points)
 
-        self._particles = new_parts
+        self._update_particles(new_parts)
         self._covs = new_covs
         self._sig_points = new_sig_points
 
@@ -1004,6 +1071,9 @@ class MaxCorrEntUPF(UnscentedParticleFilter):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self._filt = MaxCorrEntUKF()
+
+    def correct(self, meas, past_state, **kwargs):
+        return super().correct(meas, past_state=past_state, **kwargs)
 
     @property
     def kernel_bandwidth(self):
