@@ -2,6 +2,7 @@ import numpy as np
 import numpy.random as rnd
 
 
+##TODO: confirm/fix this implementation
 class MetropolisHastings:
     def __init__(self, **kwargs):
         self.proposal_sampling_fnc = kwargs.get('proposal_sampling_fnc', None)
