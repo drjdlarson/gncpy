@@ -633,11 +633,12 @@ class StudentsTFilter(BayesFilter):
         factor = self.meas_noise_dof * (self.dof - 2) \
             / (self.dof * (self.meas_noise_dof - 2))
         P_zz = meas_mat @ self.scale @ meas_mat.T + factor * self.meas_noise
-        gain = self.scale @ meas_mat.T @ la.inv(P_zz)
+        inv_P_zz = la.inv(P_zz)
+        gain = self.scale @ meas_mat.T @ inv_P_zz
         P_kk = self.scale - gain @ meas_mat @ self.scale
         est_meas = self.get_est_meas(cur_state, **kwargs)
         innov = (meas - est_meas)
-        delta_2 = innov.T @ P_zz @ innov
+        delta_2 = innov.T @ inv_P_zz @ innov
         next_state = cur_state + gain @ innov
 
         factor = (self.dof + delta_2) / (self.dof + meas.size)
@@ -648,8 +649,7 @@ class StudentsTFilter(BayesFilter):
         factor = dof_p * (self.dof - 2) / (self.dof * (dof_p - 2))
         self.scale = factor * P_k
 
-        meas_fit_prob = pdf(meas, est_meas, P_zz,
-                            self.meas_noise_dof)
+        meas_fit_prob = pdf(meas, est_meas, P_zz, self.meas_noise_dof)
         meas_fit_prob = meas_fit_prob.item()
 
         return (next_state, meas_fit_prob)
