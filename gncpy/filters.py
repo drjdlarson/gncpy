@@ -717,7 +717,13 @@ class ParticleFilter(BayesFilter):
         self._particleDist.weights = [w for ii in range(0, num_parts)]
 
     def _update_particles(self, particle_lst):
-        self.init_particles(particle_lst)
+        num_parts = len(particle_lst)
+        if num_parts > 0:
+            w = 1.0 / num_parts
+        else:
+            w = 1
+        self._particleDist.particles = particle_lst
+        self._particleDist.weights = [w for ii in range(0, num_parts)]
 
     def _calc_state(self):
         return self._particleDist.mean
@@ -782,10 +788,20 @@ class ParticleFilter(BayesFilter):
         prop_fit = [self.proposal_fnc(x_hat, cond, **kwargs)
                     for x_hat, cond in zip(self._particleDist.particles,
                                            conditioned_lst)]
-        weights = [p_ii / q_ii for p_ii, q_ii in zip(rel_likeli, prop_fit)]
+        weights = []
+        for p_ii, q_ii in zip(rel_likeli, prop_fit):
+            if q_ii < 1e-16:
+                w = 0
+            else:
+                w = p_ii / q_ii
+            weights.append(w)
+
         tot = np.sum(weights)
 
-        self._particleDist.weights = [w / tot for w in weights]
+        if tot > 0:
+            self._particleDist.weights = [w / tot for w in weights]
+        else:
+            self._particleDist.weights = weights
 
     def _calc_relative_likelihoods(self, meas, est_meas, renorm=True,
                                    **kwargs):
@@ -806,9 +822,16 @@ class ParticleFilter(BayesFilter):
             r = rng.random()
             cumulative_weight = 0
             n = -1
-            while cumulative_weight < r and n < self.num_particles - 1:
+            failed = False
+            while cumulative_weight < r:
                 n += 1
+                if n >= self.num_particles:
+                    failed = True
+                    break
                 cumulative_weight += self._particleDist.weights[n]
+
+            if failed:
+                continue
 
             new_parts.append(self._particleDist.particles[n].copy())
             if n not in inds_kept:
