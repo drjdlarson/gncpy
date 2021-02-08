@@ -1,29 +1,35 @@
 import numpy as np
 import numpy.random as rnd
 import scipy.linalg as la
-import numpy.testing as test
 import scipy.stats as stats
 from scipy.stats.distributions import chi2
+from copy import deepcopy
 
 import gncpy.filters as filters
-import gncpy.sampling as sampling
+import gncpy.distributions as distributions
 
 
 def test_ParticleFilter():
     rng = rnd.default_rng()
     num_parts = 2000
     max_time = 30
+    level_sig = 0.05
 
     true_state = np.zeros((1, 1))
     noise_state = true_state.copy()
     proc_noise_std = np.array([[0.2]])
+    proc_cov = proc_noise_std**2
     proc_mean = np.array([1.0])
     meas_noise_std = np.array([[1.0]])
+    meas_cov = meas_noise_std**2
     F = np.array([[0.75]])
     H = np.array([[2.0]])
 
-    init_parts = [2 * rng.random(true_state.shape) - 1
-                  for ii in range(0, num_parts)]
+    distrib = distributions.ParticleDistribution()
+    for ii in range(0, num_parts):
+        p = distributions.Particle()
+        p.point = 2 * rng.random(true_state.shape) - 1
+        distrib.add_particle(p, 1 / num_parts)
 
     # define particle filter
     particleFilter = filters.ParticleFilter()
@@ -33,7 +39,6 @@ def test_ParticleFilter():
 
     def meas_likelihood(meas, est, **kwargs):
         m = meas.copy().reshape(meas.size)
-        meas_cov = kwargs['meas_cov']
         return stats.multivariate_normal.pdf(m, mean=est,
                                              cov=meas_cov)
 
@@ -41,13 +46,14 @@ def test_ParticleFilter():
         return H @ x
 
     def proposal_sampling_fnc(x, **kwargs):
-        cov = kwargs['proc_cov']
         rng = kwargs['rng']
-        return rng.multivariate_normal(proc_mean, cov).reshape(x.shape)
+        cov = kwargs['cov']
+        mean = proc_mean  # x.flatten()
+        return x + rng.multivariate_normal(mean, cov).reshape(x.shape)
 
     def proposal_fnc(x_hat, cond, **kwargs):
-        cov = kwargs['proc_cov']
-        return stats.multivariate_normal.pdf((x_hat - cond), mean=proc_mean,
+        cov = kwargs['cov']
+        return stats.multivariate_normal.pdf(x_hat - proc_mean, mean=cond,
                                              cov=cov)
 
     particleFilter.dyn_fnc = f
@@ -56,11 +62,16 @@ def test_ParticleFilter():
     particleFilter.proposal_fnc = proposal_fnc
 
     particleFilter.set_meas_model(meas_mod)
-    particleFilter.init_particles(init_parts)
+    particleFilter.init_from_dist(distrib)
+
+    particleFilter.plot_particles(0, title='Init Particle Distribution')
 
     for tt in range(1, max_time):
-        _ = particleFilter.predict(proc_cov=proc_noise_std**2,
-                                   rng=rng)
+        # print(tt)
+        particleFilter.predict(rng=rng, cov=proc_cov)
+
+        # ttl = 't = {} Predicted Particle Distribution'.format(tt)
+        # particleFilter.plot_particles(0, title=ttl)
 
         # calculate true state and measurement for this timestep
         true_state = F @ true_state + proc_mean
@@ -69,24 +80,28 @@ def test_ParticleFilter():
                                       proc_noise_std**2).reshape(true_state.shape)
         meas = H @ noise_state + meas_noise_std * rng.normal()
 
-        output = particleFilter.correct(meas, proc_cov=proc_noise_std**2,
-                                        meas_cov=meas_noise_std**2)[0]
+        pred_state = particleFilter.correct(meas, cov=proc_cov)[0]
+
+        # ttl = 't = {} Particle Distribution'.format(tt)
+        # particleFilter.plot_particles(0, title=ttl)
+
+    # particleFilter.plot_particles(0)
 
     # check that particle distribution matches the expected mean assuming
     # that the covariance is the same and its normally distributed
-    alpha = 0.05
     exp_cov = la.solve_discrete_are(F.T, H.T, proc_noise_std**2,
                                     meas_noise_std**2)
-
-    # calc from https://math.bme.hu/~marib/tobbvalt/tv5.pdf
-    z_stat = (output - true_state).T @ la.inv(exp_cov) \
-        @ (output - true_state)
+    exp_std = np.sqrt(exp_cov)
+    z_stat = (pred_state - noise_state).T @ la.inv(exp_std)
     z_stat = z_stat.item()
-    l_crit_val = chi2.ppf(alpha/2, output.size)
-    u_crit_val = chi2.ppf(1 - alpha/2, output.size)
+    p_val = stats.norm.sf(abs(z_stat)) * 2
 
-    assert z_stat > l_crit_val, "Test statistic too low"
-    assert z_stat < u_crit_val, "Test statistic too high"
+    # print(pred_state)
+    # print(true_state)
+    # print(noise_state)
+    # print(particleFilter.cov)
+    # print(exp_cov)
+    assert p_val > level_sig, "p-value too low, final state is unexpected"
 
 
 def test_StudentsTFilter():
@@ -297,9 +312,17 @@ def test_UnscentedParticleFilter():
     F = np.array([[0.75]])
     H = np.array([[2.0]])
 
-    init_parts = [2 * rng.random(true_state.shape) - 1
-                  for ii in range(0, num_parts)]
-    init_covs = [np.array([[5]]).copy() for ii in range(0, num_parts)]
+    refSigPoints = distributions.SigmaPoints(alpha=alpha, kappa=kappa,
+                                             n=true_state.size)
+    refSigPoints.init_weights()
+    distrib = distributions.ParticleDistribution()
+    for ii in range(0, num_parts):
+        p = distributions.Particle()
+        p.point = 2 * rng.random(true_state.shape) - 1
+        p.uncertainty = np.array([[5]])
+        p.sigmaPoints = deepcopy(refSigPoints)
+        p.sigmaPoints.update_points(p.point.copy(), p.uncertainty)
+        distrib.add_particle(p, 1 / num_parts)
 
     # define particle filter
     upf = filters.UnscentedParticleFilter()
@@ -335,11 +358,15 @@ def test_UnscentedParticleFilter():
     upf.set_proc_noise(mat=proc_noise_std**2)
     upf.meas_noise = meas_cov
 
-    upf.init_particles(init_parts, init_covs)
-    upf.init_UKF(alpha, kappa, true_state.size)
+    upf.init_from_dist(distrib)
+
+    ttl = 'Initial Particle Distribution'
+    upf.plot_particles(0, title=ttl)
 
     for tt in range(1, max_time):
+        # print('pred:')
         upf.predict(rng=rng)
+        # upf.plot_weighted_particles(0, title='weighted dist pred: {}'.format(tt))
 
         # calculate true state and measurement for this timestep
         true_state = F @ true_state + proc_mean
@@ -351,14 +378,28 @@ def test_UnscentedParticleFilter():
         meas = H @ noise_state + m_noise
 
         pred_state = upf.correct(meas)[0]
+        # print('cor:')
+        # print(pred_state)
+        # upf.plot_weighted_particles(0, title='weighted dist corr: {}'.format(tt))
+
+        # ttl = 't = {} Particle Distribution'.format(tt)
+        # upf.plot_particles(0, title=ttl)
+
+    upf.plot_particles(0)
+    # upf.plot_weighted_particles(0)
 
     exp_cov = la.solve_discrete_are(F.T, H.T, proc_noise_std**2,
                                     meas_noise_std**2)
     exp_std = np.sqrt(exp_cov)
-    z_stat = (pred_state - true_state).T @ la.inv(exp_std)
+    z_stat = (pred_state - noise_state).T @ la.inv(exp_std)
     z_stat = z_stat.item()
     p_val = stats.norm.sf(abs(z_stat)) * 2
 
+    # print(pred_state)
+    # print(true_state)
+    # print(noise_state)
+    # print(upf.cov)
+    # print(exp_cov)
     assert p_val > level_sig, "p-value too low, final state is unexpected"
 
 

@@ -327,64 +327,6 @@ class ExtendedKalmanFilter(KalmanFilter):
         return next_state
 
 
-class SigmaPoints():
-    """ Helper class that defines sigma points.
-
-    Args:
-        state0 (n x 1 numpy array): Initial state.
-        alpha (float): Tunig parameter, influences the spread of sigma
-            points about the mean. In range (0, 1].
-        kappa (float): Tunig parameter, influences the spread of sigma
-            points about the mean. In range [0, inf].
-        beta (float, optional): Tunig parameter for distribution type.
-            In range [0, Inf]. Defaults to 2 for gaussians.
-    """
-
-    def __init__(self, **kwargs):
-        self.weights_mean = kwargs.get('weights_mean', [])
-        self.weights_cov = kwargs.get('weights_cov', [])
-        self.alpha = kwargs.get('alpha', 1)
-        self.kappa = kwargs.get('kappa', 0)
-        self.beta = kwargs.get('beta', 2)
-        self.n = kwargs.get('n', 0)
-        self.points = kwargs.get('points', [])
-
-    @property
-    def lam(self):
-        return self.alpha**2 * (self.n + self.kappa) - self.n
-
-    @property
-    def mean(self):
-        return gmath.weighted_sum_vec(self.weights_mean, self.points)
-
-    @property
-    def cov(self):
-        x_bar = self.mean
-        cov_lst = [(x - x_bar) @ (x - x_bar).T for x in self.points]
-        return gmath.weighted_sum_mat(self.weights_cov, cov_lst)
-
-    def init_weights(self):
-        lam = self.lam
-        self.weights_mean = [lam / (self.n + lam)]
-        self.weights_cov = [lam / (self.n + lam)
-                            + 1 - self.alpha**2 + self.beta]
-        w = 1 / (2 * (self.n + lam))
-        for ii in range(1, 2 * self.n + 1):
-            self.weights_mean.append(w)
-            self.weights_cov.append(w)
-
-    def update_points(self, x, cov):
-        S = la.cholesky((self.n + self.lam) * cov)
-
-        self.points = [x]
-
-        for ii in range(0, self.n):
-            self.points.append(x + S[:, [ii]])
-
-        for ii in range(self.n, 2 * self.n):
-            self.points.append(x - S[:, [ii - self.n]])
-
-
 class UnscentedKalmanFilter(BayesFilter):
     """ This implements an unscented kalman filter.
 
@@ -401,7 +343,7 @@ class UnscentedKalmanFilter(BayesFilter):
     def __init__(self, **kwargs):
         self.dyn_fnc = kwargs.get('dyn_fnc', None)
 
-        self._stateSigmaPoints = SigmaPoints()
+        self._stateSigmaPoints = gdistrib.SigmaPoints()
         super().__init__(**kwargs)
 
     def init_sigma_points(self, state0, alpha, kappa, beta=2):
@@ -417,7 +359,7 @@ class UnscentedKalmanFilter(BayesFilter):
                 In range [0, Inf]. Defaults to 2 for gaussians.
         """
         n = state0.size
-        self._stateSigmaPoints = SigmaPoints(alpha=alpha,
+        self._stateSigmaPoints = gdistrib.SigmaPoints(alpha=alpha,
                                              kappa=kappa,
                                              beta=beta, n=n)
         self._stateSigmaPoints.init_weights()
@@ -425,8 +367,10 @@ class UnscentedKalmanFilter(BayesFilter):
 
     def predict(self, **kwargs):
         cur_state = kwargs['cur_state']
-        self._stateSigmaPoints.update_points(cur_state, self.cov)
-
+        try:
+            self._stateSigmaPoints.update_points(cur_state, self.cov)
+        except Exception:
+            brk = 1
         # propagate points
         new_points = [self.dyn_fnc(x, **kwargs)
                       for x in self._stateSigmaPoints.points]
@@ -692,6 +636,12 @@ class ParticleFilter(BayesFilter):
     def cov(self, x):
         pass
 
+    def init_from_dist(self, dist):
+        self._particleDist = deepcopy(dist)
+
+    def extract_dist(self):
+        return deepcopy(self._particleDist)
+
     @property
     def num_particles(self):
         """ The number of particles used by the filter
@@ -713,8 +663,11 @@ class ParticleFilter(BayesFilter):
         else:
             warn('No particles to initialize. SKIPPING')
             return
-        self._particleDist.particles = particle_lst
-        self._particleDist.weights = [w for ii in range(0, num_parts)]
+        w_lst = [w for ii in range(0, num_parts)]
+        self._particleDist.clear_particles()
+        for (p, w) in zip(particle_lst, w_lst):
+            part = gdistrib.Particle(point=p)
+            self._particleDist.add_particle(part, w)
 
     def _update_particles(self, particle_lst):
         num_parts = len(particle_lst)
@@ -722,8 +675,11 @@ class ParticleFilter(BayesFilter):
             w = 1.0 / num_parts
         else:
             w = 1
-        self._particleDist.particles = particle_lst
-        self._particleDist.weights = [w for ii in range(0, num_parts)]
+        w_lst = [w for ii in range(0, num_parts)]
+        self._particleDist.clear_particles()
+        for (p, w) in zip(particle_lst, w_lst):
+            part = gdistrib.Particle(point=p)
+            self._particleDist.add_particle(part, w)
 
     def _calc_state(self):
         return self._particleDist.mean
@@ -742,13 +698,13 @@ class ParticleFilter(BayesFilter):
 
         """
         if self.dyn_fnc is not None:
-            self._prop_parts = [self.dyn_fnc(x, **kwargs)
-                                for x in self._particleDist.particles]
+            self._prop_parts = [self.dyn_fnc(p.point, **kwargs)
+                                for (p, w) in self._particleDist]
         else:
             msg = 'Predict function not implemented when dyn_fnc is None'
             raise RuntimeError(msg)
 
-        new_parts = [x + self.proposal_sampling_fnc(x, **kwargs)
+        new_parts = [self.proposal_sampling_fnc(x, **kwargs)
                      for x in self._prop_parts]
         self._update_particles(new_parts)
         return self._calc_state()
@@ -773,14 +729,18 @@ class ParticleFilter(BayesFilter):
         """
 
         # calculate weights
-        est_meas = [self.get_est_meas(x, **kwargs)
-                    for x in self._particleDist.particles]
-        self._calc_weights(meas, est_meas, self._prop_parts)
+        est_meas = [self.get_est_meas(p.point, **kwargs)
+                    for (p, w) in self._particleDist]
+        self._calc_weights(meas, est_meas, self._prop_parts, **kwargs)
 
         inds_removed = self._selection(**kwargs)
 
-        return (self._calc_state(), self._particleDist.weights,
-                inds_removed)
+        est_meas = [self.get_est_meas(p.point, **kwargs)
+                    for p, w in self._particleDist]
+        rel_likeli = self._calc_relative_likelihoods(meas, est_meas,
+                                                     renorm=False, **kwargs)
+
+        return (self._calc_state(), rel_likeli, inds_removed)
 
     def _calc_weights(self, meas, est_meas, conditioned_lst, **kwargs):
         rel_likeli = self._calc_relative_likelihoods(meas, est_meas,
@@ -799,9 +759,10 @@ class ParticleFilter(BayesFilter):
         tot = np.sum(weights)
 
         if tot > 0:
-            self._particleDist.weights = [w / tot for w in weights]
+            up_weights = [w / tot for w in weights]
         else:
-            self._particleDist.weights = weights
+            up_weights = weights
+        self._particleDist.update_weights(up_weights)
 
     def _calc_relative_likelihoods(self, meas, est_meas, renorm=True,
                                    **kwargs):
@@ -833,13 +794,16 @@ class ParticleFilter(BayesFilter):
             if failed:
                 continue
 
-            new_parts.append(self._particleDist.particles[n].copy())
+            new_parts.append(deepcopy(self._particleDist._particles[n]))
             if n not in inds_kept:
                 inds_kept.append(n)
 
         inds_removed = [ii for ii in range(0, self.num_particles)
                         if ii not in inds_kept]
-        self._update_particles(new_parts)
+
+        self._particleDist.clear_particles()
+        for p in new_parts:
+            self._particleDist.add_particle(p, 1 / len(new_parts))
 
         return inds_removed
 
@@ -859,12 +823,42 @@ class ParticleFilter(BayesFilter):
                 ii = inds[0]
             else:
                 ii = inds
-            x = [x[ii, 0] for x in self._particleDist.particles]
+            x = [p.point[ii, 0] for (p, w) in self._particleDist]
             f_hndl.axes[0].hist(x, **h_opts)
         else:
-            x = [p[inds[0], 0] for p in self._particleDist.particles]
-            y = [p[inds[1], 0] for p in self._particleDist.particles]
+            x = [p.point[inds[0], 0] for p, w in self._particleDist]
+            y = [p.point[inds[1], 0] for p, w in self._particleDist]
             f_hndl.axes[0].hist2d(x, y, **h_opts)
+
+        pltUtil.set_title_label(f_hndl, 0, opts, ttl=title,
+                                x_lbl=x_lbl, y_lbl=y_lbl)
+        if lgnd_loc is not None:
+            plt.legend(loc=lgnd_loc)
+        plt.tight_layout()
+
+        return f_hndl
+
+    def plot_weighted_particles(self, inds,  x_lbl='State', y_lbl='Weight',
+                                title='Weighted Particle Distribution',
+                                **kwargs):
+        opts = pltUtil.init_plotting_opts(**kwargs)
+        f_hndl = opts['f_hndl']
+        lgnd_loc = opts['lgnd_loc']
+
+        if f_hndl is None:
+            f_hndl = plt.figure()
+            f_hndl.add_subplot(1, 1, 1)
+
+        if (not isinstance(inds, list)) or len(inds) == 1:
+            if isinstance(inds, list):
+                ii = inds[0]
+            else:
+                ii = inds
+            x = [p[ii, 0] for p in self._particleDist.particles]
+            y = [w for p, w in self._particleDist]
+            f_hndl.axes[0].bar(x, y)
+        else:
+            warn('Only 1 element supported for weighted particle distribution')
 
         pltUtil.set_title_label(f_hndl, 0, opts, ttl=title,
                                 x_lbl=x_lbl, y_lbl=y_lbl)
@@ -905,30 +899,9 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
     def __init__(self, **kwargs):
         self._filt = UnscentedKalmanFilter()
         self._dyn_fnc = None
-        self._covs = []
         self._sig_points = []
 
         super().__init__(**kwargs)
-
-    def init_UKF(self, alpha, kappa, state_len, beta=2):
-        self._filt._stateSigmaPoints.alpha = alpha
-        self._filt._stateSigmaPoints.kappa = kappa
-        self._filt._stateSigmaPoints.beta = beta
-        self._filt._stateSigmaPoints.n = state_len
-
-        self._filt._stateSigmaPoints.init_weights()
-
-    def init_particles(self, particle_lst, cov_lst):
-        """ Initializes the particles and covariances
-        Args:
-            particle_lst (list): List of numpy arrays, one for each particle.
-            cov_lst (list): list of numpy arrays, one for each particle
-        """
-        self._covs = deepcopy(cov_lst)
-        super().init_particles(particle_lst)
-
-    def _update_particles(self, particle_lst):
-        super().init_particles(particle_lst)
 
     def set_meas_model(self, fnc):
         self._filt.set_meas_model(fnc)
@@ -954,18 +927,17 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
         self._dyn_fnc = f
 
     def predict(self, **kwargs):
-        new_parts = []
-        new_covs = []
-        new_sig_points = []
-        for x, P in zip(self._particleDist.particles, self._covs):
-            self._filt.cov = P
-            new_parts.append(self._filt.predict(cur_state=x, **kwargs))
-            new_covs.append(self._filt.cov)
-            new_sig_points.append(self._filt._stateSigmaPoints.points)
+        newDist = gdistrib.ParticleDistribution()
+        for p, w in self._particleDist:
+            part = gdistrib.Particle()
+            self._filt.cov = p.uncertainty
+            self._filt._stateSigmaPoints = deepcopy(p.sigmaPoints)
+            part.point = self._filt.predict(cur_state=p.point, **kwargs)
+            part.uncertainty = self._filt.cov
+            part.sigmaPoints = deepcopy(self._filt._stateSigmaPoints)
+            newDist.add_particle(part, 1 / self._particleDist.num_particles)
 
-        self._update_particles(new_parts)
-        self._covs = new_covs
-        self._sig_points = new_sig_points
+        self._particleDist = newDist
         return self._calc_state()
 
     def correct(self, meas, **kwargs):
@@ -984,33 +956,32 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
 
         # call UKF correction on each particle
         self._prop_parts = []
-        new_parts = []
-        new_covs = []
-        new_sig_points = []
-        for ii, (x, P) in enumerate(zip(self._particleDist.particles,
-                                        self._covs)):
-            self._filt.cov = P
-            self._filt._stateSigmaPoints.points = self._sig_points[ii]
-            ns = self._filt.correct(cur_state=x, meas=meas, **kwargs)[0]
-            cov = self._filt.cov
+        newDist = gdistrib.ParticleDistribution()
+        for p, w in self._particleDist:
+            part = gdistrib.Particle()
+
+            self._filt.cov = p.uncertainty
+            self._filt._stateSigmaPoints = deepcopy(p.sigmaPoints)
+            ns = self._filt.correct(cur_state=p.point, meas=meas, **kwargs)[0]
+            cov = self._filt.cov.copy()
 
             self._prop_parts.append(ns)
-
             samp = self.proposal_sampling_fnc(ns, cov=cov, **prop_samp_kw)
 
-            new_parts.append(samp)
-            new_covs.append(self._filt.cov)
-            new_sig_points.append(self._filt._stateSigmaPoints.points)
+            part.point = samp
+            part.uncertainty = cov.copy()
+            part.sigmaPoints = deepcopy(self._filt._stateSigmaPoints)
+
+            newDist.add_particle(part, 1 / self._particleDist.num_particles)
 
         # update info for next UKF
-        self._update_particles(new_parts)
-        self._covs = new_covs
-        self._sig_points = new_sig_points
+        self._particleDist = newDist
 
         # resample/selection
-        est_meas = [self._filt.get_est_meas(x, **kwargs)
-                    for x in self._particleDist.particles]
-        self._calc_weights(meas, est_meas, self._prop_parts, self._covs)
+        est_meas = [self._filt.get_est_meas(p.point, **kwargs)
+                    for p, w in self._particleDist]
+        cov_lst = [p.uncertainty.copy() for p, w in self._particleDist]
+        self._calc_weights(meas, est_meas, self._prop_parts, cov_lst)
 
         inds_removed = self._selection(**kwargs)
 
@@ -1018,19 +989,34 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
             self.move_particles(old_parts, old_covs, old_sig_points,  meas,
                                 **move_kw)
 
-        return (self._calc_state(), self._particleDist.weights,
-                inds_removed)
+        est_meas = [self._filt.get_est_meas(p.point, **kwargs)
+                    for p, w in self._particleDist]
+        rel_likeli = self._calc_relative_likelihoods(meas, est_meas,
+                                                     renorm=False)
+
+        return (self._calc_state(), rel_likeli, inds_removed)
 
     def _calc_weights(self, meas, est_meas, conditioned_lst, cov_lst):
         rel_likeli = self._calc_relative_likelihoods(meas, est_meas,
-                                                     renorm=False)
+                                                      renorm=False)
         prop_fit = [self.proposal_fnc(x_hat, cond, cov=p_hat)
                     for x_hat, cond, p_hat in zip(self._particleDist.particles,
                                                   conditioned_lst, cov_lst)]
-        weights = [p_ii / q_ii for p_ii, q_ii in zip(rel_likeli, prop_fit)]
+        weights = []
+        for p_ii, q_ii in zip(rel_likeli, prop_fit):
+            if q_ii < 1e-16:
+                w = np.inf
+            else:
+                w = p_ii / q_ii
+            weights.append(w)
+
         tot = np.sum(weights)
 
-        self._particleDist.weights = [w / tot for w in weights]
+        if tot > 0 and tot != np.inf:
+            up_weights = [w / tot for w in weights]
+        else:
+            up_weights = weights
+        self._particleDist.update_weights(up_weights)
 
     def move_particles(self, old_parts, old_covs, old_sig_points, meas,
                        **kwargs):
