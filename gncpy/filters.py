@@ -875,13 +875,10 @@ class MCMCParticleFilterBase(ParticleFilter):
 
     Attributes:
         use_MCMC (bool): Flag indicating if move step is run
-        sampler (:mod:`gncpy.sampling`): Class instance from the sampling
-            module. Must already be setup and have a sample method.
     """
 
     def __init__(self, **kwargs):
         self.use_MCMC = False
-        self.sampler = None
 
         super().__init__(**kwargs)
 
@@ -899,7 +896,6 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
     def __init__(self, **kwargs):
         self._filt = UnscentedKalmanFilter()
         self._dyn_fnc = None
-        self._sig_points = []
 
         super().__init__(**kwargs)
 
@@ -950,9 +946,7 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
             move_kw = deepcopy(kwargs)
             if 'rng' not in move_kw:
                 move_kw['rng'] = rng
-            old_parts = deepcopy(self._particleDist.particles)
-            old_covs = deepcopy(self._covs)
-            old_sig_points = deepcopy(self._sig_points)
+            oldDist = deepcopy(self._particleDist)
 
         # call UKF correction on each particle
         self._prop_parts = []
@@ -986,8 +980,7 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
         inds_removed = self._selection(**kwargs)
 
         if self.use_MCMC:
-            self.move_particles(old_parts, old_covs, old_sig_points,  meas,
-                                **move_kw)
+            self.move_particles(oldDist,  meas, **move_kw)
 
         est_meas = [self._filt.get_est_meas(p.point, **kwargs)
                     for p, w in self._particleDist]
@@ -998,7 +991,7 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
 
     def _calc_weights(self, meas, est_meas, conditioned_lst, cov_lst):
         rel_likeli = self._calc_relative_likelihoods(meas, est_meas,
-                                                      renorm=False)
+                                                     renorm=False)
         prop_fit = [self.proposal_fnc(x_hat, cond, cov=p_hat)
                     for x_hat, cond, p_hat in zip(self._particleDist.particles,
                                                   conditioned_lst, cov_lst)]
@@ -1018,18 +1011,16 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
             up_weights = weights
         self._particleDist.update_weights(up_weights)
 
-    def move_particles(self, old_parts, old_covs, old_sig_points, meas,
+    def move_particles(self, oldDist, meas,
                        **kwargs):
         rng = kwargs['rng']
-        new_parts = []
-        new_covs = []
-        new_sig_points = []
 
         accept_prob = rng.random()
-        for ii, (x, P) in enumerate(zip(old_parts, old_covs)):
-            self._filt.cov = P
-            self._filt._stateSigmaPoints.points = old_sig_points[ii]
-            ns = self._filt.correct(cur_state=x, meas=meas, **kwargs)[0]
+        newDist = gdistrib.ParticleDistribution()
+        for ii, (p, w) in enumerate(oldDist):
+            self._filt.cov = p.uncertainty
+            self._filt._stateSigmaPoints = p.sigmaPoints
+            ns = self._filt.correct(cur_state=p.point, meas=meas, **kwargs)[0]
             cov = self._filt.cov
 
             cand = self.proposal_sampling_fnc(ns, cov=cov, **kwargs)
@@ -1040,33 +1031,34 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
                                                           renorm=False)[0]
             cand_fit = self.proposal_fnc(cand, ns, cov=cov)
 
-            part = self._particleDist.particles[ii].copy()
+            part = deepcopy(self._particleDist._particles[ii])
+            est_meas = self._filt.get_est_meas(part.point, **kwargs)
             part_likeli = self._calc_relative_likelihoods(meas,
-                                                          [part],
+                                                          [est_meas],
                                                           renorm=False)[0]
-            part_fit = self.proposal_fnc(part, ns, cov=cov)
+            part_fit = self.proposal_fnc(part.point, ns, cov=cov)
 
             num = cand_likeli * part_fit
             den = part_likeli * cand_fit
 
             if den < np.finfo(np.float32).eps:
-                ratio = 0.0
+                ratio = np.inf
             else:
                 ratio = num / den
             accept_val = np.min((ratio, 1))
 
             if accept_prob <= accept_val:
-                new_parts.append(cand)
-                new_covs.append(cov)
-                new_sig_points.append(self._filt._stateSigmaPoints.points)
+                newPart = gdistrib.Particle()
+                newPart.point = cand
+                newPart.uncertainty = cov
+                sPoints = self._filt._stateSigmaPoints
+                newPart.sigmaPoints = deepcopy(sPoints)
             else:
-                new_parts.append(part)
-                new_covs.append(self._covs[ii])
-                new_sig_points.append(self._sig_points)
+                newPart = part
 
-        self._update_particles(new_parts)
-        self._covs = new_covs
-        self._sig_points = new_sig_points
+            newDist.add_particle(newPart, 1 / self._particleDist.num_particles)
+
+        self._particleDist = newDist
 
 
 class MaxCorrEntUPF(UnscentedParticleFilter):

@@ -511,9 +511,17 @@ def test_UnscentedParticleFilterMCMC():
     F = np.array([[0.75]])
     H = np.array([[2.0]])
 
-    init_parts = [2 * rng.random(true_state.shape) - 1
-                  for ii in range(0, num_parts)]
-    init_covs = [np.array([[5]]).copy() for ii in range(0, num_parts)]
+    refSigPoints = distributions.SigmaPoints(alpha=alpha, kappa=kappa,
+                                             n=true_state.size)
+    refSigPoints.init_weights()
+    distrib = distributions.ParticleDistribution()
+    for ii in range(0, num_parts):
+        p = distributions.Particle()
+        p.point = 2 * rng.random(true_state.shape) - 1
+        p.uncertainty = np.array([[5]])
+        p.sigmaPoints = deepcopy(refSigPoints)
+        p.sigmaPoints.update_points(p.point.copy(), p.uncertainty)
+        distrib.add_particle(p, 1 / num_parts)
 
     # define particle filter
     upf = filters.UnscentedParticleFilter()
@@ -523,7 +531,7 @@ def test_UnscentedParticleFilterMCMC():
 
     def meas_likelihood(meas, est, **kwargs):
         m = meas.copy().reshape(meas.size)
-        return stats.multivariate_normal.pdf(m, mean=est.copy(),
+        return stats.multivariate_normal.pdf(m, mean=est,
                                              cov=meas_cov)
 
     def meas_mod(x, **kwargs):
@@ -532,7 +540,7 @@ def test_UnscentedParticleFilterMCMC():
     def proposal_sampling_fnc(x, **kwargs):
         rng = kwargs['rng']
         cov = kwargs['cov']
-        mean = x.copy().flatten()
+        mean = x.flatten()
         return rng.multivariate_normal(mean, cov).reshape(x.shape)
 
     def proposal_fnc(x_hat, cond, **kwargs):
@@ -551,8 +559,10 @@ def test_UnscentedParticleFilterMCMC():
     upf.set_proc_noise(mat=proc_noise_std**2)
     upf.meas_noise = meas_cov
 
-    upf.init_particles(init_parts, init_covs)
-    upf.init_UKF(alpha, kappa, true_state.size)
+    upf.init_from_dist(distrib)
+
+    ttl = 'Initial Particle Distribution'
+    upf.plot_particles(0, title=ttl)
 
     for tt in range(1, max_time):
         upf.predict(rng=rng)
@@ -566,12 +576,12 @@ def test_UnscentedParticleFilterMCMC():
         m_noise = rng.multivariate_normal(meas_mean, meas_cov)
         meas = H @ noise_state + m_noise
 
-        pred_state = upf.correct(meas)[0]
+        pred_state = upf.correct(meas, rng=rng)[0]
 
     exp_cov = la.solve_discrete_are(F.T, H.T, proc_noise_std**2,
                                     meas_noise_std**2)
     exp_std = np.sqrt(exp_cov)
-    z_stat = (pred_state - true_state).T @ la.inv(exp_std)
+    z_stat = (pred_state - noise_state).T @ la.inv(exp_std)
     z_stat = z_stat.item()
     p_val = stats.norm.sf(abs(z_stat)) * 2
 
