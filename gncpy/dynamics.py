@@ -18,10 +18,16 @@ class DynamicsBase:
     # __metaclass__ = util.ClassPropertyMetaClass
     state_names = ()
 
+    def __init__(self):
+        super().__init__()
+
 
 class LinearDynamicsBase(DynamicsBase):
     """ Base class for all linear dynamics models.
     """
+
+    def __init__(self):
+        super().__init__()
 
     def get_dis_process_noise_mat(self, dt, **kwargs):
         """ Class method for getting the process noise. Must be overridden in
@@ -53,6 +59,32 @@ class LinearDynamicsBase(DynamicsBase):
         msg = 'get_state_mat function is undefined'
         warn(msg, RuntimeWarning)
         return np.array([[]])
+
+    def propagate_state(self, x, u, dt, add_noise=False, **kwargs):
+        r"""This propagates the continuous time dynamics based on the supplied
+        continuous function list.
+
+        This implements the equation :math:`x_{k+1} = \int \dot{x}_k dt` and
+        returns the next state as a vector
+
+        Args:
+            x (N x 1 numpy array): current state.
+            u (N x Nu numpy array): DESCRIPTION.
+            dt (float): delta time.
+            add_noise (bool, optional): flag indicating if noise should be
+                added to the output. Defaults to False.
+            **kwargs (dict): Passed through to the dynamics function.
+
+        Keyword Args:
+            rng (random.default_rng generator): Random number generator.
+                Only used if adding noise
+
+        Returns:
+            ns (TYPE): DESCRIPTION.
+
+        """
+        state_trans_mat = self.get_state_mat(**kwargs)
+        return state_trans_mat @ x
 
 
 class NonlinearDynamicsBase(LinearDynamicsBase):
@@ -165,7 +197,7 @@ class NonlinearDynamicsBase(LinearDynamicsBase):
                                         **kwargs)
 
 
-class DoubleIntegrator(LinearDynamicsBase()):
+class DoubleIntegrator(LinearDynamicsBase):
     """ This implements a double integrator model
     """
     state_names = ('x pos', 'y pos', 'x vel', 'y vel')
@@ -232,7 +264,7 @@ class ClohessyWiltshireOrbit(LinearDynamicsBase):
 
     Attritbutes:
         dt (float): delta time.
-        mean_motion (float): mean motion
+        mean_motion (float): mean motion of reference spacecraft
     """
 
     state_names = ('x position', 'y position', 'z position',
@@ -241,6 +273,8 @@ class ClohessyWiltshireOrbit(LinearDynamicsBase):
     def __init__(self):
         self.dt = 0
         self.mean_motion = 0
+
+        super().__init__()
 
     def get_dis_process_noise_mat(self, **kwargs):
         """ Class method for returning the process noise.
@@ -300,6 +334,8 @@ class TschaunerHempelOrbit(NonlinearDynamicsBase):
         self.mu = kwargs.get('mu', 3.986004418 * 10**14)
         self.semi_major = kwargs.get('semi_major', 0)
         self.eccentricity = kwargs.get('eccentricity', 1)
+
+        super().__init__()
 
     @property
     def cont_fnc_lst(self):
@@ -392,6 +428,9 @@ class KarlgaardOrbit(NonlinearDynamicsBase):
     state_names = ('non-dim radius', 'non-dim az angle', 'non-dim elv angle',
                    'non-dim radius ROC', 'non-dim az angle ROC',
                    'non-dim elv angle ROC')
+
+    def __init__(self):
+        super().__init__()
 
     def cont_fnc_lst(self):
         # returns non-dim radius ROC

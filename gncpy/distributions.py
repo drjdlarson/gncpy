@@ -53,7 +53,9 @@ class SigmaPoints():
             self.weights_cov.append(w)
 
     def update_points(self, x, cov):
-        S = la.cholesky((self.n + self.lam) * cov)
+        loc_cov = cov.copy()
+        loc_cov = (loc_cov + loc_cov.T) * 0.5
+        S = la.cholesky((self.n + self.lam) * loc_cov)
 
         self.points = [x]
 
@@ -170,6 +172,7 @@ class ParticleDistribution:
         else:
             x_dim = self.particles[0].size
             cov = np.cov(np.hstack(self.particles)).reshape((x_dim, x_dim))
+            cov = (cov + cov.T) * 0.5
         return cov
 
     @property
