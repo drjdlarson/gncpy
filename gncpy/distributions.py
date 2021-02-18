@@ -160,7 +160,14 @@ class ParticleDistribution:
     def mean(self):
         """ Mean of the particles
         """
-        return gmath.weighted_sum_vec(self.weights, self.particles)
+        if any(np.abs(self.weights) == np.inf):
+            if self.num_particles > 0:
+                mean = np.zeros(self.particles[0].shape)
+            else:
+                mean = np.array([[]])
+        else:
+            mean = gmath.weighted_sum_vec(self.weights, self.particles)
+        return mean
 
     @property
     def covariance(self):

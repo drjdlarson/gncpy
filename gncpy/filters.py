@@ -948,7 +948,7 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
         self._particleDist = newDist
         return self._calc_state()
 
-    def correct(self, meas, **kwargs):
+    def correct(self, meas, selection=True, **kwargs):
         rng = kwargs.get('rng', rnd.default_rng())
         prop_samp_kw = deepcopy(kwargs)
         if 'rng' not in prop_samp_kw:
@@ -989,14 +989,17 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
         cov_lst = [p.uncertainty.copy() for p, w in self._particleDist]
         self._calc_weights(meas, est_meas, self._prop_parts, cov_lst)
 
-        inds_removed = self._selection(**kwargs)
+        if selection:
+            inds_removed = self._selection(**kwargs)
+        else:
+            inds_removed = True
 
-        npart_match = oldDist.num_particles == self._particleDist.num_particles
-        if self.use_MCMC and npart_match:
-            try:
-                self.move_particles(oldDist,  meas, **move_kw)
-            except Exception:
-                raise
+        if self.use_MCMC:
+            if oldDist.num_particles == self._particleDist.num_particles:
+                try:
+                    self.move_particles(oldDist,  meas, **move_kw)
+                except Exception:
+                    raise
 
         est_meas = [self._filt.get_est_meas(p.point, **kwargs)
                     for p, w in self._particleDist]
