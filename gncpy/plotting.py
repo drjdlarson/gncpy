@@ -3,6 +3,7 @@
 import numpy as np
 from numpy.linalg import eigh
 import numpy.random as rnd
+import matplotlib.pyplot as plt
 
 
 def calc_error_ellipse(cov, n_sig):
@@ -104,3 +105,9 @@ def set_title_label(fig, ax_num, opts, ttl="", x_lbl="", y_lbl=""):
     fig.axes[ax_num].set_ylabel(y_lbl, fontsize=opts['ax_fontsize'],
                                 fontstyle=opts['ax_fontstyle'],
                                 fontfamily=opts['ax_fontfamily'])
+
+def get_cmap(n, name='Dark2'):
+    '''Returns a function that maps each index in 0, 1, ..., n-1 to a distinct
+    RGB color; the keyword argument name must be a standard mpl colormap name.
+    '''
+    return plt.cm.get_cmap(name, n)

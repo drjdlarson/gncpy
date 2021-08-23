@@ -422,10 +422,18 @@ def test_MaxCorrEntUPF():
     meas_cov = meas_noise_std**2
     F = np.array([[0.75]])
     H = np.array([[2.0]])
-
-    init_parts = [2 * rng.random(true_state.shape) - 1
-                  for ii in range(0, num_parts)]
-    init_covs = [np.array([[5]]).copy() for ii in range(0, num_parts)]
+    
+    refSigPoints = distributions.SigmaPoints(alpha=alpha, kappa=kappa,
+                                             n=true_state.size)
+    refSigPoints.init_weights()
+    distrib = distributions.ParticleDistribution()
+    for ii in range(0, num_parts):
+        p = distributions.Particle()
+        p.point = 2 * rng.random(true_state.shape) - 1
+        p.uncertainty = np.array([[5]])
+        p.sigmaPoints = deepcopy(refSigPoints)
+        p.sigmaPoints.update_points(p.point.copy(), p.uncertainty)
+        distrib.add_particle(p, 1 / num_parts)
 
     # define particle filter
     upf = filters.MaxCorrEntUPF()
@@ -462,10 +470,9 @@ def test_MaxCorrEntUPF():
     upf.set_proc_noise(mat=proc_noise_std**2)
     upf.meas_noise = meas_cov
 
-    upf.init_particles(init_parts, init_covs)
-    upf.init_UKF(alpha, kappa, true_state.size)
+    upf.init_from_dist(distrib)
 
-    pred_state = np.mean(init_parts, axis=0)
+    pred_state = distrib.mean  # np.mean(init_parts, axis=0)
     for tt in range(1, max_time):
         orig_state = pred_state.copy()
         upf.predict(rng=rng)

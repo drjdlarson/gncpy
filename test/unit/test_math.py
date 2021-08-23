@@ -48,4 +48,4 @@ def test_get_elem_sym_fnc():
     s = math.get_elem_sym_fnc(z)
     ans = np.array([1.00000000e+00, 1.29872625e+01, 7.38299885e+00, 3.75369344e-01,
        1.95657517e-16, 0.00000000e+00])
-    test.assert_allclose(s, ans)
+    test.assert_allclose(s.flatten(), ans.flatten())

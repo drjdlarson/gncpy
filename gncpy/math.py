@@ -25,8 +25,8 @@ def get_jacobian(x, fnc, **kwargs):
     n_vars = x.size
     J = np.zeros((n_vars, 1))
     for ii in range(0, n_vars):
-        x_r = x.copy()
-        x_l = x.copy()
+        x_r = x.astype(float)
+        x_l = x.astype(float)
         x_r[ii] += step_size
         x_l[ii] -= step_size
         J[ii] = (fnc(x_r, **kwargs) - fnc(x_l, **kwargs)) * inv_step2
@@ -92,8 +92,9 @@ def get_state_jacobian(x, u, fncs, **kwargs):
     n_states = x.size
     A = np.zeros((n_states, n_states))
     for row in range(0, n_states):
-        A[[row], :] = get_jacobian(x.copy(),
-                                   lambda x_: fncs[row](x_, u, **kwargs)).T
+        res = get_jacobian(x.copy(), lambda x_, **kwargs_:
+                           fncs[row](x_, u, **kwargs_), **kwargs)
+        A[[row], :] = res.T
     return A
 
 
@@ -118,9 +119,9 @@ def get_input_jacobian(x, u, fncs, **kwargs):
     n_inputs = u.size
     B = np.zeros((n_states, n_inputs))
     for row in range(0, n_states):
-        B[[row], :] = get_jacobian(u.copy(),
-                                   lambda u_: fncs[row](x, u_, **kwargs),
-                                   **kwargs).T
+        res = get_jacobian(u.copy(), lambda u_, **kwargs_:
+                           fncs[row](x, u_, **kwargs_), **kwargs)
+        B[[row], :] = res.T
     return B
 
 

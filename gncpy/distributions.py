@@ -53,7 +53,9 @@ class SigmaPoints():
             self.weights_cov.append(w)
 
     def update_points(self, x, cov):
-        S = la.cholesky((self.n + self.lam) * cov)
+        loc_cov = cov.copy()
+        loc_cov = (loc_cov + loc_cov.T) * 0.5
+        S = la.cholesky((self.n + self.lam) * loc_cov)
 
         self.points = [x]
 
@@ -158,7 +160,14 @@ class ParticleDistribution:
     def mean(self):
         """ Mean of the particles
         """
-        return gmath.weighted_sum_vec(self.weights, self.particles)
+        if any(np.abs(self.weights) == np.inf):
+            if self.num_particles > 0:
+                mean = np.zeros(self.particles[0].shape)
+            else:
+                mean = np.array([[]])
+        else:
+            mean = gmath.weighted_sum_vec(self.weights, self.particles)
+        return mean
 
     @property
     def covariance(self):
@@ -170,6 +179,7 @@ class ParticleDistribution:
         else:
             x_dim = self.particles[0].size
             cov = np.cov(np.hstack(self.particles)).reshape((x_dim, x_dim))
+            cov = (cov + cov.T) * 0.5
         return cov
 
     @property
