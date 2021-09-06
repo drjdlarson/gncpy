@@ -87,7 +87,7 @@ class Particle:
         warn('Particle mean is read only')
 
 
-class ParticleDistIter:
+class _ParticleDistIter:
     def __init__(self, partDist):
         self._partDist = partDist
         self._index = 0
@@ -189,4 +189,4 @@ class ParticleDistribution:
         return len(self._particles)
 
     def __iter__(self):
-        return ParticleDistIter(self)
+        return _ParticleDistIter(self)

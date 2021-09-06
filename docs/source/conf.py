@@ -34,7 +34,7 @@ release = '0.0.0'
 extensions = [
         'sphinx.ext.autodoc',
         'sphinx.ext.napoleon',
-        'sphinx.ext.autosummary',
+        # 'sphinx.ext.autosummary',
         'sphinx.ext.mathjax',
         'sphinx.ext.todo',
         'sphinx.ext.viewcode',
@@ -57,11 +57,16 @@ autodoc_default_flags = [
          "inherited-members",
          "show-inheritance",
 ]
-autosummary_generate = True
+# autosummary_generate = True
 autodoc_member_order = 'groupwise'
+add_module_names = False
 
 # Todo configuration
 todo_include_todos = True
+todo_link_only = True
+
+# bibtex config
+bibtex_bibfiles = ['refs.bib']
 
 
 # -- Options for HTML output -------------------------------------------------

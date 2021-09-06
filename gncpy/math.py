@@ -1,26 +1,30 @@
-# -*- coding: utf-8 -*-
-"""
-This file contains useful math utility functions.
-
-"""
+"""Useful math utility functions."""
 import numpy as np
-import scipy.linalg as la
 from copy import deepcopy
 
 
-def get_jacobian(x, fnc, **kwargs):
+def get_jacobian(x, fnc, f_args=(), step_size=10**-7):
     """Calculates the jacobian of a function.
 
     Numerically calculates the jacobian using the central difference method.
 
-    Args:
-        x (numpy array): The point to evaluate at
-        fnc (function): The function to evaluate
+    Parameters
+    ----------
+    x : numpy array
+        The point to evaluate about.
+    fnc : callable
+        The function to evaluate, must be of the form `f(x, *f_args)`.
+    f_args : tuple, optional
+        Additional argumets for `fnc`. The default is ().
+    step_size : float, optional
+        The step size to use when calculating the jacobian. The default is
+        10**-7.
 
-    Returns:
-        (Nx1 numpy array): The jacobain of the function
+    Returns
+    -------
+    jac : N x 1 numpy array
+        The jacobain of the function
     """
-    step_size = kwargs.get('step_size', 10**-7)
     inv_step2 = 1 / (2 * step_size)
     n_vars = x.size
     J = np.zeros((n_vars, 1))
@@ -29,23 +33,32 @@ def get_jacobian(x, fnc, **kwargs):
         x_l = x.astype(float)
         x_r[ii] += step_size
         x_l[ii] -= step_size
-        J[ii] = (fnc(x_r, **kwargs) - fnc(x_l, **kwargs)) * inv_step2
+        J[ii] = (fnc(x_r, *f_args) - fnc(x_l, *f_args)) * inv_step2
     return J
 
 
-def get_hessian(x, fnc, **kwargs):
+def get_hessian(x, fnc, f_args=(), step_size=np.finfo(float).eps**(1 / 4)):
     """Calculates the hessian of a function.
 
     Numerically calculates the hessian using the central difference method.
 
-    Args:
-        x (numpy array): The point to evaluate at
-        fnc (function): The function to evaluate
+    Parameters
+    ----------
+    x : numpy array
+        DESCRIPTION.
+    fnc : callable
+        Function.
+    f_args : tuple, optional
+        Additional arguments for the function. The default is ().
+    step_size : float, optional
+        Step size for differentiation. The default is np.finfo(float).eps**(1 / 4).
 
-    Returns:
-        (NxN numpy array): The hessian of the function
+    Returns
+    -------
+    N x N array
+        Hessian of the function.
+
     """
-    step_size = np.finfo(float).eps**(1/4)
     den = 1 / (4 * step_size**2)
     n_vars = x.size
     H = np.zeros((n_vars, n_vars))
@@ -67,74 +80,126 @@ def get_hessian(x, fnc, **kwargs):
             x_im_jp[ii] -= step_size
             x_im_jp[jj] += step_size
 
-            H[ii, jj] = (fnc(x_ip_jp) - fnc(x_ip_jm) - fnc(x_im_jp)
-                         + fnc(x_im_jm)) * den
+            H[ii, jj] = (fnc(x_ip_jp, *f_args) - fnc(x_ip_jm, *f_args)
+                         - fnc(x_im_jp, *f_args) + fnc(x_im_jm, *f_args)) * den
     return 0.5 * (H + H.T)
 
 
-def get_state_jacobian(x, u, fncs, **kwargs):
+def get_state_jacobian(t, x, fncs, f_args, u=None, **kwargs):
     r"""Calculates the jacobian matrix for the state of a state space model.
 
+    Notes
+    -----
     Numerically calculates the jacobian using the central difference method
     for the state of the standard statespace model
 
     .. math::
-        \dot{x} = Ax + Bu
+        \dot{x} = f(t, x, u)
 
-    Args:
-        x (numpy array): The state to evaluate at
-        u (numpy array): The input to evaluate at
-        fnc (function): The function to evaluate. Must take in x, u
 
-    Returns:
-        (Nx1 numpy array): The jacobain of the function
+    Parameters
+    ----------
+    t : float
+        timestep to evaluate at.
+    x : N x 1 numpy array
+        state to calculate the jocobain about.
+    fncs : list
+        1 function per state in order. They must have the signature
+        `f(t, x, u, *f_args)` if `u` is given or .`f(t, x, *f_args)` if u is
+        not given.
+    f_args : tuple
+        Additional arguemnts to pass to each function in `fncs`.
+    u : Nu x 1 numpy array, optional
+        the control signal to calculate the jacobian about. The default is
+        None.
+    **kwargs : dict, optional
+        Additional keyword arguments for :meth:`gncpy.math.get_jacobian`.
+
+    Returns
+    -------
+    jac : N x N numpy array
+        Jaccobian matrix.
+
     """
     n_states = x.size
     A = np.zeros((n_states, n_states))
     for row in range(0, n_states):
-        res = get_jacobian(x.copy(), lambda x_, **kwargs_:
-                           fncs[row](x_, u, **kwargs_), **kwargs)
+        if u is not None:
+            res = get_jacobian(x.copy(),
+                               lambda _x, *_f_args: fncs[row](t, _x, u, *_f_args),
+                               f_args=f_args, **kwargs)
+        else:
+            res = get_jacobian(x.copy(),
+                               lambda _x, *_f_args: fncs[row](t, _x, *_f_args),
+                               f_args=f_args, **kwargs)
+
         A[[row], :] = res.T
     return A
 
 
-def get_input_jacobian(x, u, fncs, **kwargs):
+def get_input_jacobian(t, x, u, fncs, f_args, **kwargs):
     r"""Calculates the jacobian matrix for the input of a state space model.
 
+    Notes
+    -----
     Numerically calculates the jacobian using the central difference method
     for the input of the standard statespace model
 
     .. math::
-        \dot{x} = Ax + Bu
+        \dot{x} = f(t, x, u)
 
-    Args:
-        x (numpy array): The state to evaluate at
-        u (numpy array): The input to evaluate at
-        fnc (function): The function to evaluate. Must take in x, u
 
-    Returns:
-        (Nx1 numpy array): The jacobain of the function
+    Parameters
+    ----------
+    t : float
+        timestep to evaluate at.
+    x : N x 1 numpy array
+        state to calculate the jocobain about.
+    u : Nu x 1 numpy array
+        control input to calculate the jocobian about.
+    fncs : list
+        1 function per state in order. They must have the signature
+        `f(t, x, u, *f_args)` if `u` is given or .`f(t, x, *f_args)` if u is
+        not given.
+    f_args : tuple
+        Additional arguemnts to pass to each function in `fncs`.
+    **kwargs : dict, optional
+        Additional keyword arguments for :meth:`gncpy.math.get_jacobian`.
+
+    Returns
+    -------
+    jac : N x Nu numpy array
+        jacobian matrix.
+
     """
     n_states = x.size
     n_inputs = u.size
     B = np.zeros((n_states, n_inputs))
     for row in range(0, n_states):
-        res = get_jacobian(u.copy(), lambda u_, **kwargs_:
-                           fncs[row](x, u_, **kwargs_), **kwargs)
+        res = get_jacobian(u.copy(),
+                           lambda _u, *_f_args: fncs[row](t, x, _u, *_f_args),
+                           **kwargs)
         B[[row], :] = res.T
     return B
 
 
 def rk4(f, x, h, **kwargs):
-    """ Implements a classic Runge-Kutta integration RK4.
+    """Implements a classic Runge-Kutta integration RK4.
 
-    Args:
-        f (function): function to integrate, must take x as the first argument
-            and arbitrary kwargs after
-        x (numpy array, or float): state needed by function
-        h (float): step size
-    Returns:
-        (numpy array, or float): Integrated state
+    Parameters
+    ----------
+    f : callable
+        function to integrate, must take x as the first argument and arbitrary
+        kwargs after
+    x : numpy array, or float
+        state needed by function
+    h : float
+        step size
+
+    Returns
+    -------
+    state : numpy array, or float
+        Integrated state
     """
     k1 = h * f(x, **kwargs)
     k2 = h * f(x + 0.5 * k1, **kwargs)
@@ -144,15 +209,22 @@ def rk4(f, x, h, **kwargs):
 
 
 def rk4_backward(f, x, h, **kwargs):
-    """ Implements a backwards classic Runge-Kutta integration RK4.
+    """Implements a backwards classic Runge-Kutta integration RK4.
 
-    Args:
-        f (function): function to reverse integrate, must take x as the first
-            argument and arbitrary kwargs after
-        x (numpy array, or float): state needed by function
-        h (float): step size
-    Returns:
-        (numpy array, or float): Reverse integrated state
+    Parameters
+    ----------
+    f : callable
+        function to reverse integrate, must take x as the first argument and
+        arbitrary kwargs after
+    x : numpy array, or float
+        state needed by function
+    h : float
+        step size
+
+    Returns
+    -------
+    state : numpy array, or float
+        Reverse integrated state
     """
     k1 = f(x, **kwargs)
     k2 = f(x - 0.5 * h * k1, **kwargs)
@@ -172,24 +244,36 @@ def log_sum_exp(lst):
     return tot
 
 
-def disrw(F, G, dt, Rwpsd):
-    ME = np.vstack((np.hstack((-F, G @ Rwpsd @ G.T)),
-                    np.hstack((np.zeros(F.shape), F.T))))
-    phi = la.expm(ME * dt)
-    phi_12 = phi[0:F.shape[0], F.shape[1]:]
-    phi_22 = phi[F.shape[0]:, F.shape[1]:]
-
-    return phi_22.T @ phi_12
-
-
 def gamma_fnc(alpha):
+    r"""Implements a gamma function.
+
+    Notes
+    -----
+    This implements the gamma function as
+
+    .. math::
+        \Gamma(\alpha) = (\alpha -1)!
+
+    Todo
+    ----
+    Add support for complex number input
+
+    Parameters
+    ----------
+    alpha : int
+        number to evaluate the gamma function at.
+
+    Returns
+    -------
+    int
+        result of the gamma function.
+
+    """
+
     return np.math.factorial(alpha - 1)
 
 
 def get_elem_sym_fnc(z):
-    """
-    Words
-    """
     if z.size == 0:
         esf = np.array([[1]])
     else:
@@ -208,7 +292,7 @@ def get_elem_sym_fnc(z):
                 else:
                     F[i_n - 1, k - 1] = F[i_nminus - 1, k - 1] \
                         + z_loc[n - 1] * F[i_nminus - 1, k - 1 - 1]
-            tmp = i_n;
+            tmp = i_n
             i_n = i_nminus
             i_nminus = tmp
         esf = np.hstack((np.array([[1]]), F[[i_nminus - 1], :]))
@@ -217,42 +301,72 @@ def get_elem_sym_fnc(z):
 
 
 def weighted_sum_vec(w_lst, x_lst):
-    """ Calculates the weighted sum of a list of vectors
+    """Calculates the weighted sum of a list of vectors.
 
-    Args:
-        w_lst (list of floats): list of weights.
-        x_lst (list of n x 1 numpy arrays): list of vectors to be weighted and
-            summed.
+    Parameters
+    ----------
+    w_lst : list of floats
+        list of weights.
+    x_lst : list of n x 1 numpy arrays
+        list of vectors to be weighted and summed.
 
-    Returns:
-        n x 1 numpy array: weighted sum of inputs.
+    Returns
+    -------
+    w_sum : n x 1 numpy array
+        weighted sum of inputs.
     """
     return np.sum([w * x for w, x in zip(w_lst, x_lst)], axis=0)
 
 
 def weighted_sum_mat(w_lst, P_lst):
-    """ Calculates the weighted sum of a list of matrices
+    """Calculates the weighted sum of a list of matrices.
 
-    Args:
-        w_lst (list of floats): list of weights.
-        P_lst (list of n x m numpy arrays): list of matrices to be weighted and
-            summed.
+    Parameters
+    ----------
+    w_lst : list of floats
+        list of weights.
+    P_lst : list of n x m numpy arrays
+        list of matrices to be weighted and summed.
 
-    Returns:
-        n x m numpy array: weighted sum of inputs.
+    Returns
+    -------
+    w_sum : n x m numpy array
+        weighted sum of inputs.
     """
     return np.sum([w * P for w, P in zip(w_lst, P_lst)], axis=0)
 
 
 def gaussian_kernel(x, sig):
+    """Implements a Gaussian Kernel.
+
+    Parameters
+    ----------
+    x : float
+        point to evaluate the kernel at.
+    sig : float
+        kernel parameter.
+
+    Returns
+    -------
+    float
+        kernel value.
+
+    """
     return np.exp(-x**2 / (2 * sig**2))
 
 
 def epanechnikov_kernel(x):
-    """ Implements the Epanechnikov kernel
+    """Implements the Epanechnikov kernel.
 
-    Args:
-        x (numpy array): state to evaluate the kernel at
+    Parameters
+    ----------
+    x : numpy array
+        state to evaluate the kernel at
+
+    Returns
+    -------
+    val : float
+        kernal value
     """
     def calc_vn(n):
         if n == 1:

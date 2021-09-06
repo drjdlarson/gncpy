@@ -11,6 +11,11 @@ Welcome to gncpy's documentation!
    license
 
 
+Todos
+-----
+.. todolist::
+
+
 Indices and tables
 ==================
 

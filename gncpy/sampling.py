@@ -1,9 +1,20 @@
+"""Implements standard sampling algorithms in a standardized fashion.
+
+.. todo::
+    Determine a standardized implementation for algorithm interface
+"""
 import numpy as np
 import numpy.random as rnd
 
 
-##TODO: confirm/fix this implementation
+# TODO: confirm/fix this implementation
 class MetropolisHastings:
+    """Implements a Metropolis Hasting algorithm.
+
+    .. todo::
+        confirm/fix the implementation
+    """
+
     def __init__(self, **kwargs):
         self.proposal_sampling_fnc = kwargs.get('proposal_sampling_fnc', None)
         self.proposal_fnc = kwargs.get('proposal_fnc', None)
@@ -35,4 +46,3 @@ class MetropolisHastings:
                 accepted = True
 
         return out, accepted
-
