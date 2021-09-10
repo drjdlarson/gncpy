@@ -233,6 +233,18 @@ def rk4_backward(f, x, h, **kwargs):
 
 
 def log_sum_exp(lst):
+    """Utility function for a log-sum-exponential trick.
+
+    Parameters
+    ----------
+    lst : list
+        list of values.
+
+    Returns
+    -------
+    tot : float
+        result of log-sum-exponential calculation.
+    """
     if len(lst) == 0:
         return None
     m_val = max(lst)
@@ -268,8 +280,7 @@ def gamma_fnc(alpha):
         result of the gamma function.
 
     """
-
-    return np.math.factorial(alpha - 1)
+    return np.math.factorial(int(alpha - 1))
 
 
 def get_elem_sym_fnc(z):

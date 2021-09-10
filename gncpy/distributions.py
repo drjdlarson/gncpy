@@ -1,3 +1,4 @@
+"""Standard distributions for use with the package classes."""
 import numpy as np
 import numpy.linalg as la
 from warnings import warn

@@ -14,6 +14,7 @@ global_seed = 69
 d2r = np.pi / 180
 r2d = 1 / d2r
 
+debug_figs = False
 
 def test_KF_dynObj():  # noqa
     m_noise = 0.02
@@ -64,30 +65,31 @@ def test_KF_dynObj():  # noqa
     errs = states - t_states
 
     # plot states
-    fig = plt.figure()
-    for ii, s in enumerate(gdyn.DoubleIntegrator().state_names):
-        fig.add_subplot(4, 1, ii + 1)
-        fig.axes[ii].plot(time, states[:, ii], color='b')
-        fig.axes[ii].plot(time, t_states[:, ii], color='r')
-        fig.axes[ii].grid(True)
-        fig.axes[ii].set_ylabel(s)
+    if debug_figs:
+        fig = plt.figure()
+        for ii, s in enumerate(gdyn.DoubleIntegrator().state_names):
+            fig.add_subplot(4, 1, ii + 1)
+            fig.axes[ii].plot(time, states[:, ii], color='b')
+            fig.axes[ii].plot(time, t_states[:, ii], color='r')
+            fig.axes[ii].grid(True)
+            fig.axes[ii].set_ylabel(s)
 
-    fig.axes[-1].set_xlabel('time (s)')
-    fig.suptitle('States (obj)')
-    fig.tight_layout()
+        fig.axes[-1].set_xlabel('time (s)')
+        fig.suptitle('States (obj)')
+        fig.tight_layout()
 
-    # plot stds
-    fig = plt.figure()
-    for ii, s in enumerate(gdyn.DoubleIntegrator().state_names):
-        fig.add_subplot(4, 1, ii + 1)
-        fig.axes[ii].plot(time, stds[:, ii], color='b')
-        fig.axes[ii].plot(time, pre_stds[:, ii], color='r')
-        fig.axes[ii].grid(True)
-        fig.axes[ii].set_ylabel(s + ' std')
+        # plot stds
+        fig = plt.figure()
+        for ii, s in enumerate(gdyn.DoubleIntegrator().state_names):
+            fig.add_subplot(4, 1, ii + 1)
+            fig.axes[ii].plot(time, stds[:, ii], color='b')
+            fig.axes[ii].plot(time, pre_stds[:, ii], color='r')
+            fig.axes[ii].grid(True)
+            fig.axes[ii].set_ylabel(s + ' std')
 
-    fig.axes[-1].set_xlabel('time (s)')
-    fig.suptitle('Filter standard deviations (obj)')
-    fig.tight_layout()
+        fig.axes[-1].set_xlabel('time (s)')
+        fig.suptitle('Filter standard deviations (obj)')
+        fig.tight_layout()
 
     sig_num = 1
     bounding = np.sum(np.abs(errs) < sig_num * stds, axis=0) / time.size
@@ -149,30 +151,31 @@ def test_KF_mat():  # noqa
     errs = states - t_states
 
     # plot states
-    fig = plt.figure()
-    for ii, s in enumerate(gdyn.DoubleIntegrator().state_names):
-        fig.add_subplot(4, 1, ii + 1)
-        fig.axes[ii].plot(time, states[:, ii], color='b')
-        fig.axes[ii].plot(time, t_states[:, ii], color='r')
-        fig.axes[ii].grid(True)
-        fig.axes[ii].set_ylabel(s)
+    if debug_figs:
+        fig = plt.figure()
+        for ii, s in enumerate(gdyn.DoubleIntegrator().state_names):
+            fig.add_subplot(4, 1, ii + 1)
+            fig.axes[ii].plot(time, states[:, ii], color='b')
+            fig.axes[ii].plot(time, t_states[:, ii], color='r')
+            fig.axes[ii].grid(True)
+            fig.axes[ii].set_ylabel(s)
 
-    fig.axes[-1].set_xlabel('time (s)')
-    fig.suptitle('States (mat)')
-    fig.tight_layout()
+        fig.axes[-1].set_xlabel('time (s)')
+        fig.suptitle('States (mat)')
+        fig.tight_layout()
 
-    # plot stds
-    fig = plt.figure()
-    for ii, s in enumerate(gdyn.DoubleIntegrator().state_names):
-        fig.add_subplot(4, 1, ii + 1)
-        fig.axes[ii].plot(time, stds[:, ii], color='b')
-        fig.axes[ii].plot(time, pre_stds[:, ii], color='r')
-        fig.axes[ii].grid(True)
-        fig.axes[ii].set_ylabel(s + ' std')
+        # plot stds
+        fig = plt.figure()
+        for ii, s in enumerate(gdyn.DoubleIntegrator().state_names):
+            fig.add_subplot(4, 1, ii + 1)
+            fig.axes[ii].plot(time, stds[:, ii], color='b')
+            fig.axes[ii].plot(time, pre_stds[:, ii], color='r')
+            fig.axes[ii].grid(True)
+            fig.axes[ii].set_ylabel(s + ' std')
 
-    fig.axes[-1].set_xlabel('time (s)')
-    fig.suptitle('Filter standard deviations (mat)')
-    fig.tight_layout()
+        fig.axes[-1].set_xlabel('time (s)')
+        fig.suptitle('Filter standard deviations (mat)')
+        fig.tight_layout()
 
     sig_num = 1
     bounding = np.sum(np.abs(errs) < sig_num * stds, axis=0) / time.size
@@ -193,7 +196,7 @@ def test_EKF_dynObj():  # noqa
 
     m_posx_std = 0.2
     m_posy_std = 0.2
-    m_turn_std = 0.002 * d2r
+    m_turn_std = 0.2 * d2r
 
     dt = 0.01
     t0, t1 = 0, 10 + dt
@@ -202,17 +205,13 @@ def test_EKF_dynObj():  # noqa
     filt = gfilts.ExtendedKalmanFilter()
     filt.set_state_model(dyn_obj=coordTurn)
     m_mat = np.eye(5)
-    # m_mat = np.array([[1, 0, 0, 0, 0],
-    #                   [0, 0, 1, 0, 0],
-    #                   [0, 0, 0, 0, 1]])
     filt.set_measurement_model(meas_mat=m_mat)
     filt.proc_noise = coordTurn.get_dis_process_noise_mat(dt, p_posx_std,
                                                           p_posy_std,
                                                           p_turn_std)
-    # filt.meas_noise = np.diag([m_posx_std, m_posy_std, m_turn_std])**2
     filt.meas_noise = np.diag([m_posx_std, m_posx_std, m_posy_std, m_posy_std, m_turn_std])**2
     filt.cov = 0.03**2 * np.eye(5)
-    filt.cov[4, 4] = (0.002 * d2r)**2
+    filt.cov[4, 4] = (0.3 * d2r)**2
 
     time = np.arange(t0, t1, dt)
     states = np.nan * np.ones((time.size, 5))
@@ -242,51 +241,57 @@ def test_EKF_dynObj():  # noqa
     errs = states - t_states
 
     # plot states
-    fig = plt.figure()
-    for ii, s in enumerate(coordTurn.state_names):
-        fig.add_subplot(5, 1, ii + 1)
+    if debug_figs:
+        fig = plt.figure()
+        for ii, s in enumerate(coordTurn.state_names):
+            fig.add_subplot(5, 1, ii + 1)
 
-        vals = states[:, ii]
-        if ii == len(coordTurn.state_names) - 1:
-            vals *= r2d
-        fig.axes[ii].plot(time, vals, color='b')
+            vals = states[:, ii].copy()
+            if ii == len(coordTurn.state_names) - 1:
+                vals *= r2d
+            fig.axes[ii].plot(time, vals, color='b')
 
-        vals = t_states[:, ii]
-        if ii == len(coordTurn.state_names) - 1:
-            vals *= r2d
-        fig.axes[ii].plot(time, vals, color='r')
+            vals = t_states[:, ii].copy()
+            if ii == len(coordTurn.state_names) - 1:
+                vals *= r2d
+            fig.axes[ii].plot(time, vals, color='r')
 
-        fig.axes[ii].grid(True)
-        fig.axes[ii].set_ylabel(s)
+            fig.axes[ii].grid(True)
+            fig.axes[ii].set_ylabel(s)
 
-    fig.axes[-1].set_xlabel('time (s)')
-    fig.suptitle('States (obj)')
-    fig.tight_layout()
+        fig.axes[-1].set_xlabel('time (s)')
+        fig.suptitle('States (obj)')
+        fig.tight_layout()
 
-    fig = plt.figure()
-    fig.add_subplot(1, 1, 1)
-    fig.axes[0].plot(states[:, 0], states[:, 2])
-    fig.axes[0].grid(True)
-    fig.axes[0].set_xlabel('x pos (m)')
-    fig.axes[0].set_ylabel('y pos (m)')
-    fig.suptitle('Position (obj)')
+        fig = plt.figure()
+        fig.add_subplot(1, 1, 1)
+        fig.axes[0].plot(states[:, 0], states[:, 2])
+        fig.axes[0].grid(True)
+        fig.axes[0].set_xlabel('x pos (m)')
+        fig.axes[0].set_ylabel('y pos (m)')
+        fig.suptitle('Position (obj)')
 
     # plot stds
-    fig = plt.figure()
-    for ii, s in enumerate(coordTurn.state_names):
-        fig.add_subplot(5, 1, ii + 1)
+        fig = plt.figure()
+        for ii, s in enumerate(coordTurn.state_names):
+            fig.add_subplot(5, 1, ii + 1)
 
-        vals = stds[:, ii]
-        if ii == len(coordTurn.state_names) - 1:
-            vals *= r2d
-        fig.axes[ii].plot(time, vals, color='b')
+            vals = stds[:, ii].copy()
+            if ii == len(coordTurn.state_names) - 1:
+                vals *= r2d
+            fig.axes[ii].plot(time, vals, color='b')
 
-        fig.axes[ii].grid(True)
-        fig.axes[ii].set_ylabel(s + ' std')
+            vals = np.abs(errs[:, ii])
+            if ii == len(coordTurn.state_names) - 1:
+                vals *= r2d
+            fig.axes[ii].plot(time, vals, color='r')
 
-    fig.axes[-1].set_xlabel('time (s)')
-    fig.suptitle('Filter standard deviations (obj)')
-    fig.tight_layout()
+            fig.axes[ii].grid(True)
+            fig.axes[ii].set_ylabel(s + ' std')
+
+        fig.axes[-1].set_xlabel('time (s)')
+        fig.suptitle('Filter standard deviations (obj)')
+        fig.tight_layout()
 
     sig_num = 1
     bounding = np.sum(np.abs(errs) < sig_num * stds, axis=0) / time.size
@@ -351,30 +356,31 @@ def test_STF_dynObj():  # noqa
     errs = states - t_states
 
     # plot states
-    fig = plt.figure()
-    for ii, s in enumerate(gdyn.DoubleIntegrator().state_names):
-        fig.add_subplot(4, 1, ii + 1)
-        fig.axes[ii].plot(time, states[:, ii], color='b')
-        fig.axes[ii].plot(time, t_states[:, ii], color='r')
-        fig.axes[ii].grid(True)
-        fig.axes[ii].set_ylabel(s)
+    if debug_figs:
+        fig = plt.figure()
+        for ii, s in enumerate(gdyn.DoubleIntegrator().state_names):
+            fig.add_subplot(4, 1, ii + 1)
+            fig.axes[ii].plot(time, states[:, ii], color='b')
+            fig.axes[ii].plot(time, t_states[:, ii], color='r')
+            fig.axes[ii].grid(True)
+            fig.axes[ii].set_ylabel(s)
 
-    fig.axes[-1].set_xlabel('time (s)')
-    fig.suptitle('States (obj)')
-    fig.tight_layout()
+        fig.axes[-1].set_xlabel('time (s)')
+        fig.suptitle('States (obj)')
+        fig.tight_layout()
 
-    # plot stds
-    fig = plt.figure()
-    for ii, s in enumerate(gdyn.DoubleIntegrator().state_names):
-        fig.add_subplot(4, 1, ii + 1)
-        fig.axes[ii].plot(time, stds[:, ii], color='b')
-        fig.axes[ii].plot(time, pre_stds[:, ii], color='r')
-        fig.axes[ii].grid(True)
-        fig.axes[ii].set_ylabel(s + ' std')
+        # plot stds
+        fig = plt.figure()
+        for ii, s in enumerate(gdyn.DoubleIntegrator().state_names):
+            fig.add_subplot(4, 1, ii + 1)
+            fig.axes[ii].plot(time, stds[:, ii], color='b')
+            fig.axes[ii].plot(time, pre_stds[:, ii], color='r')
+            fig.axes[ii].grid(True)
+            fig.axes[ii].set_ylabel(s + ' std')
 
-    fig.axes[-1].set_xlabel('time (s)')
-    fig.suptitle('Filter standard deviations (obj)')
-    fig.tight_layout()
+        fig.axes[-1].set_xlabel('time (s)')
+        fig.suptitle('Filter standard deviations (obj)')
+        fig.tight_layout()
 
     sig_num = 1
     bounding = np.sum(np.abs(errs) <= sig_num * stds, axis=0) / time.size
@@ -437,30 +443,31 @@ def test_UKF_dynObj():  # noqa
     errs = states - t_states
 
     # plot states
-    fig = plt.figure()
-    for ii, s in enumerate(gdyn.DoubleIntegrator().state_names):
-        fig.add_subplot(4, 1, ii + 1)
-        fig.axes[ii].plot(time, states[:, ii], color='b')
-        fig.axes[ii].plot(time, t_states[:, ii], color='r')
-        fig.axes[ii].grid(True)
-        fig.axes[ii].set_ylabel(s)
+    if debug_figs:
+        fig = plt.figure()
+        for ii, s in enumerate(gdyn.DoubleIntegrator().state_names):
+            fig.add_subplot(4, 1, ii + 1)
+            fig.axes[ii].plot(time, states[:, ii], color='b')
+            fig.axes[ii].plot(time, t_states[:, ii], color='r')
+            fig.axes[ii].grid(True)
+            fig.axes[ii].set_ylabel(s)
 
-    fig.axes[-1].set_xlabel('time (s)')
-    fig.suptitle('States (obj)')
-    fig.tight_layout()
+        fig.axes[-1].set_xlabel('time (s)')
+        fig.suptitle('States (obj)')
+        fig.tight_layout()
 
-    # plot stds
-    fig = plt.figure()
-    for ii, s in enumerate(gdyn.DoubleIntegrator().state_names):
-        fig.add_subplot(4, 1, ii + 1)
-        fig.axes[ii].plot(time, stds[:, ii], color='b')
-        fig.axes[ii].plot(time, pre_stds[:, ii], color='r')
-        fig.axes[ii].grid(True)
-        fig.axes[ii].set_ylabel(s + ' std')
+        # plot stds
+        fig = plt.figure()
+        for ii, s in enumerate(gdyn.DoubleIntegrator().state_names):
+            fig.add_subplot(4, 1, ii + 1)
+            fig.axes[ii].plot(time, stds[:, ii], color='b')
+            fig.axes[ii].plot(time, pre_stds[:, ii], color='r')
+            fig.axes[ii].grid(True)
+            fig.axes[ii].set_ylabel(s + ' std')
 
-    fig.axes[-1].set_xlabel('time (s)')
-    fig.suptitle('Filter standard deviations (obj)')
-    fig.tight_layout()
+        fig.axes[-1].set_xlabel('time (s)')
+        fig.suptitle('Filter standard deviations (obj)')
+        fig.tight_layout()
 
     sig_num = 1
     bounding = np.sum(np.abs(errs) < sig_num * stds, axis=0) / time.size
@@ -519,7 +526,8 @@ def test_PF_dyn_fnc():  # noqa
 
     pf.init_from_dist(distrib)
 
-    pf.plot_particles(0, title='Init Particle Distribution')
+    if debug_figs:
+        pf.plot_particles(0, title='Init Particle Distribution')
 
     print('\tStarting sim')
     for kk, tt in enumerate(time[:-1]):
@@ -537,7 +545,8 @@ def test_PF_dyn_fnc():  # noqa
         proposal_args = ()
         pred_state = pf.correct(tt, meas, proposal_args=proposal_args, rng=rng)[0]
 
-    pf.plot_particles(0, title='Final Particle Distribution')
+    if debug_figs:
+        pf.plot_particles(0, title='Final Particle Distribution')
 
     # check that particle distribution matches the expected mean assuming
     # that the covariance is the same and its normally distributed
@@ -615,7 +624,8 @@ def test_UPF_dyn_fnc():  # noqa
 
     pf.init_from_dist(distrib)
 
-    pf.plot_particles(0, title='Init Particle Distribution')
+    if debug_figs:
+        pf.plot_particles(0, title='Init Particle Distribution')
 
     print('\tStarting sim')
     for kk, tt in enumerate(time[:-1]):
@@ -634,7 +644,8 @@ def test_UPF_dyn_fnc():  # noqa
         pred_state = pf.correct(tt, meas, sampling_args=sampling_args,
                                 proposal_args=proposal_args, rng=rng)[0]
 
-    pf.plot_particles(0, title='Final Particle Distribution')
+    if debug_figs:
+        pf.plot_particles(0, title='Final Particle Distribution')
 
     # check that particle distribution matches the expected mean assuming
     # that the covariance is the same and its normally distributed
@@ -712,7 +723,8 @@ def test_MCMC_UPF_dyn_fnc():  # noqa
 
     pf.init_from_dist(distrib)
 
-    pf.plot_particles(0, title='Init Particle Distribution')
+    if debug_figs:
+        pf.plot_particles(0, title='Init Particle Distribution')
 
     print('\tStarting sim')
     for kk, tt in enumerate(time[:-1]):
@@ -734,7 +746,8 @@ def test_MCMC_UPF_dyn_fnc():  # noqa
                                 proposal_args=proposal_args, rng=rng,
                                 move_kwargs=move_kwargs)[0]
 
-    pf.plot_particles(0, title='Final Particle Distribution')
+    if debug_figs:
+        pf.plot_particles(0, title='Final Particle Distribution')
 
     # check that particle distribution matches the expected mean assuming
     # that the covariance is the same and its normally distributed
@@ -805,30 +818,31 @@ def test_max_corr_ent_UKF_dynObj():  # noqa
     errs = states - t_states
 
     # plot states
-    fig = plt.figure()
-    for ii, s in enumerate(gdyn.DoubleIntegrator().state_names):
-        fig.add_subplot(4, 1, ii + 1)
-        fig.axes[ii].plot(time, states[:, ii], color='b')
-        fig.axes[ii].plot(time, t_states[:, ii], color='r')
-        fig.axes[ii].grid(True)
-        fig.axes[ii].set_ylabel(s)
+    if debug_figs:
+        fig = plt.figure()
+        for ii, s in enumerate(gdyn.DoubleIntegrator().state_names):
+            fig.add_subplot(4, 1, ii + 1)
+            fig.axes[ii].plot(time, states[:, ii], color='b')
+            fig.axes[ii].plot(time, t_states[:, ii], color='r')
+            fig.axes[ii].grid(True)
+            fig.axes[ii].set_ylabel(s)
 
-    fig.axes[-1].set_xlabel('time (s)')
-    fig.suptitle('States (obj)')
-    fig.tight_layout()
+        fig.axes[-1].set_xlabel('time (s)')
+        fig.suptitle('States (obj)')
+        fig.tight_layout()
 
-    # plot stds
-    fig = plt.figure()
-    for ii, s in enumerate(gdyn.DoubleIntegrator().state_names):
-        fig.add_subplot(4, 1, ii + 1)
-        fig.axes[ii].plot(time, stds[:, ii], color='b')
-        fig.axes[ii].plot(time, pre_stds[:, ii], color='r')
-        fig.axes[ii].grid(True)
-        fig.axes[ii].set_ylabel(s + ' std')
+        # plot stds
+        fig = plt.figure()
+        for ii, s in enumerate(gdyn.DoubleIntegrator().state_names):
+            fig.add_subplot(4, 1, ii + 1)
+            fig.axes[ii].plot(time, stds[:, ii], color='b')
+            fig.axes[ii].plot(time, pre_stds[:, ii], color='r')
+            fig.axes[ii].grid(True)
+            fig.axes[ii].set_ylabel(s + ' std')
 
-    fig.axes[-1].set_xlabel('time (s)')
-    fig.suptitle('Filter standard deviations (obj)')
-    fig.tight_layout()
+        fig.axes[-1].set_xlabel('time (s)')
+        fig.suptitle('Filter standard deviations (obj)')
+        fig.tight_layout()
 
     sig_num = 1
     bounding = np.sum(np.abs(errs) < sig_num * stds, axis=0) / time.size
@@ -898,7 +912,8 @@ def test_MCUPF_dyn_fnc():  # noqa
 
     pf.init_from_dist(distrib)
 
-    pf.plot_particles(0, title='Init Particle Distribution')
+    if debug_figs:
+        pf.plot_particles(0, title='Init Particle Distribution')
 
     print('\tStarting sim')
     for kk, tt in enumerate(time[:-1]):
@@ -921,7 +936,8 @@ def test_MCUPF_dyn_fnc():  # noqa
                                 proposal_args=proposal_args, rng=rng,
                                 move_kwargs=move_kwargs)[0]
 
-    pf.plot_particles(0, title='Final Particle Distribution')
+    if debug_figs:
+        pf.plot_particles(0, title='Final Particle Distribution')
 
     # check that particle distribution matches the expected mean assuming
     # that the covariance is the same and its normally distributed
@@ -1000,7 +1016,8 @@ def test_MCMC_MCUPF_dyn_fnc():  # noqa
 
     pf.init_from_dist(distrib)
 
-    pf.plot_particles(0, title='Init Particle Distribution')
+    if debug_figs:
+        pf.plot_particles(0, title='Init Particle Distribution')
 
     print('\tStarting sim')
     for kk, tt in enumerate(time[:-1]):
@@ -1023,7 +1040,8 @@ def test_MCMC_MCUPF_dyn_fnc():  # noqa
                                 proposal_args=proposal_args, rng=rng,
                                 move_kwargs=move_kwargs)[0]
 
-    pf.plot_particles(0, title='Final Particle Distribution')
+    if debug_figs:
+        pf.plot_particles(0, title='Final Particle Distribution')
 
     # check that particle distribution matches the expected mean assuming
     # that the covariance is the same and its normally distributed
@@ -1043,10 +1061,12 @@ def test_MCMC_MCUPF_dyn_fnc():  # noqa
 if __name__ == "__main__":
     plt.close('all')
 
+    debug_figs = True
+
     # test_KF_dynObj()
     # test_KF_mat()
 
-    # test_EKF_dynObj()
+    test_EKF_dynObj()
 
     # test_STF_dynObj()
 
@@ -1057,4 +1077,4 @@ if __name__ == "__main__":
     # test_UPF_dyn_fnc()
     # test_MCMC_UPF_dyn_fnc()
     # test_MCUPF_dyn_fnc()
-    test_MCMC_MCUPF_dyn_fnc()
+    # test_MCMC_MCUPF_dyn_fnc()
