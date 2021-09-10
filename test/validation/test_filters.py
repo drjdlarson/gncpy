@@ -1,493 +1,546 @@
+import sys
 import numpy as np
 import numpy.random as rnd
-import scipy.linalg as la
 import scipy.stats as stats
-from scipy.stats.distributions import chi2
-from copy import deepcopy
+import scipy.linalg as la
+import matplotlib.pyplot as plt
 
-import gncpy.filters as filters
-import gncpy.distributions as distributions
+import gncpy.filters as gfilts
+import gncpy.dynamics as gdyn
+import gncpy.distributions as gdistrib
 
 
-def test_ParticleFilter():
-    rng = rnd.default_rng()
+global_seed = 69
+d2r = np.pi / 180
+r2d = 1 / d2r
+
+
+def test_KF_dynObj():  # noqa
+    m_noise = 0.02
+    p_noise = 0.2
+
+    dt = 0.01
+    t0, t1 = 0, 10 + dt
+
+    rng = rnd.default_rng(global_seed)
+
+    filt = gfilts.KalmanFilter()
+    filt.set_state_model(dyn_obj=gdyn.DoubleIntegrator())
+    m_mat = np.array([[1, 0, 0, 0],
+                     [0, 1, 0, 0]])
+    filt.set_measurement_model(meas_mat=m_mat)
+    filt.cov = 0.25 * np.eye(4)
+    filt.proc_noise = gdyn.DoubleIntegrator().get_dis_process_noise_mat(dt, np.array([[p_noise**2]]))
+    filt.meas_noise = m_noise**2 * np.eye(2)
+
+    vx0 = 2
+    vy0 = 1
+
+    time = np.arange(t0, t1, dt)
+    states = np.nan * np.ones((time.size, 4))
+    stds = np.nan * np.ones(states.shape)
+    pre_stds = stds.copy()
+    states[0, :] = np.array([0, 0, vx0, vy0])
+    stds[0, :] = np.sqrt(np.diag(filt.cov))
+    pre_stds[0, :] = stds[0, :]
+
+    t_states = states.copy()
+
+    A = gdyn.DoubleIntegrator().get_state_mat(0, dt)
+    for kk, t in enumerate(time[:-1]):
+        states[kk + 1, :] = filt.predict(t, states[kk, :].reshape((4, 1)),
+                                         state_mat_args=(dt,)).flatten()
+        t_states[kk + 1, :] = (A @ t_states[kk, :].reshape((4, 1))).flatten()
+
+        pre_stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
+
+        n_state = m_mat @ (t_states[kk + 1, :] + np.sqrt(np.diag(filt.proc_noise))
+                           * rng.standard_normal(1)).reshape((4, 1))
+        meas = n_state + m_noise * rng.standard_normal(n_state.size).reshape(n_state.shape)
+
+        states[kk + 1, :] = filt.correct(t, meas, states[kk + 1, :].reshape((4, 1)))[0].flatten()
+        stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
+
+    errs = states - t_states
+
+    # plot states
+    fig = plt.figure()
+    for ii, s in enumerate(gdyn.DoubleIntegrator().state_names):
+        fig.add_subplot(4, 1, ii + 1)
+        fig.axes[ii].plot(time, states[:, ii], color='b')
+        fig.axes[ii].plot(time, t_states[:, ii], color='r')
+        fig.axes[ii].grid(True)
+        fig.axes[ii].set_ylabel(s)
+
+    fig.axes[-1].set_xlabel('time (s)')
+    fig.suptitle('States (obj)')
+    fig.tight_layout()
+
+    # plot stds
+    fig = plt.figure()
+    for ii, s in enumerate(gdyn.DoubleIntegrator().state_names):
+        fig.add_subplot(4, 1, ii + 1)
+        fig.axes[ii].plot(time, stds[:, ii], color='b')
+        fig.axes[ii].plot(time, pre_stds[:, ii], color='r')
+        fig.axes[ii].grid(True)
+        fig.axes[ii].set_ylabel(s + ' std')
+
+    fig.axes[-1].set_xlabel('time (s)')
+    fig.suptitle('Filter standard deviations (obj)')
+    fig.tight_layout()
+
+    sig_num = 1
+    bounding = np.sum(np.abs(errs) < sig_num * stds, axis=0) / time.size
+    assert all(bounding > (stats.norm.sf(-sig_num) - stats.norm.sf(sig_num))), 'bounding failed'
+
+    # z = (states[-1, :] - t_states[-1, :]) / (stds[-1, :])
+    # level_sig = 0.05
+    # pval = 2 * stats.norm.sf(np.abs(z))
+    # assert all(pval > level_sig), 'p value too low'
+
+
+def test_KF_mat():  # noqa
+    m_noise = 0.02
+    p_noise = 0.2
+
+    dt = 0.01
+    t0, t1 = 0, 10 + dt
+
+    rng = rnd.default_rng(global_seed)
+
+    filt = gfilts.KalmanFilter()
+    filt.set_state_model(state_mat=gdyn.DoubleIntegrator().get_state_mat(0, dt))
+    m_mat = np.array([[1, 0, 0, 0],
+                     [0, 1, 0, 0]])
+    filt.set_measurement_model(meas_mat=m_mat)
+    filt.cov = 0.25 * np.eye(4)
+    gamma = np.array([0, 0, 1, 1]).reshape((4, 1))
+    filt.proc_noise = gamma @ np.array([[p_noise**2]]) @ gamma.T
+    filt.meas_noise = m_noise**2 * np.eye(2)
+
+    vx0 = 2
+    vy0 = 1
+
+    time = np.arange(t0, t1, dt)
+    states = np.nan * np.ones((time.size, 4))
+    stds = np.nan * np.ones(states.shape)
+    pre_stds = stds.copy()
+    states[0, :] = np.array([0, 0, vx0, vy0])
+    stds[0, :] = np.sqrt(np.diag(filt.cov))
+    pre_stds[0, :] = stds[0, :]
+
+    t_states = states.copy()
+
+    A = gdyn.DoubleIntegrator().get_state_mat(0, dt)
+    for kk, t in enumerate(time[:-1]):
+        states[kk + 1, :] = filt.predict(t, states[kk, :].reshape((4, 1)),
+                                         state_mat_args=(dt,)).flatten()
+        t_states[kk + 1, :] = (A @ t_states[kk, :].reshape((4, 1))).flatten()
+
+        pre_stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
+
+        n_state = m_mat @ (t_states[kk + 1, :].reshape((4, 1))
+                           + gamma * p_noise * rng.standard_normal(1))
+        meas = n_state + m_noise * rng.standard_normal(n_state.size).reshape(n_state.shape)
+
+        states[kk + 1, :] = filt.correct(t, meas, states[kk + 1, :].reshape((4, 1)))[0].flatten()
+        stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
+
+    errs = states - t_states
+
+    # plot states
+    fig = plt.figure()
+    for ii, s in enumerate(gdyn.DoubleIntegrator().state_names):
+        fig.add_subplot(4, 1, ii + 1)
+        fig.axes[ii].plot(time, states[:, ii], color='b')
+        fig.axes[ii].plot(time, t_states[:, ii], color='r')
+        fig.axes[ii].grid(True)
+        fig.axes[ii].set_ylabel(s)
+
+    fig.axes[-1].set_xlabel('time (s)')
+    fig.suptitle('States (mat)')
+    fig.tight_layout()
+
+    # plot stds
+    fig = plt.figure()
+    for ii, s in enumerate(gdyn.DoubleIntegrator().state_names):
+        fig.add_subplot(4, 1, ii + 1)
+        fig.axes[ii].plot(time, stds[:, ii], color='b')
+        fig.axes[ii].plot(time, pre_stds[:, ii], color='r')
+        fig.axes[ii].grid(True)
+        fig.axes[ii].set_ylabel(s + ' std')
+
+    fig.axes[-1].set_xlabel('time (s)')
+    fig.suptitle('Filter standard deviations (mat)')
+    fig.tight_layout()
+
+    sig_num = 1
+    bounding = np.sum(np.abs(errs) < sig_num * stds, axis=0) / time.size
+    assert all(bounding > (stats.norm.sf(-sig_num) - stats.norm.sf(sig_num))), 'bounding failed'
+
+    # z = (states[-1, :] - t_states[-1, :]) / (stds[-1, :])
+    # level_sig = 0.05
+    # pval = 2 * stats.norm.sf(np.abs(z))
+    # assert all(pval > level_sig), 'p value too low'
+
+
+def test_EKF_dynObj():  # noqa
+    rng = rnd.default_rng(global_seed)
+
+    p_posx_std = 0.2
+    p_posy_std = 0.2
+    p_turn_std = 0.1 * d2r
+
+    m_posx_std = 0.2
+    m_posy_std = 0.2
+    m_turn_std = 0.002 * d2r
+
+    dt = 0.01
+    t0, t1 = 0, 10 + dt
+
+    coordTurn = gdyn.CoordinatedTurn(dt=dt)
+    filt = gfilts.ExtendedKalmanFilter()
+    filt.set_state_model(dyn_obj=coordTurn)
+    m_mat = np.eye(5)
+    # m_mat = np.array([[1, 0, 0, 0, 0],
+    #                   [0, 0, 1, 0, 0],
+    #                   [0, 0, 0, 0, 1]])
+    filt.set_measurement_model(meas_mat=m_mat)
+    filt.proc_noise = coordTurn.get_dis_process_noise_mat(dt, p_posx_std,
+                                                          p_posy_std,
+                                                          p_turn_std)
+    # filt.meas_noise = np.diag([m_posx_std, m_posy_std, m_turn_std])**2
+    filt.meas_noise = np.diag([m_posx_std, m_posx_std, m_posy_std, m_posy_std, m_turn_std])**2
+    filt.cov = 0.03**2 * np.eye(5)
+    filt.cov[4, 4] = (0.002 * d2r)**2
+
+    time = np.arange(t0, t1, dt)
+    states = np.nan * np.ones((time.size, 5))
+    stds = np.nan * np.ones(states.shape)
+    stds[0, :] = np.sqrt(np.diag(filt.cov))
+    states[0, :] = np.array([10, 0, 0, 10, 25 * d2r])
+    t_states = states.copy()
+
+    gamma = np.array([[dt**2 / 2, 0, 0],
+                      [dt, 0, 0],
+                      [0, dt**2 / 2, 0],
+                      [0, dt, 0],
+                      [0, 0, 1]])
+    Q = np.diag([p_posx_std**2, p_posy_std**2, p_turn_std**2])
+    for kk, t in enumerate(time[:-1]):
+        states[kk + 1, :] = filt.predict(t, states[kk, :].reshape((5, 1))).flatten()
+
+        t_states[kk + 1, :] = coordTurn.propagate_state(t, t_states[kk, :].reshape((5, 1))).flatten()
+        meas = m_mat @ (t_states[kk + 1, :].reshape((5, 1)) + gamma @ np.sqrt(np.diag(Q)).reshape((3, 1))
+                        * rng.standard_normal(1))
+        meas = meas + (np.sqrt(np.diag(filt.meas_noise))
+                       * rng.standard_normal(meas.size)).reshape(meas.shape)
+
+        states[kk + 1, :] = filt.correct(t, meas, states[kk + 1, :].reshape((5, 1)))[0].flatten()
+        stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
+
+    errs = states - t_states
+
+    # plot states
+    fig = plt.figure()
+    for ii, s in enumerate(coordTurn.state_names):
+        fig.add_subplot(5, 1, ii + 1)
+
+        vals = states[:, ii]
+        if ii == len(coordTurn.state_names) - 1:
+            vals *= r2d
+        fig.axes[ii].plot(time, vals, color='b')
+
+        vals = t_states[:, ii]
+        if ii == len(coordTurn.state_names) - 1:
+            vals *= r2d
+        fig.axes[ii].plot(time, vals, color='r')
+
+        fig.axes[ii].grid(True)
+        fig.axes[ii].set_ylabel(s)
+
+    fig.axes[-1].set_xlabel('time (s)')
+    fig.suptitle('States (obj)')
+    fig.tight_layout()
+
+    fig = plt.figure()
+    fig.add_subplot(1, 1, 1)
+    fig.axes[0].plot(states[:, 0], states[:, 2])
+    fig.axes[0].grid(True)
+    fig.axes[0].set_xlabel('x pos (m)')
+    fig.axes[0].set_ylabel('y pos (m)')
+    fig.suptitle('Position (obj)')
+
+    # plot stds
+    fig = plt.figure()
+    for ii, s in enumerate(coordTurn.state_names):
+        fig.add_subplot(5, 1, ii + 1)
+
+        vals = stds[:, ii]
+        if ii == len(coordTurn.state_names) - 1:
+            vals *= r2d
+        fig.axes[ii].plot(time, vals, color='b')
+
+        fig.axes[ii].grid(True)
+        fig.axes[ii].set_ylabel(s + ' std')
+
+    fig.axes[-1].set_xlabel('time (s)')
+    fig.suptitle('Filter standard deviations (obj)')
+    fig.tight_layout()
+
+    sig_num = 1
+    bounding = np.sum(np.abs(errs) < sig_num * stds, axis=0) / time.size
+    print(bounding)
+    assert all(bounding > (stats.norm.sf(-sig_num) - stats.norm.sf(sig_num))), 'bounding failed'
+
+
+def test_STF_dynObj():  # noqa
+    m_noise = 0.02
+    p_noise = 0.2
+
+    dt = 0.01
+    t0, t1 = 0, 10 + dt
+
+    rng = rnd.default_rng(global_seed)
+
+    filt = gfilts.StudentsTFilter()
+    filt.set_state_model(dyn_obj=gdyn.DoubleIntegrator())
+    m_mat = np.array([[1, 0, 0, 0],
+                     [0, 1, 0, 0]])
+    filt.set_measurement_model(meas_mat=m_mat)
+
+    filt.proc_noise_dof = 3
+    filt.meas_noise_dof = 3
+    filt.dof = 4
+
+    filt.scale = ((filt.dof - 2) / filt.dof) * 0.25**2 * np.eye(4)
+    gamma = np.array([0, 0, 1, 1]).reshape((4, 1))
+    p_scale = ((filt.proc_noise_dof - 2) / filt.proc_noise_dof) * np.array([[p_noise**2]])
+    filt.proc_noise = gdyn.DoubleIntegrator().get_dis_process_noise_mat(dt, p_scale)
+    filt.meas_noise = ((filt.meas_noise_dof - 2) / filt.meas_noise_dof) * m_noise**2 * np.eye(2)
+
+    vx0 = 2
+    vy0 = 1
+
+    time = np.arange(t0, t1, dt)
+    states = np.nan * np.ones((time.size, 4))
+    stds = np.nan * np.ones(states.shape)
+    pre_stds = stds.copy()
+    states[0, :] = np.array([0, 0, vx0, vy0])
+    stds[0, :] = np.sqrt(np.diag(filt.cov))
+    pre_stds[0, :] = stds[0, :]
+
+    t_states = states.copy()
+
+    A = gdyn.DoubleIntegrator().get_state_mat(0, dt)
+    for kk, t in enumerate(time[:-1]):
+        states[kk + 1, :] = filt.predict(t, states[kk, :].reshape((4, 1)),
+                                         state_mat_args=(dt,)).flatten()
+        t_states[kk + 1, :] = (A @ t_states[kk, :].reshape((4, 1))).flatten()
+
+        pre_stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
+
+        n_state = m_mat @ (t_states[kk + 1, :].reshape((4, 1)) + gamma * p_noise
+                           * rng.standard_t(filt.proc_noise_dof))
+        meas = n_state + m_noise * rng.standard_t(filt.meas_noise_dof,
+                                                  size=n_state.size).reshape(n_state.shape)
+
+        states[kk + 1, :] = filt.correct(t, meas, states[kk + 1, :].reshape((4, 1)))[0].flatten()
+        stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
+
+    errs = states - t_states
+
+    # plot states
+    fig = plt.figure()
+    for ii, s in enumerate(gdyn.DoubleIntegrator().state_names):
+        fig.add_subplot(4, 1, ii + 1)
+        fig.axes[ii].plot(time, states[:, ii], color='b')
+        fig.axes[ii].plot(time, t_states[:, ii], color='r')
+        fig.axes[ii].grid(True)
+        fig.axes[ii].set_ylabel(s)
+
+    fig.axes[-1].set_xlabel('time (s)')
+    fig.suptitle('States (obj)')
+    fig.tight_layout()
+
+    # plot stds
+    fig = plt.figure()
+    for ii, s in enumerate(gdyn.DoubleIntegrator().state_names):
+        fig.add_subplot(4, 1, ii + 1)
+        fig.axes[ii].plot(time, stds[:, ii], color='b')
+        fig.axes[ii].plot(time, pre_stds[:, ii], color='r')
+        fig.axes[ii].grid(True)
+        fig.axes[ii].set_ylabel(s + ' std')
+
+    fig.axes[-1].set_xlabel('time (s)')
+    fig.suptitle('Filter standard deviations (obj)')
+    fig.tight_layout()
+
+    sig_num = 1
+    bounding = np.sum(np.abs(errs) <= sig_num * stds, axis=0) / time.size
+    print(bounding)
+    # check approx bounding
+    thresh = stats.t.sf(-sig_num, filt.dof) - stats.t.sf(sig_num, filt.dof)
+    assert all(bounding >= thresh - 0.05), 'bounding failed'
+
+
+def test_UKF_dynObj():  # noqa
+    m_noise = 0.02
+    p_noise = 0.2
+
+    dt = 0.01
+    t0, t1 = 0, 10 + dt
+
+    rng = rnd.default_rng(global_seed)
+
+    filt = gfilts.UnscentedKalmanFilter()
+    filt.set_state_model(dyn_obj=gdyn.DoubleIntegrator())
+    m_mat = np.array([[1, 0, 0, 0],
+                     [0, 1, 0, 0]])
+    filt.set_measurement_model(meas_mat=m_mat)
+    filt.cov = 0.25 * np.eye(4)
+    filt.proc_noise = gdyn.DoubleIntegrator().get_dis_process_noise_mat(dt, np.array([[p_noise**2]]))
+    filt.meas_noise = m_noise**2 * np.eye(2)
+    alpha = 0.5
+    kappa = 1
+
+    vx0 = 2
+    vy0 = 1
+
+    time = np.arange(t0, t1, dt)
+    states = np.nan * np.ones((time.size, 4))
+    stds = np.nan * np.ones(states.shape)
+    pre_stds = stds.copy()
+    states[0, :] = np.array([0, 0, vx0, vy0])
+    stds[0, :] = np.sqrt(np.diag(filt.cov))
+    pre_stds[0, :] = stds[0, :]
+
+    filt.init_sigma_points(states[0, :].reshape((4, 1)), alpha, kappa)
+
+    t_states = states.copy()
+
+    A = gdyn.DoubleIntegrator().get_state_mat(0, dt)
+    for kk, t in enumerate(time[:-1]):
+        states[kk + 1, :] = filt.predict(t, states[kk, :].reshape((4, 1)),
+                                         state_mat_args=(dt,)).flatten()
+        t_states[kk + 1, :] = (A @ t_states[kk, :].reshape((4, 1))).flatten()
+
+        pre_stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
+
+        n_state = m_mat @ (t_states[kk + 1, :] + np.sqrt(np.diag(filt.proc_noise))
+                           * rng.standard_normal(1)).reshape((4, 1))
+        meas = n_state + m_noise * rng.standard_normal(n_state.size).reshape(n_state.shape)
+
+        states[kk + 1, :] = filt.correct(t, meas, states[kk + 1, :].reshape((4, 1)))[0].flatten()
+        stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
+
+    errs = states - t_states
+
+    # plot states
+    fig = plt.figure()
+    for ii, s in enumerate(gdyn.DoubleIntegrator().state_names):
+        fig.add_subplot(4, 1, ii + 1)
+        fig.axes[ii].plot(time, states[:, ii], color='b')
+        fig.axes[ii].plot(time, t_states[:, ii], color='r')
+        fig.axes[ii].grid(True)
+        fig.axes[ii].set_ylabel(s)
+
+    fig.axes[-1].set_xlabel('time (s)')
+    fig.suptitle('States (obj)')
+    fig.tight_layout()
+
+    # plot stds
+    fig = plt.figure()
+    for ii, s in enumerate(gdyn.DoubleIntegrator().state_names):
+        fig.add_subplot(4, 1, ii + 1)
+        fig.axes[ii].plot(time, stds[:, ii], color='b')
+        fig.axes[ii].plot(time, pre_stds[:, ii], color='r')
+        fig.axes[ii].grid(True)
+        fig.axes[ii].set_ylabel(s + ' std')
+
+    fig.axes[-1].set_xlabel('time (s)')
+    fig.suptitle('Filter standard deviations (obj)')
+    fig.tight_layout()
+
+    sig_num = 1
+    bounding = np.sum(np.abs(errs) < sig_num * stds, axis=0) / time.size
+    assert all(bounding > (stats.norm.sf(-sig_num) - stats.norm.sf(sig_num))), 'bounding failed'
+
+
+def test_PF_dyn_fnc():  # noqa
+    print('test PF')
+
+    rng = rnd.default_rng(global_seed)
     num_parts = 2000
-    max_time = 30
+    t0, t1 = 0, 3
+    dt = 0.1
     level_sig = 0.05
 
-    true_state = np.zeros((1, 1))
-    noise_state = true_state.copy()
-    proc_noise_std = np.array([[0.2]])
-    proc_cov = proc_noise_std**2
+    time = np.arange(t0, t1, dt)
+    true_state = np.ones((1, 1))
+    pred_state = true_state.copy()
+    proc_noise_std = np.array([[1.0]])
     proc_mean = np.array([1.0])
-    meas_noise_std = np.array([[1.0]])
-    meas_cov = meas_noise_std**2
+    meas_noise_std = np.array([[0.2]])
     F = np.array([[0.75]])
     H = np.array([[2.0]])
 
-    distrib = distributions.ParticleDistribution()
+    distrib = gdistrib.ParticleDistribution()
     for ii in range(0, num_parts):
-        p = distributions.Particle()
-        p.point = 2 * rng.random(true_state.shape) - 1
+        p = gdistrib.Particle()
+        p.point = 2 * proc_noise_std * rng.random(true_state.shape) - proc_noise_std + true_state
         distrib.add_particle(p, 1 / num_parts)
 
     # define particle filter
-    particleFilter = filters.ParticleFilter()
+    pf = gfilts.ParticleFilter()
 
-    def f(x, **kwargs):
+    def f(t, x, *args):
         return F @ x
 
-    def meas_likelihood(meas, est, **kwargs):
-        m = meas.copy().reshape(meas.size)
-        return stats.multivariate_normal.pdf(m, mean=est,
-                                             cov=meas_cov)
+    def meas_likelihood(meas, est, *args):
+        z = ((meas - est) / meas_noise_std).item()
+        return stats.norm.pdf(z)
 
-    def meas_mod(x, **kwargs):
-        return H @ x
+    def proposal_sampling_fnc(x, rng):
+        noise = proc_mean + proc_noise_std * rng.standard_normal()
+        return x + noise
 
-    def proposal_sampling_fnc(x, **kwargs):
-        rng = kwargs['rng']
-        cov = kwargs['cov']
-        mean = proc_mean  # x.flatten()
-        return x + rng.multivariate_normal(mean, cov).reshape(x.shape)
+    def proposal_fnc(x_hat, cond, *args):
+        return 1
+        # z = ((x_hat - cond) / proc_noise_std).item()
+        # return stats.norm.pdf(z)
 
-    def proposal_fnc(x_hat, cond, **kwargs):
-        cov = kwargs['cov']
-        return stats.multivariate_normal.pdf(x_hat - proc_mean, mean=cond,
-                                             cov=cov)
+    pf.meas_likelihood_fnc = meas_likelihood
+    pf.proposal_sampling_fnc = proposal_sampling_fnc
+    pf.proposal_fnc = proposal_fnc
 
-    particleFilter.dyn_fnc = f
-    particleFilter.meas_likelihood_fnc = meas_likelihood
-    particleFilter.proposal_sampling_fnc = proposal_sampling_fnc
-    particleFilter.proposal_fnc = proposal_fnc
+    pf.set_measurement_model(meas_mat=H)
+    pf.set_state_model(dyn_fun=f)
 
-    particleFilter.set_meas_model(meas_mod)
-    particleFilter.init_from_dist(distrib)
+    pf.init_from_dist(distrib)
 
-    particleFilter.plot_particles(0, title='Init Particle Distribution')
+    pf.plot_particles(0, title='Init Particle Distribution')
 
-    for tt in range(1, max_time):
-        # print(tt)
-        particleFilter.predict(rng=rng, cov=proc_cov)
-
-        # ttl = 't = {} Predicted Particle Distribution'.format(tt)
-        # particleFilter.plot_particles(0, title=ttl)
+    print('\tStarting sim')
+    for kk, tt in enumerate(time[:-1]):
+        if np.mod(kk, int(1 / dt)) == 0:
+            print('\t\t{:.2f}'.format(tt))
+            sys.stdout.flush()
+        sampling_args = (rng, )
+        pred_state = pf.predict(tt, sampling_args=sampling_args)
 
         # calculate true state and measurement for this timestep
-        true_state = F @ true_state + proc_mean
-        noise_state = F @ noise_state \
-            + rng.multivariate_normal(proc_mean,
-                                      proc_noise_std**2).reshape(true_state.shape)
-        meas = H @ noise_state + meas_noise_std * rng.normal()
+        p_noise = proc_mean + proc_noise_std * rng.normal()
+        true_state = F @ true_state + p_noise
+        meas = H @ true_state + meas_noise_std * rng.normal()
 
-        pred_state = particleFilter.correct(meas, cov=proc_cov)[0]
+        proposal_args = ()
+        pred_state = pf.correct(tt, meas, proposal_args=proposal_args, rng=rng)[0]
 
-        # ttl = 't = {} Particle Distribution'.format(tt)
-        # particleFilter.plot_particles(0, title=ttl)
-
-    # particleFilter.plot_particles(0)
+    pf.plot_particles(0, title='Final Particle Distribution')
 
     # check that particle distribution matches the expected mean assuming
     # that the covariance is the same and its normally distributed
-    exp_cov = la.solve_discrete_are(F.T, H.T, proc_noise_std**2,
-                                    meas_noise_std**2)
-    exp_std = np.sqrt(exp_cov)
-    z_stat = (pred_state - noise_state).T @ la.inv(exp_std)
-    z_stat = z_stat.item()
-    p_val = stats.norm.sf(abs(z_stat)) * 2
-
-    # print(pred_state)
-    # print(true_state)
-    # print(noise_state)
-    # print(particleFilter.cov)
-    # print(exp_cov)
-    assert p_val > level_sig, "p-value too low, final state is unexpected"
-
-
-def test_StudentsTFilter():
-    rng = rnd.default_rng(1)
-    max_time = 30
-    num_monte = 5000
-
-    true_state = np.zeros((1, 1))
-    t_state_0 = true_state.copy()
-    F = np.array([[0.75]])
-    H = np.array([[2]])
-
-    meas_noise_dof = 3
-    meas_noise_scale = 1
-    proc_noise_dof = 3
-    proc_noise_scale = 1
-
-    F = np.array([[0.75]])
-    H = np.array([[2]])
-
-    # setup STF
-    stf = filters.StudentsTFilter()
-
-    Q = np.array([[proc_noise_scale]])
-    R = np.array([[meas_noise_scale]])
-
-    stf.set_state_mat(mat=F)
-    stf.set_input_mat(mat=np.zeros((true_state.shape[0], 1)))
-    stf.set_proc_noise(mat=Q)
-
-    stf.set_meas_mat(mat=H)
-    stf.meas_noise = R
-
-    stf.meas_noise_dof = meas_noise_dof
-    stf.proc_noise_dof = proc_noise_dof
-    stf.dof = 3
-
-    stf.scale = 10 * Q
-
-    def f(x, **kwargs):
-        rng = kwargs['rng']
-        return F @ x + proc_noise_scale \
-            * rng.standard_t(proc_noise_dof)
-
-    def meas_likelihood(meas, est, **kwargs):
-        m = meas.copy().reshape(meas.size)
-        return stats.t.pdf(m, meas_noise_dof, loc=est, scale=meas_noise_scale)
-
-    def meas_mod(x, **kwargs):
-        return H @ x
-
-    # run STF in monte carlo
-    t_dist = np.zeros(num_monte)
-    true_state = t_state_0.copy()
-    stf_dist = np.zeros(num_monte)
-    for ii in range(0, num_monte):
-        # stf_state = np.zeros(true_state.shape)
-        stf_state = 2 * rng.random(true_state.shape) - 1
-        for tt in range(1, max_time):
-            stf_state = stf.predict(cur_state=stf_state, rng=rng)
-
-            # calculate true state and measurement for this timestep
-            true_state = f(true_state, rng=rng)
-            meas = H @ true_state + meas_noise_scale \
-                * rng.standard_t(meas_noise_dof)
-
-            stf_state = stf.correct(meas=meas, cur_state=stf_state)[0]
-        stf_dist[ii] = stf_state.item()
-        t_dist[ii] = true_state[0].item()
-
-    # chi2 test to check monte carlo matches PF particles
-    exp_freq, bin_edges = np.histogram(t_dist, bins=11, density=False)
-    obs_freq, _ = np.histogram(stf_dist, bins=bin_edges, density=False)
-
-    test_stat, p_val = stats.chisquare(obs_freq, exp_freq, ddof=3)
-
-    alpha = 0.05
-    assert p_val > alpha / 2, "Distribution does not match expected"
-
-
-def test_UnscentedKalmanFilter():
-    rng = rnd.default_rng()
-    level_sig = 0.05
-    max_time = 50
-
-    alpha = 1
-    kappa = 0
-    sigma_w = 0.1
-    sigma_v = 3
-
-    proc_noise = sigma_w**2
-    meas_noise = sigma_v**2
-
-    def dyn_fnc(x, **kwargs):
-        a = 0.5
-        t = kwargs['t']
-        return a * x + 25 * x / (1 + x**2) + 8 * np.cos(1.2 * t)
-
-    def meas_mod(x, **kwargs):
-        b = 1 / 20
-        return b * x**2
-
-    state0 = np.array([[5]])
-    cov0 = np.array([[2]])
-
-    ukf = filters.UnscentedKalmanFilter()
-    ukf.cov = cov0.copy()
-    ukf.dyn_fnc = dyn_fnc
-    ukf.set_meas_model(meas_mod)
-    ukf.set_proc_noise(mat=proc_noise)
-    ukf.meas_noise = meas_noise
-    ukf.init_sigma_points(state0, alpha, kappa)
-
-    state = state0.copy()
-    pred_state = state0.copy()
-    for t in range(1, max_time):
-        pred_state = ukf.predict(cur_state=pred_state, t=t)
-
-        state = dyn_fnc(state, t=t) + sigma_w * rng.normal()
-        meas = meas_mod(state) + sigma_v * rng.normal()
-
-        pred_state = ukf.correct(cur_state=pred_state, meas=meas)[0]
-
-    exp_state = np.array([[3.46935396909752]])
-    z_stat = (pred_state - exp_state).T @ la.inv(np.sqrt(ukf.cov))
-    z_stat = z_stat.item()
-    p_val = stats.norm.sf(abs(z_stat)) * 2
-
-    assert p_val > level_sig, "p-value too low, final state is unexpected"
-
-
-def test_MaxCorrEntUKF():
-    rng = rnd.default_rng()
-    level_sig = 0.05
-    max_time = 50
-
-    alpha = 1
-    kappa = 0
-    sigma_w = 0.1
-    sigma_v = 3
-
-    proc_noise = np.array([[sigma_w**2]])
-    meas_noise = np.array([[sigma_v**2]])
-
-    def dyn_fnc(x, **kwargs):
-        a = 0.5
-        t = kwargs['t']
-        return a * x + 25 * x / (1 + x**2) + 8 * np.cos(1.2 * t)
-
-    def meas_mod(x, **kwargs):
-        b = 1 / 20
-        return b * x**2
-
-    state0 = np.array([[5]])
-    cov0 = np.array([[2]])
-
-    ukf = filters.MaxCorrEntUKF()
-    ukf.cov = cov0.copy()
-    ukf.dyn_fnc = dyn_fnc
-    ukf.set_meas_model(meas_mod)
-    ukf.set_proc_noise(mat=proc_noise)
-    ukf.meas_noise = meas_noise
-    ukf.kernel_bandwidth = 10
-
-    ukf._stateSigmaPoints.alpha = alpha
-    ukf._stateSigmaPoints.kappa = kappa
-    ukf._stateSigmaPoints.beta = 2
-    ukf._stateSigmaPoints.n = state0.size
-    ukf._stateSigmaPoints.init_weights()
-
-    state = state0.copy()
-    pred_state = state0.copy()
-    for t in range(1, max_time):
-        orig_state = pred_state.copy()
-        pred_state = ukf.predict(cur_state=pred_state, t=t)
-
-        state = dyn_fnc(state, t=t) + sigma_w * rng.normal()
-        meas = meas_mod(state) + sigma_v * rng.normal()
-
-        pred_state = ukf.correct(past_state=orig_state, cur_state=pred_state,
-                                 meas=meas)[0]
-
-    exp_state = np.array([[3.46935396909752]])
-    z_stat = (pred_state - exp_state).T @ la.inv(np.sqrt(ukf.cov))
-    z_stat = z_stat.item()
-    p_val = stats.norm.sf(abs(z_stat)) * 2
-
-    assert p_val > level_sig, "p-value too low, final state is unexpected"
-
-
-def test_UnscentedParticleFilter():
-    rng = rnd.default_rng()
-    num_parts = 500
-    max_time = 30
-    level_sig = 0.05
-
-    alpha = 1
-    kappa = 0
-
-    true_state = np.zeros((1, 1))
-    noise_state = true_state.copy()
-    proc_noise_std = np.array([[0.2]])
-    proc_cov = proc_noise_std**2
-    proc_mean = np.array([1.0])
-    meas_mean = np.array([0.0])
-    meas_noise_std = np.array([[0.1]])
-    meas_cov = meas_noise_std**2
-    F = np.array([[0.75]])
-    H = np.array([[2.0]])
-
-    refSigPoints = distributions.SigmaPoints(alpha=alpha, kappa=kappa,
-                                             n=true_state.size)
-    refSigPoints.init_weights()
-    distrib = distributions.ParticleDistribution()
-    for ii in range(0, num_parts):
-        p = distributions.Particle()
-        p.point = 2 * rng.random(true_state.shape) - 1
-        p.uncertainty = np.array([[5]])
-        p.sigmaPoints = deepcopy(refSigPoints)
-        p.sigmaPoints.update_points(p.point.copy(), p.uncertainty)
-        distrib.add_particle(p, 1 / num_parts)
-
-    # define particle filter
-    upf = filters.UnscentedParticleFilter()
-
-    def f(x, **kwargs):
-        return F @ x
-
-    def meas_likelihood(meas, est, **kwargs):
-        m = meas.copy().reshape(meas.size)
-        return stats.multivariate_normal.pdf(m, mean=est,
-                                             cov=meas_cov)
-
-    def meas_mod(x, **kwargs):
-        return H @ x
-
-    def proposal_sampling_fnc(x, **kwargs):
-        rng = kwargs['rng']
-        cov = kwargs['cov']
-        mean = x.flatten()
-        return rng.multivariate_normal(mean, cov).reshape(x.shape)
-
-    def proposal_fnc(x_hat, cond, **kwargs):
-        cov = kwargs['cov']
-        return stats.multivariate_normal.pdf(x_hat, mean=cond,
-                                             cov=cov)
-
-    upf.dyn_fnc = f
-    upf.meas_likelihood_fnc = meas_likelihood
-    upf.proposal_sampling_fnc = proposal_sampling_fnc
-    upf.proposal_fnc = proposal_fnc
-
-    upf.set_meas_model(meas_mod)
-    upf.set_proc_noise(mat=proc_noise_std**2)
-    upf.meas_noise = meas_cov
-
-    upf.init_from_dist(distrib)
-
-    ttl = 'Initial Particle Distribution'
-    upf.plot_particles(0, title=ttl)
-
-    for tt in range(1, max_time):
-        # print('pred:')
-        upf.predict(rng=rng)
-        # upf.plot_weighted_particles(0, title='weighted dist pred: {}'.format(tt))
-
-        # calculate true state and measurement for this timestep
-        true_state = F @ true_state + proc_mean
-
-        noise = rng.multivariate_normal(proc_mean, proc_cov)
-        noise_state = F @ noise_state + noise.reshape(true_state.shape)
-
-        m_noise = rng.multivariate_normal(meas_mean, meas_cov)
-        meas = H @ noise_state + m_noise
-
-        pred_state = upf.correct(meas)[0]
-        # print('cor:')
-        # print(pred_state)
-        # upf.plot_weighted_particles(0, title='weighted dist corr: {}'.format(tt))
-
-        # ttl = 't = {} Particle Distribution'.format(tt)
-        # upf.plot_particles(0, title=ttl)
-
-    upf.plot_particles(0)
-    # upf.plot_weighted_particles(0)
-
-    exp_cov = la.solve_discrete_are(F.T, H.T, proc_noise_std**2,
-                                    meas_noise_std**2)
-    exp_std = np.sqrt(exp_cov)
-    z_stat = (pred_state - noise_state).T @ la.inv(exp_std)
-    z_stat = z_stat.item()
-    p_val = stats.norm.sf(abs(z_stat)) * 2
-
-    # print(pred_state)
-    # print(true_state)
-    # print(noise_state)
-    # print(upf.cov)
-    # print(exp_cov)
-    assert p_val > level_sig, "p-value too low, final state is unexpected"
-
-
-def test_MaxCorrEntUPF():
-    rng = rnd.default_rng()
-    num_parts = 500
-    max_time = 30
-    level_sig = 0.05
-
-    alpha = 1
-    kappa = 0
-
-    true_state = np.zeros((1, 1))
-    noise_state = true_state.copy()
-    proc_noise_std = np.array([[0.2]])
-    proc_cov = proc_noise_std**2
-    proc_mean = np.array([1.0])
-    meas_mean = np.array([0.0])
-    meas_noise_std = np.array([[0.1]])
-    meas_cov = meas_noise_std**2
-    F = np.array([[0.75]])
-    H = np.array([[2.0]])
-    
-    refSigPoints = distributions.SigmaPoints(alpha=alpha, kappa=kappa,
-                                             n=true_state.size)
-    refSigPoints.init_weights()
-    distrib = distributions.ParticleDistribution()
-    for ii in range(0, num_parts):
-        p = distributions.Particle()
-        p.point = 2 * rng.random(true_state.shape) - 1
-        p.uncertainty = np.array([[5]])
-        p.sigmaPoints = deepcopy(refSigPoints)
-        p.sigmaPoints.update_points(p.point.copy(), p.uncertainty)
-        distrib.add_particle(p, 1 / num_parts)
-
-    # define particle filter
-    upf = filters.MaxCorrEntUPF()
-    upf.kernel_bandwidth = 10
-
-    def f(x, **kwargs):
-        return F @ x
-
-    def meas_likelihood(meas, est, **kwargs):
-        m = meas.copy().reshape(meas.size)
-        return stats.multivariate_normal.pdf(m, mean=est,
-                                             cov=meas_cov)
-
-    def meas_mod(x, **kwargs):
-        return H @ x
-
-    def proposal_sampling_fnc(x, **kwargs):
-        rng = kwargs['rng']
-        cov = kwargs['cov']
-        mean = x.flatten()
-        return rng.multivariate_normal(mean, cov).reshape(x.shape)
-
-    def proposal_fnc(x_hat, cond, **kwargs):
-        cov = kwargs['cov']
-        return stats.multivariate_normal.pdf(x_hat, mean=cond,
-                                             cov=cov)
-
-    upf.dyn_fnc = f
-    upf.meas_likelihood_fnc = meas_likelihood
-    upf.proposal_sampling_fnc = proposal_sampling_fnc
-    upf.proposal_fnc = proposal_fnc
-
-    upf.set_meas_model(meas_mod)
-    upf.set_proc_noise(mat=proc_noise_std**2)
-    upf.meas_noise = meas_cov
-
-    upf.init_from_dist(distrib)
-
-    pred_state = distrib.mean  # np.mean(init_parts, axis=0)
-    for tt in range(1, max_time):
-        orig_state = pred_state.copy()
-        upf.predict(rng=rng)
-
-        # calculate true state and measurement for this timestep
-        true_state = F @ true_state + proc_mean
-
-        noise = rng.multivariate_normal(proc_mean, proc_cov)
-        noise_state = F @ noise_state + noise.reshape(true_state.shape)
-
-        m_noise = rng.multivariate_normal(meas_mean, meas_cov)
-        meas = H @ noise_state + m_noise
-
-        pred_state = upf.correct(meas, orig_state)[0]
-
     exp_cov = la.solve_discrete_are(F.T, H.T, proc_noise_std**2,
                                     meas_noise_std**2)
     exp_std = np.sqrt(exp_cov)
@@ -495,101 +548,513 @@ def test_MaxCorrEntUPF():
     z_stat = z_stat.item()
     p_val = stats.norm.sf(abs(z_stat)) * 2
 
+    print(pred_state)
+    print(true_state)
     assert p_val > level_sig, "p-value too low, final state is unexpected"
 
 
-def test_UnscentedParticleFilterMCMC():
-    rng = rnd.default_rng()
-    num_parts = 300
-    max_time = 30
+def test_UPF_dyn_fnc():  # noqa
+    print('test UPF')
+
+    rng = rnd.default_rng(global_seed)
+    num_parts = 100
+    t0, t1 = 0, 3
+    dt = 0.1
     level_sig = 0.05
 
-    alpha = 1
-    kappa = 0
-
-    true_state = np.zeros((1, 1))
-    noise_state = true_state.copy()
-    proc_noise_std = np.array([[0.2]])
-    proc_cov = proc_noise_std**2
+    time = np.arange(t0, t1, dt)
+    true_state = np.ones((1, 1))
+    pred_state = true_state.copy()
+    proc_noise_std = np.array([[1.0]])
     proc_mean = np.array([1.0])
-    meas_mean = np.array([0.0])
-    meas_noise_std = np.array([[0.1]])
-    meas_cov = meas_noise_std**2
+    meas_noise_std = np.array([[0.2]])
     F = np.array([[0.75]])
     H = np.array([[2.0]])
+    alpha = 0.5
+    kappa = 1
 
-    refSigPoints = distributions.SigmaPoints(alpha=alpha, kappa=kappa,
-                                             n=true_state.size)
-    refSigPoints.init_weights()
-    distrib = distributions.ParticleDistribution()
+    distrib = gdistrib.ParticleDistribution()
     for ii in range(0, num_parts):
-        p = distributions.Particle()
-        p.point = 2 * rng.random(true_state.shape) - 1
-        p.uncertainty = np.array([[5]])
-        p.sigmaPoints = deepcopy(refSigPoints)
-        p.sigmaPoints.update_points(p.point.copy(), p.uncertainty)
+        p = gdistrib.Particle()
+        p.point = 2 * proc_noise_std * rng.random(true_state.shape) - proc_noise_std + true_state
+        p.uncertainty = 0.5**2 * np.eye(1)
+        p.sigmaPoints = gdistrib.SigmaPoints(alpha=alpha, kappa=kappa,
+                                             n=true_state.size)
+        p.sigmaPoints.init_weights()
+        p.sigmaPoints.update_points(p.point, p.uncertainty)
         distrib.add_particle(p, 1 / num_parts)
 
     # define particle filter
-    upf = filters.UnscentedParticleFilter()
+    pf = gfilts.UnscentedParticleFilter()
 
-    def f(x, **kwargs):
-        return F @ x
+    def f(t, *args):
+        return F
 
-    def meas_likelihood(meas, est, **kwargs):
-        m = meas.copy().reshape(meas.size)
-        return stats.multivariate_normal.pdf(m, mean=est,
-                                             cov=meas_cov)
+    def meas_likelihood(meas, est, *args):
+        z = ((meas - est) / meas_noise_std).item()
+        return stats.norm.pdf(z)
 
-    def meas_mod(x, **kwargs):
-        return H @ x
+    def proposal_sampling_fnc(x, rng):
+        noise = proc_mean + proc_noise_std * rng.standard_normal()
+        return x + noise
 
-    def proposal_sampling_fnc(x, **kwargs):
-        rng = kwargs['rng']
-        cov = kwargs['cov']
-        mean = x.flatten()
-        return rng.multivariate_normal(mean, cov).reshape(x.shape)
+    def proposal_fnc(x_hat, cond, cov, *args):
+        return 1
+        # z = ((x_hat - cond) / proc_noise_std).item()
+        # return stats.norm.pdf(z)
 
-    def proposal_fnc(x_hat, cond, **kwargs):
-        cov = kwargs['cov']
-        return stats.multivariate_normal.pdf(x_hat, mean=cond,
-                                             cov=cov)
+    pf.meas_likelihood_fnc = meas_likelihood
+    pf.proposal_sampling_fnc = proposal_sampling_fnc
+    pf.proposal_fnc = proposal_fnc
 
-    upf.use_MCMC = True
+    pf.proc_noise = proc_noise_std**2
+    pf.meas_noise = meas_noise_std**2
 
-    upf.dyn_fnc = f
-    upf.meas_likelihood_fnc = meas_likelihood
-    upf.proposal_sampling_fnc = proposal_sampling_fnc
-    upf.proposal_fnc = proposal_fnc
+    pf.set_measurement_model(meas_mat=H)
+    pf.set_state_model(state_mat_fun=f)
 
-    upf.set_meas_model(meas_mod)
-    upf.set_proc_noise(mat=proc_noise_std**2)
-    upf.meas_noise = meas_cov
+    pf.init_from_dist(distrib)
 
-    upf.init_from_dist(distrib)
+    pf.plot_particles(0, title='Init Particle Distribution')
 
-    ttl = 'Initial Particle Distribution'
-    upf.plot_particles(0, title=ttl)
-
-    for tt in range(1, max_time):
-        upf.predict(rng=rng)
+    print('\tStarting sim')
+    for kk, tt in enumerate(time[:-1]):
+        if np.mod(kk, int(1 / dt)) == 0:
+            print('\t\t{:.2f}'.format(tt))
+            sys.stdout.flush()
+        sampling_args = (rng, )
+        pred_state = pf.predict(tt)
 
         # calculate true state and measurement for this timestep
-        true_state = F @ true_state + proc_mean
+        p_noise = proc_mean + proc_noise_std * rng.normal()
+        true_state = F @ true_state + p_noise
+        meas = H @ true_state + meas_noise_std * rng.normal()
 
-        noise = rng.multivariate_normal(proc_mean, proc_cov)
-        noise_state = F @ noise_state + noise.reshape(true_state.shape)
+        proposal_args = ()
+        pred_state = pf.correct(tt, meas, sampling_args=sampling_args,
+                                proposal_args=proposal_args, rng=rng)[0]
 
-        m_noise = rng.multivariate_normal(meas_mean, meas_cov)
-        meas = H @ noise_state + m_noise
+    pf.plot_particles(0, title='Final Particle Distribution')
 
-        pred_state = upf.correct(meas, rng=rng)[0]
-
+    # check that particle distribution matches the expected mean assuming
+    # that the covariance is the same and its normally distributed
     exp_cov = la.solve_discrete_are(F.T, H.T, proc_noise_std**2,
                                     meas_noise_std**2)
     exp_std = np.sqrt(exp_cov)
-    z_stat = (pred_state - noise_state).T @ la.inv(exp_std)
+    z_stat = (pred_state - true_state).T @ la.inv(exp_std)
     z_stat = z_stat.item()
     p_val = stats.norm.sf(abs(z_stat)) * 2
 
+    print(pred_state)
+    print(true_state)
     assert p_val > level_sig, "p-value too low, final state is unexpected"
+
+
+def test_MCMC_UPF_dyn_fnc():  # noqa
+    print('test MCMC-UPF')
+
+    rng = rnd.default_rng(global_seed)
+    num_parts = 30
+    t0, t1 = 0, 3
+    dt = 0.1
+    level_sig = 0.05
+
+    time = np.arange(t0, t1, dt)
+    true_state = np.ones((1, 1))
+    pred_state = true_state.copy()
+    proc_noise_std = np.array([[1.0]])
+    proc_mean = np.array([1.0])
+    meas_noise_std = np.array([[0.2]])
+    F = np.array([[0.75]])
+    H = np.array([[2.0]])
+    alpha = 0.5
+    kappa = 1
+
+    distrib = gdistrib.ParticleDistribution()
+    for ii in range(0, num_parts):
+        p = gdistrib.Particle()
+        p.point = 2 * proc_noise_std * rng.random(true_state.shape) - proc_noise_std + true_state
+        p.uncertainty = 0.5**2 * np.eye(1)
+        p.sigmaPoints = gdistrib.SigmaPoints(alpha=alpha, kappa=kappa,
+                                             n=true_state.size)
+        p.sigmaPoints.init_weights()
+        p.sigmaPoints.update_points(p.point, p.uncertainty)
+        distrib.add_particle(p, 1 / num_parts)
+
+    # define particle filter
+    pf = gfilts.UnscentedParticleFilter(use_MCMC=True)
+
+    def f(t, *args):
+        return F
+
+    def meas_likelihood(meas, est, *args):
+        z = ((meas - est) / meas_noise_std).item()
+        return stats.norm.pdf(z)
+
+    def proposal_sampling_fnc(x, rng):
+        noise = proc_mean + proc_noise_std * rng.standard_normal()
+        return x + noise
+
+    def proposal_fnc(x_hat, cond, cov, *args):
+        return 1
+        # z = ((x_hat - cond) / proc_noise_std).item()
+        # return stats.norm.pdf(z)
+
+    pf.meas_likelihood_fnc = meas_likelihood
+    pf.proposal_sampling_fnc = proposal_sampling_fnc
+    pf.proposal_fnc = proposal_fnc
+
+    pf.proc_noise = proc_noise_std**2
+    pf.meas_noise = meas_noise_std**2
+
+    pf.set_measurement_model(meas_mat=H)
+    pf.set_state_model(state_mat_fun=f)
+
+    pf.init_from_dist(distrib)
+
+    pf.plot_particles(0, title='Init Particle Distribution')
+
+    print('\tStarting sim')
+    for kk, tt in enumerate(time[:-1]):
+        if np.mod(kk, int(1 / dt)) == 0:
+            print('\t\t{:.2f}'.format(tt))
+            sys.stdout.flush()
+        sampling_args = (rng, )
+        pred_state = pf.predict(tt)
+
+        # calculate true state and measurement for this timestep
+        p_noise = proc_mean + proc_noise_std * rng.normal()
+        true_state = F @ true_state + p_noise
+        meas = H @ true_state + meas_noise_std * rng.normal()
+
+        proposal_args = ()
+        move_kwargs = {'rng': rng, 'sampling_args': sampling_args,
+                       'proposal_args': proposal_args}
+        pred_state = pf.correct(tt, meas, sampling_args=sampling_args,
+                                proposal_args=proposal_args, rng=rng,
+                                move_kwargs=move_kwargs)[0]
+
+    pf.plot_particles(0, title='Final Particle Distribution')
+
+    # check that particle distribution matches the expected mean assuming
+    # that the covariance is the same and its normally distributed
+    exp_cov = la.solve_discrete_are(F.T, H.T, proc_noise_std**2,
+                                    meas_noise_std**2)
+    exp_std = np.sqrt(exp_cov)
+    z_stat = (pred_state - true_state).T @ la.inv(exp_std)
+    z_stat = z_stat.item()
+    p_val = stats.norm.sf(abs(z_stat)) * 2
+
+    print(pred_state)
+    print(true_state)
+    assert p_val > level_sig, "p-value too low, final state is unexpected"
+
+
+def test_max_corr_ent_UKF_dynObj():  # noqa
+    m_noise = 0.02
+    p_noise = 0.2
+
+    dt = 0.01
+    t0, t1 = 0, 10 + dt
+
+    rng = rnd.default_rng(global_seed)
+
+    filt = gfilts.MaxCorrEntUKF()
+    filt.set_state_model(dyn_obj=gdyn.DoubleIntegrator())
+    m_mat = np.array([[1, 0, 0, 0],
+                     [0, 1, 0, 0]])
+    filt.set_measurement_model(meas_mat=m_mat)
+    filt.cov = 0.25 * np.eye(4)
+    filt.proc_noise = gdyn.DoubleIntegrator().get_dis_process_noise_mat(dt, np.array([[p_noise**2]]))
+    filt.meas_noise = m_noise**2 * np.eye(2)
+    filt.kernel_bandwidth = 10
+    alpha = 0.5
+    kappa = 1
+
+    vx0 = 2
+    vy0 = 1
+
+    time = np.arange(t0, t1, dt)
+    states = np.nan * np.ones((time.size, 4))
+    stds = np.nan * np.ones(states.shape)
+    pre_stds = stds.copy()
+    states[0, :] = np.array([0, 0, vx0, vy0])
+    stds[0, :] = np.sqrt(np.diag(filt.cov))
+    pre_stds[0, :] = stds[0, :]
+
+    filt.init_sigma_points(states[0, :].reshape((4, 1)), alpha, kappa)
+
+    t_states = states.copy()
+
+    A = gdyn.DoubleIntegrator().get_state_mat(0, dt)
+    for kk, t in enumerate(time[:-1]):
+        states[kk + 1, :] = filt.predict(t, states[kk, :].reshape((4, 1)),
+                                         state_mat_args=(dt,)).flatten()
+        t_states[kk + 1, :] = (A @ t_states[kk, :].reshape((4, 1))).flatten()
+
+        pre_stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
+
+        n_state = m_mat @ (t_states[kk + 1, :] + np.sqrt(np.diag(filt.proc_noise))
+                           * rng.standard_normal(1)).reshape((4, 1))
+        meas = n_state + m_noise * rng.standard_normal(n_state.size).reshape(n_state.shape)
+
+        states[kk + 1, :] = filt.correct(t, meas, states[kk + 1, :].reshape((4, 1)),
+                                         states[kk, :].reshape((4, 1)))[0].flatten()
+        stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
+
+    errs = states - t_states
+
+    # plot states
+    fig = plt.figure()
+    for ii, s in enumerate(gdyn.DoubleIntegrator().state_names):
+        fig.add_subplot(4, 1, ii + 1)
+        fig.axes[ii].plot(time, states[:, ii], color='b')
+        fig.axes[ii].plot(time, t_states[:, ii], color='r')
+        fig.axes[ii].grid(True)
+        fig.axes[ii].set_ylabel(s)
+
+    fig.axes[-1].set_xlabel('time (s)')
+    fig.suptitle('States (obj)')
+    fig.tight_layout()
+
+    # plot stds
+    fig = plt.figure()
+    for ii, s in enumerate(gdyn.DoubleIntegrator().state_names):
+        fig.add_subplot(4, 1, ii + 1)
+        fig.axes[ii].plot(time, stds[:, ii], color='b')
+        fig.axes[ii].plot(time, pre_stds[:, ii], color='r')
+        fig.axes[ii].grid(True)
+        fig.axes[ii].set_ylabel(s + ' std')
+
+    fig.axes[-1].set_xlabel('time (s)')
+    fig.suptitle('Filter standard deviations (obj)')
+    fig.tight_layout()
+
+    sig_num = 1
+    bounding = np.sum(np.abs(errs) < sig_num * stds, axis=0) / time.size
+    assert all(bounding > (stats.norm.sf(-sig_num) - stats.norm.sf(sig_num))), 'bounding failed'
+
+
+def test_MCUPF_dyn_fnc():  # noqa
+    print('test MCUPF')
+
+    rng = rnd.default_rng(global_seed)
+    num_parts = 20
+    t0, t1 = 0, 3
+    dt = 0.1
+    level_sig = 0.05
+
+    time = np.arange(t0, t1, dt)
+    true_state = np.ones((1, 1))
+    pred_state = true_state.copy()
+    proc_noise_std = np.array([[1.0]])
+    proc_mean = np.array([1.0])
+    meas_noise_std = np.array([[0.2]])
+    F = np.array([[0.75]])
+    H = np.array([[2.0]])
+    alpha = 0.5
+    kappa = 1
+
+    distrib = gdistrib.ParticleDistribution()
+    for ii in range(0, num_parts):
+        p = gdistrib.Particle()
+        p.point = 2 * proc_noise_std * rng.random(true_state.shape) - proc_noise_std + true_state
+        p.uncertainty = 0.5**2 * np.eye(1)
+        p.sigmaPoints = gdistrib.SigmaPoints(alpha=alpha, kappa=kappa,
+                                             n=true_state.size)
+        p.sigmaPoints.init_weights()
+        p.sigmaPoints.update_points(p.point, p.uncertainty)
+        distrib.add_particle(p, 1 / num_parts)
+
+    # define particle filter
+    pf = gfilts.MaxCorrEntUPF(use_MCMC=False)
+    pf.kernel_bandwidth = 10
+
+    def f(t, *args):
+        return F
+
+    def meas_likelihood(meas, est, *args):
+        z = ((meas - est) / meas_noise_std).item()
+        return stats.norm.pdf(z)
+
+    def proposal_sampling_fnc(x, rng):
+        noise = proc_mean + proc_noise_std * rng.standard_normal()
+        return x + noise
+
+    def proposal_fnc(x_hat, cond, cov, *args):
+        return 1
+        # z = ((x_hat - cond) / proc_noise_std).item()
+        # return stats.norm.pdf(z)
+
+    pf.meas_likelihood_fnc = meas_likelihood
+    pf.proposal_sampling_fnc = proposal_sampling_fnc
+    pf.proposal_fnc = proposal_fnc
+
+    pf.proc_noise = proc_noise_std**2
+    pf.meas_noise = meas_noise_std**2
+
+    pf.set_measurement_model(meas_mat=H)
+    pf.set_state_model(state_mat_fun=f)
+
+    pf.init_from_dist(distrib)
+
+    pf.plot_particles(0, title='Init Particle Distribution')
+
+    print('\tStarting sim')
+    for kk, tt in enumerate(time[:-1]):
+        if np.mod(kk, int(1 / dt)) == 0:
+            print('\t\t{:.2f}'.format(tt))
+            sys.stdout.flush()
+        sampling_args = (rng, )
+        past_state = pred_state.copy()
+        pred_state = pf.predict(tt)
+
+        # calculate true state and measurement for this timestep
+        p_noise = proc_mean + proc_noise_std * rng.normal()
+        true_state = F @ true_state + p_noise
+        meas = H @ true_state + meas_noise_std * rng.normal()
+
+        proposal_args = ()
+        move_kwargs = {'rng': rng, 'sampling_args': sampling_args,
+                       'proposal_args': proposal_args}
+        pred_state = pf.correct(tt, meas, past_state, sampling_args=sampling_args,
+                                proposal_args=proposal_args, rng=rng,
+                                move_kwargs=move_kwargs)[0]
+
+    pf.plot_particles(0, title='Final Particle Distribution')
+
+    # check that particle distribution matches the expected mean assuming
+    # that the covariance is the same and its normally distributed
+    exp_cov = la.solve_discrete_are(F.T, H.T, proc_noise_std**2,
+                                    meas_noise_std**2)
+    exp_std = np.sqrt(exp_cov)
+    z_stat = (pred_state - true_state).T @ la.inv(exp_std)
+    z_stat = z_stat.item()
+    p_val = stats.norm.sf(abs(z_stat)) * 2
+
+    print(pred_state)
+    print(true_state)
+    assert p_val > level_sig, "p-value too low, final state is unexpected"
+
+
+def test_MCMC_MCUPF_dyn_fnc():  # noqa
+    print('test MCMC-MCUPF')
+
+    rng = rnd.default_rng(global_seed)
+    num_parts = 10
+    t0, t1 = 0, 3
+    dt = 0.1
+    level_sig = 0.05
+
+    time = np.arange(t0, t1, dt)
+    true_state = np.ones((1, 1))
+    pred_state = true_state.copy()
+    proc_noise_std = np.array([[1.0]])
+    proc_mean = np.array([1.0])
+    meas_noise_std = np.array([[0.2]])
+    F = np.array([[0.75]])
+    H = np.array([[2.0]])
+    alpha = 0.5
+    kappa = 1
+
+    distrib = gdistrib.ParticleDistribution()
+    for ii in range(0, num_parts):
+        p = gdistrib.Particle()
+        p.point = 2 * proc_noise_std * rng.random(true_state.shape) - proc_noise_std + true_state
+        p.uncertainty = 0.5**2 * np.eye(1)
+        p.sigmaPoints = gdistrib.SigmaPoints(alpha=alpha, kappa=kappa,
+                                             n=true_state.size)
+        p.sigmaPoints.init_weights()
+        p.sigmaPoints.update_points(p.point, p.uncertainty)
+        distrib.add_particle(p, 1 / num_parts)
+
+    # define particle filter
+    pf = gfilts.MaxCorrEntUPF(use_MCMC=True)
+    pf.kernel_bandwidth = 10
+
+    def f(t, *args):
+        return F
+
+    def meas_likelihood(meas, est, *args):
+        z = ((meas - est) / meas_noise_std).item()
+        return stats.norm.pdf(z)
+
+    def proposal_sampling_fnc(x, rng):
+        noise = proc_mean + proc_noise_std * rng.standard_normal()
+        return x + noise
+
+    def proposal_fnc(x_hat, cond, cov, *args):
+        return 1
+        # z = ((x_hat - cond) / proc_noise_std).item()
+        # return stats.norm.pdf(z)
+
+    pf.meas_likelihood_fnc = meas_likelihood
+    pf.proposal_sampling_fnc = proposal_sampling_fnc
+    pf.proposal_fnc = proposal_fnc
+
+    pf.proc_noise = proc_noise_std**2
+    pf.meas_noise = meas_noise_std**2
+
+    pf.set_measurement_model(meas_mat=H)
+    pf.set_state_model(state_mat_fun=f)
+
+    pf.init_from_dist(distrib)
+
+    pf.plot_particles(0, title='Init Particle Distribution')
+
+    print('\tStarting sim')
+    for kk, tt in enumerate(time[:-1]):
+        if np.mod(kk, int(1 / dt)) == 0:
+            print('\t\t{:.2f}'.format(tt))
+            sys.stdout.flush()
+        sampling_args = (rng, )
+        past_state = pred_state.copy()
+        pred_state = pf.predict(tt)
+
+        # calculate true state and measurement for this timestep
+        p_noise = proc_mean + proc_noise_std * rng.normal()
+        true_state = F @ true_state + p_noise
+        meas = H @ true_state + meas_noise_std * rng.normal()
+
+        proposal_args = ()
+        move_kwargs = {'rng': rng, 'sampling_args': sampling_args,
+                       'proposal_args': proposal_args}
+        pred_state = pf.correct(tt, meas, past_state, sampling_args=sampling_args,
+                                proposal_args=proposal_args, rng=rng,
+                                move_kwargs=move_kwargs)[0]
+
+    pf.plot_particles(0, title='Final Particle Distribution')
+
+    # check that particle distribution matches the expected mean assuming
+    # that the covariance is the same and its normally distributed
+    exp_cov = la.solve_discrete_are(F.T, H.T, proc_noise_std**2,
+                                    meas_noise_std**2)
+    exp_std = np.sqrt(exp_cov)
+    z_stat = (pred_state - true_state).T @ la.inv(exp_std)
+    z_stat = z_stat.item()
+    p_val = stats.norm.sf(abs(z_stat)) * 2
+
+    print(pred_state)
+    print(true_state)
+    assert p_val > level_sig, "p-value too low, final state is unexpected"
+
+
+# %% Main
+if __name__ == "__main__":
+    plt.close('all')
+
+    # test_KF_dynObj()
+    # test_KF_mat()
+
+    # test_EKF_dynObj()
+
+    # test_STF_dynObj()
+
+    # test_UKF_dynObj()
+    # test_max_corr_ent_UKF_dynObj()
+
+    # test_PF_dyn_fnc()
+    # test_UPF_dyn_fnc()
+    # test_MCMC_UPF_dyn_fnc()
+    # test_MCUPF_dyn_fnc()
+    test_MCMC_MCUPF_dyn_fnc()

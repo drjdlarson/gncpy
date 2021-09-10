@@ -32,14 +32,14 @@ release = '0.0.0'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-        'sphinx.ext.autodoc',
-        'sphinx.ext.napoleon',
-        # 'sphinx.ext.autosummary',
-        'sphinx.ext.mathjax',
-        'sphinx.ext.todo',
-        'sphinx.ext.viewcode',
-        'sphinxcontrib.bibtex',
-        ]
+    'sphinx.ext.autodoc',
+    'sphinx.ext.napoleon',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.mathjax',
+    'sphinx.ext.todo',
+    'sphinx.ext.viewcode',
+    'sphinxcontrib.bibtex',
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -47,17 +47,12 @@ templates_path = ['_templates']
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = []
+# exclude_patterns = ['_templates']
 
 # Configuration for autodoc/summary
-autoclass_content = "both"  # include both class docstring and __init__
-autodoc_default_flags = [
-         # Make sure that any autodoc declarations show the right members
-         "members",
-         "inherited-members",
-         "show-inheritance",
-]
-# autosummary_generate = True
+# note see https://stackoverflow.com/questions/2701998/sphinx-autodoc-is-not-automatic-enough
+# for help/details
+autosummary_generate = True
 autodoc_member_order = 'groupwise'
 add_module_names = False
 
@@ -78,8 +73,15 @@ bibtex_bibfiles = ['refs.bib']
 # html_theme = 'alabaster'
 html_theme = "stanford_theme"
 html_theme_path = [sphinx_theme.get_html_theme_path('stanford-theme')]
+html_theme_options = {
+    'display_version': True,
+    # Toc options
+    'collapse_navigation': False,
+    'sticky_navigation': True,
+    'navigation_depth': 4,
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+# html_static_path = ['_static']

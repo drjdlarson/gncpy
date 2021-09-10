@@ -105,21 +105,20 @@ def get_state_jacobian(t, x, fncs, f_args, u=None, **kwargs):
         state to calculate the jocobain about.
     fncs : list
         1 function per state in order. They must have the signature
-        `f(t, x, u, *f_args)` if `u` is given or .`f(t, x, *f_args)` if u is
+        `f(t, x, u, *f_args)` if `u` is given or `f(t, x, *f_args)` if `u` is
         not given.
     f_args : tuple
         Additional arguemnts to pass to each function in `fncs`.
     u : Nu x 1 numpy array, optional
         the control signal to calculate the jacobian about. The default is
         None.
-    **kwargs : dict, optional
+    \*\*kwargs : dict, optional
         Additional keyword arguments for :meth:`gncpy.math.get_jacobian`.
 
     Returns
     -------
     jac : N x N numpy array
         Jaccobian matrix.
-
     """
     n_states = x.size
     A = np.zeros((n_states, n_states))
@@ -159,11 +158,11 @@ def get_input_jacobian(t, x, u, fncs, f_args, **kwargs):
         control input to calculate the jocobian about.
     fncs : list
         1 function per state in order. They must have the signature
-        `f(t, x, u, *f_args)` if `u` is given or .`f(t, x, *f_args)` if u is
+        `f(t, x, u, *f_args)` if `u` is given or `f(t, x, *f_args)` if u is
         not given.
     f_args : tuple
         Additional arguemnts to pass to each function in `fncs`.
-    **kwargs : dict, optional
+    \*\*kwargs : dict, optional
         Additional keyword arguments for :meth:`gncpy.math.get_jacobian`.
 
     Returns

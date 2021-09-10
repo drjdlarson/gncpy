@@ -1,5 +1,4 @@
-""" Defines utility functions for plotting routines.
-"""
+"""Defines utility functions for plotting routines."""
 import numpy as np
 from numpy.linalg import eigh
 import numpy.random as rnd
@@ -7,23 +6,27 @@ import matplotlib.pyplot as plt
 
 
 def calc_error_ellipse(cov, n_sig):
-    """ Calculates parameters for an error ellipse.
+    """Calculates parameters for an error ellipse.
 
     This calucates the error ellipse for a given sigma
     number according to :cite:`Hoover1984_AlgorithmsforConfidenceCirclesandEllipses`.
 
-    Args:
-        cov (2 x 2 numpy array): covariance matrix.
-        n_sig (float): Sigma number, must be positive.
+    Parameters
+    ----------
+    cov : 2 x 2 numpy array
+        covariance matrix.
+    n_sig : float
+        Sigma number, must be positive.
 
-    Returns:
-        tuple containing
-
-                - width (float): The width of the ellipse
-                - height (float): The height of the ellipse
-                - angle (float): The rotation angle in degrees
-                of the semi-major axis. Measured up from the
-                positive x-axis.
+    Returns
+    -------
+    width : float
+        The width of the ellipse
+    height :float
+        The height of the ellipse
+    angle : float
+        The rotation angle in degrees of the semi-major axis. Measured up from
+        the positive x-axis.
     """
     # get and sort eigne values
     vals, vecs = eigh(cov)
@@ -35,7 +38,7 @@ def calc_error_ellipse(cov, n_sig):
     angle = 180 / np.pi * np.arctan2(*vecs[:, 0][::-1])
     width, height = 2 * n_sig * np.sqrt(vals)
 
-    return 2*width, 2*height, angle
+    return 2 * width, 2 * height, angle
 
 
 def init_plotting_opts(**kwargs):
@@ -106,8 +109,18 @@ def set_title_label(fig, ax_num, opts, ttl="", x_lbl="", y_lbl=""):
                                 fontstyle=opts['ax_fontstyle'],
                                 fontfamily=opts['ax_fontfamily'])
 
+
 def get_cmap(n, name='Dark2'):
-    '''Returns a function that maps each index in 0, 1, ..., n-1 to a distinct
+    """Returns a function that generates a color map.
+
+    Returns a function thata maps each index in 0, 1, ..., n-1 to a distinct
     RGB color; the keyword argument name must be a standard mpl colormap name.
-    '''
+
+    Parameters
+    ----------
+    n : int
+        Number of colors in the map.
+    name : string
+        name of the colormap, valid for `pyplot.cm.get_cmap` function
+    """
     return plt.cm.get_cmap(name, n)

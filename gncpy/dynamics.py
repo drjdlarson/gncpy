@@ -16,9 +16,6 @@ class DynamicsBase:
 
     Attributes
     ----------
-    state_names : tuple
-        Tuple of strings for the name of each state. The order should match
-        that of the state vector.
     control_model : callable or list of callables, optional
         For objects of :class:`gncpy.dynamics.LinearDynamicsBase` it is a
         callable with the signature `t, *ctrl_args` and returns the
@@ -31,6 +28,9 @@ class DynamicsBase:
     """
 
     state_names = ()
+    """Tuple of strings for the name of each state. The order should match
+    that of the state vector.
+    """
 
     def __init__(self, control_model=None):
         self.control_model = control_model
@@ -356,23 +356,23 @@ class CoordinatedTurn(NonlinearDynamicsBase):
     @property
     def _cont_fnc_lst(self):
         # returns x_dot
-        def f0(t, x):
+        def f0(t, x, *args):
             return x[1]
 
         # returns x_dot_dot
-        def f1(t, x):
+        def f1(t, x, *args):
             return -x[4] * x[3]
 
         # returns y_dot
-        def f2(t, x):
+        def f2(t, x, *args):
             return x[3]
 
         # returns y_dot_dot
-        def f3(t, x):
+        def f3(t, x, *args):
             return x[4] * x[1]
 
         # returns omega_dot
-        def f4(t, x):
+        def f4(t, x, *args):
             return 0
 
         return [f0, f1, f2, f3, f4]
@@ -413,8 +413,8 @@ class ClohessyWiltshireOrbit(LinearDynamicsBase):
     based on :cite:`Clohessy1960_TerminalGuidanceSystemforSatelliteRendezvous`
     and :cite:`Desai2013_AComparativeStudyofEstimationModelsforSatelliteRelativeMotion`
 
-    Attritbutes
-    -----------
+    Attributes
+    ----------
     mean_motion :float
         mean motion of reference spacecraft
     """
@@ -510,19 +510,19 @@ class TschaunerHempelOrbit(NonlinearDynamicsBase):
     @property
     def _cont_fnc_lst(self):
         # returns x velocity
-        def f0(t, x):
+        def f0(t, x, *args):
             return x[3]
 
         # returns y velocity
-        def f1(t, x):
+        def f1(t, x, *args):
             return x[4]
 
         # returns z velocity
-        def f2(t, x):
+        def f2(t, x, *args):
             return x[5]
 
         # returns x acceleration
-        def f3(t, x):
+        def f3(t, x, *args):
             e = self.eccentricity
             a = self.semi_major
             mu = self.mu
@@ -538,7 +538,7 @@ class TschaunerHempelOrbit(NonlinearDynamicsBase):
             return (wz**2 + 2 * C1) * x[0] + wz_dot * x[1] + 2 * wz * x[4]
 
         # returns y acceleration
-        def f4(t, x):
+        def f4(t, x, *args):
             e = self.eccentricity
             a = self.semi_major
             mu = self.mu
@@ -554,7 +554,7 @@ class TschaunerHempelOrbit(NonlinearDynamicsBase):
             return (wz**2 - C1) * x[1] - wz_dot * x[0] - 2 * wz * x[3]
 
         # returns z acceleration
-        def f5(t, x):
+        def f5(t, x, *args):
             e = self.eccentricity
             a = self.semi_major
             mu = self.mu
@@ -567,7 +567,7 @@ class TschaunerHempelOrbit(NonlinearDynamicsBase):
             return -C1 * x[2]
 
         # returns true anomaly ROC
-        def f6(t, x):
+        def f6(t, x, *args):
             e = self.eccentricity
             a = self.semi_major
             p = a * (1 - e**2)
@@ -614,19 +614,19 @@ class KarlgaardOrbit(NonlinearDynamicsBase):
     @property
     def _cont_fnc_lst(self):
         # returns non-dim radius ROC
-        def f0(t, x):
+        def f0(t, x, *args):
             return x[3]
 
         # returns non-dim az angle ROC
-        def f1(t, x):
+        def f1(t, x, *args):
             return x[4]
 
         # returns non-dim elv angle ROC
-        def f2(t, x):
+        def f2(t, x, *args):
             return x[5]
 
         # returns non-dim radius ROC ROC
-        def f3(t, x):
+        def f3(t, x, *args):
             r = x[0]
             phi = x[2]
             theta_d = x[4]
@@ -635,7 +635,7 @@ class KarlgaardOrbit(NonlinearDynamicsBase):
                     + phi_d**2) + 3 * r + 2 * theta_d)
 
         # returns non-dim az angle ROC ROC
-        def f4(t, x):
+        def f4(t, x, *args):
             r = x[0]
             theta = x[1]
             r_d = x[3]
@@ -644,7 +644,7 @@ class KarlgaardOrbit(NonlinearDynamicsBase):
                     - 2 * r_d)
 
         # returns non-dim elv angle ROC ROC
-        def f5(t, x):
+        def f5(t, x, *args):
             phi = x[2]
             r_d = x[3]
             theta_d = x[4]
