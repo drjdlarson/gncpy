@@ -1,3 +1,4 @@
+"""Constants and utility functions relating to the WGS-84 model."""
 import numpy as np
 
 
