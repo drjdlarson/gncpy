@@ -1,213 +1,344 @@
+"""Standardized dynamics models with predefined functions for built in filters.
+
+These provide an easy to use interface for some common dynamic objects and
+and their associated models. They have been designed to integrate well with the
+filters in :mod:`gncpy.filters`.
+"""
 import numpy as np
-import numpy.random as rnd
-import scipy.linalg as la
-# import abc
+import scipy.integrate as s_integrate
 from warnings import warn
 
 import gncpy.math as gmath
-# import gncpy.utilities as util
 
 
 class DynamicsBase:
-    """ This defines common attributes for all dynamics models.
+    r"""Defines common attributes for all dynamics models.
 
-    Attributes:
-        state_names (tuple): Tuple of strings for the name of each state. The
-            order should match that of the state vector.
+    Attributes
+    ----------
+    control_model : callable or list of callables, optional
+        For objects of :class:`gncpy.dynamics.LinearDynamicsBase` it is a
+        callable with the signature `t, *ctrl_args` and returns the
+        input matrix :math:`G_k` from :math:`x_{k+1} = F_k x_k + G_k u_k`.
+        For objects of :class:`gncpy.dynamics.NonlinearDynamicsBase` it is a
+        list of callables where each callable returns the modification to the
+        corresponding state, :math:`g(t, u_i)`, in the differential equation
+        :math:`\dot{x}_i = f(t, x_i) + g(t, u_i)` and has the signature
+        `t, u, *ctrl_args`.
     """
-    # __metaclass__ = util.ClassPropertyMetaClass
-    state_names = ()
 
-    def __init__(self):
+    state_names = ()
+    """Tuple of strings for the name of each state. The order should match
+    that of the state vector.
+    """
+
+    def __init__(self, control_model=None):
+        self.control_model = control_model
         super().__init__()
 
 
 class LinearDynamicsBase(DynamicsBase):
-    """ Base class for all linear dynamics models.
+    """Base class for all linear dynamics models.
+
+    Child classes should define their own get_state_mat function and set the
+    state names class variable. The remainder of the functions autogenerate
+    based on these values.
+
     """
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
-    def get_dis_process_noise_mat(self, dt, **kwargs):
-        """ Class method for getting the process noise. Must be overridden in
-        child classes.
+    def get_dis_process_noise_mat(self, dt, *f_args):
+        """Class method for getting the process noise.
 
-        Args:
-            dt (float): delta time.
-            **kwargs (dict): any additional arguments needed.
+        Should be overridden in child classes. Should maintain the same
+        signature to allow for standardized wrappers.
 
-        Returns:
-            2d numpy array: discrete time process noise matrix.
+        Parameters
+        ----------
+        dt : float
+            delta time.
+        *kwargs : tuple, optional
+            any additional arguments needed.
+
+        Returns
+        -------
+        N x N numpy array
+            discrete time process noise matrix.
 
         """
         msg = 'get_dis_process_noise_mat function is undefined'
         warn(msg, RuntimeWarning)
         return np.array([[]])
 
-    def get_state_mat(self, **kwargs):
-        """ Class method for getting the discrete time state matrix. Must be
-        overridden in child classes.
+    def get_state_mat(self, timestep, *f_args):
+        """Class method for getting the discrete time state matrix.
 
-        Args:
-            **kwargs (TYPE): any additional arguments needed.
+        Must be overridden in child classes.
 
-        Returns:
-            2d numpy array: state matrix.
+        Parameters
+        ----------
+        timestep : float
+            timestep.
+        *f_args : dict, optional
+            any additional arguments needed.
+
+        Returns
+        -------
+        N x N numpy array
+            state matrix.
 
         """
         msg = 'get_state_mat function is undefined'
         warn(msg, RuntimeWarning)
         return np.array([[]])
 
-    def propagate_state(self, x, u, dt, add_noise=False, **kwargs):
-        r"""This propagates the continuous time dynamics based on the supplied
-        continuous function list.
+    def propagate_state(self, timestep, state, u=None, state_args=(), ctrl_args=()):
+        r"""Propagates the state to the next time step.
 
-        This implements the equation :math:`x_{k+1} = \int \dot{x}_k dt` and
-        returns the next state as a vector
+        Notes
+        -----
+        This implements the equation
 
-        Args:
-            x (N x 1 numpy array): current state.
-            u (N x Nu numpy array): DESCRIPTION.
-            dt (float): delta time.
-            add_noise (bool, optional): flag indicating if noise should be
-                added to the output. Defaults to False.
-            **kwargs (dict): Passed through to the dynamics function.
+        .. math::
+            x_{k+1} = F_k x_k + G_k u_k
 
-        Keyword Args:
-            rng (random.default_rng generator): Random number generator.
-                Only used if adding noise
+        Parameters
+        ----------
+        timestep : float
+            timestep.
+        state : N x 1 numpy array
+            state vector.
+        u : N x Nu numpy array, optional
+            Control effort vector. The default is None.
+        state_args : tuple, optional
+            Additional arguments needed by the `get_state_mat` function. The
+            default is ().
+        ctrl_args : tuple, optional
+            Additional arguments needed by the get input mat function. The
+            default is (). Only used if a control effort is supplied.
 
-        Returns:
-            ns (TYPE): DESCRIPTION.
+        Returns
+        -------
+        next_state : N x 1 numpy array
+            The propagated state.
 
         """
-        state_trans_mat = self.get_state_mat(**kwargs)
-        return state_trans_mat @ x
+        state_trans_mat = self.get_state_mat(timestep, *state_args)
+        next_state = state_trans_mat @ state
+
+        if self.control_model is not None:
+            input_mat = self.control_model(timestep, *ctrl_args)
+            ctrl = input_mat @ u
+            next_state += ctrl
+
+        return next_state
 
 
 class NonlinearDynamicsBase(LinearDynamicsBase):
-    """ Base class for all non-linear dynamics models.
+    """Base class for non-linear dynamics models.
+
+    Child classes should define their own _cont_fnc_lst property and set the
+    state names class variable. The remainder of the functions autogenerate
+    based on these values.
+
+    Attributes
+    ----------
+    dt : float
+        time difference for the integration period
+    integrator_type : string, optional
+        integrator type as defined by scipy's integrate.ode function. The
+        default is `dopri5`.
+    integrator_params : dict, optional
+        additional parameters for the integrator. The default is {}.
     """
+
+    def __init__(self, integrator_type='dopri5', integrator_params={},
+                 dt=np.nan, **kwargs):
+        self.dt = dt
+        self.integrator_type = integrator_type
+        self.integrator_params = integrator_params
+
+        self._integrator = None
+
+        super().__init__(**kwargs)
+
     @property
-    def cont_fnc_lst(self):
-        r""" Class property for the continuous time dynamics functions. Must be
-        overridden in the child classes.
+    def _cont_fnc_lst(self):
+        r"""Class property for the continuous time dynamics functions.
 
-        This is a list of functions that implement differential equations
-        :math:`\dot{x} = f(x, u)` for each state, in order.
+        Must be overridden in the child classes.
 
-        Returns:
-            list: functions that take an N x 1 numpy array for the state, an
-            N x Nu numpy array for control input, and other arguments as kwargs
+        Notes
+        -----
+        This is a list of functions that implement part of the differential
+        equations :math:`\dot{x} = f(t, x) + g(t, u)` for each state, in order.
+        These functions only represent the dynamics :math:`f(t, x)`.
+
+        Returns
+        -------
+        list
+            Each element is a function that take the timestep, the state, and
+            *f_args. They must return the new state for the given index in the
+            list/state vector.
         """
         msg = 'cont_fnc_lst not implemented'
         warn(msg, RuntimeWarning)
         return []
 
-    @property
-    def disc_fnc_lst(self):
-        """ Class property for the discrete time dynamics functions.
-        Automatically generates the list by integrating the continuous time
-        dynamics functions.
+    def _cont_dyn(self, t, x, u, state_args, ctrl_args):
+        r"""Implements the continuous time dynamics.
 
-        Returns:
-            list: functions for each state variable that take an N x 1 numpy
-            array for the state, an N x Nu numpy array for control input,
-            delta time, and other arguments as kwargs.
+        This automatically sets up the combined differential equation based on
+        the supplied continuous function list.
 
+        This implements the equation :math:`\dot{x} = f(t, x) + g(t, u)` and
+        returns the state derivatives as a vector. Note the control input is
+        only used if an appropriate control model is set by the user.
+
+        Parameters
+        ----------
+        t : float
+            timestep.
+        x : N x 1 numpy array
+            current state.
+        u : Nu x 1 numpy array
+            Control effort, not used if no control model.
+        state_args : tuple
+            Additional arguements for the state functions.
+        ctrl_args : tuple
+            Additional arguments for the control functions. Not used if no
+            control model
+
+        Returns
+        -------
+        x_dot : N x 1 numpy array
+            state derivative
         """
-        lst = []
-
-        def g(f):
-            return lambda x, u, dt, **kwargs: gmath.rk4(f, x, dt, u=u,
-                                                        **kwargs)
-
-        for f in self.cont_fnc_lst:
-            lst.append(g(f))
-        return lst
-
-    def cont_dyn(self, x, **kwargs):
-        r""" This implements the continuous time dynamics based on the supplied
-        continuous function list.
-
-        This implements the equation :math:`\dot{x} = f(x, u)` and returns the
-        state derivatives as a vector
-
-        Args:
-            x (N x 1 numpy array): current state.
-            **kwargs (dict): Passed through to the dynamics function.
-
-        Returns:
-            out (N x 1 numpy array): derivative of next state.
-
-        """
-        u = kwargs['cur_input']
         out = np.zeros((len(self.state_names), 1))
-        for ii, f in enumerate(self.cont_fnc_lst):
-            out[ii] = f(x, u, **kwargs)
+        for ii, f in enumerate(self._cont_fnc_lst):
+            out[ii] = f(t, x, *state_args)
+
+        if self.control_model is not None:
+            for ii, g in enumerate(self.control_model):
+                out[ii] += g(t, u, *ctrl_args)
 
         return out
 
-    def propagate_state(self, x, u, dt, add_noise=False, **kwargs):
-        r"""This propagates the continuous time dynamics based on the supplied
-        continuous function list.
+    def get_state_mat(self, timestep, state, *f_args):
+        """Calculates the state matrix from the ode list.
 
-        This implements the equation :math:`x_{k+1} = \int \dot{x}_k dt` and
-        returns the next state as a vector
+        Parameters
+        ----------
+        timestep : float
+            timestep.
+        state : N x 1 numpy array
+            current state.
+        *f_args : tuple
+            Additional arguments to pass to the ode functions.
 
-        Args:
-            x (N x 1 numpy array): current state.
-            u (N x Nu numpy array): DESCRIPTION.
-            dt (float): delta time.
-            add_noise (bool, optional): flag indicating if noise should be
-                added to the output. Defaults to False.
-            **kwargs (dict): Passed through to the dynamics function.
+        Returns
+        -------
+        N x N numpy array
+            state transition matrix.
+        """
+        return gmath.get_state_jacobian(timestep, state, self._cont_fnc_lst,
+                                        f_args)
 
-        Keyword Args:
-            rng (random.default_rng generator): Random number generator.
-                Only used if adding noise
+    def propagate_state(self, timestep, state, u=None, state_args=(), ctrl_args=()):
+        """Propagates the continuous time dynamics.
 
-        Returns:
-            ns (TYPE): DESCRIPTION.
+        Automatically integrates the defined ode list and adds control inputs
+        (held constant over the integration period).
+
+        Parameters
+        ----------
+        timestep : float
+            current timestep.
+        state : N x 1 numpy array
+            Current state vector.
+        u : Nu x 1 numpy array, optional
+            Current control effort. The default is None. Only used if a control
+            model is set.
+        state_args : tuple, optional
+            Additional arguments to pass to the state odes. The default is ().
+        ctrl_args : tuple, optional
+            Additional arguments to pass to the control functions. The default
+            is ().
+
+        Raises
+        ------
+        RuntimeError
+            If the integration fails.
+
+        Returns
+        -------
+        next_state : N x 1 numpy array
+            the state at time :math:`t + dt`.
 
         """
-        ns = gmath.rk4(self.cont_dyn, x.copy(), dt, cur_input=u, **kwargs)
-        if add_noise:
-            rng = kwargs.get('rng', rnd.default_rng(1))
-            proc_mat = self.get_dis_process_noise_mat(dt, **kwargs)
-            ns += proc_mat @ rng.standard_normal(ns.shape)
-        return ns
+        self._integrator = s_integrate.ode(lambda t, y, *f_args:
+                                           self._cont_dyn(t, y, u, f_args,
+                                                          ctrl_args).flatten())
+        self._integrator.set_integrator(self.integrator_type,
+                                        **self.integrator_params)
+        self._integrator.set_initial_value(state, timestep)
+        self._integrator.set_f_params(*state_args)
 
-    def get_state_mat(self, x, u, dt, **kwargs):
-        """ Calculates the jacobian of the differential equations.
+        next_time = timestep + self.dt
+        next_state = self._integrator.integrate(next_time)
+        next_state = next_state.reshape((next_state.size, 1))
+        if not self._integrator.successful():
+            msg = 'Integration failed at time {}'.format(timestep)
+            raise RuntimeError(msg)
 
-        Args:
-            x (N x 1 numpy array): current state.
-            u (Nu x 1 numpy array): DESCRIPTION.
-            dt (float): delta time.
-            **kwargs (dict): Passed through to the dynamics function.
-
-        Returns:
-            TYPE: DESCRIPTION.
-
-        """
-        return gmath.get_state_jacobian(x, u, self.cont_fnc_lst, dt=dt,
-                                        **kwargs)
+        return next_state
 
 
 class DoubleIntegrator(LinearDynamicsBase):
-    """ This implements a double integrator model
-    """
+    """Implements a double integrator model."""
+
     state_names = ('x pos', 'y pos', 'x vel', 'y vel')
 
-    def get_dis_process_noise_mat(self, dt, **kwargs):
-        x_dim = len(self.state_names)
-        return np.zeros((x_dim, x_dim))
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
-    def get_state_mat(self, **kwargs):
-        dt = kwargs['dt']
+    def get_dis_process_noise_mat(self, dt, proc_cov):
+        """Discrete process noise matrix.
+
+        Parameters
+        ----------
+        dt : float
+            time difference, unused.
+        proc_cov : N x N numpy array
+            Covariance matrix of the process noise.
+
+        Returns
+        -------
+        4 x 4 numpy array
+            process noise matrix.
+
+        """
+        gamma = np.array([0, 0, 1, 1]).reshape((4, 1))
+        return gamma @ proc_cov @ gamma.T
+
+    def get_state_mat(self, timestep, dt):
+        """Class method for getting the discrete time state matrix.
+
+        Parameters
+        ----------
+        timestep : float
+            timestep.
+        dt : float
+            time difference
+
+        Returns
+        -------
+        4 x 4 numpy array
+            state matrix.
+
+        """
         return np.array([[1., 0, dt, 0],
                          [0., 1., 0, dt],
                          [0, 0, 1., 0],
@@ -215,44 +346,64 @@ class DoubleIntegrator(LinearDynamicsBase):
 
 
 class CoordinatedTurn(NonlinearDynamicsBase):
-    """ This implements the non-linear coordinated turn dynamics model.
-    """
+    """Implements the non-linear coordinated turn dynamics model."""
+
     state_names = ('x pos', 'x vel', 'y pos', 'y vel', 'turn angle')
 
-    def cont_fnc_lst(self):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    @property
+    def _cont_fnc_lst(self):
         # returns x_dot
-        def f0(x, u, **kwargs):
+        def f0(t, x, *args):
             return x[1]
 
         # returns x_dot_dot
-        def f1(x, u, **kwargs):
+        def f1(t, x, *args):
             return -x[4] * x[3]
 
         # returns y_dot
-        def f2(x, u, **kwargs):
+        def f2(t, x, *args):
             return x[3]
 
         # returns y_dot_dot
-        def f3(x, u, **kwargs):
+        def f3(t, x, *args):
             return x[4] * x[1]
 
         # returns omega_dot
-        def f4(x, u, **kwargs):
+        def f4(t, x, *args):
             return 0
 
         return [f0, f1, f2, f3, f4]
 
-    def get_dis_process_noise_mat(self, dt, **kwargs):
-        pos_std = kwargs['pos_std']
-        turn_std = kwargs['turn_std']
+    def get_dis_process_noise_mat(self, dt, posx_std, posy_std, turn_std):
+        """Discrete process noise matrix.
 
-        G = np.array([[dt**2 / 2, 0, 0],
-                      [dt, 0, 0],
-                      [0, dt**2 / 2, 0],
-                      [0, dt, 0],
-                      [0, 0, 1]])
-        Q = la.block_diag(pos_std**2 * np.eye(2), np.array([[turn_std**2]]))
-        return G @ Q @ G.T
+        Parameters
+        ----------
+        dt : float
+            time difference
+        posx_std : float
+            Standard deviation of the x position position process noise.
+        posy_std : float
+            Standard deviation of the y position position process noise.
+        turn_std : float
+            Standard deviation of the turn angle process noise.
+
+        Returns
+        -------
+        5 x 5 numpy array
+            Process noise matrix.
+
+        """
+        gamma = np.array([[dt**2 / 2, 0, 0],
+                          [dt, 0, 0],
+                          [0, dt**2 / 2, 0],
+                          [0, dt, 0],
+                          [0, 0, 1]])
+        Q = np.diag([posx_std**2, posy_std**2, turn_std**2])
+        return gamma @ Q @ gamma.T
 
 
 class ClohessyWiltshireOrbit(LinearDynamicsBase):
@@ -262,56 +413,69 @@ class ClohessyWiltshireOrbit(LinearDynamicsBase):
     based on :cite:`Clohessy1960_TerminalGuidanceSystemforSatelliteRendezvous`
     and :cite:`Desai2013_AComparativeStudyofEstimationModelsforSatelliteRelativeMotion`
 
-    Attritbutes:
-        dt (float): delta time.
-        mean_motion (float): mean motion of reference spacecraft
+    Attributes
+    ----------
+    mean_motion :float
+        mean motion of reference spacecraft
     """
 
-    state_names = ('x position', 'y position', 'z position',
-                   'x velocity', 'y velocity', 'z velocity')
+    state_names = ('x pos', 'y pos', 'z pos',
+                   'x vel', 'y vel', 'z vel')
 
-    def __init__(self):
-        self.dt = 0
-        self.mean_motion = 0
+    def __init__(self, mean_motion=None, **kwargs):
+        self.mean_motion = mean_motion
 
-        super().__init__()
+        super().__init__(**kwargs)
 
-    def get_dis_process_noise_mat(self, **kwargs):
-        """ Class method for returning the process noise.
+    def get_dis_process_noise_mat(self, dt):
+        """Calculates the process noise.
 
-        Returns:
-            2d numpy array: discrete time process noise matrix.
+        Parameters
+        ----------
+        dt : float
+            time difference, not used but needed for standardized interface.
 
+        Returns
+        -------
+        6 x 6 numpy array
+            discrete time process noise matrix.
         """
         return np.zeros((len(self.state_names), len(self.state_names)))
 
-    def get_state_mat(self, **kwargs):
-        """ Class method for getting the discrete time state matrix. Must be
-        overridden in child classes.
+    def get_state_mat(self, timestep, dt):
+        """Calculates the state transition matrix.
 
-        Returns:
-            2d numpy array: state matrix.
+        Parameters
+        ----------
+        timestep : float
+            current timestep.
+        dt : float
+            time difference.
+
+        Returns
+        -------
+        F : 6 x 6 numpy array
+            state transition matrix.
 
         """
-        dt = self.dt
         n = self.mean_motion
-        F = np.array([[4 - 3*np.cos(dt * n), 0, 0, np.sin(dt * n) / n,
-                       -(2 * np.cos(dt * n) - 2) / n, 0],
-                      [6 * np.sin(dt*n) - 6 * dt * n, 1, 0,
-                       (2 * np.cos(dt * n) - 2) / n,
-                       (4 * np.sin(dt * n) - 3 * dt * n) / n, 0],
-                      [0, 0, np.cos(dt * n), 0, 0, np.sin(dt * n) / n],
-                      [3 * n * np.sin(dt * n), 0, 0, np.cos(dt * n),
-                       2 * np.sin(dt * n), 0],
-                      [6 * n * (np.cos(dt * n) - 1), 0, 0, -2 * np.sin(dt * n),
-                       4 * np.cos(dt * n) - 3, 0],
-                      [0, 0, -n * np.sin(dt * n), 0, 0, np.cos(dt * n)]])
+        c_dtn = np.cos(dt * n)
+        s_dtn = np.sin(dt * n)
+        F = np.array([[4 - 3 * c_dtn, 0, 0, s_dtn / n, -(2 * c_dtn - 2) / n, 0],
+                      [6 * s_dtn - 6 * dt * n, 1, 0, (2 * c_dtn - 2) / n,
+                       (4 * s_dtn - 3 * dt * n) / n, 0],
+                      [0, 0, c_dtn, 0, 0, s_dtn / n],
+                      [3 * n * s_dtn, 0, 0, c_dtn, 2 * s_dtn, 0],
+                      [6 * n * (c_dtn - 1), 0, 0, -2 * s_dtn, 4 * c_dtn - 3, 0],
+                      [0, 0, -n * s_dtn, 0, 0, c_dtn]])
         return F
 
 
 class TschaunerHempelOrbit(NonlinearDynamicsBase):
-    """This implements the non-linear Tschauner-Hempel elliptical orbit model.
+    """Implements the non-linear Tschauner-Hempel elliptical orbit model.
 
+    Notes
+    -----
     It is the general elliptical orbit of an object around another target
     object as defined in
     :cite:`Tschauner1965_RendezvousZuEineminElliptischerBahnUmlaufendenZiel`.
@@ -321,38 +485,44 @@ class TschaunerHempelOrbit(NonlinearDynamicsBase):
     :cite:`Okasha2013_GuidanceNavigationandControlforSatelliteProximityOperationsUsingTschaunerHempelEquations`
     and :cite:`Lange1965_FloquetTheoryOrbitalPerturbations`
 
-    Attributes:
-        mu (float): gravitational parameter in m^3 s^-2
-        semi_major (float): semi-major axis in meters
-        eccentricity (float): eccentricity
+    Attributes
+    ----------
+    mu : float, optional
+        gravitational parameter in :math:`m^3 s^{-2}`. The default is 3.986004418 * 10**14.
+    semi_major : float
+        semi-major axis in meters. The default is None.
+    eccentricity : float, optional
+        eccentricity. The default is 1.
     """
-    state_names = ('x position', 'y position', 'z position',
-                   'x velocity', 'y velocity', 'z velocity',
+
+    state_names = ('x pos', 'y pos', 'z pos',
+                   'x vel', 'y vel', 'z vel',
                    'targets true anomaly')
 
-    def __init__(self, **kwargs):
-        self.mu = kwargs.get('mu', 3.986004418 * 10**14)
-        self.semi_major = kwargs.get('semi_major', 0)
-        self.eccentricity = kwargs.get('eccentricity', 1)
+    def __init__(self, mu=3.986004418 * 10**14, semi_major=None, eccentricity=1,
+                 **kwargs):
+        self.mu = mu
+        self.semi_major = semi_major
+        self.eccentricity = eccentricity
 
-        super().__init__()
+        super().__init__(**kwargs)
 
     @property
-    def cont_fnc_lst(self):
+    def _cont_fnc_lst(self):
         # returns x velocity
-        def f0(x, u, **kwargs):
+        def f0(t, x, *args):
             return x[3]
 
         # returns y velocity
-        def f1(x, u, **kwargs):
+        def f1(t, x, *args):
             return x[4]
 
         # returns z velocity
-        def f2(x, u, **kwargs):
+        def f2(t, x, *args):
             return x[5]
 
         # returns x acceleration
-        def f3(x, u, **kwargs):
+        def f3(t, x, *args):
             e = self.eccentricity
             a = self.semi_major
             mu = self.mu
@@ -368,7 +538,7 @@ class TschaunerHempelOrbit(NonlinearDynamicsBase):
             return (wz**2 + 2 * C1) * x[0] + wz_dot * x[1] + 2 * wz * x[4]
 
         # returns y acceleration
-        def f4(x, u, **kwargs):
+        def f4(t, x, *args):
             e = self.eccentricity
             a = self.semi_major
             mu = self.mu
@@ -384,7 +554,7 @@ class TschaunerHempelOrbit(NonlinearDynamicsBase):
             return (wz**2 - C1) * x[1] - wz_dot * x[0] - 2 * wz * x[3]
 
         # returns z acceleration
-        def f5(x, u, **kwargs):
+        def f5(t, x, *args):
             e = self.eccentricity
             a = self.semi_major
             mu = self.mu
@@ -397,7 +567,7 @@ class TschaunerHempelOrbit(NonlinearDynamicsBase):
             return -C1 * x[2]
 
         # returns true anomaly ROC
-        def f6(x, u, **kwargs):
+        def f6(t, x, *args):
             e = self.eccentricity
             a = self.semi_major
             p = a * (1 - e**2)
@@ -406,47 +576,57 @@ class TschaunerHempelOrbit(NonlinearDynamicsBase):
             R = p / (1 + e * np.cos(x[6]))
             return H / R**2
 
-        return [f0, f1, f2, f3, f4, f5]
+        return [f0, f1, f2, f3, f4, f5, f6]
 
-    def get_dis_process_noise_mat(self, **kwargs):
-        """ Returns the process noise.
+    def get_dis_process_noise_mat(self, dt):
+        """Calculates the process noise.
 
-        Returns:
-            2d numpy array: discrete time process noise matrix.
+        Parameters
+        ----------
+        dt : float
+            time difference, not used but needed for standardized interface.
 
+        Returns
+        -------
+        7 x 7 numpy array
+            discrete time process noise matrix.
         """
         return np.zeros((len(self.state_names), len(self.state_names)))
 
 
 class KarlgaardOrbit(NonlinearDynamicsBase):
-    """ This implements the non-linear Karlgaar elliptical orbit model.
+    """Implements the non-linear Karlgaar elliptical orbit model.
 
+    Notes
+    -----
     It uses the numerical integration of the second order approximation in
     dimensionless sphereical coordinates. See
     :cite:`Karlgaard2003_SecondOrderRelativeMotionEquations` for details.
     """
+
     state_names = ('non-dim radius', 'non-dim az angle', 'non-dim elv angle',
                    'non-dim radius ROC', 'non-dim az angle ROC',
                    'non-dim elv angle ROC')
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
-    def cont_fnc_lst(self):
+    @property
+    def _cont_fnc_lst(self):
         # returns non-dim radius ROC
-        def f0(x, u, **kwargs):
+        def f0(t, x, *args):
             return x[3]
 
         # returns non-dim az angle ROC
-        def f1(x, u, **kwargs):
+        def f1(t, x, *args):
             return x[4]
 
         # returns non-dim elv angle ROC
-        def f2(x, u, **kwargs):
+        def f2(t, x, *args):
             return x[5]
 
         # returns non-dim radius ROC ROC
-        def f3(x, u, **kwargs):
+        def f3(t, x, *args):
             r = x[0]
             phi = x[2]
             theta_d = x[4]
@@ -455,7 +635,7 @@ class KarlgaardOrbit(NonlinearDynamicsBase):
                     + phi_d**2) + 3 * r + 2 * theta_d)
 
         # returns non-dim az angle ROC ROC
-        def f4(x, u, **kwargs):
+        def f4(t, x, *args):
             r = x[0]
             theta = x[1]
             r_d = x[3]
@@ -464,7 +644,7 @@ class KarlgaardOrbit(NonlinearDynamicsBase):
                     - 2 * r_d)
 
         # returns non-dim elv angle ROC ROC
-        def f5(x, u, **kwargs):
+        def f5(t, x, *args):
             phi = x[2]
             r_d = x[3]
             theta_d = x[4]
@@ -473,102 +653,17 @@ class KarlgaardOrbit(NonlinearDynamicsBase):
 
         return [f0, f1, f2, f3, f4, f5]
 
-    def get_dis_process_noise_mat(self, **kwargs):
-        """ Returns the process noise.
+    def get_dis_process_noise_mat(self, dt):
+        """Calculates the process noise.
 
-        Returns:
-            2d numpy array: discrete time process noise matrix.
+        Parameters
+        ----------
+        dt : float
+            time difference, not used but needed for standardized interface.
 
+        Returns
+        -------
+        6 x 6 numpy array
+            discrete time process noise matrix.
         """
         return np.zeros((len(self.state_names), len(self.state_names)))
-
-
-
-# class DynamicObject(metaclass=abc.ABCMeta):
-#     """ Base class for dynamic objects.
-
-#     This defaults to assuming nonlinear dynamics, and automates the
-#     linearization, and discritization of a list of continuous time dynamics
-#     functions.
-
-#     Attributes:
-#         nom_ctrl (Nu x 1 numpy array): Nominal control input
-#     """
-#     def __init___(self, **kwargs):
-#         self.nom_ctrl = kwargs.get('nom_ctrl', np.array([[]]))
-
-#     @property
-#     @abc.abstractmethod
-#     def cont_dyn_funcs(self):
-#         """ List of continuous time dynamics functions.
-
-#         Must be defined in child class, one element per state, in order, must
-#         take at least the following arguments (in order): state, control input
-#         """
-#         pass
-
-#     @property
-#     def disc_dyn_funcs(self):
-#         """ List of discrete time dynamics functions
-
-#         one element per state, in order, integration of continuous time, each
-#         function takes the following arguments (in order) state, control input,
-#         time step
-#         """
-#         lst = []
-
-#         def g(f):
-#             return lambda x, u, dt: gmath.rk4(f, x, dt, u=u)
-
-#         for f in self.cont_dyn_funcs:
-#             lst.append(g(f))
-#         return lst
-
-#     @property
-#     def disc_inv_dyn_funcs(self):
-#         """ List of discrete time inverse dynamics functions
-#         """
-#         lst = []
-
-#         def g_bar(f):
-#             return lambda x, u, dt: gmath.rk4_backward(f, x, dt, u=u)
-
-#         for f in self.cont_dyn_funcs:
-#             lst.append(g_bar(f))
-#         return lst
-
-#     def get_disc_state_mat(self, state, u, dt, **kwargs):
-#         """ Returns the discrete time state matrix.
-
-#         This assumes the dynamics functions are nonlinear and calculates the
-#         jacobian. If this is not the case, the child class should override
-#         the implementation.
-
-#         Args:
-#             state (N x 1 numpy array): Current state
-#             u (Nu x 1 numpy array): Current control input
-#             dt (float): time step
-#             kwargs : any additional arguments needed by the dynamics functions
-#         Returns:
-#             (N x N numpy array): State matrix
-#         """
-#         return gmath.get_state_jacobian(state, u, self.disc_dyn_funcs, dt=dt,
-#                                         **kwargs)
-
-#     def get_disc_input_mat(self, state, u, dt, **kwargs):
-#         """ Returns the discrete time input matrix.
-
-#         This assumes the dynamics functions are nonlinear and calculates the
-#         jacobian. If this is not the case, the child class should override
-#         the implementation.
-
-#         Args:
-#             state (N x 1 numpy array): Current state
-#             u (Nu x 1 numpy array): Current control input
-#             dt (float): time step
-#             kwargs : any additional arguments needed by the dynamics functions
-#         Returns:
-#             (N x Nu numpy array): Input matrix
-#         """
-#         return gmath.get_input_jacobian(state, u, self.disc_dyn_funcs, dt=dt,
-#                                         **kwargs)

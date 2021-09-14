@@ -1,14 +1,19 @@
-Welcome to gncpy's documentation!
+Welcome to GNCPy's documentation!
 =================================
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-   autodoc/modules
+   api
    References
    Publications
    license
+
+
+Todos
+-----
+.. todolist::
 
 
 Indices and tables
