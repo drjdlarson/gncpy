@@ -142,9 +142,9 @@ def set_title_label(fig, ax_num, opts, ttl=None, x_lbl=None, y_lbl=None):
     None.
     """
     if ttl is not None:
-        fig.axes[ax_num].set_title(ttl, fontsize=opts['ttl_fontsize'],
-                                   fontstyle=opts['ttl_fontstyle'],
-                                   fontfamily=opts['ttl_fontfamily'])
+        fig.suptitle(ttl, fontsize=opts['ttl_fontsize'],
+                     fontstyle=opts['ttl_fontstyle'],
+                     fontfamily=opts['ttl_fontfamily'])
         if fig.canvas.manager is not None:
             fig.canvas.manager.set_window_title(ttl)
 
