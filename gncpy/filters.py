@@ -1957,7 +1957,7 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
             part_likeli = self._calc_relative_likelihoods(meas,
                                                           [est_meas],
                                                           renorm=False)[0]
-            part_fit = self.proposal_fnc(self._particleDist._particles[ii], ns,
+            part_fit = self.proposal_fnc(part.point, ns,
                                          cov, *proposal_args)
 
             num = cand_likeli * part_fit
