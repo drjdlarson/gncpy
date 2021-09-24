@@ -4,6 +4,7 @@ import numpy.random as rnd
 import numpy.linalg as la
 from scipy.linalg import expm
 import scipy.integrate as s_integrate
+import scipy.stats as stats
 import abc
 from warnings import warn
 from copy import deepcopy
@@ -641,14 +642,18 @@ class StudentsTFilter(KalmanFilter):
         Degree of freedom for the process noise model. The default is 3.
     meas_noise_dof : int, optional
         Degree of freedom for the measurement noise model. The default is 3.
+    use_moment_matching : bool, optional
+        Flag indicating if moment matching is used to maintain the heavy tail
+        property as the filter propagates over time. The default is True.
     """
 
     def __init__(self, scale=np.array([[]]), dof=3, proc_noise_dof=3,
-                 meas_noise_dof=3, **kwargs):
+                 meas_noise_dof=3, use_moment_matching=True, **kwargs):
         self.scale = scale
         self.dof = dof
         self.proc_noise_dof = proc_noise_dof
         self.meas_noise_dof = meas_noise_dof
+        self.use_moment_matching = use_moment_matching
 
         self._dyn_obj = None
         self._state_mat = np.array([[]])
@@ -750,44 +755,42 @@ class StudentsTFilter(KalmanFilter):
             Goodness of fit of the measurement based on the state and
             scale assuming Student's t noise.
         """
-        def _pdf(x, mu, sig, v):
-            d = x.size
-            del2 = (x - mu).T @ la.inv(sig) @ (x - mu)
-            inv_det = 1 / np.sqrt(la.det(sig))
-            gam_rat = gmath.gamma_fnc(np.floor((v + d) / 2)) \
-                / gmath.gamma_fnc(np.floor(v / 2))
-            return gam_rat / (v * np.pi)**(d / 2) * inv_det \
-                * (1 + del2 / v)**(-(v + d) / 2)
-
         est_meas, meas_mat = self._est_meas(timestep, cur_state, meas.size,
                                             meas_fun_args)
 
-        # update state
+        # get gain
+        scale_meas_T = self.scale @ meas_mat.T
         factor = self.meas_noise_dof * (self.dof - 2) \
             / (self.dof * (self.meas_noise_dof - 2))
-        P_zz = meas_mat @ self.scale @ meas_mat.T + factor * self.meas_noise
-        inv_P_zz = la.inv(P_zz)
-        gain = self.scale @ meas_mat.T @ inv_P_zz
-        P_kk = self.scale - gain @ meas_mat @ self.scale
+        inov_cov = meas_mat @ scale_meas_T + factor * self.meas_noise
+        inov_cov = (inov_cov + inov_cov.T) * 0.5
+        sqrt_inv_inov_cov = la.inv(la.cholesky(inov_cov))
+        inv_inov_cov = sqrt_inv_inov_cov.T @ sqrt_inv_inov_cov
+        gain = scale_meas_T @ inv_inov_cov
+        P_kk = (np.eye(cur_state.shape[0]) - gain @ meas_mat) @ self.scale
 
+        # update state
         innov = (meas - est_meas)
-        delta_2 = innov.T @ inv_P_zz @ innov
+        delta_2 = innov.T @ inv_inov_cov @ innov
         next_state = cur_state + gain @ innov
 
         # moment matching
-        factor = (self.dof + delta_2) / (self.dof + meas.size)
-        P_k = factor * P_kk
-        dof_p = self.dof + meas.size
+        if self.use_moment_matching:
+            dof_p = self.dof + meas.size
+            factor = (self.dof + delta_2) / dof_p
+            P_k = factor * P_kk
 
-        factor = dof_p * (self.dof - 2) / (self.dof * (dof_p - 2))
-        self.scale = factor * P_k
+            factor = dof_p * (self.dof - 2) / (self.dof * (dof_p - 2))
+            self.scale = factor * P_k
 
-        # self.scale = P_kk
-        # self.dof = dof_p
+        else:
+            self.scale = P_kk
 
         # get measurement fit
-        meas_fit_prob = _pdf(meas, est_meas, P_zz, self.meas_noise_dof)
-        meas_fit_prob = meas_fit_prob.item()
+        meas_fit_prob = stats.multivariate_t.pdf(meas.flatten(),
+                                                 loc=est_meas.flatten(),
+                                                 shape=inov_cov,
+                                                 df=self.meas_noise_dof)
 
         return next_state, meas_fit_prob
 
