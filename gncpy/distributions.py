@@ -183,7 +183,7 @@ class ParticleDistribution:
             Each element is a :class:`.distributions.Particle` object.
         """
         if self.num_particles > 0:
-            return [x.point for x in self._particles]
+            return [x.mean for x in self._particles]
         else:
             return self._particles
 
