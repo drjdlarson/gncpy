@@ -1204,12 +1204,12 @@ if __name__ == "__main__":
 
     # test_STF_dynObj()
 
-    # test_UKF_dynObj()
+    test_UKF_dynObj()
     # test_max_corr_ent_UKF_dynObj()
 
     # test_PF_dyn_fnc()
     # test_UPF_dyn_fnc()
-    test_UPF_dynObj()
+    # test_UPF_dynObj()
     # test_MCMC_UPF_dyn_fnc()
     # test_MCUPF_dyn_fnc()
     # test_MCMC_MCUPF_dyn_fnc()

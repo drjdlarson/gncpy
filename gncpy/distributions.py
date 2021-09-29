@@ -134,7 +134,8 @@ class Particle:
             The mean value.
         """
         if self.sigmaPoints is not None:
-            ref = deepcopy(self.sigmaPoints)
+            # ref = deepcopy(self.sigmaPoints)
+            ref = self.sigmaPoints
             ref.update_points(self.point, self.uncertainty)
             return ref.mean
         else:
