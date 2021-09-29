@@ -226,17 +226,24 @@ class ParticleDistribution:
 
         Parameters
         ----------
-        p : :class:`.distributions.Particle`
-            Particle to add.
-        w : float
-            Weight of the particle.
+        p : :class:`.distributions.Particle` or list
+            Particle to add or list of particles.
+        w : float or list
+            Weight of the particle or list of weights.
 
         Returns
         -------
         None.
         """
-        self._particles.append(p)
-        self._weights.append(w)
+        if isinstance(p, list):
+            self._particles.extend(p)
+        else:
+            self._particles.append(p)
+
+        if isinstance(w, list):
+            self._weights.extend(w)
+        else:
+            self._weights.append(w)
 
     def clear_particles(self):
         """Clears the particle and weight lists."""

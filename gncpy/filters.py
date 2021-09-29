@@ -950,17 +950,17 @@ class UnscentedKalmanFilter(ExtendedKalmanFilter):
 
         # propagate points
         if self._use_lin_dyn:
-            next_state, state_mat = KalmanFilter._predict_next_state(self, timestep,
-                                                                     cur_state, cur_input,
-                                                                     state_mat_args,
-                                                                     input_mat_args)
-            self.cov = state_mat @ self.cov @ state_mat.T + self.proc_noise
+            # next_state, state_mat = KalmanFilter._predict_next_state(self, timestep,
+            #                                                          cur_state, cur_input,
+            #                                                          state_mat_args,
+            #                                                          input_mat_args)
+            # self.cov = state_mat @ self.cov @ state_mat.T + self.proc_noise
 
-            # new_points = [KalmanFilter._predict_next_state(self, timestep,
-            #                                                 x, cur_input,
-            #                                                 state_mat_args,
-            #                                                 input_mat_args)[0]
-            #               for x in self._stateSigmaPoints.points]
+            new_points = [KalmanFilter._predict_next_state(self, timestep,
+                                                           x, cur_input,
+                                                           state_mat_args,
+                                                           input_mat_args)[0]
+                          for x in self._stateSigmaPoints.points]
         elif self._use_non_lin_dyn:
             new_points = [ExtendedKalmanFilter._predict_next_state(self,
                                                                    timestep,
@@ -970,17 +970,16 @@ class UnscentedKalmanFilter(ExtendedKalmanFilter):
         else:
             raise RuntimeError('State model not specified')
 
-        # self._stateSigmaPoints.points = new_points
-
-        # estimate weighted state output
-        # next_state = self._stateSigmaPoints.mean
+        self._stateSigmaPoints.points = new_points
 
         # update covariance
-        # self.cov = self._stateSigmaPoints.cov + self.proc_noise
+        self.cov = self._stateSigmaPoints.cov + self.proc_noise
         self.cov = (self.cov + self.cov.T) * 0.5
 
-        self._stateSigmaPoints.update_points(next_state, self.cov)
+        # estimate weighted state output
+        # self._stateSigmaPoints.update_points(next_state, self.cov)
         next_state = self._stateSigmaPoints.mean
+
         return next_state
 
     def _calc_meas_cov(self, timestep, n_meas, meas_fun_args):
@@ -1070,14 +1069,17 @@ class ParticleFilter(BayesFilter):
         Function of the state and `*args`. It returns the
     """
 
-    def __init__(self, meas_likelihood_fnc=None, proposal_sampling_fnc=None,
-                 proposal_fnc=None, dyn_obj=None, dyn_fun=None, part_dist=None,
-                 transition_prob_fnc=None, **kwargs):
+    def __init__(self, dyn_obj=None, dyn_fun=None, part_dist=None,
+                 transition_prob_fnc=None, rng=None, **kwargs):
 
-        self.meas_likelihood_fnc = meas_likelihood_fnc
-        self.proposal_sampling_fnc = proposal_sampling_fnc
-        self.proposal_fnc = proposal_fnc
-        self.transition_prob_fnc = transition_prob_fnc
+        self.__meas_likelihood_fnc = None
+        self.__proposal_sampling_fnc = None
+        self.__proposal_fnc = None
+        self.__transition_prob_fnc = None
+
+        if rng is None:
+            rng = rnd.default_rng(1)
+        self.rng = rng
 
         self._dyn_fnc = None
         self._dyn_obj = None
@@ -1095,6 +1097,38 @@ class ParticleFilter(BayesFilter):
         self._prop_parts = []
 
         super().__init__(**kwargs)
+
+    @property
+    def meas_likelihood_fnc(self):
+        return self.__meas_likelihood_fnc
+
+    @meas_likelihood_fnc.setter
+    def meas_likelihood_fnc(self, val):
+        self.__meas_likelihood_fnc = val
+
+    @property
+    def proposal_fnc(self):
+        return self.__proposal_fnc
+
+    @proposal_fnc.setter
+    def proposal_fnc(self, val):
+        self.__proposal_fnc = val
+
+    @property
+    def proposal_sampling_fnc(self):
+        return self.__proposal_sampling_fnc
+
+    @proposal_sampling_fnc.setter
+    def proposal_sampling_fnc(self, val):
+        self.__proposal_sampling_fnc = val
+
+    @property
+    def transition_prob_fnc(self):
+        return self.__transition_prob_fnc
+
+    @transition_prob_fnc.setter
+    def transition_prob_fnc(self, val):
+        self.__transition_prob_fnc = val
 
     def set_state_model(self, dyn_obj=None, dyn_fun=None):
         """Sets the state model.
@@ -1298,12 +1332,12 @@ class ParticleFilter(BayesFilter):
 
         """
         if self._dyn_obj is not None:
-            prop_parts = [self._dyn_obj.propagate_state(timestep, x,
+            self._prop_parts = [self._dyn_obj.propagate_state(timestep, x,
                                                        state_args=dyn_fun_params)
                          for x in self._particleDist.particles]
 
         elif self._dyn_fnc is not None:
-            prop_parts = [self._dyn_fnc(timestep, x, *dyn_fun_params)
+            self._prop_parts = [self._dyn_fnc(timestep, x, *dyn_fun_params)
                          for x in self._particleDist.particles]
 
         else:
@@ -1311,15 +1345,17 @@ class ParticleFilter(BayesFilter):
 
         new_weights = [w * self.transition_prob_fnc(x, p, *transition_args)
                            if self.transition_prob_fnc is not None
-                           else w for x, w, p in zip(prop_parts,
+                           else w for x, w, p in zip(self._prop_parts,
                                                   self._particleDist.weights,
                                                   self._particleDist.particles)]
+
+        new_parts = [self.proposal_sampling_fnc(p, self.rng, *sampling_args)
+                     for p in self._prop_parts]
 
         self._particleDist.clear_particles()
         for p, w in zip(new_parts, new_weights):
             part = gdistrib.Particle(point=p)
             self._particleDist.add_particle(part, w)
-
 
         return self._calc_state()
 
@@ -1352,14 +1388,14 @@ class ParticleFilter(BayesFilter):
         rel_likeli = self._calc_relative_likelihoods(meas, est_meas,
                                                      renorm=False,
                                                      meas_likely_args=meas_likely_args)
-        prop_fit = np.array([self.proposal_fnc(x_hat, cond, *proposal_args)
+        prop_fit = np.array([self.proposal_fnc(x_hat, cond, meas, *proposal_args)
                              for x_hat, cond in zip(self._particleDist.particles,
                                                     conditioned_lst)])
 
-        un_norm_weights = rel_likeli / prop_fit
-        inds = np.where(prop_fit < np.finfo(float).tiny)[0]
+        inds = np.where(prop_fit < np.finfo(float).eps)[0]
         if inds.size > 0:
-            un_norm_weights[inds] = np.inf
+            prop_fit[inds] = np.finfo(float).eps
+        un_norm_weights = rel_likeli / prop_fit * np.array(self._particleDist.weights)
 
         tot = np.sum(un_norm_weights)
 
@@ -1372,10 +1408,10 @@ class ParticleFilter(BayesFilter):
 
         return un_norm_weights
 
-    def _selection(self, rng):
+    def _selection(self):
         new_parts = []
         inds_kept = []
-        probs = rng.random(self.num_particles)
+        probs = self.rng.random(self.num_particles)
         cumulative_weight = np.cumsum(self._particleDist.weights)
         failed = False
         for r in probs:
@@ -1401,8 +1437,7 @@ class ParticleFilter(BayesFilter):
         return inds_removed
 
     def correct(self, timestep, meas, selection=True,
-                meas_fun_args=(), meas_likely_args=(), proposal_args=(),
-                rng=rnd.default_rng()):
+                meas_fun_args=(), meas_likely_args=(), proposal_args=()):
         """Corrects the state estimate.
 
         Parameters
@@ -1451,7 +1486,7 @@ class ParticleFilter(BayesFilter):
 
         # resample
         if selection:
-            inds_removed = self._selection(rng)
+            inds_removed = self._selection()
             un_norm_weights = None
 
         else:
@@ -1656,6 +1691,47 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
         super().__init__(**kwargs)
 
     @property
+    def meas_likelihood_fnc(self):
+        return lambda y, y_hat: stats.multivariate_normal.pdf(y.flatten(),
+                                                              y_hat.flatten(),
+                                                              self._filt.meas_noise,
+                                                              True)
+
+    @meas_likelihood_fnc.setter
+    def meas_likelihood_fnc(self, val):
+        warn('Measuremnet likelihood has an assumed form.')
+
+    @property
+    def proposal_fnc(self):
+        return lambda x_hat, part: stats.multivariate_normal.pdf(x_hat.flatten(),
+                                                                 part.mean.flatten(),
+                                                                 part.uncertainty)
+
+    @proposal_fnc.setter
+    def proposal_fnc(self, val):
+        warn('Proposal distribution has an assumed form.')
+
+    @property
+    def proposal_sampling_fnc(self):
+        return lambda part: self.rng.multivariate_normal(part.mean.flatten(),
+                                                         part.uncertainty).reshape(part.mean.shape)
+
+    @proposal_sampling_fnc.setter
+    def proposal_sampling_fnc(self, val):
+        warn('Proposal sampling has an assumed form.')
+
+    @property
+    def transition_prob_fnc(self):
+        return lambda x_hat, x: stats.multivariate_normal.pdf(x_hat.flatten(),
+                                                              x.flatten(),
+                                                              self._filt.proc_noise,
+                                                              True)
+
+    @transition_prob_fnc.setter
+    def transition_prob_fnc(self, val):
+        warn('Transistion distribution has an assumed form.')
+
+    @property
     def cov(self):
         """Read only covariance of the particles.
 
@@ -1755,7 +1831,7 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
                                    input_mat_fun=input_mat_fun, dyn_obj=dyn_obj,
                                    ode_lst=ode_lst)
 
-    def set_measurement_model(self, meas_mat=None, meas_fun_lst=None):
+    def set_measurement_model(self, **kwargs):
         r"""Sets the measurement model for the filter.
 
         This is a wrapper for the inner UKF's set_measurement model function.
@@ -1763,8 +1839,7 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
         See :meth:`gncpy.filters.UnscentedKalmanFilter.set_measurement_model`
         for details.
         """
-        self._filt.set_measurement_model(meas_mat=meas_mat,
-                                         meas_fun_lst=meas_fun_lst)
+        self._filt.set_measurement_model(**kwargs)
 
     def predict(self, timestep, ukf_kwargs={}):
         """Prediction step of the UPF.
@@ -1803,8 +1878,8 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
         return self._filt.correct(timestep, meas, state, **filt_kwargs)
 
     def correct(self, timestep, meas, selection=True, ukf_kwargs={},
-                rng=rnd.default_rng(), sampling_args=(), meas_fun_args=(),
-                move_kwargs={}, meas_likely_args=(), proposal_args=(),
+                meas_fun_args=(),
+                move_kwargs={},
                 allow_move=True):
         """Correction step of the UPF.
 
@@ -1855,39 +1930,39 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
             oldDist = deepcopy(self._particleDist)
 
         # call UKF correction on each particle
-        self._prop_parts = []
-        newDist = gdistrib.ParticleDistribution()
-        new_weight = 1 / self._particleDist.num_particles
-        for p, w in self._particleDist:
-            part = gdistrib.Particle()
-
+        new_weights = np.nan * np.ones(len(self._particleDist.particles))
+        new_parts = [None] * len(self._particleDist.particles)
+        for ii, (p, w) in enumerate(self._particleDist):
             self._filt.cov = p.uncertainty
             self._filt._stateSigmaPoints = p.sigmaPoints
-            ns = self._inner_correct(timestep, meas, p.point, ukf_kwargs)[0]
-            cov = self._filt.cov
 
-            self._prop_parts.append(ns)
-            samp = self.proposal_sampling_fnc(ns, *sampling_args)
+            part = gdistrib.Particle()
+            part.point = self._inner_correct(timestep, meas, p.mean, ukf_kwargs)[0]
+            part.uncertainty = self._filt.cov
+
+            samp = self.proposal_sampling_fnc(part)
+
+            est_meas = self._filt._est_meas(timestep, part.point, meas.size,
+                                            meas_fun_args)[0]
+            meas_likeli = self.meas_likelihood_fnc(meas, est_meas)
+            trans_prob = self.transition_prob_fnc(samp, part.point)
+            proposal_prob = self.proposal_fnc(samp, part)
+
+            if proposal_prob < np.finfo(float).eps:
+                proposal_prob = np.finfo(float).eps
+            new_weights[ii] = meas_likeli * trans_prob / proposal_prob
 
             part.point = samp
-            part.uncertainty = cov
             part.sigmaPoints = self._filt._stateSigmaPoints
-
-            newDist.add_particle(part, new_weight)
+            new_parts[ii] = part
 
         # update info for next UKF
+        newDist = gdistrib.ParticleDistribution()
+        newDist.add_particle(new_parts, (new_weights / np.sum(new_weights)).tolist())
         self._particleDist = newDist
 
-        # resample/selection
-        est_meas = [self._filt._est_meas(timestep, p, meas.size, meas_fun_args)[0]
-                    for p in self._particleDist.particles]
-        cov_lst = [p.uncertainty for p, w in self._particleDist]
-        un_norm_weights = self._calc_weights(meas, est_meas, self._prop_parts,
-                                             cov_lst, meas_likely_args,
-                                             proposal_args)
-
         if selection:
-            inds_removed = self._selection(rng)
+            inds_removed = self._selection()
         else:
             inds_removed = True
 
@@ -1899,7 +1974,7 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
         if selection or move_parts:
             un_norm_weights = None
 
-        return (self._calc_state(), un_norm_weights, inds_removed)
+        return (self._calc_state(), new_weights, inds_removed)
 
     def _calc_weights(self, meas, est_meas, conditioned_lst, cov_lst,
                       meas_likely_args, proposal_args):
