@@ -315,9 +315,9 @@ def weighted_sum_vec(w_lst, x_lst):
 
     Parameters
     ----------
-    w_lst : list of floats
+    w_lst : list of floats, or N numpy array
         list of weights.
-    x_lst : list of n x 1 numpy arrays
+    x_lst : list of n x 1 numpy arrays, or N x n x 1 numpy array
         list of vectors to be weighted and summed.
 
     Returns
@@ -325,7 +325,15 @@ def weighted_sum_vec(w_lst, x_lst):
     w_sum : n x 1 numpy array
         weighted sum of inputs.
     """
-    return np.sum([w * x for w, x in zip(w_lst, x_lst)], axis=0)
+    if isinstance(x_lst, list):
+        x = np.stack(x_lst)
+    else:
+        x = x_lst
+    if isinstance(w_lst, list):
+        w = np.array(w_lst)
+    else:
+        w = w_lst
+    return np.sum(w.reshape((-1,) + (1,) * (x.ndim - 1)) * x, axis=0)
 
 
 def weighted_sum_mat(w_lst, P_lst):
@@ -333,9 +341,9 @@ def weighted_sum_mat(w_lst, P_lst):
 
     Parameters
     ----------
-    w_lst : list of floats
+    w_lst : list of floats or numpy array
         list of weights.
-    P_lst : list of n x m numpy arrays
+    P_lst : list of n x m numpy arrays or N x n x n numpy array
         list of matrices to be weighted and summed.
 
     Returns
@@ -343,7 +351,15 @@ def weighted_sum_mat(w_lst, P_lst):
     w_sum : n x m numpy array
         weighted sum of inputs.
     """
-    return np.sum([w * P for w, P in zip(w_lst, P_lst)], axis=0)
+    if isinstance(P_lst, list):
+        cov = np.stack(P_lst)
+    else:
+        cov = P_lst
+    if isinstance(w_lst, list):
+        w = np.array(w_lst)
+    else:
+        w = w_lst
+    return np.sum(w.reshape((-1,) + (1,)*(cov.ndim - 1)) * cov, axis=0)
 
 
 def gaussian_kernel(x, sig):

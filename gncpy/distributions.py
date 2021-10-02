@@ -2,7 +2,6 @@
 import numpy as np
 import numpy.linalg as la
 from warnings import warn
-from copy import deepcopy
 
 import gncpy.math as gmath
 
@@ -32,8 +31,8 @@ class SigmaPoints():
     """
 
     def __init__(self, alpha=1, kappa=0, beta=2, n=0):
-        self.weights_mean = []
-        self.weights_cov = []
+        self.weights_mean = np.array([])
+        self.weights_cov = np.array([])
         self.alpha = alpha
         self.kappa = kappa
         self.beta = beta
@@ -48,14 +47,17 @@ class SigmaPoints():
     @property
     def mean(self):
         """Mean of the points, accounting for the weights."""
-        return gmath.weighted_sum_vec(self.weights_mean, self.points)
+        return gmath.weighted_sum_vec(self.weights_mean,
+                                      self.points).reshape((self.points.shape[1], 1))
 
     @property
     def cov(self):
         """Covariance of the points, accounting for the weights."""
         x_bar = self.mean
-        cov_lst = [(x - x_bar) @ (x - x_bar).T for x in self.points]
-        return gmath.weighted_sum_mat(self.weights_cov, cov_lst)
+        diff = (self.points - x_bar.ravel()).reshape(self.points.shape[0], x_bar.size, 1)
+        return gmath.weighted_sum_mat(self.weights_cov,
+                                      diff @ diff.reshape(self.points.shape[0],
+                                                          1, x_bar.size))
 
     def init_weights(self):
         """Initializes the weights based on other parameters.
@@ -64,13 +66,15 @@ class SigmaPoints():
         `alpha`, `kappa`, `beta`, and `n`.
         """
         lam = self.lam
-        self.weights_mean = [lam / (self.n + lam)]
-        self.weights_cov = [lam / (self.n + lam)
-                            + 1 - self.alpha**2 + self.beta]
+        self.weights_mean = np.nan * np.ones(2 * self.n + 1)
+        self.weights_cov = np.nan * np.ones(2 * self.n + 1)
+        self.weights_mean[0] = lam / (self.n + lam)
+        self.weights_cov[0] = lam / (self.n + lam) + 1 - self.alpha**2 \
+            + self.beta
+
         w = 1 / (2 * (self.n + lam))
-        for ii in range(1, 2 * self.n + 1):
-            self.weights_mean.append(w)
-            self.weights_cov.append(w)
+        self.weights_mean[1:] = w
+        self.weights_cov[1:] = w
 
     def update_points(self, x, cov):
         """Updates the sigma points given some initial point and covariance.
@@ -86,17 +90,23 @@ class SigmaPoints():
         -------
         None.
         """
-        loc_cov = cov.copy()
-        loc_cov = (loc_cov + loc_cov.T) * 0.5
+        loc_cov = cov
         S = la.cholesky((self.n + self.lam) * loc_cov)
 
-        self.points = [x]
+        # self.points = [None] * (2 * self.n + 1)
+        self.points = np.nan * np.ones((2 * self.n + 1, x.size))
+        self.points[0, :] = x.flatten()
+        self.points[1:self.n + 1, :] = x.ravel() + S.T
+        self.points[self.n + 1:, :] = x.ravel() - S.T
+        # self.points[0] = x
 
-        for ii in range(0, self.n):
-            self.points.append(x + S[:, [ii]])
+        # for ii in range(0, self.n):
+        #     self.points[ii + 1] = x + S[:, [ii]]
 
-        for ii in range(self.n, 2 * self.n):
-            self.points.append(x - S[:, [ii - self.n]])
+        # for ii in range(self.n, 2 * self.n):
+        #     self.points[ii + 1] = x - S[:, [ii - self.n]]
+
+        # brk = 1
 
 
 class Particle:
@@ -134,10 +144,8 @@ class Particle:
             The mean value.
         """
         if self.sigmaPoints is not None:
-            # ref = deepcopy(self.sigmaPoints)
-            ref = self.sigmaPoints
-            ref.update_points(self.point, self.uncertainty)
-            return ref.mean
+            # self.sigmaPoints.update_points(self.point, self.uncertainty)
+            return self.sigmaPoints.mean
         else:
             return self.point
 

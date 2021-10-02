@@ -480,7 +480,7 @@ def test_PF_dyn_fnc():  # noqa
 
     rng = rnd.default_rng(global_seed)
     num_parts = 2000
-    t0, t1 = 0, 3
+    t0, t1 = 0, 4
     dt = 0.1
     level_sig = 0.05
 
@@ -574,7 +574,7 @@ def test_UPF_dyn_fnc():  # noqa
 
     rng = rnd.default_rng(global_seed)
     num_parts = 100
-    t0, t1 = 0, 3
+    t0, t1 = 0, 4
     dt = 0.1
     level_sig = 0.05
 
@@ -1178,8 +1178,8 @@ if __name__ == "__main__":
     # test_max_corr_ent_UKF_dynObj()
 
     # test_PF_dyn_fnc()
-    # test_UPF_dyn_fnc()
-    test_UPF_dynObj()
+    test_UPF_dyn_fnc()
+    # test_UPF_dynObj()
     # test_MCMC_UPF_dyn_fnc()
     # test_MCUPF_dyn_fnc()
     # test_MCMC_MCUPF_dyn_fnc()
