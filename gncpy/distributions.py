@@ -179,6 +179,11 @@ class ParticleDistribution:
         self._particles = []
         self._weights = []
 
+        self.__need_mean_lst_update = True
+        self.__need_uncert_lst_update = True
+        self.__means = []
+        self.__uncertianties = []
+
     @property
     def particles(self):
         """Particles in the distribution.
@@ -192,9 +197,12 @@ class ParticleDistribution:
             Each element is a :class:`.distributions.Particle` object.
         """
         if self.num_particles > 0:
-            return [x.mean for x in self._particles]
+            if self.__need_mean_lst_update:
+                self.__need_mean_lst_update = False
+                self.__means = [x.mean for x in self._particles]
+            return self.__means
         else:
-            return self._particles
+            return []
 
     @property
     def weights(self):
@@ -227,7 +235,13 @@ class ParticleDistribution:
         list
             Each element is a N x N numpy array
         """
-        return [x.uncertainty for x in self._particles]
+        if self.num_particles > 0:
+            if self.__need_uncert_lst_update:
+                self.__need_uncert_lst_update = False
+                self.__uncertianties = [x.uncertainty for x in self._particles]
+            return self.__uncertianties
+        else:
+            return []
 
     def add_particle(self, p, w):
         """Adds a particle and weight to the distribution.
@@ -243,6 +257,8 @@ class ParticleDistribution:
         -------
         None.
         """
+        self.__need_mean_lst_update = True
+        self.__need_uncert_lst_update = True
         if isinstance(p, list):
             self._particles.extend(p)
         else:
@@ -255,14 +271,19 @@ class ParticleDistribution:
 
     def clear_particles(self):
         """Clears the particle and weight lists."""
+        self.__need_mean_lst_update = True
+        self.__need_uncert_lst_update = True
         self._particles = []
         self._weights = []
 
     def update_weights(self, w_lst):
         """Updates the weights to match the given list.
 
-        Checks that the lenght of the weights matches the number of particles.
+        Checks that the length of the weights matches the number of particles.
         """
+        self.__need_mean_lst_update = True
+        self.__need_uncert_lst_update = True
+
         if len(w_lst) != self.num_particles:
             warn('Different number of weights than particles')
         else:

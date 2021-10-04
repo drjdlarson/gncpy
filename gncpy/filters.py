@@ -24,7 +24,9 @@ class BayesFilter(metaclass=abc.ABCMeta):
 
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, use_cholesky_inverse=True, **kwargs):
+        self.use_cholesky_inverse = use_cholesky_inverse
+
         super().__init__(**kwargs)
 
     @abc.abstractmethod
@@ -357,8 +359,11 @@ class KalmanFilter(BayesFilter):
         cov_meas_T = self.cov @ meas_mat.T
         inov_cov = meas_mat @ cov_meas_T + self.meas_noise
         inov_cov = (inov_cov + inov_cov.T) * 0.5
-        sqrt_inv_inov_cov = la.inv(la.cholesky(inov_cov))
-        inv_inov_cov = sqrt_inv_inov_cov.T @ sqrt_inv_inov_cov
+        if self.use_cholesky_inverse:
+            sqrt_inv_inov_cov = la.inv(la.cholesky(inov_cov))
+            inv_inov_cov = sqrt_inv_inov_cov.T @ sqrt_inv_inov_cov
+        else:
+            inv_inov_cov = la.inv(inov_cov)
         kalman_gain = cov_meas_T @ inv_inov_cov
 
         # update the state with measurement
@@ -764,8 +769,11 @@ class StudentsTFilter(KalmanFilter):
             / (self.dof * (self.meas_noise_dof - 2))
         inov_cov = meas_mat @ scale_meas_T + factor * self.meas_noise
         inov_cov = (inov_cov + inov_cov.T) * 0.5
-        sqrt_inv_inov_cov = la.inv(la.cholesky(inov_cov))
-        inv_inov_cov = sqrt_inv_inov_cov.T @ sqrt_inv_inov_cov
+        if self.use_cholesky_inverse:
+            sqrt_inv_inov_cov = la.inv(la.cholesky(inov_cov))
+            inv_inov_cov = sqrt_inv_inov_cov.T @ sqrt_inv_inov_cov
+        else:
+            inv_inov_cov = la.inv(inov_cov)
         gain = scale_meas_T @ inv_inov_cov
         P_kk = (np.eye(cur_state.shape[0]) - gain @ meas_mat) @ self.scale
 
@@ -1024,8 +1032,11 @@ class UnscentedKalmanFilter(ExtendedKalmanFilter):
         cross_cov = gmath.weighted_sum_mat(self._stateSigmaPoints.weights_cov,
                                            cross_cov_lst)
 
-        sqrt_inv_meas_cov = la.inv(la.cholesky(meas_cov))
-        inv_meas_cov = sqrt_inv_meas_cov.T @ sqrt_inv_meas_cov
+        if self.use_cholesky_inverse:
+            sqrt_inv_meas_cov = la.inv(la.cholesky(meas_cov))
+            inv_meas_cov = sqrt_inv_meas_cov.T @ sqrt_inv_meas_cov
+        else:
+            inv_meas_cov = la.inv(meas_cov)
         gain = cross_cov @ inv_meas_cov
         inov = (meas - est_meas)
 
@@ -1677,9 +1688,6 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
     def proposal_sampling_fnc(self, val):
         warn('Proposal sampling has an assumed form.')
 
-    def __trans_prob_help(self, x_hat, x):
-        return stats.multivariate_normal.pdf(x_hat.ravel(), x.ravel(),
-                                             self._filt.proc_noise, True)
     @property
     def transition_prob_fnc(self):
         return lambda x_hat, x: stats.multivariate_normal.pdf(x_hat.ravel(),
@@ -1779,15 +1787,18 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
             The predicted state.
         """
         newDist = gdistrib.ParticleDistribution()
-        new_weight = 1 / self._particleDist.num_particles
-        for origPart, w in self._particleDist:
+        new_weight = [1 / self._particleDist.num_particles] * self._particleDist.num_particles
+        new_parts = [None] * self._particleDist.num_particles
+        for ii, (origPart, w) in enumerate(self._particleDist):
             part = gdistrib.Particle()
             self._filt.cov = origPart.uncertainty
             self._filt._stateSigmaPoints = origPart.sigmaPoints
             part.point = self._filt.predict(timestep, origPart.point, **ukf_kwargs)
             part.uncertainty = self._filt.cov
             part.sigmaPoints = self._filt._stateSigmaPoints
-            newDist.add_particle(part, new_weight)
+            new_parts[ii] = part
+
+        newDist.add_particle(new_parts, new_weight)
 
         self._particleDist = newDist
         return self._calc_state()
@@ -1844,7 +1855,7 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
 
         # call UKF correction on each particle
         new_weights = np.nan * np.ones(len(self._particleDist.particles))
-        rel_likeli = np.nan * np.ones(len(self._particleDist.particles))
+        # rel_likeli = np.nan * np.ones(len(self._particleDist.particles))
         new_parts = [None] * len(self._particleDist.particles)
         for ii, (p, w) in enumerate(self._particleDist):
             self._filt.cov = p.uncertainty
@@ -1857,13 +1868,13 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
             samp = self.proposal_sampling_fnc(part)
             est_meas = self._est_meas(timestep, part.point, meas.size,
                                       meas_fun_args)
-            rel_likeli[ii] = self.meas_likelihood_fnc(meas, est_meas)
+            rel_likeli = self.meas_likelihood_fnc(meas, est_meas)
             trans_prob = self.transition_prob_fnc(samp, part.point)
             proposal_prob = self.proposal_fnc(samp, part)
 
             if proposal_prob < np.finfo(float).eps:
                 proposal_prob = np.finfo(float).eps
-            new_weights[ii] = rel_likeli[ii] * trans_prob / proposal_prob
+            new_weights[ii] = rel_likeli * trans_prob / proposal_prob
 
             part.point = samp
             part.sigmaPoints = self._filt._stateSigmaPoints
@@ -1882,12 +1893,13 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
         if move_parts:
             self.move_particles(timestep, oldDist, meas, **move_kwargs)
 
-        est_meas = [self._est_meas(timestep, p, meas.size, meas_fun_args)
-                    for p in self._particleDist.particles]
-        rel_likeli = np.array([self.meas_likelihood_fnc(meas, y_hat)
-                               for y_hat in est_meas])
+        rel_likeli = [self.meas_likelihood_fnc(meas,
+                                               self._est_meas(timestep, p,
+                                                              meas.size,
+                                                              meas_fun_args))
+                      for p in self._particleDist.particles]
 
-        return (self._calc_state(), rel_likeli.tolist(), inds_removed)
+        return (self._calc_state(), rel_likeli, inds_removed)
 
     def move_particles(self, timestep, oldDist, meas, ukf_kwargs={},
                        rng=rnd.default_rng(), sampling_args=(), meas_fun_args=(),
