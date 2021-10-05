@@ -2,7 +2,6 @@
 import numpy as np
 import numpy.linalg as la
 from warnings import warn
-from copy import deepcopy
 
 import gncpy.math as gmath
 
@@ -32,8 +31,8 @@ class SigmaPoints():
     """
 
     def __init__(self, alpha=1, kappa=0, beta=2, n=0):
-        self.weights_mean = []
-        self.weights_cov = []
+        self.weights_mean = np.array([])
+        self.weights_cov = np.array([])
         self.alpha = alpha
         self.kappa = kappa
         self.beta = beta
@@ -48,14 +47,17 @@ class SigmaPoints():
     @property
     def mean(self):
         """Mean of the points, accounting for the weights."""
-        return gmath.weighted_sum_vec(self.weights_mean, self.points)
+        return gmath.weighted_sum_vec(self.weights_mean,
+                                      self.points).reshape((self.points.shape[1], 1))
 
     @property
     def cov(self):
         """Covariance of the points, accounting for the weights."""
         x_bar = self.mean
-        cov_lst = [(x - x_bar) @ (x - x_bar).T for x in self.points]
-        return gmath.weighted_sum_mat(self.weights_cov, cov_lst)
+        diff = (self.points - x_bar.ravel()).reshape(self.points.shape[0], x_bar.size, 1)
+        return gmath.weighted_sum_mat(self.weights_cov,
+                                      diff @ diff.reshape(self.points.shape[0],
+                                                          1, x_bar.size))
 
     def init_weights(self):
         """Initializes the weights based on other parameters.
@@ -64,13 +66,15 @@ class SigmaPoints():
         `alpha`, `kappa`, `beta`, and `n`.
         """
         lam = self.lam
-        self.weights_mean = [lam / (self.n + lam)]
-        self.weights_cov = [lam / (self.n + lam)
-                            + 1 - self.alpha**2 + self.beta]
+        self.weights_mean = np.nan * np.ones(2 * self.n + 1)
+        self.weights_cov = np.nan * np.ones(2 * self.n + 1)
+        self.weights_mean[0] = lam / (self.n + lam)
+        self.weights_cov[0] = lam / (self.n + lam) + 1 - self.alpha**2 \
+            + self.beta
+
         w = 1 / (2 * (self.n + lam))
-        for ii in range(1, 2 * self.n + 1):
-            self.weights_mean.append(w)
-            self.weights_cov.append(w)
+        self.weights_mean[1:] = w
+        self.weights_cov[1:] = w
 
     def update_points(self, x, cov):
         """Updates the sigma points given some initial point and covariance.
@@ -86,17 +90,23 @@ class SigmaPoints():
         -------
         None.
         """
-        loc_cov = cov.copy()
-        loc_cov = (loc_cov + loc_cov.T) * 0.5
+        loc_cov = cov
         S = la.cholesky((self.n + self.lam) * loc_cov)
 
-        self.points = [x]
+        # self.points = [None] * (2 * self.n + 1)
+        self.points = np.nan * np.ones((2 * self.n + 1, x.size))
+        self.points[0, :] = x.flatten()
+        self.points[1:self.n + 1, :] = x.ravel() + S.T
+        self.points[self.n + 1:, :] = x.ravel() - S.T
+        # self.points[0] = x
 
-        for ii in range(0, self.n):
-            self.points.append(x + S[:, [ii]])
+        # for ii in range(0, self.n):
+        #     self.points[ii + 1] = x + S[:, [ii]]
 
-        for ii in range(self.n, 2 * self.n):
-            self.points.append(x - S[:, [ii - self.n]])
+        # for ii in range(self.n, 2 * self.n):
+        #     self.points[ii + 1] = x - S[:, [ii - self.n]]
+
+        # brk = 1
 
 
 class Particle:
@@ -134,9 +144,8 @@ class Particle:
             The mean value.
         """
         if self.sigmaPoints is not None:
-            ref = deepcopy(self.sigmaPoints)
-            ref.update_points(self.point, self.uncertainty)
-            return ref.mean
+            # self.sigmaPoints.update_points(self.point, self.uncertainty)
+            return self.sigmaPoints.mean
         else:
             return self.point
 
@@ -148,16 +157,16 @@ class Particle:
 class _ParticleDistIter:
     def __init__(self, partDist):
         self._partDist = partDist
-        self._index = 0
+        self.__index = 0
 
     def __next__(self):
-        if self._index < self._partDist.num_particles:
-            p = self._partDist._particles[self._index]
-            w = self._partDist.weights[self._index]
-            res = (p, w)
-            self._index += 1
-            return res
-        raise StopIteration
+        try:
+            result = (self._partDist._particles[self.__index],
+                      self._partDist.weights[self.__index])
+        except IndexError:
+            raise StopIteration
+        self.__index += 1
+        return result
 
 
 class ParticleDistribution:
@@ -169,6 +178,13 @@ class ParticleDistribution:
     def __init__(self, **kwargs):
         self._particles = []
         self._weights = []
+
+        self.__need_mean_lst_update = True
+        self.__need_uncert_lst_update = True
+        self.__means = []
+        self.__uncertianties = []
+
+        self.__index = 0
 
     @property
     def particles(self):
@@ -183,9 +199,12 @@ class ParticleDistribution:
             Each element is a :class:`.distributions.Particle` object.
         """
         if self.num_particles > 0:
-            return [x.mean for x in self._particles]
+            if self.__need_mean_lst_update:
+                self.__need_mean_lst_update = False
+                self.__means = [x.mean for x in self._particles]
+            return self.__means
         else:
-            return self._particles
+            return []
 
     @property
     def weights(self):
@@ -218,35 +237,55 @@ class ParticleDistribution:
         list
             Each element is a N x N numpy array
         """
-        return [x.uncertainty for x in self._particles]
+        if self.num_particles > 0:
+            if self.__need_uncert_lst_update:
+                self.__need_uncert_lst_update = False
+                self.__uncertianties = [x.uncertainty for x in self._particles]
+            return self.__uncertianties
+        else:
+            return []
 
     def add_particle(self, p, w):
         """Adds a particle and weight to the distribution.
 
         Parameters
         ----------
-        p : :class:`.distributions.Particle`
-            Particle to add.
-        w : float
-            Weight of the particle.
+        p : :class:`.distributions.Particle` or list
+            Particle to add or list of particles.
+        w : float or list
+            Weight of the particle or list of weights.
 
         Returns
         -------
         None.
         """
-        self._particles.append(p)
-        self._weights.append(w)
+        self.__need_mean_lst_update = True
+        self.__need_uncert_lst_update = True
+        if isinstance(p, list):
+            self._particles.extend(p)
+        else:
+            self._particles.append(p)
+
+        if isinstance(w, list):
+            self._weights.extend(w)
+        else:
+            self._weights.append(w)
 
     def clear_particles(self):
         """Clears the particle and weight lists."""
+        self.__need_mean_lst_update = True
+        self.__need_uncert_lst_update = True
         self._particles = []
         self._weights = []
 
     def update_weights(self, w_lst):
         """Updates the weights to match the given list.
 
-        Checks that the lenght of the weights matches the number of particles.
+        Checks that the length of the weights matches the number of particles.
         """
+        self.__need_mean_lst_update = True
+        self.__need_uncert_lst_update = True
+
         if len(w_lst) != self.num_particles:
             warn('Different number of weights than particles')
         else:

@@ -16,6 +16,7 @@ r2d = 1 / d2r
 
 debug_figs = False
 
+
 def test_KF_dynObj():  # noqa
     m_noise = 0.02
     p_noise = 0.2
@@ -478,8 +479,8 @@ def test_PF_dyn_fnc():  # noqa
     print('test PF')
 
     rng = rnd.default_rng(global_seed)
-    num_parts = 2000
-    t0, t1 = 0, 3
+    num_parts = 1000
+    t0, t1 = 0, 4
     dt = 0.1
     level_sig = 0.05
 
@@ -498,28 +499,34 @@ def test_PF_dyn_fnc():  # noqa
         p.point = 2 * proc_noise_std * rng.random(true_state.shape) - proc_noise_std + true_state
         distrib.add_particle(p, 1 / num_parts)
 
-    # define particle filter
-    pf = gfilts.ParticleFilter()
-
     def f(t, x, *args):
         return F @ x
+
+    def transition_prob_fnc(x, mean, *args):
+        z = ((x - mean) / proc_noise_std).item()
+        return stats.norm.pdf(z)
 
     def meas_likelihood(meas, est, *args):
         z = ((meas - est) / meas_noise_std).item()
         return stats.norm.pdf(z)
 
-    def proposal_sampling_fnc(x, rng):
+    def proposal_sampling_fnc(x, rng, *args):
         noise = proc_mean + proc_noise_std * rng.standard_normal()
         return x + noise
 
-    def proposal_fnc(x_hat, cond, *args):
-        return 1
-        # z = ((x_hat - cond) / proc_noise_std).item()
-        # return stats.norm.pdf(z)
+    def proposal_fnc(x_hat, mean, y, *args):
+        # return 1
+        z = ((x_hat - mean) / proc_noise_std).item()
+        return stats.norm.pdf(z)
+
+    # define particle filter
+    pf = gfilts.ParticleFilter()
+    pf.rng = rng
 
     pf.meas_likelihood_fnc = meas_likelihood
     pf.proposal_sampling_fnc = proposal_sampling_fnc
     pf.proposal_fnc = proposal_fnc
+    pf.transition_prob_fnc = transition_prob_fnc
 
     pf.set_measurement_model(meas_mat=H)
     pf.set_state_model(dyn_fun=f)
@@ -534,7 +541,7 @@ def test_PF_dyn_fnc():  # noqa
         if np.mod(kk, int(1 / dt)) == 0:
             print('\t\t{:.2f}'.format(tt))
             sys.stdout.flush()
-        sampling_args = (rng, )
+        sampling_args = ()
         pred_state = pf.predict(tt, sampling_args=sampling_args)
 
         # calculate true state and measurement for this timestep
@@ -543,7 +550,7 @@ def test_PF_dyn_fnc():  # noqa
         meas = H @ true_state + meas_noise_std * rng.normal()
 
         proposal_args = ()
-        pred_state = pf.correct(tt, meas, proposal_args=proposal_args, rng=rng)[0]
+        pred_state = pf.correct(tt, meas, proposal_args=proposal_args)[0]
 
     if debug_figs:
         pf.plot_particles(0, title='Final Particle Distribution')
@@ -567,7 +574,7 @@ def test_UPF_dyn_fnc():  # noqa
 
     rng = rnd.default_rng(global_seed)
     num_parts = 100
-    t0, t1 = 0, 3
+    t0, t1 = 0, 4
     dt = 0.1
     level_sig = 0.05
 
@@ -594,27 +601,10 @@ def test_UPF_dyn_fnc():  # noqa
         distrib.add_particle(p, 1 / num_parts)
 
     # define particle filter
-    pf = gfilts.UnscentedParticleFilter()
+    pf = gfilts.UnscentedParticleFilter(rng=rng)
 
     def f(t, *args):
         return F
-
-    def meas_likelihood(meas, est, *args):
-        z = ((meas - est) / meas_noise_std).item()
-        return stats.norm.pdf(z)
-
-    def proposal_sampling_fnc(x, rng):
-        noise = proc_mean + proc_noise_std * rng.standard_normal()
-        return x + noise
-
-    def proposal_fnc(x_hat, cond, cov, *args):
-        return 1
-        # z = ((x_hat - cond) / proc_noise_std).item()
-        # return stats.norm.pdf(z)
-
-    pf.meas_likelihood_fnc = meas_likelihood
-    pf.proposal_sampling_fnc = proposal_sampling_fnc
-    pf.proposal_fnc = proposal_fnc
 
     pf.proc_noise = proc_noise_std**2
     pf.meas_noise = meas_noise_std**2
@@ -632,7 +622,7 @@ def test_UPF_dyn_fnc():  # noqa
         if np.mod(kk, int(1 / dt)) == 0:
             print('\t\t{:.2f}'.format(tt))
             sys.stdout.flush()
-        sampling_args = (rng, )
+
         pred_state = pf.predict(tt)
 
         # calculate true state and measurement for this timestep
@@ -640,9 +630,7 @@ def test_UPF_dyn_fnc():  # noqa
         true_state = F @ true_state + p_noise
         meas = H @ true_state + meas_noise_std * rng.normal()
 
-        proposal_args = ()
-        pred_state = pf.correct(tt, meas, sampling_args=sampling_args,
-                                proposal_args=proposal_args, rng=rng)[0]
+        pred_state = pf.correct(tt, meas)[0]
 
     if debug_figs:
         pf.plot_particles(0, title='Final Particle Distribution')
@@ -668,7 +656,7 @@ def test_UPF_dynObj():  # noqa
     num_parts = 100
     dt = 0.01
     t0, t1 = 0, 6 + dt
-    level_sig = 0.05
+    # level_sig = 0.05
 
     time = np.arange(t0, t1, dt)
 
@@ -679,7 +667,7 @@ def test_UPF_dynObj():  # noqa
                          [0, 1, 0, 0]])
 
     dynObj = gdyn.DoubleIntegrator()
-    pf = gfilts.UnscentedParticleFilter(use_MCMC=False)
+    pf = gfilts.UnscentedParticleFilter(use_MCMC=False, rng=rng)
     pf.set_state_model(dyn_obj=dynObj)
     pf.set_measurement_model(meas_mat=meas_mat)
 
@@ -688,22 +676,6 @@ def test_UPF_dynObj():  # noqa
     # proc_noise = p_noise_std**2 * np.diag([0, 0, 1, 1])
     pf.proc_noise = proc_noise.copy()
     pf.meas_noise = m_noise_std**2 * np.eye(meas_mat.shape[0])
-
-    def meas_likelihood(meas, est, *args):  # noqa
-        return stats.multivariate_normal.pdf(meas.flatten(), mean=est.flatten(),
-                                             cov=m_noise_std**2 * np.eye(2))
-
-    def proposal_sampling_fnc(x, rng, proc_noise):  # noqa
-        val = rng.multivariate_normal(x.flatten(), proc_noise).reshape(x.shape)
-        return val
-
-    def proposal_fnc(x_hat, cond, p_hat, *args):  # noqa
-        return stats.multivariate_normal.pdf(x_hat.flatten(), mean=cond.flatten(),
-                                             cov=p_hat)
-
-    pf.meas_likelihood_fnc = meas_likelihood
-    pf.proposal_sampling_fnc = proposal_sampling_fnc
-    pf.proposal_fnc = proposal_fnc
 
     true_state = np.array([20, 80, 3, -3]).reshape((4, 1))
 
@@ -750,10 +722,7 @@ def test_UPF_dynObj():  # noqa
         meas = meas_mat @ (true_state + p_noise.reshape(true_state.shape)) \
             + m_noise.reshape((2, 1))
 
-        proposal_args = ()
-        sampling_args = (rng, proc_noise)
-        pred_state = pf.correct(tt, meas, sampling_args=sampling_args,
-                                proposal_args=proposal_args, rng=rng)[0]
+        pred_state = pf.correct(tt, meas)[0]
         xy_pos[kk + 1, :] = pred_state[0:2, 0]
 
     if debug_figs:
@@ -762,7 +731,7 @@ def test_UPF_dynObj():  # noqa
         fig = plt.figure()
         fig.add_subplot(1, 1, 1)
         fig.axes[0].plot(xy_pos[:, 0], xy_pos[:, 1], label='est')
-        fig.axes[0].plot(true_pos[:, 0], xy_pos[:, 1], label='true', color='k')
+        fig.axes[0].plot(true_pos[:, 0], true_pos[:, 1], label='true', color='k')
         fig.axes[0].legend()
         fig.axes[0].grid(True)
         ttl = 'X/Y Position'
@@ -778,10 +747,10 @@ def test_UPF_dynObj():  # noqa
     #                                 proc_noise,
     #                                 m_noise_std**2 * np.eye(2))
 
-    sqrt_inv_cov = la.inv(la.cholesky(pf.cov))
-    inv_cov = sqrt_inv_cov.T @ sqrt_inv_cov
-    chi_stat = (pred_state - true_state).T @ inv_cov @ (pred_state - true_state)
-    crit_val = stats.chi2.ppf(1 - level_sig, df=true_state.size)
+    # sqrt_inv_cov = la.inv(la.cholesky(pf.cov))
+    # inv_cov = sqrt_inv_cov.T @ sqrt_inv_cov
+    # chi_stat = (pred_state - true_state).T @ inv_cov @ (pred_state - true_state)
+    # crit_val = stats.chi2.ppf(1 - level_sig, df=true_state.size)
 
     print(pred_state.flatten())
     print(true_state.flatten())
@@ -796,8 +765,8 @@ def test_MCMC_UPF_dyn_fnc():  # noqa
     print('test MCMC-UPF')
 
     rng = rnd.default_rng(global_seed)
-    num_parts = 30
-    t0, t1 = 0, 3
+    num_parts = 50
+    t0, t1 = 0, 4
     dt = 0.1
     level_sig = 0.05
 
@@ -824,27 +793,10 @@ def test_MCMC_UPF_dyn_fnc():  # noqa
         distrib.add_particle(p, 1 / num_parts)
 
     # define particle filter
-    pf = gfilts.UnscentedParticleFilter(use_MCMC=True)
+    pf = gfilts.UnscentedParticleFilter(use_MCMC=True, rng=rng)
 
     def f(t, *args):
         return F
-
-    def meas_likelihood(meas, est, *args):
-        z = ((meas - est) / meas_noise_std).item()
-        return stats.norm.pdf(z)
-
-    def proposal_sampling_fnc(x, rng):
-        noise = proc_mean + proc_noise_std * rng.standard_normal()
-        return x + noise
-
-    def proposal_fnc(x_hat, cond, cov, *args):
-        return 1
-        # z = ((x_hat - cond) / proc_noise_std).item()
-        # return stats.norm.pdf(z)
-
-    pf.meas_likelihood_fnc = meas_likelihood
-    pf.proposal_sampling_fnc = proposal_sampling_fnc
-    pf.proposal_fnc = proposal_fnc
 
     pf.proc_noise = proc_noise_std**2
     pf.meas_noise = meas_noise_std**2
@@ -862,7 +814,7 @@ def test_MCMC_UPF_dyn_fnc():  # noqa
         if np.mod(kk, int(1 / dt)) == 0:
             print('\t\t{:.2f}'.format(tt))
             sys.stdout.flush()
-        sampling_args = (rng, )
+
         pred_state = pf.predict(tt)
 
         # calculate true state and measurement for this timestep
@@ -870,12 +822,7 @@ def test_MCMC_UPF_dyn_fnc():  # noqa
         true_state = F @ true_state + p_noise
         meas = H @ true_state + meas_noise_std * rng.normal()
 
-        proposal_args = ()
-        move_kwargs = {'rng': rng, 'sampling_args': sampling_args,
-                       'proposal_args': proposal_args}
-        pred_state = pf.correct(tt, meas, sampling_args=sampling_args,
-                                proposal_args=proposal_args, rng=rng,
-                                move_kwargs=move_kwargs)[0]
+        pred_state = pf.correct(tt, meas)[0]
 
     if debug_figs:
         pf.plot_particles(0, title='Final Particle Distribution')
@@ -1012,28 +959,11 @@ def test_MCUPF_dyn_fnc():  # noqa
         distrib.add_particle(p, 1 / num_parts)
 
     # define particle filter
-    pf = gfilts.MaxCorrEntUPF(use_MCMC=False)
+    pf = gfilts.MaxCorrEntUPF(use_MCMC=False, rng=rng)
     pf.kernel_bandwidth = 10
 
     def f(t, *args):
         return F
-
-    def meas_likelihood(meas, est, *args):
-        z = ((meas - est) / meas_noise_std).item()
-        return stats.norm.pdf(z)
-
-    def proposal_sampling_fnc(x, rng):
-        noise = proc_mean + proc_noise_std * rng.standard_normal()
-        return x + noise
-
-    def proposal_fnc(x_hat, cond, cov, *args):
-        return 1
-        # z = ((x_hat - cond) / proc_noise_std).item()
-        # return stats.norm.pdf(z)
-
-    pf.meas_likelihood_fnc = meas_likelihood
-    pf.proposal_sampling_fnc = proposal_sampling_fnc
-    pf.proposal_fnc = proposal_fnc
 
     pf.proc_noise = proc_noise_std**2
     pf.meas_noise = meas_noise_std**2
@@ -1051,7 +981,7 @@ def test_MCUPF_dyn_fnc():  # noqa
         if np.mod(kk, int(1 / dt)) == 0:
             print('\t\t{:.2f}'.format(tt))
             sys.stdout.flush()
-        sampling_args = (rng, )
+
         past_state = pred_state.copy()
         pred_state = pf.predict(tt)
 
@@ -1060,12 +990,7 @@ def test_MCUPF_dyn_fnc():  # noqa
         true_state = F @ true_state + p_noise
         meas = H @ true_state + meas_noise_std * rng.normal()
 
-        proposal_args = ()
-        move_kwargs = {'rng': rng, 'sampling_args': sampling_args,
-                       'proposal_args': proposal_args}
-        pred_state = pf.correct(tt, meas, past_state, sampling_args=sampling_args,
-                                proposal_args=proposal_args, rng=rng,
-                                move_kwargs=move_kwargs)[0]
+        pred_state = pf.correct(tt, meas, past_state)[0]
 
     if debug_figs:
         pf.plot_particles(0, title='Final Particle Distribution')
@@ -1116,28 +1041,11 @@ def test_MCMC_MCUPF_dyn_fnc():  # noqa
         distrib.add_particle(p, 1 / num_parts)
 
     # define particle filter
-    pf = gfilts.MaxCorrEntUPF(use_MCMC=True)
+    pf = gfilts.MaxCorrEntUPF(use_MCMC=True, rng=rng)
     pf.kernel_bandwidth = 10
 
     def f(t, *args):
         return F
-
-    def meas_likelihood(meas, est, *args):
-        z = ((meas - est) / meas_noise_std).item()
-        return stats.norm.pdf(z)
-
-    def proposal_sampling_fnc(x, rng):
-        noise = proc_mean + proc_noise_std * rng.standard_normal()
-        return x + noise
-
-    def proposal_fnc(x_hat, cond, cov, *args):
-        return 1
-        # z = ((x_hat - cond) / proc_noise_std).item()
-        # return stats.norm.pdf(z)
-
-    pf.meas_likelihood_fnc = meas_likelihood
-    pf.proposal_sampling_fnc = proposal_sampling_fnc
-    pf.proposal_fnc = proposal_fnc
 
     pf.proc_noise = proc_noise_std**2
     pf.meas_noise = meas_noise_std**2
@@ -1155,7 +1063,7 @@ def test_MCMC_MCUPF_dyn_fnc():  # noqa
         if np.mod(kk, int(1 / dt)) == 0:
             print('\t\t{:.2f}'.format(tt))
             sys.stdout.flush()
-        sampling_args = (rng, )
+
         past_state = pred_state.copy()
         pred_state = pf.predict(tt)
 
@@ -1164,12 +1072,7 @@ def test_MCMC_MCUPF_dyn_fnc():  # noqa
         true_state = F @ true_state + p_noise
         meas = H @ true_state + meas_noise_std * rng.normal()
 
-        proposal_args = ()
-        move_kwargs = {'rng': rng, 'sampling_args': sampling_args,
-                       'proposal_args': proposal_args}
-        pred_state = pf.correct(tt, meas, past_state, sampling_args=sampling_args,
-                                proposal_args=proposal_args, rng=rng,
-                                move_kwargs=move_kwargs)[0]
+        pred_state = pf.correct(tt, meas, past_state)[0]
 
     if debug_figs:
         pf.plot_particles(0, title='Final Particle Distribution')
@@ -1209,10 +1112,12 @@ if __name__ == "__main__":
 
     # test_PF_dyn_fnc()
     # test_UPF_dyn_fnc()
-    test_UPF_dynObj()
+    # test_UPF_dynObj()
     # test_MCMC_UPF_dyn_fnc()
     # test_MCUPF_dyn_fnc()
-    # test_MCMC_MCUPF_dyn_fnc()
+    test_MCMC_MCUPF_dyn_fnc()
 
     end = timer()
-    print(end - start)
+    print('{:.2f} s'.format(end - start))
+    print('Close all plots to exit')
+    plt.show()
