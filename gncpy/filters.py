@@ -22,6 +22,12 @@ class BayesFilter(metaclass=abc.ABCMeta):
     This defines the required functions and provides their recommended function
     signature for inherited classes.
 
+    Attributes
+    ----------
+    use_cholesky_inverse : bool
+        Flag indicating if a cholesky decomposition should be performed before
+        taking the inverse. This can improve numerical stability but may also
+        increase runtime. The default is True.
     """
 
     def __init__(self, use_cholesky_inverse=True, **kwargs):
@@ -815,7 +821,9 @@ class UnscentedKalmanFilter(ExtendedKalmanFilter):
     For details on the filter see
     :cite:`Wan2000_TheUnscentedKalmanFilterforNonlinearEstimation`. This
     implementation assumes that the noise is purely addative and as such,
-    appropriate simplifications have been made.
+    appropriate simplifications have been made. These simplifications include
+    not using sigma points to track the noise, and using the fixed process and
+    measurement noise covariance matrices in the filter's covariance updates.
     """
 
     def __init__(self, sigmaPoints=None, **kwargs):
@@ -1063,17 +1071,16 @@ class ParticleFilter(BayesFilter):
 
     Attributes
     ----------
-    meas_likelihood_fnc : callable
-        Function of the measurement, estimated measurement, and `*args`. It
-        returns the relative likelihood of the estimated measurement
-    proposal_sampling_fnc : callable
-        Function of the state and `*args`. It returns a sampled state from
-        some proposal distribution. The return value must be an N x 1 numpy array.
-    proposal_fnc : callable
-        Function of the state, expected state, and `*args`. It returns the
-        relativel likelihood of the state.
-    transition_prob_fnc : callable
-        Function of the state and `*args`. It returns the
+    require_copy_prop_parts : bool
+        Flag indicating if the propagated particles need to be copied if this
+        filter is being manipulated externally. This is a constant value that
+        should not be modified outside of the class, but can be overridden by
+        inherited classes.
+    require_copy_can_dist : bool
+        Flag indicating if a candidate distribution needs to be copied if this
+        filter is being manipulated externally. This is a constant value that
+        should not be modified outside of the class, but can be overridden by
+        inherited classes.
     """
 
     require_copy_prop_parts = True
@@ -1104,12 +1111,32 @@ class ParticleFilter(BayesFilter):
         if part_dist is not None:
             self.init_from_dist(part_dist)
 
-        self._prop_parts = []
+        self.prop_parts = []
 
         super().__init__(**kwargs)
 
     @property
     def meas_likelihood_fnc(self):
+        r"""A function that returns the likelihood of the measurement.
+
+        This must have the signature :code:`f(y, y_hat, *args)` where `y` is
+        the measurement as an Nm x 1 numpy array, and `y_hat` is the estimated
+        measurement.
+
+        Notes
+        -----
+        This represents :math:`p(y_t \vert x_t)` in the importance
+        weight
+
+        .. math::
+
+            w_t = w_{t-1} \frac{p(y_t \vert x_t) p(x_t \vert x_{t-1})}{q(x_t \vert x_{t-1}, y_t)}
+
+        Returns
+        -------
+        callable
+            function to return the measurement likelihood.
+        """
         return self.__meas_likelihood_fnc
 
     @meas_likelihood_fnc.setter
@@ -1118,6 +1145,27 @@ class ParticleFilter(BayesFilter):
 
     @property
     def proposal_fnc(self):
+        r"""A function that returns the probability for the proposal distribution.
+
+        This must have the signature :code:`f(x_hat, x, y, *args)` where
+        `x_hat` is a :class:`gncpy.distributions.Particle` of the estimated
+        state, `x` is the particle it is conditioned on, and `y` is the
+        measurement.
+
+        Notes
+        -----
+        This represents :math:`q(x_t \vert x_{t-1}, y_t)` in the importance
+        weight
+
+        .. math::
+
+            w_t = w_{t-1} \frac{p(y_t \vert x_t) p(x_t \vert x_{t-1})}{q(x_t \vert x_{t-1}, y_t)}
+
+        Returns
+        -------
+        callable
+            function to return the proposal probability.
+        """
         return self.__proposal_fnc
 
     @proposal_fnc.setter
@@ -1126,6 +1174,16 @@ class ParticleFilter(BayesFilter):
 
     @property
     def proposal_sampling_fnc(self):
+        """A function that returns a random sample from the proposal distribtion.
+
+        This should be consistent with the PDF specified in the
+        :meth:`gncpy.filters.ParticleFilter.proposal_fnc`.
+
+        Returns
+        -------
+        callable
+            function to return a random sample.
+        """
         return self.__proposal_sampling_fnc
 
     @proposal_sampling_fnc.setter
@@ -1134,6 +1192,26 @@ class ParticleFilter(BayesFilter):
 
     @property
     def transition_prob_fnc(self):
+        r"""A function that returns the transition probability for the state.
+
+        This must have the signature :code:`f(x_hat, x, *args)` where
+        `x_hat` is an N x 1 numpy array representing the propagated state, and
+        `x` is the state it is conditioned on.
+
+        Notes
+        -----
+        This represents :math:`p(x_t \vert x_{t-1})` in the importance
+        weight
+
+        .. math::
+
+            w_t = w_{t-1} \frac{p(y_t \vert x_t) p(x_t \vert x_{t-1})}{q(x_t \vert x_{t-1}, y_t)}
+
+        Returns
+        -------
+        callable
+            function to return the transition probability.
+        """
         return self.__transition_prob_fnc
 
     @transition_prob_fnc.setter
@@ -1237,7 +1315,6 @@ class ParticleFilter(BayesFilter):
         -------
         int
             Number of particles.
-
         """
         return self._particleDist.num_particles
 
@@ -1255,7 +1332,6 @@ class ParticleFilter(BayesFilter):
         Returns
         -------
         None.
-
         """
         if make_copy:
             self._particleDist = deepcopy(dist)
@@ -1275,7 +1351,6 @@ class ParticleFilter(BayesFilter):
         -------
         :class:`gncpy.distributions.ParticleDistribution`
             Particle distribution object used by the filter
-
         """
         if make_copy:
             return deepcopy(self._particleDist)
@@ -1291,16 +1366,13 @@ class ParticleFilter(BayesFilter):
             List of numpy arrays, one for each particle.
         """
         num_parts = len(particle_lst)
-        if num_parts > 0:
-            w = 1.0 / num_parts
-        else:
+        if num_parts <= 0:
             warn('No particles to initialize. SKIPPING')
             return
-        w_lst = [w for ii in range(0, num_parts)]
+
         self._particleDist.clear_particles()
-        for (p, w) in zip(particle_lst, w_lst):
-            part = gdistrib.Particle(point=p)
-            self._particleDist.add_particle(part, w)
+        self._particleDist.add_particle(particle_lst,
+                                        [1.0 / num_parts] * num_parts)
 
     def _calc_state(self):
         return self._particleDist.mean
@@ -1331,25 +1403,25 @@ class ParticleFilter(BayesFilter):
 
         """
         if self._dyn_obj is not None:
-            self._prop_parts = [self._dyn_obj.propagate_state(timestep, x,
-                                                              state_args=dyn_fun_params)
-                                for x in self._particleDist.particles]
+            self.prop_parts = [self._dyn_obj.propagate_state(timestep, x,
+                                                             state_args=dyn_fun_params)
+                               for x in self._particleDist.particles]
 
         elif self._dyn_fnc is not None:
-            self._prop_parts = [self._dyn_fnc(timestep, x, *dyn_fun_params)
-                                for x in self._particleDist.particles]
+            self.prop_parts = [self._dyn_fnc(timestep, x, *dyn_fun_params)
+                               for x in self._particleDist.particles]
 
         else:
             raise RuntimeError('No state model set')
 
         new_weights = [w * self.transition_prob_fnc(x, p, *transition_args)
                        if self.transition_prob_fnc is not None
-                       else w for x, w, p in zip(self._prop_parts,
+                       else w for x, w, p in zip(self.prop_parts,
                                                  self._particleDist.weights,
                                                  self._particleDist.particles)]
 
         new_parts = [self.proposal_sampling_fnc(p, self.rng, *sampling_args)
-                     for p in self._prop_parts]
+                     for p in self.prop_parts]
 
         self._particleDist.clear_particles()
         for p, w in zip(new_parts, new_weights):
@@ -1407,8 +1479,6 @@ class ParticleFilter(BayesFilter):
             Current timestep.
         meas : Nm x 1 numpy array
             Current measurement.
-        selection : bool, optional
-            flag indicating if the selection step should be run. The default is True.
         meas_fun_args : tuple, optional
             Arguments for the measurement matrix function if one has
             been specified. The default is ().
@@ -1418,8 +1488,6 @@ class ParticleFilter(BayesFilter):
         proposal_args : tuple, optional
             Additional arguments for the proposal distribution function. The
             default is ().
-        rng : numpy random generator, optional
-            Random number generator. The default is rnd.default_rng().
 
         Raises
         ------
@@ -1430,10 +1498,8 @@ class ParticleFilter(BayesFilter):
         -------
         state : N x 1 numpy array
             corrected state.
-        un_norm_weights : numpy array
-            The unnormalized weight of each particle. This is only useful if
-            selection is not being performed. If selection is performed this
-            output should not be used.
+        rel_likeli : numpy array
+            The unnormalized measurement likelihood of each particle.
         inds_removed : list
             each element is an int representing the index of any particles
             that were removed during the selection process.
@@ -1446,7 +1512,7 @@ class ParticleFilter(BayesFilter):
                                for y in est_meas])
         prop_fit = np.array([self.proposal_fnc(x_hat, cond, meas, *proposal_args)
                              for x_hat, cond in zip(self._particleDist.particles,
-                                                    self._prop_parts)])
+                                                    self.prop_parts)])
 
         inds = np.where(prop_fit < np.finfo(float).eps)[0]
         if inds.size > 0:
@@ -1547,7 +1613,8 @@ class MCMCParticleFilterBase(ParticleFilter):
 
         super().__init__(**kwargs)
 
-    def move_particles(self, **kwargs):
+    @abc.abstractmethod
+    def move_particles(self, timestep, meas, old_weights, **kwargs):
         """Generic interface for the movement function.
 
         This must be overridden in the child class. It is recommended to keep
@@ -1656,6 +1723,8 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
     :cite:`VanDerMerwe2001_TheUnscentedParticleFilter`.
     """
 
+    require_copy_prop_parts = False
+
     def __init__(self, **kwargs):
         self.candDist = None
 
@@ -1663,10 +1732,31 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
 
         super().__init__(**kwargs)
 
-    require_copy_prop_parts = False
-
     @property
     def meas_likelihood_fnc(self):
+        r"""A function that returns the likelihood of the measurement.
+
+        This has the signature :code:`f(y, y_hat, *args)` where `y` is
+        the measurement as an Nm x 1 numpy array, and `y_hat` is the estimated
+        measurement.
+
+        Notes
+        -----
+        This represents :math:`p(y_t \vert x_t)` in the importance
+        weight
+
+        .. math::
+
+            w_t \propto \frac{p(y_t \vert x_t) p(x_t \vert x_{t-1})}{q(x_t \vert x_{t-1}, y_t)}
+
+        and has the assumed form :math:`\mathcal{N}(y_t, R)` for measurement
+        noise covariance :math:`R`.
+
+        Returns
+        -------
+        callable
+            function to return the measurement likelihood.
+        """
         return lambda y, y_hat: stats.multivariate_normal.pdf(y.ravel(),
                                                               y_hat.ravel(),
                                                               self._filt.meas_noise,
@@ -1678,6 +1768,29 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
 
     @property
     def proposal_fnc(self):
+        r"""A function that returns the probability for the proposal distribution.
+
+        This has the signature :code:`f(x_hat, x, y, *args)` where
+        `x_hat` is a :class:`gncpy.distributions.Particle` of the estimated
+        state, `x` is the particle it is conditioned on, and `y` is the
+        measurement.
+
+        Notes
+        -----
+        This represents :math:`q(x_t \vert x_{t-1}, y_t)` in the importance
+        weight
+
+        .. math::
+
+            w_t \propto \frac{p(y_t \vert x_t) p(x_t \vert x_{t-1})}{q(x_t \vert x_{t-1}, y_t)}
+
+        and has the assumed form :math:`\mathcal{N}(\bar{x}_{t}, \hat{P}_t)`
+
+        Returns
+        -------
+        callable
+            function to return the proposal probability.
+        """
         return lambda x_hat, part: stats.multivariate_normal.pdf(x_hat.ravel(),
                                                                  part.mean.ravel(),
                                                                  part.uncertainty)
@@ -1688,8 +1801,21 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
 
     @property
     def proposal_sampling_fnc(self):
+        r"""A function that returns a random sample from the proposal distribtion.
+
+        This should be consistent with the PDF specified in the
+        :meth:`gncpy.filters.ParticleFilter.proposal_fnc`.
+
+        Notes
+        -----
+        This assumes :math:`x` is drawn from :math:`\mathcal{N}(\bar{x}_{t}, \hat{P}_t)`
+        Returns
+        -------
+        callable
+            function to return a random sample.
+        """
         return lambda part: self.rng.multivariate_normal(part.mean.ravel(),
-                                                          part.uncertainty).reshape(part.mean.shape)
+                                                         part.uncertainty).reshape(part.mean.shape)
 
     @proposal_sampling_fnc.setter
     def proposal_sampling_fnc(self, val):
@@ -1697,6 +1823,29 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
 
     @property
     def transition_prob_fnc(self):
+        r"""A function that returns the transition probability for the state.
+
+        This must have the signature :code:`f(x_hat, x, *args)` where
+        `x_hat` is an N x 1 numpy array representing the propagated state, and
+        `x` is the state it is conditioned on.
+
+        Notes
+        -----
+        This represents :math:`p(x_t \vert x_{t-1})` in the importance
+        weight
+
+        .. math::
+
+            w_t \propto \frac{p(y_t \vert x_t) p(x_t \vert x_{t-1})}{q(x_t \vert x_{t-1}, y_t)}
+
+        and has the assumed form :math:`\mathcal{N}(x_{t-1}, Q)` for the process
+        noise covariance :math:`Q`.
+
+        Returns
+        -------
+        callable
+            function to return the transition probability.
+        """
         return lambda x_hat, x: stats.multivariate_normal.pdf(x_hat.ravel(),
                                                               x.ravel(),
                                                               self._filt.proc_noise,
@@ -1817,21 +1966,7 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
             else:
                 self.candDist = self._predict_loop(timestep, ukf_kwargs,
                                                    self.candDist)
-        # newDist = gdistrib.ParticleDistribution()
-        # new_weight = [1 / self._particleDist.num_particles] * self._particleDist.num_particles
-        # new_parts = [None] * self._particleDist.num_particles
-        # for ii, (origPart, w) in enumerate(self._particleDist):
-        #     part = gdistrib.Particle()
-        #     self._filt.cov = origPart.uncertainty
-        #     self._filt._stateSigmaPoints = origPart.sigmaPoints
-        #     part.point = self._filt.predict(timestep, origPart.point, **ukf_kwargs)
-        #     part.uncertainty = self._filt.cov
-        #     part.sigmaPoints = self._filt._stateSigmaPoints
-        #     new_parts[ii] = part
 
-        # newDist.add_particle(new_parts, new_weight)
-
-        # self._particleDist = newDist
         return self._calc_state()
 
     def _inner_correct(self, timestep, meas, state, filt_kwargs):
@@ -1876,7 +2011,11 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
 
         # update info for next UKF
         newDist = gdistrib.ParticleDistribution()
-        newDist.add_particle(new_parts, (new_weights / np.sum(new_weights)).tolist())
+        tot = np.sum(new_weights)
+        # protect against divide by 0
+        if tot < np.finfo(float).eps:
+            tot = np.finfo(float).eps
+        newDist.add_particle(new_parts, (new_weights / tot).tolist())
 
         return newDist
 
@@ -1894,18 +2033,9 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
         ukf_kwargs : dict, optional
             Additional arguments to pass to the UKF correction function. The
             default is {}.
-        meas_fun_args : tuple, optional
-            Arguments for the measurement matrix function if one has
-            been specified. The default is ().
         move_kwargs : dict, optional
             Additional arguments to pass to the movement function.
             The default is {}.
-        meas_likely_args : tuple, optional
-            additional agruments for the measurement likelihood function.
-            The default is ().
-        proposal_args : tuple, optional
-            Additional arguments for the proposal distribution function. The
-            default is ().
 
         Returns
         -------
@@ -1945,9 +2075,8 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
 
         return (self._calc_state(), rel_likeli, inds_removed)
 
-    def move_particles(self, timestep, meas, old_weights, ukf_kwargs={},
-                       meas_fun_args=()):
-        """Movement function for the MCMC move step.
+    def move_particles(self, timestep, meas, old_weights):
+        r"""Movement function for the MCMC move step.
 
         This modifies the internal particle distribution but does not return a
         value.
@@ -1960,32 +2089,14 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
         ----------
         timestep : float
             Current timestep.
-        oldDist : :class:`gncpy.distributions.ParticleDistribution`
-            Distribution before the measurement correction.
         meas : Nm x 1 numpy array
             measurement.
-        ukf_kwargs : dict, optional
-            Additional arguments to pass to the UKF correction function. The
-            default is {}.
-        rng : numpy random generator, optional
-            Random number generator. The default is rnd.default_rng().
-        sampling_args : tuple, optional
-            Extra arguments to be passed to the proposal sampling function.
-            The default is ().
-        meas_fun_args : tuple, optional
-            Arguments for the measurement matrix function if one has
-            been specified. The default is ().
-        meas_likely_args : tuple, optional
-            additional agruments for the measurement likelihood function.
-            The default is ().
-        proposal_args : tuple, optional
-            Additional arguments for the proposal distribution function. The
-            default is ().
+        old_weights : :class:`gncpy.distributions.ParticleDistribution`
+            Distribution before the measurement correction.
 
         Returns
         -------
         None.
-
         """
         accept_prob = self.rng.random()
         num_parts = self._particleDist.num_particles
@@ -2058,7 +2169,6 @@ class MaxCorrEntUPF(UnscentedParticleFilter):
         -------
         float
             bandwidth
-
         """
         return self._filt.kernel_bandwidth
 

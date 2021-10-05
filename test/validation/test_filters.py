@@ -959,28 +959,11 @@ def test_MCUPF_dyn_fnc():  # noqa
         distrib.add_particle(p, 1 / num_parts)
 
     # define particle filter
-    pf = gfilts.MaxCorrEntUPF(use_MCMC=False)
+    pf = gfilts.MaxCorrEntUPF(use_MCMC=False, rng=rng)
     pf.kernel_bandwidth = 10
 
     def f(t, *args):
         return F
-
-    def meas_likelihood(meas, est, *args):
-        z = ((meas - est) / meas_noise_std).item()
-        return stats.norm.pdf(z)
-
-    def proposal_sampling_fnc(x, rng):
-        noise = proc_mean + proc_noise_std * rng.standard_normal()
-        return x + noise
-
-    def proposal_fnc(x_hat, cond, cov, *args):
-        return 1
-        # z = ((x_hat - cond) / proc_noise_std).item()
-        # return stats.norm.pdf(z)
-
-    pf.meas_likelihood_fnc = meas_likelihood
-    pf.proposal_sampling_fnc = proposal_sampling_fnc
-    pf.proposal_fnc = proposal_fnc
 
     pf.proc_noise = proc_noise_std**2
     pf.meas_noise = meas_noise_std**2
@@ -998,7 +981,7 @@ def test_MCUPF_dyn_fnc():  # noqa
         if np.mod(kk, int(1 / dt)) == 0:
             print('\t\t{:.2f}'.format(tt))
             sys.stdout.flush()
-        sampling_args = (rng, )
+
         past_state = pred_state.copy()
         pred_state = pf.predict(tt)
 
@@ -1007,12 +990,7 @@ def test_MCUPF_dyn_fnc():  # noqa
         true_state = F @ true_state + p_noise
         meas = H @ true_state + meas_noise_std * rng.normal()
 
-        proposal_args = ()
-        move_kwargs = {'rng': rng, 'sampling_args': sampling_args,
-                       'proposal_args': proposal_args}
-        pred_state = pf.correct(tt, meas, past_state, sampling_args=sampling_args,
-                                proposal_args=proposal_args, rng=rng,
-                                move_kwargs=move_kwargs)[0]
+        pred_state = pf.correct(tt, meas, past_state)[0]
 
     if debug_figs:
         pf.plot_particles(0, title='Final Particle Distribution')
@@ -1063,28 +1041,11 @@ def test_MCMC_MCUPF_dyn_fnc():  # noqa
         distrib.add_particle(p, 1 / num_parts)
 
     # define particle filter
-    pf = gfilts.MaxCorrEntUPF(use_MCMC=True)
+    pf = gfilts.MaxCorrEntUPF(use_MCMC=True, rng=rng)
     pf.kernel_bandwidth = 10
 
     def f(t, *args):
         return F
-
-    def meas_likelihood(meas, est, *args):
-        z = ((meas - est) / meas_noise_std).item()
-        return stats.norm.pdf(z)
-
-    def proposal_sampling_fnc(x, rng):
-        noise = proc_mean + proc_noise_std * rng.standard_normal()
-        return x + noise
-
-    def proposal_fnc(x_hat, cond, cov, *args):
-        return 1
-        # z = ((x_hat - cond) / proc_noise_std).item()
-        # return stats.norm.pdf(z)
-
-    pf.meas_likelihood_fnc = meas_likelihood
-    pf.proposal_sampling_fnc = proposal_sampling_fnc
-    pf.proposal_fnc = proposal_fnc
 
     pf.proc_noise = proc_noise_std**2
     pf.meas_noise = meas_noise_std**2
@@ -1102,7 +1063,7 @@ def test_MCMC_MCUPF_dyn_fnc():  # noqa
         if np.mod(kk, int(1 / dt)) == 0:
             print('\t\t{:.2f}'.format(tt))
             sys.stdout.flush()
-        sampling_args = (rng, )
+
         past_state = pred_state.copy()
         pred_state = pf.predict(tt)
 
@@ -1111,12 +1072,7 @@ def test_MCMC_MCUPF_dyn_fnc():  # noqa
         true_state = F @ true_state + p_noise
         meas = H @ true_state + meas_noise_std * rng.normal()
 
-        proposal_args = ()
-        move_kwargs = {'rng': rng, 'sampling_args': sampling_args,
-                       'proposal_args': proposal_args}
-        pred_state = pf.correct(tt, meas, past_state, sampling_args=sampling_args,
-                                proposal_args=proposal_args, rng=rng,
-                                move_kwargs=move_kwargs)[0]
+        pred_state = pf.correct(tt, meas, past_state)[0]
 
     if debug_figs:
         pf.plot_particles(0, title='Final Particle Distribution')
@@ -1157,9 +1113,9 @@ if __name__ == "__main__":
     # test_PF_dyn_fnc()
     # test_UPF_dyn_fnc()
     # test_UPF_dynObj()
-    test_MCMC_UPF_dyn_fnc()
+    # test_MCMC_UPF_dyn_fnc()
     # test_MCUPF_dyn_fnc()
-    # test_MCMC_MCUPF_dyn_fnc()
+    test_MCMC_MCUPF_dyn_fnc()
 
     end = timer()
     print('{:.2f} s'.format(end - start))
