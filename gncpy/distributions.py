@@ -157,16 +157,16 @@ class Particle:
 class _ParticleDistIter:
     def __init__(self, partDist):
         self._partDist = partDist
-        self._index = 0
+        self.__index = 0
 
     def __next__(self):
-        if self._index < self._partDist.num_particles:
-            p = self._partDist._particles[self._index]
-            w = self._partDist.weights[self._index]
-            res = (p, w)
-            self._index += 1
-            return res
-        raise StopIteration
+        try:
+            result = (self._partDist._particles[self.__index],
+                      self._partDist.weights[self.__index])
+        except IndexError:
+            raise StopIteration
+        self.__index += 1
+        return result
 
 
 class ParticleDistribution:
@@ -183,6 +183,8 @@ class ParticleDistribution:
         self.__need_uncert_lst_update = True
         self.__means = []
         self.__uncertianties = []
+
+        self.__index = 0
 
     @property
     def particles(self):
