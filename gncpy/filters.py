@@ -14,6 +14,7 @@ import gncpy.math as gmath
 import gncpy.plotting as pltUtil
 import gncpy.distributions as gdistrib
 import gncpy.dynamics as gdyn
+import gncpy.errors as gerr
 
 
 class BayesFilter(metaclass=abc.ABCMeta):
@@ -1458,7 +1459,11 @@ class ParticleFilter(BayesFilter):
                 failed = True
 
         if failed:
-            warn('Failed to select particle, check weights')
+            tot = np.sum(self._particleDist.weights)
+            self._particleDist.clear_particles()
+            msg = 'Failed to select enough particles, ' \
+                + 'check weights (sum = {})'.format(tot)
+            raise gerr.ParticleDepletionError(msg)
 
         inds_removed = [ii for ii in range(0, self.num_particles)
                         if ii not in inds_kept]

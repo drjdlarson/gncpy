@@ -93,20 +93,10 @@ class SigmaPoints():
         loc_cov = cov
         S = la.cholesky((self.n + self.lam) * loc_cov)
 
-        # self.points = [None] * (2 * self.n + 1)
         self.points = np.nan * np.ones((2 * self.n + 1, x.size))
         self.points[0, :] = x.flatten()
         self.points[1:self.n + 1, :] = x.ravel() + S.T
         self.points[self.n + 1:, :] = x.ravel() - S.T
-        # self.points[0] = x
-
-        # for ii in range(0, self.n):
-        #     self.points[ii + 1] = x + S[:, [ii]]
-
-        # for ii in range(self.n, 2 * self.n):
-        #     self.points[ii + 1] = x - S[:, [ii - self.n]]
-
-        # brk = 1
 
 
 class Particle:
@@ -201,7 +191,7 @@ class ParticleDistribution:
         if self.num_particles > 0:
             if self.__need_mean_lst_update:
                 self.__need_mean_lst_update = False
-                self.__means = [x.mean for x in self._particles]
+                self.__means = [x.mean for x in self._particles if x]
             return self.__means
         else:
             return []
@@ -240,7 +230,8 @@ class ParticleDistribution:
         if self.num_particles > 0:
             if self.__need_uncert_lst_update:
                 self.__need_uncert_lst_update = False
-                self.__uncertianties = [x.uncertainty for x in self._particles]
+                self.__uncertianties = [x.uncertainty for x in self._particles
+                                        if x]
             return self.__uncertianties
         else:
             return []
@@ -294,11 +285,8 @@ class ParticleDistribution:
     @property
     def mean(self):
         """Mean of the particles."""
-        if any(np.abs(self.weights) == np.inf):
-            if self.num_particles > 0:
-                mean = np.zeros(self.particles[0].shape)
-            else:
-                mean = np.array([[]])
+        if self.num_particles == 0 or any(np.abs(self.weights) == np.inf):
+            mean = np.array([[]])
         else:
             mean = gmath.weighted_sum_vec(self.weights, self.particles)
         return mean
