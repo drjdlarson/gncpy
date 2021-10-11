@@ -1441,9 +1441,10 @@ class ParticleFilter(BayesFilter):
 
         return est_meas
 
-    def _selection(self):
+    def _selection(self, unnorm_weights, rel_likeli_in=None):
         new_parts = [None] * self.num_particles
         old_weights = [None] * self.num_particles
+        rel_likeli_out = [None] * self.num_particles
         inds_kept = []
         probs = self.rng.random(self.num_particles)
         cumulative_weight = np.cumsum(self._particleDist.weights)
@@ -1452,7 +1453,9 @@ class ParticleFilter(BayesFilter):
             inds = np.where(cumulative_weight >= r)[0]
             if inds.size > 0:
                 new_parts[ii] = deepcopy(self._particleDist._particles[inds[0]])
-                old_weights[ii] = self._particleDist.weights[inds[0]]
+                old_weights[ii] = unnorm_weights[inds[0]]
+                if rel_likeli_in is not None:
+                    rel_likeli_out[ii] = rel_likeli_in[inds[0]]
                 if inds[0] not in inds_kept:
                     inds_kept.append(inds[0])
             else:
@@ -1472,7 +1475,7 @@ class ParticleFilter(BayesFilter):
         w = 1 / len(new_parts)
         self._particleDist.add_particle(new_parts, [w] * len(new_parts))
 
-        return inds_removed, old_weights
+        return inds_removed, old_weights, rel_likeli_out
 
     def correct(self, timestep, meas, meas_fun_args=(), meas_likely_args=(),
                 proposal_args=()):
@@ -1522,23 +1525,20 @@ class ParticleFilter(BayesFilter):
         inds = np.where(prop_fit < np.finfo(float).eps)[0]
         if inds.size > 0:
             prop_fit[inds] = np.finfo(float).eps
-        weights = rel_likeli / prop_fit * np.array(self._particleDist.weights)
+        unnorm_weights = rel_likeli / prop_fit * np.array(self._particleDist.weights)
 
-        tot = np.sum(weights)
+        tot = np.sum(unnorm_weights)
         if tot > 0 and tot != np.inf:
-            weights /= tot
+            weights = unnorm_weights / tot
         else:
-            weights[:] = np.inf
+            weights = np.inf * unnorm_weights
         self._particleDist.update_weights(weights)
 
         # resample
-        inds_removed = self._selection()[0]
-        est_meas = [self._est_meas(timestep, p, meas.size, meas_fun_args)
-                    for p in self._particleDist.particles]
-        rel_likeli = np.array([self.meas_likelihood_fnc(meas, y, *meas_likely_args)
-                               for y in est_meas])
+        inds_removed, rel_likeli = self._selection(unnorm_weights,
+                                                   rel_likeli_in=rel_likeli.tolist())[0:3:2]
 
-        return (self._calc_state(), rel_likeli.tolist(), inds_removed)
+        return (self._calc_state(), rel_likeli, inds_removed)
 
     def plot_particles(self, inds, title='Particle Distribution',
                        x_lbl='State', y_lbl='Count', **kwargs):
@@ -1764,8 +1764,7 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
         """
         return lambda y, y_hat: stats.multivariate_normal.pdf(y.ravel(),
                                                               y_hat.ravel(),
-                                                              self._filt.meas_noise,
-                                                              True)
+                                                              self._filt.meas_noise)
 
     @meas_likelihood_fnc.setter
     def meas_likelihood_fnc(self, val):
@@ -1830,7 +1829,7 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
     def transition_prob_fnc(self):
         r"""A function that returns the transition probability for the state.
 
-        This must have the signature :code:`f(x_hat, x, *args)` where
+        This has the signature :code:`f(x_hat, x, cov)` where
         `x_hat` is an N x 1 numpy array representing the propagated state, and
         `x` is the state it is conditioned on.
 
@@ -1843,18 +1842,17 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
 
             w_t \propto \frac{p(y_t \vert x_t) p(x_t \vert x_{t-1})}{q(x_t \vert x_{t-1}, y_t)}
 
-        and has the assumed form :math:`\mathcal{N}(x_{t-1}, Q)` for the process
-        noise covariance :math:`Q`.
+        and has the assumed form :math:`\mathcal{N}(f(x_{t-1}), P_t)` for the
+        covariance :math:`P_t`.
 
         Returns
         -------
         callable
             function to return the transition probability.
         """
-        return lambda x_hat, x: stats.multivariate_normal.pdf(x_hat.ravel(),
-                                                              x.ravel(),
-                                                              self._filt.proc_noise,
-                                                              True)
+        return lambda x_hat, x, cov: stats.multivariate_normal.pdf(x_hat.ravel(),
+                                                                   x.ravel(),
+                                                                   cov)
 
     @transition_prob_fnc.setter
     def transition_prob_fnc(self, val):
@@ -1933,16 +1931,18 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
         newDist = gdistrib.ParticleDistribution()
         num_parts = dist.num_particles
         new_parts = [None] * num_parts
+        new_weights = [None] * num_parts
         for ii, (origPart, w) in enumerate(dist):
             part = gdistrib.Particle()
-            self._filt.cov = origPart.uncertainty
-            self._filt._stateSigmaPoints = origPart.sigmaPoints
+            self._filt.cov = origPart.uncertainty.copy()
+            self._filt._stateSigmaPoints = deepcopy(origPart.sigmaPoints)
             part.point = self._filt.predict(timestep, origPart.point, **ukf_kwargs)
             part.uncertainty = self._filt.cov
             part.sigmaPoints = self._filt._stateSigmaPoints
             new_parts[ii] = part
+            new_weights[ii] = w
 
-        newDist.add_particle(new_parts, [1 / num_parts] * num_parts)
+        newDist.add_particle(new_parts, new_weights)
         return newDist
 
     def predict(self, timestep, ukf_kwargs={}):
@@ -1983,32 +1983,33 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
                                     meas_fun_args)[0]
 
     def _correct_loop(self, timestep, meas, ukf_kwargs, dist):
-        if 'meas_fun_args' in ukf_kwargs:
-            meas_fun_args = ukf_kwargs['meas_fun_args']
-        else:
-            meas_fun_args = ()
-
-        new_weights = np.nan * np.ones(dist.num_particles)
+        unnorm_weights = np.nan * np.ones(dist.num_particles)
         new_parts = [None] * dist.num_particles
+        rel_likeli = [None] * dist.num_particles
         for ii, (p, w) in enumerate(dist):
-            self._filt.cov = p.uncertainty
-            self._filt._stateSigmaPoints = p.sigmaPoints
+            self._filt.cov = p.uncertainty.copy()
+            self._filt._stateSigmaPoints = deepcopy(p.sigmaPoints)
 
+            # create a new particle and correct the predicted point with the measurement
             part = gdistrib.Particle()
-            part.point = self._inner_correct(timestep, meas, p.point, ukf_kwargs)[0]
+            part.point, rel_likeli[ii] = self._inner_correct(timestep, meas, p.point, ukf_kwargs)
             part.uncertainty = self._filt.cov
 
+            # draw a sample from the proposal distribution using the corrected point
             samp = self.proposal_sampling_fnc(part)
-            est_meas = self._est_meas(timestep, part.point, meas.size,
-                                      meas_fun_args)
-            rel_likeli = self.meas_likelihood_fnc(meas, est_meas)
-            trans_prob = self.transition_prob_fnc(samp, part.point)
+
+            # transition probability of the sample given the predicted point
+            trans_prob = self.transition_prob_fnc(samp, p.point, p.uncertainty)
+
+            # probability of the sampled value given the corrected value
             proposal_prob = self.proposal_fnc(samp, part)
 
+            # get new weight
             if proposal_prob < np.finfo(float).eps:
                 proposal_prob = np.finfo(float).eps
-            new_weights[ii] = rel_likeli * trans_prob / proposal_prob
+            unnorm_weights[ii] = rel_likeli[ii] * trans_prob / proposal_prob
 
+            # update the new particle with the sampled point
             part.point = samp
             part.sigmaPoints = self._filt._stateSigmaPoints
             part.sigmaPoints.update_points(part.point, part.uncertainty)
@@ -2016,13 +2017,13 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
 
         # update info for next UKF
         newDist = gdistrib.ParticleDistribution()
-        tot = np.sum(new_weights)
+        tot = np.sum(unnorm_weights)
         # protect against divide by 0
         if tot < np.finfo(float).eps:
             tot = np.finfo(float).eps
-        newDist.add_particle(new_parts, (new_weights / tot).tolist())
+        newDist.add_particle(new_parts, (unnorm_weights / tot).tolist())
 
-        return newDist
+        return newDist, rel_likeli, unnorm_weights
 
     def correct(self, timestep, meas, ukf_kwargs={}, move_kwargs={}):
         """Correction step of the UPF.
@@ -2053,34 +2054,30 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
             each element is an int representing the index of any particles
             that were removed during the selection process.
         """
-        if 'meas_fun_args' in ukf_kwargs:
-            meas_fun_args = ukf_kwargs['meas_fun_args']
-        else:
-            meas_fun_args = ()
 
         # call UKF correction on each particle
-        self._particleDist = self._correct_loop(timestep, meas, ukf_kwargs,
-                                                self._particleDist)
+        (self._particleDist, rel_likeli,
+         unnorm_weights) = self._correct_loop(timestep, meas, ukf_kwargs,
+                                              self._particleDist)
         if self.use_MCMC:
-            self.candDist = self._correct_loop(timestep, meas, ukf_kwargs,
-                                               self.candDist)
+            (self.candDist, can_rel_likeli,
+             can_unnorm_weights) = self._correct_loop(timestep, meas,
+                                                      ukf_kwargs, self.candDist)
 
         # perform selection/resampling
-        inds_removed, old_weights = self._selection()
+        (inds_removed, old_weights,
+         rel_likeli) = self._selection(unnorm_weights, rel_likeli_in=rel_likeli)
 
         # optionally move particles
         if self.use_MCMC:
-            self.move_particles(timestep, meas, old_weights, **move_kwargs)
-
-        rel_likeli = [self.meas_likelihood_fnc(meas,
-                                               self._est_meas(timestep, p,
-                                                              meas.size,
-                                                              meas_fun_args))
-                      for p in self._particleDist.particles]
+            rel_likeli = self.move_particles(timestep, meas, old_weights,
+                                             rel_likeli, can_unnorm_weights,
+                                             can_rel_likeli, **move_kwargs)
 
         return (self._calc_state(), rel_likeli, inds_removed)
 
-    def move_particles(self, timestep, meas, old_weights):
+    def move_particles(self, timestep, meas, old_weights, old_likeli,
+                       can_weight, can_likeli):
         r"""Movement function for the MCMC move step.
 
         This modifies the internal particle distribution but does not return a
@@ -2106,18 +2103,24 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
         accept_prob = self.rng.random()
         num_parts = self._particleDist.num_particles
         new_parts = [None] * num_parts
-        for ii, (can, exp, ex_weight) in \
-                enumerate(zip(self.candDist, self._particleDist, old_weights)):
+        new_likeli = [None] * num_parts
+        for ii, (can, exp, ex_weight, can_weight, ex_like, can_like) in \
+                enumerate(zip(self.candDist, self._particleDist,
+                              old_weights, can_weight, old_likeli, can_likeli)):
 
-            if accept_prob <= np.min([1, can[1] / ex_weight]):
+            if accept_prob <= np.min([1, can_weight / ex_weight]):
                 # accept move
                 new_parts[ii] = can[0]
+                new_likeli[ii] = can_like
             else:
                 # reject move
                 new_parts[ii] = exp[0]
+                new_likeli[ii] = ex_like
 
         self._particleDist.clear_particles()
         self._particleDist.add_particle(new_parts, [1 / num_parts] * num_parts)
+
+        return new_likeli
 
 
 class MaxCorrEntUPF(UnscentedParticleFilter):
