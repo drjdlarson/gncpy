@@ -1407,19 +1407,22 @@ class ParticleFilter(BayesFilter):
             self.prop_parts = [self._dyn_obj.propagate_state(timestep, x,
                                                              state_args=dyn_fun_params)
                                for x in self._particleDist.particles]
+            mean = self._dyn_obj.propagate_state(timestep, self._particleDist.mean,
+                                                 state_args=dyn_fun_params)
 
         elif self._dyn_fnc is not None:
             self.prop_parts = [self._dyn_fnc(timestep, x, *dyn_fun_params)
                                for x in self._particleDist.particles]
+            mean = self._dyn_fnc(timestep, self._particleDist.mean,
+                                 *dyn_fun_params)
 
         else:
             raise RuntimeError('No state model set')
 
-        new_weights = [w * self.transition_prob_fnc(x, p, *transition_args)
+        new_weights = [w * self.transition_prob_fnc(x, mean, *transition_args)
                        if self.transition_prob_fnc is not None
-                       else w for x, w, p in zip(self.prop_parts,
-                                                 self._particleDist.weights,
-                                                 self._particleDist.particles)]
+                       else w for x, w in zip(self.prop_parts,
+                                              self._particleDist.weights)]
 
         new_parts = [self.proposal_sampling_fnc(p, self.rng, *sampling_args)
                      for p in self.prop_parts]
@@ -1531,7 +1534,7 @@ class ParticleFilter(BayesFilter):
         if tot > 0 and tot != np.inf:
             weights = unnorm_weights / tot
         else:
-            weights = np.inf * unnorm_weights
+            weights = np.inf * np.ones(unnorm_weights.size)
         self._particleDist.update_weights(weights)
 
         # resample
@@ -2110,7 +2113,7 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
 
             if accept_prob <= np.min([1, can_weight / ex_weight]):
                 # accept move
-                new_parts[ii] = can[0]
+                new_parts[ii] = deepcopy(can[0])
                 new_likeli[ii] = can_like
             else:
                 # reject move
