@@ -646,6 +646,7 @@ def test_UPF_dyn_fnc():  # noqa
 
     print(pred_state)
     print(true_state)
+    print(exp_cov)
     assert p_val > level_sig, "p-value too low, final state is unexpected"
 
 
@@ -653,10 +654,11 @@ def test_UPF_dynObj():  # noqa
     print('test UPF dynObj')
 
     rng = rnd.default_rng(global_seed)
-    num_parts = 100
+    filt_rng = rnd.default_rng(global_seed)
+    num_parts = 250
     dt = 0.01
     t0, t1 = 0, 6 + dt
-    # level_sig = 0.05
+    level_sig = 0.05
 
     time = np.arange(t0, t1, dt)
 
@@ -667,13 +669,11 @@ def test_UPF_dynObj():  # noqa
                          [0, 1, 0, 0]])
 
     dynObj = gdyn.DoubleIntegrator()
-    pf = gfilts.UnscentedParticleFilter(use_MCMC=False, rng=rng)
+    pf = gfilts.UnscentedParticleFilter(use_MCMC=False, rng=filt_rng)
     pf.set_state_model(dyn_obj=dynObj)
     pf.set_measurement_model(meas_mat=meas_mat)
 
-    proc_noise = dynObj.get_dis_process_noise_mat(dt,
-                                                  np.array([[p_noise_std**2]]))
-    # proc_noise = p_noise_std**2 * np.diag([0, 0, 1, 1])
+    proc_noise = p_noise_std**2 * np.diag([dt**2, dt**2, 1, 1])
     pf.proc_noise = proc_noise.copy()
     pf.meas_noise = m_noise_std**2 * np.eye(meas_mat.shape[0])
 
@@ -742,23 +742,33 @@ def test_UPF_dynObj():  # noqa
 
     # check that particle distribution matches the expected mean assuming
     # that the covariance is the same and its normally distributed
-    # note this calculation fails with the given process noise
-    # exp_cov = la.solve_discrete_are(dynObj.get_state_mat(0, dt).T, meas_mat.T,
-    #                                 proc_noise,
-    #                                 m_noise_std**2 * np.eye(2))
+    crit_val = stats.chi2.ppf(1 - level_sig, df=true_state.size)
+    exp_cov = la.solve_discrete_are(dynObj.get_state_mat(0, dt).T, meas_mat.T,
+                                    proc_noise,
+                                    m_noise_std**2 * np.eye(2))
 
-    # sqrt_inv_cov = la.inv(la.cholesky(pf.cov))
-    # inv_cov = sqrt_inv_cov.T @ sqrt_inv_cov
+    inv_cov = la.inv(exp_cov)
+    chi_stat = (pred_state - true_state).T @ inv_cov @ (pred_state - true_state)
+    # print((chi_stat.item(), crit_val))
+    # if chi_stat >= crit_val:
+    #     print("values are different (expected cov)")
+    # else:
+    #     print('pass (expected cov)')
+
+    # inv_cov = la.inv(pf.cov)
     # chi_stat = (pred_state - true_state).T @ inv_cov @ (pred_state - true_state)
-    # crit_val = stats.chi2.ppf(1 - level_sig, df=true_state.size)
+    # print((chi_stat.item(), crit_val))
+    # if chi_stat >= crit_val:
+    #     print("values are different (calculated cov)")
+    # else:
+    #     print('pass (calculated cov)')
 
     print(pred_state.flatten())
     print(true_state.flatten())
     print(pf.cov)
-    # print((chi_stat, crit_val))
-    # print(exp_cov)
-    # Note test method is likely incorrectly implemented for multivariate z
-    # assert chi_stat < crit_val, "values are different"
+    print((chi_stat, crit_val))
+    print(exp_cov)
+    assert chi_stat < crit_val, "values are different"
 
 
 def test_MCMC_UPF_dyn_fnc():  # noqa
@@ -840,6 +850,126 @@ def test_MCMC_UPF_dyn_fnc():  # noqa
     print(true_state)
     assert p_val > level_sig, "p-value too low, final state is unexpected"
 
+
+def test_MCMC_UPF_dynObj():  # noqa
+    print('test MCMC UPF dynObj')
+
+    rng = rnd.default_rng(global_seed)
+    filt_rng = rnd.default_rng(global_seed)
+    num_parts = 75
+    dt = 0.01
+    t0, t1 = 0, 6 + dt
+    level_sig = 0.05
+
+    time = np.arange(t0, t1, dt)
+
+    m_noise_std = 0.02
+    p_noise_std = 0.2
+
+    meas_mat = np.array([[1, 0, 0, 0],
+                         [0, 1, 0, 0]])
+
+    dynObj = gdyn.DoubleIntegrator()
+    pf = gfilts.UnscentedParticleFilter(use_MCMC=True, rng=filt_rng)
+    pf.set_state_model(dyn_obj=dynObj)
+    pf.set_measurement_model(meas_mat=meas_mat)
+
+    proc_noise = p_noise_std**2 * np.diag([dt**2, dt**2, 1, 1])
+    pf.proc_noise = proc_noise.copy()
+    pf.meas_noise = m_noise_std**2 * np.eye(meas_mat.shape[0])
+
+    true_state = np.array([20, 80, 3, -3]).reshape((4, 1))
+
+    distrib = gdistrib.ParticleDistribution()
+    b_cov = np.diag([3**2, 5**2, 2**2, 1])
+    alpha = 0.5
+    kappa = 1
+    spread = 2 * np.sqrt(np.diag(b_cov)).reshape((true_state.shape))
+    l_bnd = true_state - spread / 2
+    for ii in range(0, num_parts):
+        part = gdistrib.Particle()
+        part.point = l_bnd + spread * rng.random(true_state.shape)
+        part.uncertainty = b_cov.copy()
+        part.sigmaPoints = gdistrib.SigmaPoints(alpha=alpha, kappa=kappa,
+                                                n=true_state.size)
+        part.sigmaPoints.init_weights()
+        part.sigmaPoints.update_points(part.point, part.uncertainty)
+        distrib.add_particle(part, 1 / num_parts)
+
+    pf.init_from_dist(distrib)
+
+    if debug_figs:
+        pf.plot_particles(0, title='Init Particle Distribution')
+
+    print('\tStarting sim')
+    xy_pos = np.zeros((time.size, 2))
+    xy_pos[0, :] = true_state[0:2, 0]
+    true_pos = xy_pos.copy()
+    for kk, tt in enumerate(time[:-1]):
+        if np.mod(kk, int(1 / dt)) == 0:
+            print('\t\t{:.2f}'.format(tt))
+            sys.stdout.flush()
+
+        ukf_kwargs_pred = {'state_mat_args': (dt, )}
+        pred_state = pf.predict(tt, ukf_kwargs=ukf_kwargs_pred)
+
+        # calculate true state and measurement for this timestep
+        p_noise = rng.multivariate_normal(np.zeros(proc_noise.shape[0]),
+                                          proc_noise)
+        true_state = dynObj.propagate_state(tt, true_state, state_args=(dt,))
+        true_pos[kk + 1, :] = true_state[0:2, 0]
+        m_noise = rng.multivariate_normal(np.zeros(meas_mat.shape[0]),
+                                          m_noise_std**2 * np.eye(2))
+        meas = meas_mat @ (true_state + p_noise.reshape(true_state.shape)) \
+            + m_noise.reshape((2, 1))
+
+        pred_state = pf.correct(tt, meas)[0]
+        xy_pos[kk + 1, :] = pred_state[0:2, 0]
+
+    if debug_figs:
+        pf.plot_particles(0, title='Final Particle Distribution')
+
+        fig = plt.figure()
+        fig.add_subplot(1, 1, 1)
+        fig.axes[0].plot(xy_pos[:, 0], xy_pos[:, 1], label='est')
+        fig.axes[0].plot(true_pos[:, 0], true_pos[:, 1], label='true', color='k')
+        fig.axes[0].legend()
+        fig.axes[0].grid(True)
+        ttl = 'X/Y Position'
+        fig.suptitle(ttl)
+        fig.axes[0].set_xlabel('x-position (m)')
+        fig.axes[0].set_ylabel('y-position (m)')
+        fig.canvas.manager.set_window_title(ttl)
+
+    # check that particle distribution matches the expected mean assuming
+    # that the covariance is the same and its normally distributed
+    crit_val = stats.chi2.ppf(1 - level_sig, df=true_state.size)
+    exp_cov = la.solve_discrete_are(dynObj.get_state_mat(0, dt).T, meas_mat.T,
+                                    proc_noise,
+                                    m_noise_std**2 * np.eye(2))
+
+    inv_cov = la.inv(exp_cov)
+    chi_stat = (pred_state - true_state).T @ inv_cov @ (pred_state - true_state)
+    # print((chi_stat.item(), crit_val))
+    # if chi_stat >= crit_val:
+    #     print("values are different (expected cov)")
+    # else:
+    #     print('pass (expected cov)')
+
+    # inv_cov = la.inv(pf.cov)
+    # chi_stat = (pred_state - true_state).T @ inv_cov @ (pred_state - true_state)
+    # print((chi_stat.item(), crit_val))
+    # if chi_stat >= crit_val:
+    #     print("values are different (calculated cov)")
+    # else:
+    #     print('pass (calculated cov)')
+
+    print(pred_state.flatten())
+    print(true_state.flatten())
+    print(pf.cov)
+    print((chi_stat, crit_val))
+    print(exp_cov)
+    assert chi_stat < crit_val, "values are different"
 
 def test_max_corr_ent_UKF_dynObj():  # noqa
     m_noise = 0.02
@@ -1114,8 +1244,9 @@ if __name__ == "__main__":
     # test_UPF_dyn_fnc()
     # test_UPF_dynObj()
     # test_MCMC_UPF_dyn_fnc()
+    test_MCMC_UPF_dynObj()
     # test_MCUPF_dyn_fnc()
-    test_MCMC_MCUPF_dyn_fnc()
+    # test_MCMC_MCUPF_dyn_fnc()
 
     end = timer()
     print('{:.2f} s'.format(end - start))
