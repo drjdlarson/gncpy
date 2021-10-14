@@ -2057,7 +2057,6 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
             each element is an int representing the index of any particles
             that were removed during the selection process.
         """
-
         # call UKF correction on each particle
         (self._particleDist, rel_likeli,
          unnorm_weights) = self._correct_loop(timestep, meas, ukf_kwargs,
@@ -2186,3 +2185,93 @@ class MaxCorrEntUPF(UnscentedParticleFilter):
     @kernel_bandwidth.setter
     def kernel_bandwidth(self, kernel_bandwidth):
         self._filt.kernel_bandwidth = kernel_bandwidth
+
+
+class QuadratureKalmanFilter(KalmanFilter):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.quadPoints = gdistrib.QuadraturePoints()
+
+    # predict(self, timestep, *args, **kwargs)
+    def predict(self, timestep, cur_state, cur_input=None, state_mat_args=(),
+                input_mat_args=()):
+        # factorize covariance as P = sqrt(P) * sqrt(P)^T
+        sqrt_cov = la.cholesky(self.cov).T
+
+        # generate quadrature points as X_i = sqrt(P) * xi_i + x_hat for m points
+        self.quadPoints.update_points(cur_state, sqrt_cov, have_sqrt=True)
+
+        # predict each point using the dynamics
+        for ii, (point, _) in enumerate(self.quadPoints):
+            pred_point = self._predict_next_state(timestep, point, cur_input,
+                                                  state_mat_args, input_mat_args)[0]
+            self.quadPoints.points[ii, :] = pred_point.ravel()
+
+        # update covariance as Q - m * x * x^T + sum(w_i * X_i * X_i^T)
+        state_cov = self.quadPoints.num_points * cur_state @ cur_state.T
+        self.cov = self.proc_noise - state_cov + self.quadPoints.cov
+
+        return self.quadPoints.mean
+
+    # correct(self, timestep, meas, *args, **kwargs)
+    def correct(self, timestep, meas, cur_state, meas_fun_args=()):
+        # factorize covariance as P = sqrt(P) * sqrt(P)^T
+        sqrt_cov = la.cholesky(self.cov).T
+
+        # generate quadrature points as X_i = sqrt(P) * xi_i + x_hat for m points
+        self.quadPoints.update_points(cur_state, sqrt_cov, have_sqrt=True)
+
+        # Estimate a measurement for each quad point, Z_i
+        measQuads = gdistrib.QuadraturePoints()
+        measQuads.points = np.nan * np.ones((self.quadPoints.points.shape[0], meas.size))
+        measQuads.weights = self.quadPoints.weights.copy()
+        for ii, (point, _) in enumerate(self.quadPoints):
+            measQuads.points[ii, :] = self._est_meas(timestep, point, meas.size,
+                                                     meas_fun_args)[0].ravel()
+
+        # estimate predicted measurement as sum of est measurement quad points
+        est_meas = measQuads.mean
+
+        # estimate innovation cov as P_zz = R - m * z_hat * z_hat^T + sum(w_i * Z_i * Z_i^T)
+        est_noise = self.quadPoints.num_points * est_meas @ est_meas.T
+        inov_cov = self.meas_noise - est_noise + measQuads.cov
+        if self.use_cholesky_inverse:
+            sqrt_inv_inov_cov = la.inv(la.cholesky(inov_cov))
+            inv_inov_cov = sqrt_inv_inov_cov.T @ sqrt_inv_inov_cov
+        else:
+            inv_inov_cov = la.inv(inov_cov)
+
+        # estimate cross cov as P_xz = sum(w_i * X_i * Z_i^T) - m * x * z_hat^T
+        cov_lst = [None] * self.quadPoints.num_points
+        for ii, (qp, mp) in enumerate(zip(self.quadPoints, measQuads)):
+            cov_lst[ii] = qp[0] @ mp[0].T
+        cross_mat = self.quadPoints.num_points * cur_state @ est_meas.T
+        cross_cov = gmath.weighted_sum_mat(self.quadPoints.weights, cov_lst) \
+            - cross_mat
+
+        # calc Kalman gain as K = P_xz * P_zz^-1
+        gain = cross_cov @ inv_inov_cov
+
+        # state is x_hat + K *(z - z_hat)
+        innov = meas - est_meas
+        cor_state = cur_state + gain @ innov
+
+        # update covariance as P = P_k - K * P_zz^-1 * K^T
+        self.cov = self.cov - gain @ inv_inov_cov @ gain.T
+
+        # TODO: figure out what this calculation should be
+        meas_fit_prob = None
+
+        return (cor_state, meas_fit_prob)
+
+
+class SquareRootQKF(QuadratureKalmanFilter):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def predict(self, timestep, *args, **kwargs):
+        pass
+
+    def correct(self, timestep, meas, *args, **kwargs):
+        pass
