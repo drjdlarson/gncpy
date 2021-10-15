@@ -2188,19 +2188,36 @@ class MaxCorrEntUPF(UnscentedParticleFilter):
 
 
 class QuadratureKalmanFilter(KalmanFilter):
-    def __init__(self, **kwargs):
+    def __init__(self, points_per_axis=None, **kwargs):
         super().__init__(**kwargs)
 
-        self.quadPoints = gdistrib.QuadraturePoints()
+        self.quadPoints = gdistrib.QuadraturePoints(points_per_axis=points_per_axis)
+        self._sqrt_cov = np.array([[]])
+
+    @property
+    def points_per_axis(self):
+        return self.quadPoints.points_per_axis
+
+    @points_per_axis.setter
+    def points_per_axis(self, val):
+        self.quadPoints.points_per_axis = val
+
+    def _factorize_cov(self, val=None):
+        if val is None:
+            val = self.cov
+        self._sqrt_cov = la.cholesky(val).T
+
+    def _pred_update_cov(self):
+        self.cov = self.proc_noise + self.quadPoints.cov
 
     # predict(self, timestep, *args, **kwargs)
     def predict(self, timestep, cur_state, cur_input=None, state_mat_args=(),
                 input_mat_args=()):
         # factorize covariance as P = sqrt(P) * sqrt(P)^T
-        sqrt_cov = la.cholesky(self.cov).T
+        self._factorize_cov()
 
         # generate quadrature points as X_i = sqrt(P) * xi_i + x_hat for m points
-        self.quadPoints.update_points(cur_state, sqrt_cov, have_sqrt=True)
+        self.quadPoints.update_points(cur_state, self._sqrt_cov, have_sqrt=True)
 
         # predict each point using the dynamics
         for ii, (point, _) in enumerate(self.quadPoints):
@@ -2209,21 +2226,24 @@ class QuadratureKalmanFilter(KalmanFilter):
             self.quadPoints.points[ii, :] = pred_point.ravel()
 
         # update covariance as Q - m * x * x^T + sum(w_i * X_i * X_i^T)
-        state_cov = self.quadPoints.num_points * cur_state @ cur_state.T
-        self.cov = self.proc_noise - state_cov + self.quadPoints.cov
+        self._pred_update_cov()
 
         return self.quadPoints.mean
+
+    def _corr_update_cov(self, gain, inov_cov):
+        self.cov = self.cov - gain @ inov_cov @ gain.T
+        self.cov = 0.5 * (self.cov + self.cov.T)
 
     # correct(self, timestep, meas, *args, **kwargs)
     def correct(self, timestep, meas, cur_state, meas_fun_args=()):
         # factorize covariance as P = sqrt(P) * sqrt(P)^T
-        sqrt_cov = la.cholesky(self.cov).T
+        self._factorize_cov()
 
         # generate quadrature points as X_i = sqrt(P) * xi_i + x_hat for m points
-        self.quadPoints.update_points(cur_state, sqrt_cov, have_sqrt=True)
+        self.quadPoints.update_points(cur_state, self._sqrt_cov, have_sqrt=True)
 
         # Estimate a measurement for each quad point, Z_i
-        measQuads = gdistrib.QuadraturePoints()
+        measQuads = gdistrib.QuadraturePoints(num_axes=meas.size)
         measQuads.points = np.nan * np.ones((self.quadPoints.points.shape[0], meas.size))
         measQuads.weights = self.quadPoints.weights.copy()
         for ii, (point, _) in enumerate(self.quadPoints):
@@ -2234,8 +2254,7 @@ class QuadratureKalmanFilter(KalmanFilter):
         est_meas = measQuads.mean
 
         # estimate innovation cov as P_zz = R - m * z_hat * z_hat^T + sum(w_i * Z_i * Z_i^T)
-        est_noise = self.quadPoints.num_points * est_meas @ est_meas.T
-        inov_cov = self.meas_noise - est_noise + measQuads.cov
+        inov_cov = self.meas_noise + measQuads.cov
         if self.use_cholesky_inverse:
             sqrt_inv_inov_cov = la.inv(la.cholesky(inov_cov))
             inv_inov_cov = sqrt_inv_inov_cov.T @ sqrt_inv_inov_cov
@@ -2245,10 +2264,8 @@ class QuadratureKalmanFilter(KalmanFilter):
         # estimate cross cov as P_xz = sum(w_i * X_i * Z_i^T) - m * x * z_hat^T
         cov_lst = [None] * self.quadPoints.num_points
         for ii, (qp, mp) in enumerate(zip(self.quadPoints, measQuads)):
-            cov_lst[ii] = qp[0] @ mp[0].T
-        cross_mat = self.quadPoints.num_points * cur_state @ est_meas.T
-        cross_cov = gmath.weighted_sum_mat(self.quadPoints.weights, cov_lst) \
-            - cross_mat
+            cov_lst[ii] = (qp[0] - cur_state) @ (mp[0] - est_meas).T
+        cross_cov = gmath.weighted_sum_mat(self.quadPoints.weights, cov_lst)
 
         # calc Kalman gain as K = P_xz * P_zz^-1
         gain = cross_cov @ inv_inov_cov
@@ -2257,11 +2274,12 @@ class QuadratureKalmanFilter(KalmanFilter):
         innov = meas - est_meas
         cor_state = cur_state + gain @ innov
 
-        # update covariance as P = P_k - K * P_zz^-1 * K^T
-        self.cov = self.cov - gain @ inv_inov_cov @ gain.T
+        # update covariance as P = P_k - K * P_zz * K^T
+        self._corr_update_cov(gain, inov_cov)
 
-        # TODO: figure out what this calculation should be
-        meas_fit_prob = None
+        meas_fit_prob = stats.multivariate_normal.pdf(meas.ravel(),
+                                                      mean=est_meas.ravel(),
+                                                      cov=inov_cov)
 
         return (cor_state, meas_fit_prob)
 
@@ -2270,8 +2288,19 @@ class SquareRootQKF(QuadratureKalmanFilter):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def predict(self, timestep, *args, **kwargs):
+    @property
+    def cov(self):
+        return self._sqrt_cov @ self._sqrt_cov.T
+
+    @cov.setter
+    def cov(self, val):
+        super()._factorize_cov(val=val)
+
+    def _factorize_cov(self):
         pass
 
-    def correct(self, timestep, meas, *args, **kwargs):
+    def _pred_update_cov(self):
+        pass
+
+    def _corr_update_cov(self, gain, inov_cov):
         pass

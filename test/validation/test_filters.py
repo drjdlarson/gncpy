@@ -971,6 +971,7 @@ def test_MCMC_UPF_dynObj():  # noqa
     print(exp_cov)
     assert chi_stat < crit_val, "values are different"
 
+
 def test_max_corr_ent_UKF_dynObj():  # noqa
     m_noise = 0.02
     p_noise = 0.2
@@ -1221,6 +1222,130 @@ def test_MCMC_MCUPF_dyn_fnc():  # noqa
     assert p_val > level_sig, "p-value too low, final state is unexpected"
 
 
+def test_QKF_dynObj():  # noqa
+    m_noise_std = 0.02
+    p_noise_std = 0.05
+    sig_num = 2
+
+    dt = 0.01
+    t0, t1 = 0, 10 + dt
+
+    rng = rnd.default_rng(global_seed)
+    dynObj = gdyn.DoubleIntegrator()
+
+    filt = gfilts.QuadratureKalmanFilter(points_per_axis=5)
+    filt.set_state_model(dyn_obj=dynObj)
+    m_mat = np.array([[1, 0, 0, 0],
+                     [0, 1, 0, 0]])
+    filt.set_measurement_model(meas_mat=m_mat)
+    proc_noise = p_noise_std**2 * np.eye(4)
+    meas_noise = m_noise_std**2 * np.eye(2)
+    filt.cov = 0.1**2 * np.eye(4)
+    filt.proc_noise = proc_noise.copy()
+    filt.meas_noise = meas_noise.copy()
+
+    vx0 = 2
+    vy0 = 1
+
+    time = np.arange(t0, t1, dt)
+    states = np.nan * np.ones((time.size, 4))
+    stds = np.nan * np.ones(states.shape)
+    states[0, :] = np.array([0, 0, vx0, vy0])
+    stds[0, :] = np.sqrt(np.diag(filt.cov))
+
+    t_states = states.copy()
+
+    for kk, t in enumerate(time[:-1]):
+        if np.mod(kk, int(1 / dt)) == 0:
+            print('\t\t{:.2f}'.format(t))
+            sys.stdout.flush()
+
+        states[kk + 1, :] = filt.predict(t, states[kk, :].reshape((4, 1)),
+                                         state_mat_args=(dt,)).flatten()
+        p_noise = rng.multivariate_normal(np.zeros(proc_noise.shape[0]),
+                                          proc_noise).reshape((4, 1))
+        t_states[kk + 1, :] = (dynObj.propagate_state(t,
+                                                      t_states[kk, :].reshape((4, 1)),
+                                                      state_args=(dt,))
+                               + 0 * p_noise).ravel()
+
+        n_state = t_states[kk + 1, :].reshape((4, 1)) + p_noise
+        m_noise = rng.multivariate_normal(np.zeros(meas_noise.shape[0]),
+                                          meas_noise)
+        meas = m_mat @ n_state + m_noise.reshape((2, 1))
+
+        states[kk + 1, :] = filt.correct(t, meas, states[kk + 1, :].reshape((4, 1)))[0].flatten()
+        stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
+
+    errs = t_states - states
+
+    # plot states
+    if debug_figs:
+        fig = plt.figure()
+        for ii, s in enumerate(gdyn.DoubleIntegrator().state_names):
+            fig.add_subplot(4, 1, ii + 1)
+            fig.axes[ii].plot(time, states[:, ii], color='b')
+            fig.axes[ii].plot(time, t_states[:, ii], color='r')
+            fig.axes[ii].grid(True)
+            fig.axes[ii].set_ylabel(s)
+
+        fig.axes[-1].set_xlabel('time (s)')
+        fig.suptitle('States (obj)')
+        fig.tight_layout()
+
+        # plot stds
+        fig = plt.figure()
+        for ii, s in enumerate(gdyn.DoubleIntegrator().state_names):
+            fig.add_subplot(4, 1, ii + 1)
+            fig.axes[ii].plot(time, sig_num * stds[:, ii], color='r')
+            fig.axes[ii].plot(time, np.abs(errs[:, ii]), color='k')
+            fig.axes[ii].grid(True)
+            fig.axes[ii].set_ylabel(s + ' std')
+
+        fig.axes[-1].set_xlabel('time (s)')
+        fig.suptitle('Filter standard deviations (obj)')
+        fig.tight_layout()
+
+        fig = plt.figure()
+        fig.add_subplot(1, 1, 1)
+        fig.axes[0].plot(t_states[:, 0], t_states[:, 1], color='r', label='true')
+        fig.axes[0].plot(states[:, 0], states[:, 1], color='b', label='est')
+        fig.axes[0].grid(True)
+        fig.suptitle('Positions')
+        fig.axes[0].legend()
+        fig.tight_layout()
+
+    bounding = np.sum(np.abs(errs) < sig_num * stds, axis=0) / time.size
+    min_bound = stats.norm.sf(-sig_num) - stats.norm.sf(sig_num)
+    if debug_figs:
+        print('Bounding is:')
+        print(bounding)
+        print('must be > {}'.format(min_bound))
+    assert all(bounding > min_bound), 'bounding failed'
+
+    # check that particle distribution matches the expected mean assuming
+    # that the covariance is the same and its normally distributed
+    pred_state = states[-1, :].reshape((4, 1))
+    true_state = t_states[-1, :].reshape((4, 1))
+    level_sig = 0.05
+
+    crit_val = stats.chi2.ppf(1 - level_sig, df=true_state.size)
+    exp_cov = la.solve_discrete_are(dynObj.get_state_mat(0, dt).T, m_mat.T,
+                                    proc_noise,
+                                    meas_noise)
+
+    inv_cov = la.inv(exp_cov)
+    chi_stat = (pred_state - true_state).T @ inv_cov @ (pred_state - true_state)
+
+    if debug_figs:
+        print(pred_state.flatten())
+        print(true_state.flatten())
+        print(filt.cov)
+        print((chi_stat, crit_val))
+        print(exp_cov)
+    assert chi_stat < crit_val, "values are different"
+
+
 # %% Main
 if __name__ == "__main__":
     from timeit import default_timer as timer
@@ -1244,9 +1369,11 @@ if __name__ == "__main__":
     # test_UPF_dyn_fnc()
     # test_UPF_dynObj()
     # test_MCMC_UPF_dyn_fnc()
-    test_MCMC_UPF_dynObj()
+    # test_MCMC_UPF_dynObj()
     # test_MCUPF_dyn_fnc()
     # test_MCMC_MCUPF_dyn_fnc()
+
+    test_QKF_dynObj()
 
     end = timer()
     print('{:.2f} s'.format(end - start))

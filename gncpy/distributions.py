@@ -1,7 +1,9 @@
 """Standard distributions for use with the package classes."""
 import numpy as np
 import numpy.linalg as la
+from numpy.polynomial.hermite import hermgauss
 from warnings import warn
+import itertools
 
 import gncpy.math as gmath
 
@@ -54,7 +56,7 @@ class QuadraturePoints:
     def mean(self):
         """Mean of the points, accounting for the weights."""
         return gmath.weighted_sum_vec(self.weights,
-                                      self.points).reshape((self.points.shape[1], 1))
+                                      self.points).reshape((self.num_axes, 1))
 
     @property
     def cov(self):
@@ -63,7 +65,7 @@ class QuadraturePoints:
         diff = (self.points - x_bar.ravel()).reshape(self.points.shape[0], x_bar.size, 1)
         return gmath.weighted_sum_mat(self.weights,
                                       diff @ diff.reshape(self.points.shape[0],
-                                                          1, x_bar.size))
+                                                          1, self.num_axes))
 
     def _factor_scale_matrix(self, scale, have_sqrt):
         if have_sqrt:
@@ -72,7 +74,7 @@ class QuadraturePoints:
             return la.cholesky(scale)
 
     def update_points(self, mean, scale, have_sqrt=False):
-        """Updates the sigma points given some initial point and covariance.
+        """Updates the quadrature points given some initial point and scale.
 
         Parameters
         ----------
@@ -88,20 +90,30 @@ class QuadraturePoints:
         -------
         None.
         """
-        self._num_axes = mean.size
+        def create_combos(points_per_ax, num_ax, tot_points):
+            combos = np.meshgrid(*itertools.repeat(range(points_per_ax), num_ax))
+
+            return np.array(combos).reshape((num_ax, tot_points)).T
+
+        self.num_axes = mean.size
 
         sqrt_cov = self._factor_scale_matrix(scale, have_sqrt)
 
         self.points = np.nan * np.ones((self.num_points, self.num_axes))
-
-        # TODO: figure out what these should be
         self.weights = np.nan * np.ones(self.num_points)
 
-        # TODO: figure out what these should be
-        quad_points = []
+        # get standard values for 1 axis case
+        quad_points, weights = hermgauss(self.points_per_axis)
 
-        for row, direction in enumerate(quad_points):
-            self.points[row, :] = (mean + sqrt_cov @ direction.reshape((self._num_axes, 1))).ravel()
+        ind_combos = create_combos(self.points_per_axis, self.num_axes,
+                                   self.num_points)
+
+        for ii, inds in enumerate(ind_combos):
+            point = quad_points[inds].reshape((inds.size, 1))
+            self.points[ii, :] = (mean + sqrt_cov @ point).ravel()
+            self.weights[ii] = np.prod(weights[inds])
+
+        self.weights = self.weights / np.sum(self.weights)
 
     def __iter__(self):
         """Custom iterator for looping over the object.
