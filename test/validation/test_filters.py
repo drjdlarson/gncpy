@@ -595,7 +595,7 @@ def test_UPF_dyn_fnc():  # noqa
         p.point = 2 * proc_noise_std * rng.random(true_state.shape) - proc_noise_std + true_state
         p.uncertainty = 0.5**2 * np.eye(1)
         p.sigmaPoints = gdistrib.SigmaPoints(alpha=alpha, kappa=kappa,
-                                             n=true_state.size)
+                                             num_axes=true_state.size)
         p.sigmaPoints.init_weights()
         p.sigmaPoints.update_points(p.point, p.uncertainty)
         distrib.add_particle(p, 1 / num_parts)
@@ -690,7 +690,7 @@ def test_UPF_dynObj():  # noqa
         part.point = l_bnd + spread * rng.random(true_state.shape)
         part.uncertainty = b_cov.copy()
         part.sigmaPoints = gdistrib.SigmaPoints(alpha=alpha, kappa=kappa,
-                                                n=true_state.size)
+                                                num_axes=true_state.size)
         part.sigmaPoints.init_weights()
         part.sigmaPoints.update_points(part.point, part.uncertainty)
         distrib.add_particle(part, 1 / num_parts)
@@ -797,7 +797,7 @@ def test_MCMC_UPF_dyn_fnc():  # noqa
         p.point = 2 * proc_noise_std * rng.random(true_state.shape) - proc_noise_std + true_state
         p.uncertainty = 0.5**2 * np.eye(1)
         p.sigmaPoints = gdistrib.SigmaPoints(alpha=alpha, kappa=kappa,
-                                             n=true_state.size)
+                                             num_axes=true_state.size)
         p.sigmaPoints.init_weights()
         p.sigmaPoints.update_points(p.point, p.uncertainty)
         distrib.add_particle(p, 1 / num_parts)
@@ -891,7 +891,7 @@ def test_MCMC_UPF_dynObj():  # noqa
         part.point = l_bnd + spread * rng.random(true_state.shape)
         part.uncertainty = b_cov.copy()
         part.sigmaPoints = gdistrib.SigmaPoints(alpha=alpha, kappa=kappa,
-                                                n=true_state.size)
+                                                num_axes=true_state.size)
         part.sigmaPoints.init_weights()
         part.sigmaPoints.update_points(part.point, part.uncertainty)
         distrib.add_particle(part, 1 / num_parts)
@@ -1084,7 +1084,7 @@ def test_MCUPF_dyn_fnc():  # noqa
         p.point = 2 * proc_noise_std * rng.random(true_state.shape) - proc_noise_std + true_state
         p.uncertainty = 0.5**2 * np.eye(1)
         p.sigmaPoints = gdistrib.SigmaPoints(alpha=alpha, kappa=kappa,
-                                             n=true_state.size)
+                                             num_axes=true_state.size)
         p.sigmaPoints.init_weights()
         p.sigmaPoints.update_points(p.point, p.uncertainty)
         distrib.add_particle(p, 1 / num_parts)
@@ -1166,7 +1166,7 @@ def test_MCMC_MCUPF_dyn_fnc():  # noqa
         p.point = 2 * proc_noise_std * rng.random(true_state.shape) - proc_noise_std + true_state
         p.uncertainty = 0.5**2 * np.eye(1)
         p.sigmaPoints = gdistrib.SigmaPoints(alpha=alpha, kappa=kappa,
-                                             n=true_state.size)
+                                             num_axes=true_state.size)
         p.sigmaPoints.init_weights()
         p.sigmaPoints.update_points(p.point, p.uncertainty)
         distrib.add_particle(p, 1 / num_parts)

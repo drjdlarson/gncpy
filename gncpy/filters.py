@@ -854,10 +854,11 @@ class UnscentedKalmanFilter(ExtendedKalmanFilter):
             Tunig parameter for distribution type. In range [0, Inf].
             Defaults to 2 for gaussians.
         """
-        n = state0.size
+        num_axes = state0.size
         self._stateSigmaPoints = gdistrib.SigmaPoints(alpha=alpha,
                                                       kappa=kappa,
-                                                      beta=beta, n=n)
+                                                      beta=beta,
+                                                      num_axes=num_axes)
         self._stateSigmaPoints.init_weights()
         self._stateSigmaPoints.update_points(state0, self.cov)
 
