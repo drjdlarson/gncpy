@@ -1,11 +1,13 @@
 """Standard distributions for use with the package classes."""
 import numpy as np
 import numpy.linalg as la
-from numpy.polynomial.hermite import hermgauss
+import numpy.polynomial.hermite_e as herm_e
 from warnings import warn
 import itertools
+import matplotlib.pyplot as plt
 
 import gncpy.math as gmath
+import gncpy.plotting as pltUtil
 
 
 class _QuadPointIter:
@@ -102,8 +104,8 @@ class QuadraturePoints:
         self.points = np.nan * np.ones((self.num_points, self.num_axes))
         self.weights = np.nan * np.ones(self.num_points)
 
-        # get standard values for 1 axis case
-        quad_points, weights = hermgauss(self.points_per_axis)
+        # get standard values for 1 axis case, use "Probabilist's" Hermite polynomials
+        quad_points, weights = herm_e.hermegauss(self.points_per_axis)
 
         ind_combos = create_combos(self.points_per_axis, self.num_axes,
                                    self.num_points)
@@ -114,6 +116,8 @@ class QuadraturePoints:
             self.weights[ii] = np.prod(weights[inds])
 
         self.weights = self.weights / np.sum(self.weights)
+
+        # note: Sum[w * p @ p.T] should equal the identity matrix here
 
     def __iter__(self):
         """Custom iterator for looping over the object.
@@ -126,6 +130,68 @@ class QuadraturePoints:
             Weight of the current point.
         """
         return _QuadPointIter(self)
+
+    def plot_points(self, inds, x_lbl='X Position', y_lbl='Y Position',
+                    ttl='Weighted Positions', size_factor=100**2, **kwargs):
+        """Plots the weighted points.
+
+        Keywrod arguments are processed with
+        :meth:`gncpy.plotting.init_plotting_opts`. This function
+        implements
+
+            - f_hndl
+            - Any title/axis/text options
+
+        Parameters
+        ----------
+        inds : list or int
+            Indices of the point vector to plot. Can be a list of at most 2
+            elements. If only 1 is given a bar chart is created.
+        x_lbl : string, optional
+            Label for the x-axis. The default is 'X Position'.
+        y_lbl : string, optional
+            Label for the y-axis. The default is 'Y Position'.
+        ttl : string, optional
+            Title of the plot. The default is 'Weighted positions'.
+        size_factor : int, optional
+            Factor to multiply the weight by when determining the marker size.
+            Only used if plotting 2 indices. The default is 100**2.
+        **kwargs : dict
+            Additional standard plotting options.
+
+        Returns
+        -------
+        fig : TYPE
+            DESCRIPTION.
+
+        """
+        opts = pltUtil.init_plotting_opts(**kwargs)
+        fig = opts['f_hndl']
+
+        if fig is None:
+            fig = plt.figure()
+            fig.add_subplot(1, 1, 1)
+
+        if isinstance(inds, list):
+            if len(inds) >= 2:
+                fig.axes[0].scatter(self.points[:, inds[0]],
+                                    self.points[:, inds[1]],
+                                    s=size_factor * self.weights, color='k')
+                fig.axes[0].grid(True)
+
+            elif len(inds) == 1:
+                fig.axes[0].bar(self.points[:, inds[0]],
+                                self.weights)
+        else:
+            fig.axes[0].bar(self.points[:, inds[0]],
+                            self.weights)
+
+        pltUtil.set_title_label(fig, 0, opts, ttl=ttl, x_lbl=x_lbl,
+                                y_lbl=y_lbl)
+
+        fig.tight_layout()
+
+        return fig
 
 
 class SigmaPoints(QuadraturePoints):

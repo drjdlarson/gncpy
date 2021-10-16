@@ -2,7 +2,7 @@
 import numpy as np
 import numpy.random as rnd
 import numpy.linalg as la
-from scipy.linalg import expm
+from scipy.linalg import expm, solve_triangular
 import scipy.integrate as s_integrate
 import scipy.stats as stats
 import abc
@@ -2194,6 +2194,7 @@ class QuadratureKalmanFilter(KalmanFilter):
 
         self.quadPoints = gdistrib.QuadraturePoints(points_per_axis=points_per_axis)
         self._sqrt_cov = np.array([[]])
+        self._dyn_fnc = None
 
     @property
     def points_per_axis(self):
@@ -2203,13 +2204,27 @@ class QuadratureKalmanFilter(KalmanFilter):
     def points_per_axis(self, val):
         self.quadPoints.points_per_axis = val
 
+    def set_state_model(self, dyn_fun=None, **kwargs):
+        if dyn_fun is not None:
+            self._dyn_fnc = dyn_fun
+        else:
+            super().set_state_model(**kwargs)
+
     def _factorize_cov(self, val=None):
         if val is None:
             val = self.cov
-        self._sqrt_cov = la.cholesky(val).T
+        # numpy linalg is lower triangular
+        self._sqrt_cov = la.cholesky(val)
 
     def _pred_update_cov(self):
         self.cov = self.proc_noise + self.quadPoints.cov
+
+    def _predict_next_state(self, timestep, cur_state, cur_input, state_mat_args, input_mat_args):
+        if self._dyn_fnc is not None:
+            return self._dyn_fnc(timestep, cur_state, *state_mat_args)
+        else:
+            return super()._predict_next_state(timestep, cur_state, cur_input,
+                                               state_mat_args, input_mat_args)[0]
 
     # predict(self, timestep, *args, **kwargs)
     def predict(self, timestep, cur_state, cur_input=None, state_mat_args=(),
@@ -2223,7 +2238,7 @@ class QuadratureKalmanFilter(KalmanFilter):
         # predict each point using the dynamics
         for ii, (point, _) in enumerate(self.quadPoints):
             pred_point = self._predict_next_state(timestep, point, cur_input,
-                                                  state_mat_args, input_mat_args)[0]
+                                                  state_mat_args, input_mat_args)
             self.quadPoints.points[ii, :] = pred_point.ravel()
 
         # update covariance as Q - m * x * x^T + sum(w_i * X_i * X_i^T)
@@ -2235,8 +2250,7 @@ class QuadratureKalmanFilter(KalmanFilter):
         self.cov = self.cov - gain @ inov_cov @ gain.T
         self.cov = 0.5 * (self.cov + self.cov.T)
 
-    # correct(self, timestep, meas, *args, **kwargs)
-    def correct(self, timestep, meas, cur_state, meas_fun_args=()):
+    def _corr_core(self, timestep, cur_state, meas, meas_fun_args):
         # factorize covariance as P = sqrt(P) * sqrt(P)^T
         self._factorize_cov()
 
@@ -2246,13 +2260,20 @@ class QuadratureKalmanFilter(KalmanFilter):
         # Estimate a measurement for each quad point, Z_i
         measQuads = gdistrib.QuadraturePoints(num_axes=meas.size)
         measQuads.points = np.nan * np.ones((self.quadPoints.points.shape[0], meas.size))
-        measQuads.weights = self.quadPoints.weights.copy()
+        measQuads.weights = self.quadPoints.weights
         for ii, (point, _) in enumerate(self.quadPoints):
             measQuads.points[ii, :] = self._est_meas(timestep, point, meas.size,
                                                      meas_fun_args)[0].ravel()
 
         # estimate predicted measurement as sum of est measurement quad points
         est_meas = measQuads.mean
+
+        return measQuads, est_meas
+
+    # correct(self, timestep, meas, *args, **kwargs)
+    def correct(self, timestep, meas, cur_state, meas_fun_args=()):
+        measQuads, est_meas = self._corr_core(timestep, cur_state, meas,
+                                              meas_fun_args)
 
         # estimate innovation cov as P_zz = R - m * z_hat * z_hat^T + sum(w_i * Z_i * Z_i^T)
         inov_cov = self.meas_noise + measQuads.cov
@@ -2284,24 +2305,113 @@ class QuadratureKalmanFilter(KalmanFilter):
 
         return (cor_state, meas_fit_prob)
 
+    def plot_quadrature(self, inds, **kwargs):
+        """Wrapper function for :meth:`gncpy.distributions.QuadraturePoints.plot_points`."""
+        return self.quadPoints.plot_points(inds, **kwargs)
+
 
 class SquareRootQKF(QuadratureKalmanFilter):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        self._meas_noise = np.array([[]])
+        self._sqrt_p_noise = np.array([[]])
+        self._sqrt_m_noise = np.array([[]])
+
     @property
     def cov(self):
+        # sqrt cov is lower triangular
         return self._sqrt_cov @ self._sqrt_cov.T
 
     @cov.setter
     def cov(self, val):
-        super()._factorize_cov(val=val)
+        if val.size == 0:
+            self._sqrt_cov = val
+        else:
+            super()._factorize_cov(val=val)
+
+    @property
+    def proc_noise(self):
+        return self._sqrt_p_noise @ self._sqrt_p_noise.T
+
+    @proc_noise.setter
+    def proc_noise(self, val):
+        if val.size == 0 or np.all(val == 0):
+            self._sqrt_p_noise = val
+        else:
+            self._sqrt_p_noise = la.cholesky(val)
+
+    @property
+    def meas_noise(self):
+        return self._sqrt_m_noise @ self._sqrt_m_noise.T
+
+    @meas_noise.setter
+    def meas_noise(self, val):
+        if val.size == 0 or np.all(val == 0):
+            self._sqrt_m_noise = val
+        else:
+            self._sqrt_m_noise = la.cholesky(val)
 
     def _factorize_cov(self):
         pass
 
     def _pred_update_cov(self):
-        pass
+        weight_mat = np.diag(np.sqrt(self.quadPoints.weights))
+        x_hat = self.quadPoints.mean
+        state_mat = np.concatenate([x.reshape((x.size, 1)) - x_hat
+                                    for x in self.quadPoints.points], axis=1)
 
-    def _corr_update_cov(self, gain, inov_cov):
-        pass
+        self._sqrt_cov = la.qr(np.concatenate((state_mat @ weight_mat,
+                                               self._sqrt_p_noise.T), axis=1).T,
+                               mode='r').T
+
+    def _corr_update_cov(self, gain, state_mat, meas_mat, inov_cov):
+        orig = self.cov - gain @ inov_cov @ gain.T
+
+        self._sqrt_cov = la.qr(np.concatenate((state_mat - gain @ meas_mat,
+                                               gain @ self._sqrt_m_noise), axis=1).T,
+                               mode='r').T
+
+    def correct(self, timestep, meas, cur_state, meas_fun_args=()):
+        measQuads, est_meas = self._corr_core(timestep, cur_state, meas,
+                                              meas_fun_args)
+
+        weight_mat = np.diag(np.sqrt(self.quadPoints.weights))
+
+        # calculate sqrt of the measurement covariance
+        meas_mat = np.concatenate([z.reshape((z.size, 1)) - est_meas
+                                   for z in measQuads.points], axis=1) @ weight_mat
+        sqrt_inov_cov = la.qr(np.concatenate((meas_mat,
+                                              self._sqrt_m_noise), axis=1).T,
+                              mode='r').T
+
+        # calculate cross covariance
+        x_hat = self.quadPoints.mean
+        state_mat = np.concatenate([x.reshape((x.size, 1)) - x_hat
+                                    for x in self.quadPoints.points], axis=1) @ weight_mat
+        cross_cov = state_mat @ meas_mat.T
+
+        # calculate gain
+        # inv_sqrt_inov_cov = la.inv(sqrt_inov_cov)
+        # gain = cross_cov @ (inv_sqrt_inov_cov.T @ inv_sqrt_inov_cov)
+        inter = solve_triangular(sqrt_inov_cov.T, cross_cov.T)
+        gain = solve_triangular(sqrt_inov_cov, inter, lower=True).T
+
+        # state is x_hat + K *(z - z_hat)
+        innov = meas - est_meas
+        cor_state = cur_state + gain @ innov
+
+        # update covariance
+        inov_cov = sqrt_inov_cov @ sqrt_inov_cov.T
+
+        orig = self.cov - gain @ inov_cov @ gain.T
+        new = self.cov - cross_cov @ gain.T
+        new2 = self.cov - cross_cov @ gain.T + gain @ inov_cov @ gain.T - gain @ cross_cov.T
+
+        self._corr_update_cov(gain, state_mat, meas_mat, inov_cov)
+
+        meas_fit_prob = stats.multivariate_normal.pdf(meas.ravel(),
+                                                      mean=est_meas.ravel(),
+                                                      cov=inov_cov)
+
+        return (cor_state, meas_fit_prob)
