@@ -27,7 +27,20 @@ class _QuadPointIter:
 
 
 class QuadraturePoints:
-    """Helper class that defines quadrature points.
+    r"""Helper class that defines quadrature points.
+
+    Notes
+    -----
+    This implements the Probabilist's version of the Gauss-Hermite quadrature
+    points. This consists of the Hermite polynomial
+
+    .. math::
+        H_{e_n}(x) = (-1)^n \exp{\frac{x^2}{2}} \frac{\partial^n}{\partial x^n} \exp{-\frac{x^2}{2}}
+
+    and its associated weights. For details see
+    :cite:`Press1992_NumericalRecipesinCtheArtofScientificComputing`,
+    :cite:`Golub1969_CalculationofGaussQuadratureRules` and for a multi-variate
+    extension :cite:`Jackel2005_ANoteonMultivariateGaussHermiteQuadrature`.
 
     Attributes
     ----------
@@ -35,7 +48,7 @@ class QuadraturePoints:
         Number of points to use per axis
     num_axes : int
         Number of axis in each point. This can be set manually, but will be updated
-        when :meth:`self.update_points` is called to match the supplied mean.
+        when :meth:`.update_points` is called to match the supplied mean.
     weights : numpy array
         Weight of each quadrature point
     points : M x N numpy array
@@ -51,7 +64,7 @@ class QuadraturePoints:
 
     @property
     def num_points(self):
-        """Expected number of points."""
+        """Read only expected number of points."""
         return int(self.points_per_axis**self.num_axes)
 
     @property
@@ -161,9 +174,8 @@ class QuadraturePoints:
 
         Returns
         -------
-        fig : TYPE
-            DESCRIPTION.
-
+        fig : matplotlib figure handle
+            Handle to the figure used.
         """
         opts = pltUtil.init_plotting_opts(**kwargs)
         fig = opts['f_hndl']

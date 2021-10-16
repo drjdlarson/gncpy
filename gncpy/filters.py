@@ -336,7 +336,7 @@ class KalmanFilter(BayesFilter):
         return est_meas, meas_mat
 
     def correct(self, timestep, meas, cur_state, meas_fun_args=()):
-        """Implementss a discrete time correction step for a Kalman Filter.
+        """Implements a discrete time correction step for a Kalman Filter.
 
         Parameters
         ----------
@@ -2189,6 +2189,20 @@ class MaxCorrEntUPF(UnscentedParticleFilter):
 
 
 class QuadratureKalmanFilter(KalmanFilter):
+    """Implementation of a Quadrature Kalman Filter.
+
+    Notes
+    -----
+    This implementation is based on
+    :cite:`Arasaratnam2007_DiscreteTimeNonlinearFilteringAlgorithmsUsingGaussHermiteQuadrature`
+    and uses Gauss-Hermite quadrature points.
+
+    Attributes
+    ----------
+    quadPoints : :class:`gncpy.distributions.QuadraturePoints`
+        Quadrature points used by the filter.
+    """
+
     def __init__(self, points_per_axis=None, **kwargs):
         super().__init__(**kwargs)
 
@@ -2198,6 +2212,7 @@ class QuadratureKalmanFilter(KalmanFilter):
 
     @property
     def points_per_axis(self):
+        """Wrapper for the  number of quadrature points per axis."""
         return self.quadPoints.points_per_axis
 
     @points_per_axis.setter
@@ -2205,10 +2220,66 @@ class QuadratureKalmanFilter(KalmanFilter):
         self.quadPoints.points_per_axis = val
 
     def set_state_model(self, dyn_fun=None, **kwargs):
+        """Sets the state model.
+
+        This can either be a non-linear dyanmic function or any valid model
+        for the :class:`.KalmanFilter`.
+
+        Parameters
+        ----------
+        dyn_fun : callable
+            The a function that propagates the state. This is assumed to be
+            non-linear but can also be a linear function. It must have the
+            signature :code:`f(t, x, *args)` where `t` is the timestep,
+            `x` is a N x 1 numpy array, and it returns an N x 1 numpy array
+            representing the next state.
+        **kwargs : dict
+            Additional agruments to pass to :class:`.KalmanFilter` if `dyn_fun`
+            is not used.
+        """
         if dyn_fun is not None:
             self._dyn_fnc = dyn_fun
         else:
             super().set_state_model(**kwargs)
+
+    def set_measurement_model(self, meas_mat=None, meas_fun=None):
+        r"""Sets the measurement model for the filter.
+
+        This can either set the constant measurement matrix, or a potentially
+        non-linear function.
+
+        Notes
+        -----
+        This assumes a measurement model of the form
+
+        .. math::
+            \tilde{y}_{k+1} = H x_{k+1}^-
+
+        for the measurement matrix case. Or of the form
+
+        .. math::
+            \tilde{y}_{k+1} = h(t, x_{k+1}^-)
+
+        for the potentially non-linear case.
+
+        Parameters
+        ----------
+        meas_mat : Nm x N numpy array, optional
+            Measurement matrix that transforms the state to estimated
+            measurements. The default is None.
+        meas_fun : callable, optional
+            Function that returns the matrix for transforming the state to
+            estimated measurements. Must have the signature :code:`h(t, x, *args)`
+            where `t` is the timestep, `x` is an N x 1 numpy array of the
+            current state, and return an Nm x 1 numpy array of the estimated
+            measurement. The default is None.
+
+        Raises
+        ------
+        RuntimeError
+            Rasied if no arguments are specified.
+        """
+        super().set_measurement_model(meas_mat=meas_mat, meas_fun=meas_fun)
 
     def _factorize_cov(self, val=None):
         if val is None:
@@ -2226,9 +2297,38 @@ class QuadratureKalmanFilter(KalmanFilter):
             return super()._predict_next_state(timestep, cur_state, cur_input,
                                                state_mat_args, input_mat_args)[0]
 
-    # predict(self, timestep, *args, **kwargs)
     def predict(self, timestep, cur_state, cur_input=None, state_mat_args=(),
                 input_mat_args=()):
+        """Prediction step of the filter.
+
+        Parameters
+        ----------
+        timestep : float
+            Current timestep.
+        cur_state : N x 1 numpy array
+            Current state.
+        cur_input : N x Nu numpy array, optional
+            Current input. The default is None.
+        state_mat_args : tuple, optional
+            Additional arguments for the get state matrix function if one has
+            been specified, the propagate state function if using a dynamic
+            object, or the dynamic function is a non-linear model is used.
+            The default is ().
+        input_mat_args : tuple, optional
+            Additional arguments for the get input matrix function if one has
+            been specified or the propagate state function if using a dynamic
+            object. The default is ().
+
+        Raises
+        ------
+        RuntimeError
+            If the state model has not been set
+
+        Returns
+        -------
+        N x 1 numpy array
+            The predicted state.
+        """
         # factorize covariance as P = sqrt(P) * sqrt(P)^T
         self._factorize_cov()
 
@@ -2250,6 +2350,13 @@ class QuadratureKalmanFilter(KalmanFilter):
         self.cov = self.cov - gain @ inov_cov @ gain.T
         self.cov = 0.5 * (self.cov + self.cov.T)
 
+    def _est_meas(self, timestep, cur_state, n_meas, meas_fun_args):
+        if self._meas_fnc is not None:
+            return self._meas_fnc(timestep, cur_state, *meas_fun_args).ravel()
+        else:
+            return super()._est_meas(timestep, cur_state, n_meas,
+                                     meas_fun_args)[0].ravel()
+
     def _corr_core(self, timestep, cur_state, meas, meas_fun_args):
         # factorize covariance as P = sqrt(P) * sqrt(P)^T
         self._factorize_cov()
@@ -2263,15 +2370,37 @@ class QuadratureKalmanFilter(KalmanFilter):
         measQuads.weights = self.quadPoints.weights
         for ii, (point, _) in enumerate(self.quadPoints):
             measQuads.points[ii, :] = self._est_meas(timestep, point, meas.size,
-                                                     meas_fun_args)[0].ravel()
+                                                     meas_fun_args)
 
         # estimate predicted measurement as sum of est measurement quad points
         est_meas = measQuads.mean
 
         return measQuads, est_meas
 
-    # correct(self, timestep, meas, *args, **kwargs)
     def correct(self, timestep, meas, cur_state, meas_fun_args=()):
+        """Implements the correction step of the filter.
+
+        Parameters
+        ----------
+        timestep : float
+            Current timestep.
+        meas : Nm x 1 numpy array
+            Current measurement.
+        cur_state : N x 1 numpy array
+            Current state.
+        meas_fun_args : tuple, optional
+            Arguments for the measurement matrix function if one has
+            been specified. The default is ().
+
+        Returns
+        -------
+        next_state : N x 1 numpy array
+            The corrected state.
+        meas_fit_prob : float
+            Goodness of fit of the measurement based on the state and
+            covariance assuming Gaussian noise.
+
+        """
         measQuads, est_meas = self._corr_core(timestep, cur_state, meas,
                                               meas_fun_args)
 
@@ -2311,6 +2440,13 @@ class QuadratureKalmanFilter(KalmanFilter):
 
 
 class SquareRootQKF(QuadratureKalmanFilter):
+    """Implementation of a Square root Quadrature Kalman Filter (SQKF).
+
+    Notes
+    -----
+    This is based on :cite:`Arasaratnam2008_SquareRootQuadratureKalmanFiltering`.
+    """
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -2320,6 +2456,7 @@ class SquareRootQKF(QuadratureKalmanFilter):
 
     @property
     def cov(self):
+        """Covariance of the filter."""
         # sqrt cov is lower triangular
         return self._sqrt_cov @ self._sqrt_cov.T
 
@@ -2332,6 +2469,7 @@ class SquareRootQKF(QuadratureKalmanFilter):
 
     @property
     def proc_noise(self):
+        """Process noise of the filter."""
         return self._sqrt_p_noise @ self._sqrt_p_noise.T
 
     @proc_noise.setter
@@ -2343,6 +2481,7 @@ class SquareRootQKF(QuadratureKalmanFilter):
 
     @property
     def meas_noise(self):
+        """Measurement noise of the filter."""
         return self._sqrt_m_noise @ self._sqrt_m_noise.T
 
     @meas_noise.setter
@@ -2365,14 +2504,35 @@ class SquareRootQKF(QuadratureKalmanFilter):
                                                self._sqrt_p_noise.T), axis=1).T,
                                mode='r').T
 
-    def _corr_update_cov(self, gain, state_mat, meas_mat, inov_cov):
-        orig = self.cov - gain @ inov_cov @ gain.T
-
+    def _corr_update_cov(self, gain, state_mat, meas_mat):
         self._sqrt_cov = la.qr(np.concatenate((state_mat - gain @ meas_mat,
                                                gain @ self._sqrt_m_noise), axis=1).T,
                                mode='r').T
 
     def correct(self, timestep, meas, cur_state, meas_fun_args=()):
+        """Implements the correction step of the filter.
+
+        Parameters
+        ----------
+        timestep : float
+            Current timestep.
+        meas : Nm x 1 numpy array
+            Current measurement.
+        cur_state : N x 1 numpy array
+            Current state.
+        meas_fun_args : tuple, optional
+            Arguments for the measurement matrix function if one has
+            been specified. The default is ().
+
+        Returns
+        -------
+        next_state : N x 1 numpy array
+            The corrected state.
+        meas_fit_prob : float
+            Goodness of fit of the measurement based on the state and
+            covariance assuming Gaussian noise.
+
+        """
         measQuads, est_meas = self._corr_core(timestep, cur_state, meas,
                                               meas_fun_args)
 
@@ -2392,10 +2552,12 @@ class SquareRootQKF(QuadratureKalmanFilter):
         cross_cov = state_mat @ meas_mat.T
 
         # calculate gain
-        # inv_sqrt_inov_cov = la.inv(sqrt_inov_cov)
-        # gain = cross_cov @ (inv_sqrt_inov_cov.T @ inv_sqrt_inov_cov)
         inter = solve_triangular(sqrt_inov_cov.T, cross_cov.T)
         gain = solve_triangular(sqrt_inov_cov, inter, lower=True).T
+
+        # the above gain is equavalent to
+        # inv_sqrt_inov_cov = la.inv(sqrt_inov_cov)
+        # gain = cross_cov @ (inv_sqrt_inov_cov.T @ inv_sqrt_inov_cov)
 
         # state is x_hat + K *(z - z_hat)
         innov = meas - est_meas
@@ -2404,11 +2566,7 @@ class SquareRootQKF(QuadratureKalmanFilter):
         # update covariance
         inov_cov = sqrt_inov_cov @ sqrt_inov_cov.T
 
-        orig = self.cov - gain @ inov_cov @ gain.T
-        new = self.cov - cross_cov @ gain.T
-        new2 = self.cov - cross_cov @ gain.T + gain @ inov_cov @ gain.T - gain @ cross_cov.T
-
-        self._corr_update_cov(gain, state_mat, meas_mat, inov_cov)
+        self._corr_update_cov(gain, state_mat, meas_mat)
 
         meas_fit_prob = stats.multivariate_normal.pdf(meas.ravel(),
                                                       mean=est_meas.ravel(),
