@@ -2,9 +2,11 @@
 import numpy as np
 import numpy.linalg as la
 import numpy.polynomial.hermite_e as herm_e
+import numpy.random as rnd
 from warnings import warn
 import itertools
 import matplotlib.pyplot as plt
+import enum
 
 import gncpy.math as gmath
 import gncpy.plotting as pltUtil
@@ -548,3 +550,49 @@ class ParticleDistribution:
             Weight of the current particle.
         """
         return _ParticleDistIter(self)
+
+
+class GSMTypes(enum.Enum):
+    STUDENTS_T = enum.auto()
+    SYMMETRIC_A_STABLE = enum.auto()
+
+    def __str__(self):
+        """Return the enum name for strings."""
+        return self.name
+
+
+class GaussianScaleMixture:
+    def __init__(self):
+        self.type = None
+
+    def sample(self, rng=None):
+        """Draw a sample from the specified GSM type.
+
+        Parameters
+        ----------
+        rng : numpy random generator, optional
+            Random number generator to use. If none is given then the numpy
+            default is used. The default is None.
+
+        Returns
+        -------
+        float
+            randomly sampled value from the GSM.
+        """
+        if rng is None:
+            rng = rnd.default_rng()
+
+        if self.type is GSMTypes.STUDENTS_T:
+            return self._sample_student_t(rng)
+
+        elif self.type is GSMTypes.SYMMETRIC_A_STABLE:
+            return self._sample_SaS(rng)
+
+        else:
+            raise RuntimeError('GSM type: {} is not supported'.format(self.type))
+
+    def _sample_student_t(self, rng):
+        pass
+
+    def _sample_SaS(self, rng):
+        pass
