@@ -2850,24 +2850,36 @@ class GSMFilterBase(BayesFilter):
 
         return self._coreFilter.predict(timestep, *args, **kwargs)
 
-    def correct(self, timestep, meas, core_filt_args=(), core_filt_kwargs={},
-                m_noise_filt_kwargs=None):
+    def correct(self, timestep, meas, core_filt_args=(),
+                core_filt_kwargs={}, m_noise_pred_args=None,
+                m_noise_pred_kwargs=None,
+                m_noise_cor_args=None, m_noise_cor_kwargs=None):
         """Correction step of the GSM filter.
 
         This optionally estimates the measurement noise then calls the core
         filters correction function.
         """
+        # TODO: handle init of kwargs, i.e. None to lists/dicts
+
         if self.enable_meas_noise_estimation:
             num_meas_filts = len(self._measNoiseFilters)
-            if m_noise_filt_kwargs is None:
-                m_noise_filt_kwargs = [()] * num_meas_filts
+            if m_noise_pred_kwargs is None:
+                m_noise_pred_kwargs = [{}] * num_meas_filts
+            if m_noise_cor_kwargs is None:
+                m_noise_cor_kwargs = [{}] * num_meas_filts
 
+            cur_state = np.nan(num_meas_filts)
             for ii in range(num_meas_filts):
-                # TODO: does this need a correct function call?
-                self._measNoiseFilters[ii].predict(timestep,
-                                                   **m_noise_filt_kwargs[ii])
+                cur_state[ii] = self._measNoiseFilters[ii].predict(timestep,
+                                                                   *m_noise_pred_kwargs[ii],
+                                                                   **m_noise_pred_kwargs[ii])
+                # TODO: handle cur_state when not all filters need it
+                cur_state[ii] = self._measNoiseFilters[ii].correct(timestep,
+                                                                   meas[ii],
+                                                                   cur_state[ii],
+                                                                   **m_noise_cor_kwargs[ii])
 
-            self._coreFilter.meas_noise = sla.block_diag(*[self._measNoiseFilters[ii].cov])
+            self._coreFilter.meas_noise = np.diag(cur_state)
 
         return self._coreFilter.correct(self, timestep, meas, *core_filt_args,
                                         **core_filt_kwargs)
