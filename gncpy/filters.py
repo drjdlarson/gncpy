@@ -144,16 +144,38 @@ class KalmanFilter(BayesFilter):
         filt_state = super().save_filter_state()
 
         filt_state['cov'] = self.cov.copy()
-        filt_state['meas_noise'] = self.meas_noise.copy()
-        filt_state['proc_noise'] = self.proc_noise.copy()
+        if self.meas_noise is not None:
+            filt_state['meas_noise'] = self.meas_noise.copy()
+        else:
+            filt_state['meas_noise'] = self.meas_noise
+
+        if self.proc_noise is not None:
+            filt_state['proc_noise'] = self.proc_noise.copy()
+        else:
+            filt_state['proc_noise'] = self.proc_noise
+
         filt_state['dt'] = self.dt
-        filt_state['dyn_obj'] = deepcopy(self._dyn_obj)
-        filt_state['state_mat'] = self._state_mat.copy()
-        filt_state['input_mat'] = self._input_mat.copy()
-        filt_state['get_state_mat'] = self._get_state_mat
-        filt_state['get_input_mat'] = self._get_input_mat
-        filt_state['meas_mat'] = self._meas_mat.copy()
-        filt_state['meas_fnc'] = self._meas_fnc
+        filt_state['_dyn_obj'] = deepcopy(self._dyn_obj)
+
+        if self._state_mat is not None:
+            filt_state['_state_mat'] = self._state_mat.copy()
+        else:
+            filt_state['_state_mat'] = self._state_mat
+
+        if self._input_mat is not None:
+            filt_state['_input_mat'] = self._input_mat.copy()
+        else:
+            filt_state['_input_mat'] = self._input_mat
+
+        filt_state['_get_state_mat'] = self._get_state_mat
+        filt_state['_get_input_mat'] = self._get_input_mat
+
+        if self._meas_mat is not None:
+            filt_state['_meas_mat'] = self._meas_mat.copy()
+        else:
+            filt_state['_meas_mat'] = self._meas_mat
+
+        filt_state['_meas_fnc'] = self._meas_fnc
 
         return filt_state
 
@@ -172,13 +194,13 @@ class KalmanFilter(BayesFilter):
         self.proc_noise = filt_state['proc_noise']
         self.dt = filt_state['dt']
 
-        self._dyn_obj = filt_state['dyn_obj']
-        self._state_mat = filt_state['state_mat']
-        self._input_mat = filt_state['input_mat']
-        self._get_state_mat = filt_state['get_state_mat']
-        self._get_input_mat = filt_state['get_input_mat']
-        self._meas_mat = filt_state['meas_mat']
-        self._meas_fnc = filt_state['meas_fnc']
+        self._dyn_obj = filt_state['_dyn_obj']
+        self._state_mat = filt_state['_state_mat']
+        self._input_mat = filt_state['_input_mat']
+        self._get_state_mat = filt_state['_get_state_mat']
+        self._get_input_mat = filt_state['_get_input_mat']
+        self._meas_mat = filt_state['_meas_mat']
+        self._meas_fnc = filt_state['_meas_fnc']
 
     def set_state_model(self, state_mat=None, input_mat=None, cont_time=False,
                         state_mat_fun=None, input_mat_fun=None, dyn_obj=None):
@@ -497,8 +519,8 @@ class ExtendedKalmanFilter(KalmanFilter):
         filt_state['cont_cov'] = self.cont_cov
         filt_state['integrator_type'] = self.integrator_type
         filt_state['integrator_params'] = deepcopy(self.integrator_params)
-        filt_state['ode_lst'] = self._ode_lst
-        filt_state['integrator'] = self._integrator
+        filt_state['_ode_lst'] = self._ode_lst
+        filt_state['_integrator'] = self._integrator
 
         return filt_state
 
@@ -513,10 +535,10 @@ class ExtendedKalmanFilter(KalmanFilter):
         super().load_filter_state(filt_state)
 
         self.cont_cov = filt_state['cont_cov']
-        self.integrator_type = filt_state['intaegrator_type']
+        self.integrator_type = filt_state['integrator_type']
         self.integrator_params = filt_state['integrator_params']
-        self._ode_lst = filt_state['ode_lst']
-        self._integrator = filt_state['integrator']
+        self._ode_lst = filt_state['_ode_lst']
+        self._integrator = filt_state['_integrator']
 
     def set_state_model(self, dyn_obj=None, ode_lst=None):
         r"""Sets the state model equations.
@@ -956,9 +978,9 @@ class UnscentedKalmanFilter(ExtendedKalmanFilter):
         """Saves filter variables so they can be restored later."""
         filt_state = super().save_filter_state()
 
-        filt_state['stateSigmaPoints'] = deepcopy(self._stateSigmaPoints)
-        filt_state['use_lin_dyn'] = self._use_lin_dyn
-        filt_state['use_non_lin_dyn'] = self._use_non_lin_dyn
+        filt_state['_stateSigmaPoints'] = deepcopy(self._stateSigmaPoints)
+        filt_state['_use_lin_dyn'] = self._use_lin_dyn
+        filt_state['_use_non_lin_dyn'] = self._use_non_lin_dyn
 
         return filt_state
 
@@ -972,9 +994,9 @@ class UnscentedKalmanFilter(ExtendedKalmanFilter):
         """
         super().load_filter_state(filt_state)
 
-        self._stateSigmaPoints = filt_state['stateSigmaPoints']
-        self._use_lin_dyn = filt_state['use_lin_dyn']
-        self._use_non_lin_dyn = filt_state['use_non_lin_dyn']
+        self._stateSigmaPoints = filt_state['_stateSigmaPoints']
+        self._use_lin_dyn = filt_state['_use_lin_dyn']
+        self._use_non_lin_dyn = filt_state['_use_non_lin_dyn']
 
     def init_sigma_points(self, state0, alpha, kappa, beta=2):
         """Initializes the sigma points used by the filter.
@@ -1707,11 +1729,17 @@ class ParticleFilter(BayesFilter):
         # calculate weights
         est_meas = [self._est_meas(timestep, p, meas.size, meas_fun_args)
                     for p in self._particleDist.particles]
-        rel_likeli = np.array([self.meas_likelihood_fnc(meas, y, *meas_likely_args)
-                               for y in est_meas])
-        prop_fit = np.array([self.proposal_fnc(x_hat, cond, meas, *proposal_args)
-                             for x_hat, cond in zip(self._particleDist.particles,
-                                                    self.prop_parts)])
+        if self.meas_likelihood_fnc is None:
+            rel_likeli = np.ones(len(est_meas))
+        else:
+            rel_likeli = np.array([self.meas_likelihood_fnc(meas, y, *meas_likely_args)
+                                   for y in est_meas]).ravel()
+        if self.proposal_fnc is None:
+            prop_fit = np.ones(len(self.prop_parts))
+        else:
+            prop_fit = np.array([self.proposal_fnc(x_hat, cond, meas, *proposal_args)
+                                 for x_hat, cond in zip(self._particleDist.particles,
+                                                        self.prop_parts)]).ravel()
 
         inds = np.where(prop_fit < np.finfo(float).eps)[0]
         if inds.size > 0:
@@ -1843,6 +1871,32 @@ class MaxCorrEntUKF(UnscentedKalmanFilter):
 
         super().__init__(**kwargs)
 
+    def save_filter_state(self):
+        """Saves filter variables so they can be restored later."""
+        filt_state = super().save_filter_state()
+
+        filt_state['kernel_bandwidth'] = self.kernel_bandwidth
+        filt_state['_past_state'] = self._past_state
+        filt_state['_cur_state'] = self._cur_state
+        filt_state['_meas'] = self._meas
+
+        return filt_state
+
+    def load_filter_state(self, filt_state):
+        """Initializes filter using saved filter state.
+
+        Attributes
+        ----------
+        filt_state : dict
+            Dictionary generated by :meth:`save_filter_state`.
+        """
+        super().load_filter_state(filt_state)
+
+        self.kernel_bandwidth = filt_state['kernel_bandwidth']
+        self._past_state = filt_state['_past_state']
+        self._cur_state = filt_state['_cur_state']
+        self._meas = filt_state['_meas']
+
     def _calc_meas_cov(self, timestep, n_meas, meas_fun_args):
         meas_cov, est_points, est_meas = super()._calc_meas_cov(timestep,
                                                                 n_meas, meas_fun_args)
@@ -1927,6 +1981,26 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
         self._filt = UnscentedKalmanFilter()
 
         super().__init__(**kwargs)
+
+    def save_filter_state(self):
+        """Saves filter variables so they can be restored later."""
+        filt_state = super().save_filter_state()
+
+        filt_state['_filt'] = self._filt.save_filter_state()
+
+        return filt_state
+
+    def load_filter_state(self, filt_state):
+        """Initializes filter using saved filter state.
+
+        Attributes
+        ----------
+        filt_state : dict
+            Dictionary generated by :meth:`save_filter_state`.
+        """
+        super().load_filter_state(filt_state)
+
+        self._filt.load_filter_state(filt_state['_filt'])
 
     @property
     def meas_likelihood_fnc(self):
@@ -2329,6 +2403,26 @@ class MaxCorrEntUPF(UnscentedParticleFilter):
         super().__init__(**kwargs)
         self._filt = MaxCorrEntUKF()
 
+    def save_filter_state(self):
+        """Saves filter variables so they can be restored later."""
+        filt_state = super().save_filter_state()
+
+        filt_state['_past_state'] = self._past_state
+
+        return filt_state
+
+    def load_filter_state(self, filt_state):
+        """Initializes filter using saved filter state.
+
+        Attributes
+        ----------
+        filt_state : dict
+            Dictionary generated by :meth:`save_filter_state`.
+        """
+        super().load_filter_state(filt_state)
+
+        self._past_state = filt_state['_past_state']
+
     def _inner_correct(self, timestep, meas, state, filt_kwargs):
         """Wrapper so child class can override."""
         return self._filt.correct(timestep, meas, state, self._past_state,
@@ -2397,6 +2491,31 @@ class QuadratureKalmanFilter(KalmanFilter):
         self._sqrt_cov = np.array([[]])
         self._dyn_fnc = None
 
+    def save_filter_state(self):
+        """Saves filter variables so they can be restored later."""
+        filt_state = super().save_filter_state()
+
+        filt_state['quadPoints'] = self.quadPoints
+
+        filt_state['_sqrt_cov'] = self._sqrt_cov
+        filt_state['_dyn_fnc'] = self._dyn_fnc
+
+        return filt_state
+
+    def load_filter_state(self, filt_state):
+        """Initializes filter using saved filter state.
+
+        Attributes
+        ----------
+        filt_state : dict
+            Dictionary generated by :meth:`save_filter_state`.
+        """
+        super().load_filter_state(filt_state)
+
+        self.quadPoints = filt_state['quadPoints']
+        self._sqrt_cov = filt_state['_sqrt_cov']
+        self._dyn_fnc = filt_state['_dyn_fnc']
+
     @property
     def points_per_axis(self):
         """Wrapper for the  number of quadrature points per axis."""
@@ -2455,11 +2574,10 @@ class QuadratureKalmanFilter(KalmanFilter):
             Measurement matrix that transforms the state to estimated
             measurements. The default is None.
         meas_fun : callable, optional
-            Function that returns the matrix for transforming the state to
-            estimated measurements. Must have the signature :code:`h(t, x, *args)`
-            where `t` is the timestep, `x` is an N x 1 numpy array of the
-            current state, and return an Nm x 1 numpy array of the estimated
-            measurement. The default is None.
+            Function that transforms the state to estimated measurements. Must
+            have the signature :code:`h(t, x, *args)` where `t` is the timestep,
+            `x` is an N x 1 numpy array of the current state, and return an
+            Nm x 1 numpy array of the estimated measurement. The default is None.
 
         Raises
         ------
@@ -2637,9 +2755,36 @@ class SquareRootQKF(QuadratureKalmanFilter):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        self.est_meas_noise_fnc = None
+
         self._meas_noise = np.array([[]])
         self._sqrt_p_noise = np.array([[]])
         self._sqrt_m_noise = np.array([[]])
+
+    def save_filter_state(self):
+        """Saves filter variables so they can be restored later."""
+        filt_state = super().save_filter_state()
+
+        filt_state['_meas_noise'] = self._meas_noise
+
+        filt_state['_sqrt_p_noise'] = self._sqrt_p_noise
+        filt_state['_sqrt_m_noise'] = self._sqrt_m_noise
+
+        return filt_state
+
+    def load_filter_state(self, filt_state):
+        """Initializes filter using saved filter state.
+
+        Attributes
+        ----------
+        filt_state : dict
+            Dictionary generated by :meth:`save_filter_state`.
+        """
+        super().load_filter_state(filt_state)
+
+        self._meas_noise = filt_state['_meas_noise']
+        self._sqrt_p_noise = filt_state['_sqrt_p_noise']
+        self._sqrt_m_noise = filt_state['_sqrt_m_noise']
 
     @property
     def cov(self):
@@ -2728,6 +2873,13 @@ class SquareRootQKF(QuadratureKalmanFilter):
         # calculate sqrt of the measurement covariance
         meas_mat = np.concatenate([z.reshape((z.size, 1)) - est_meas
                                    for z in measQuads.points], axis=1) @ weight_mat
+        if self.est_meas_noise_fnc is not None:
+            # inov_cov = np.zeros((est_meas.size, est_meas.size))
+            # for w, z in zip(self.quadPoints.weights, measQuads.points):
+            #     inov_cov += w**2 * z @ z.T
+            # inov_cov -= est_meas @ est_meas.T
+            self.meas_noise = self.est_meas_noise_fnc(est_meas, meas_mat @ meas_mat.T)
+
         sqrt_inov_cov = la.qr(np.concatenate((meas_mat,
                                               self._sqrt_m_noise), axis=1).T,
                               mode='r').T
@@ -2763,15 +2915,100 @@ class SquareRootQKF(QuadratureKalmanFilter):
 
 
 class GSMFilterBase(BayesFilter):
-    def __int__(self, enable_proc_noise_estimation=False,
+    def __init__(self, enable_proc_noise_estimation=False,
                 enable_meas_noise_estimation=False, **kwargs):
         super().__init__(**kwargs)
 
         self.enable_proc_noise_estimation = enable_proc_noise_estimation
-        self.enable_meas_noise_estimation = enable_meas_noise_estimation
 
         self._coreFilter = None
-        self._measNoiseFilters = []
+        self._meas_noise_filters = []
+
+    def save_filter_state(self):
+        """Saves filter variables so they can be restored later."""
+        filt_state = super().save_filter_state()
+
+        filt_state['enable_proc_noise_estimation'] = self.enable_proc_noise_estimation
+        filt_state['enable_meas_noise_estimation'] = self.enable_meas_noise_estimation
+
+        if self._coreFilter is not None:
+            filt_state['_coreFilter'] = (type(self._coreFilter),
+                                         self._coreFilter.save_filter_state())
+        else:
+            filt_state['_coreFilter'] = (None, self._coreFilter)
+
+        filt_state['_meas_noise_filters'] = [(type(f), f.save_filter_state())
+                                             for f in self._meas_noise_filters]
+        return filt_state
+
+    def load_filter_state(self, filt_state):
+        """Initializes filter using saved filter state.
+
+        Attributes
+        ----------
+        filt_state : dict
+            Dictionary generated by :meth:`save_filter_state`.
+        """
+        super().load_filter_state(filt_state)
+
+        self.enable_proc_noise_estimation = filt_state['enable_proc_noise_estimation']
+        self.enable_meas_noise_estimation = filt_state['enable_meas_noise_estimation']
+
+        cls_type = filt_state['_coreFilter'][0]
+        if cls_type is not None:
+            self._coreFilter = cls_type()
+            self._coreFilter.load_filter_state(filt_state['_coreFilter'][1])
+
+        num_m_filts = len(filt_state['_meas_noise_filters'])
+        self._meas_noise_filters = [None] * num_m_filts
+        for ii, (cls_type, vals) in enumerate(filt_state['_meas_noise_filters']):
+            self._meas_noise_filters[ii] = cls_type()
+            self._meas_noise_filters[ii].load_filter_state(vals)
+
+    def __mfilt_prop_samp_factory(self, rvs):
+        def f(x, rng):
+            return np.array([[rvs()]])
+        return f
+
+    def __mfilt_meas_like_factory(self):
+        def f(meas, est, *args):
+            return stats.norm.pdf(meas)
+        return f
+
+    def __mfilt_dyn_fun_factory(self):
+        def f(t, x, *args):
+            return x
+        return f
+
+    def set_meas_noise_model(self, num_particles, mix_dist_samp_fnc_lst,
+                             rng=None):
+        num_meas = len(mix_dist_samp_fnc_lst)
+
+        if not isinstance(num_particles, list):
+            n_parts_lst = [num_particles] * num_meas
+        else:
+            n_parts_lst = num_particles.copy()
+
+        self._meas_noise_filters = [None] * num_meas
+        for ii, (rvs, n_parts) in enumerate(zip(mix_dist_samp_fnc_lst,
+                                                n_parts_lst)):
+            distrib = gdistrib.ParticleDistribution()
+            weight = 1 / n_parts
+            for _ in range(n_parts):
+                part = gdistrib.Particle()
+                part.point = rvs()
+                distrib.add_particle(part, weight)
+
+            filt = ParticleFilter(rng=rng)
+            filt.set_state_model(dyn_fun=self.__mfilt_dyn_fun_factory())
+            filt.set_measurement_model(meas_mat=np.zeros((1, 1)))
+            filt.meas_likelihood_fnc = self.__mfilt_meas_like_factory()
+            filt.proposal_sampling_fnc = self.__mfilt_prop_samp_factory(rvs)
+            filt.init_from_dist(distrib)
+
+            # when calling use f_meas = [(meas - est_meas) / sqrt(diag(inv_cov)]_ii)
+            self._meas_noise_filters[ii] = filt
+
 
     @property
     def cov(self):
@@ -2807,36 +3044,6 @@ class GSMFilterBase(BayesFilter):
     def meas_noise(self, val):
         raise RuntimeError('Should not be here, or need to handle this somehow')
 
-    def save_filter_state(self):
-        """Saves filter variables so they can be restored later."""
-        filt_state = super().save_filter_state()
-
-        filt_state['enable_proc_noise_estimation'] = self.enable_proc_noise_estimation
-        filt_state['enable_meas_noise_estimation'] = self.enable_meas_noise_estimation
-        filt_state['_coreFilter'] = self._coreFilter.save_filter_state()
-
-        filt_state['_measNoiseFilters'] = [f.save_filter_state()
-                                           for f in self._measNoiseFilters]
-        return filt_state
-
-    def load_filter_state(self, filt_state):
-        """Initializes filter using saved filter state.
-
-        Attributes
-        ----------
-        filt_state : dict
-            Dictionary generated by :meth:`save_filter_state`.
-        """
-        super().load_filter_state(filt_state)
-
-        self.enable_proc_noise_estimation = filt_state['enable_proc_noise_estimation']
-        self.enable_meas_noise_estimation = filt_state['enable_meas_noise_estimation']
-
-        self._coreFilter.load_filter_state(filt_state['_coreFilter'])
-
-        for ii in range(len(filt_state['_measNoiseFilters'])):
-            self._measNoiseFilters[ii].load_filter_state(filt_state['_measNoiseFilters'][ii])
-
     def predict(self, timestep, *args, **kwargs):
         """Prediction step of the GSM filter.
 
@@ -2850,48 +3057,36 @@ class GSMFilterBase(BayesFilter):
 
         return self._coreFilter.predict(timestep, *args, **kwargs)
 
-    def correct(self, timestep, meas, core_filt_args=(),
-                core_filt_kwargs={}, m_noise_pred_args=None,
-                m_noise_pred_kwargs=None,
-                m_noise_cor_args=None, m_noise_cor_kwargs=None):
+    def correct(self, timestep, meas, core_filt_args=(), core_filt_kwargs={}):
         """Correction step of the GSM filter.
 
         This optionally estimates the measurement noise then calls the core
         filters correction function.
         """
-        # TODO: handle init of kwargs, i.e. None to lists/dicts
+        # TODO: setup core filter for estimating measurement noise during
+        # correction function call
+        def est_meas_noise(est_meas, inov_cov):
+            m_diag = np.nan * np.ones(est_meas.size)
+            f_meas = (meas - est_meas).ravel() / np.sqrt(np.diag(inov_cov))
+            for ii, filt in enumerate(self._meas_noise_filters):
+                filt.predict(timestep)
+                m_diag[ii] = filt.correct(timestep, f_meas[ii].reshape((1, 1)))[0]
 
-        if self.enable_meas_noise_estimation:
-            num_meas_filts = len(self._measNoiseFilters)
-            if m_noise_pred_kwargs is None:
-                m_noise_pred_kwargs = [{}] * num_meas_filts
-            if m_noise_cor_kwargs is None:
-                m_noise_cor_kwargs = [{}] * num_meas_filts
+            return np.diag(m_diag)
 
-            cur_state = np.nan(num_meas_filts)
-            for ii in range(num_meas_filts):
-                cur_state[ii] = self._measNoiseFilters[ii].predict(timestep,
-                                                                   *m_noise_pred_kwargs[ii],
-                                                                   **m_noise_pred_kwargs[ii])
-                # TODO: handle cur_state when not all filters need it
-                cur_state[ii] = self._measNoiseFilters[ii].correct(timestep,
-                                                                   meas[ii],
-                                                                   cur_state[ii],
-                                                                   **m_noise_cor_kwargs[ii])
+        self._coreFilter.est_meas_noise_fnc = est_meas_noise
 
-            self._coreFilter.meas_noise = np.diag(cur_state)
-
-        return self._coreFilter.correct(self, timestep, meas, *core_filt_args,
+        return self._coreFilter.correct(timestep, meas, *core_filt_args,
                                         **core_filt_kwargs)
 
 
-class GaussianScaleMixtureFilter(GSMFilterBase):
-    """Implementation of a Gaussian Scale Mixture filter."""
+class QKFGaussianScaleMixtureFilter(GSMFilterBase):
+    """Implementation of a QKF Gaussian Scale Mixture filter."""
 
-    def __int__(self, **kwargs):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self._coreFilter = SquareRootQKF()
+        self._coreFilter = QuadratureKalmanFilter()
 
     @property
     def points_per_axis(self):
@@ -2901,6 +3096,33 @@ class GaussianScaleMixtureFilter(GSMFilterBase):
     @points_per_axis.setter
     def points_per_axis(self, val):
         self._coreFilter.quadPoints.points_per_axis = val
+
+    def set_state_model(self, **kwargs):
+        """Wrapper for the core filters set state model function.
+
+        See :meth:`.QuadratureKalmanFilter.set_state_model` for details.
+        """
+        self._coreFilter.set_state_model(**kwargs)
+
+    def set_measurement_model(self, **kwargs):
+        """Wrapper for the core filters set measurement model function.
+
+        See :meth:`.QuadratureKalmanFilter.set_measurement_model` for details.
+        """
+        self._coreFilter.set_measurement_model(**kwargs)
+
+
+class SQKFGaussianScaleMixtureFilter(QKFGaussianScaleMixtureFilter):
+    """Implementation of a SQKF Gaussian Scale Mixture filter.
+
+    This is provided for documentation purposes. It functions the same as
+    the :class:`.QKFGaussianScaleMixtureFilter` class.
+    """
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self._coreFilter = SquareRootQKF()
 
     def set_state_model(self, **kwargs):
         """Wrapper for the core filters set state model function.

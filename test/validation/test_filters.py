@@ -48,6 +48,10 @@ def test_KF_dynObj():  # noqa
 
     t_states = states.copy()
 
+    filt_state = filt.save_filter_state()
+    filt = gfilts.KalmanFilter()
+    filt.load_filter_state(filt_state)
+
     A = gdyn.DoubleIntegrator().get_state_mat(0, dt)
     for kk, t in enumerate(time[:-1]):
         states[kk + 1, :] = filt.predict(t, states[kk, :].reshape((4, 1)),
@@ -221,6 +225,10 @@ def test_EKF_dynObj():  # noqa
     states[0, :] = np.array([10, 0, 0, 10, 25 * d2r])
     t_states = states.copy()
 
+    filt_state = filt.save_filter_state()
+    filt = gfilts.ExtendedKalmanFilter()
+    filt.load_filter_state(filt_state)
+
     gamma = np.array([[dt**2 / 2, 0, 0],
                       [dt, 0, 0],
                       [0, dt**2 / 2, 0],
@@ -328,6 +336,10 @@ def test_STF_dynObj():  # noqa
     vx0 = 2
     vy0 = 1
 
+    filt_state = filt.save_filter_state()
+    filt = gfilts.StudentsTFilter()
+    filt.load_filter_state(filt_state)
+
     time = np.arange(t0, t1, dt)
     states = np.nan * np.ones((time.size, 4))
     stds = np.nan * np.ones(states.shape)
@@ -340,9 +352,9 @@ def test_STF_dynObj():  # noqa
 
     A = gdyn.DoubleIntegrator().get_state_mat(0, dt)
     for kk, t in enumerate(time[:-1]):
-        # if np.mod(kk, int(1 / dt)) == 0:
-        print('\t\t{:.2f}'.format(t))
-        sys.stdout.flush()
+        if np.mod(kk, int(1 / dt)) == 0:
+            print('\t\t{:.2f}'.format(t))
+            sys.stdout.flush()
         states[kk + 1, :] = filt.predict(t, states[kk, :].reshape((4, 1)),
                                          state_mat_args=(dt,)).flatten()
         t_states[kk + 1, :] = (A @ t_states[kk, :].reshape((4, 1))).flatten()
@@ -426,6 +438,10 @@ def test_UKF_dynObj():  # noqa
     pre_stds[0, :] = stds[0, :]
 
     filt.init_sigma_points(states[0, :].reshape((4, 1)), alpha, kappa)
+
+    filt_state = filt.save_filter_state()
+    filt = gfilts.UnscentedKalmanFilter()
+    filt.load_filter_state(filt_state)
 
     t_states = states.copy()
 
@@ -536,6 +552,10 @@ def test_PF_dyn_fnc():  # noqa
 
     pf.init_from_dist(distrib)
 
+    filt_state = pf.save_filter_state()
+    pf = gfilts.ParticleFilter()
+    pf.load_filter_state(filt_state)
+
     if debug_figs:
         pf.plot_particles(0, title='Init Particle Distribution')
 
@@ -616,6 +636,10 @@ def test_UPF_dyn_fnc():  # noqa
     pf.set_state_model(state_mat_fun=f)
 
     pf.init_from_dist(distrib)
+
+    filt_state = pf.save_filter_state()
+    pf = gfilts.UnscentedParticleFilter()
+    pf.load_filter_state(filt_state)
 
     if debug_figs:
         pf.plot_particles(0, title='Init Particle Distribution')
@@ -819,6 +843,10 @@ def test_MCMC_UPF_dyn_fnc():  # noqa
 
     pf.init_from_dist(distrib)
 
+    filt_state = pf.save_filter_state()
+    pf = gfilts.UnscentedParticleFilter()
+    pf.load_filter_state(filt_state)
+
     if debug_figs:
         pf.plot_particles(0, title='Init Particle Distribution')
 
@@ -1009,6 +1037,10 @@ def test_max_corr_ent_UKF_dynObj():  # noqa
 
     filt.init_sigma_points(states[0, :].reshape((4, 1)), alpha, kappa)
 
+    filt_state = filt.save_filter_state()
+    filt = gfilts.MaxCorrEntUKF()
+    filt.load_filter_state(filt_state)
+
     t_states = states.copy()
 
     A = gdyn.DoubleIntegrator().get_state_mat(0, dt)
@@ -1107,6 +1139,10 @@ def test_MCUPF_dyn_fnc():  # noqa
 
     pf.init_from_dist(distrib)
 
+    filt_state = pf.save_filter_state()
+    pf = gfilts.MaxCorrEntUPF()
+    pf.load_filter_state(filt_state)
+
     if debug_figs:
         pf.plot_particles(0, title='Init Particle Distribution')
 
@@ -1189,6 +1225,10 @@ def test_MCMC_MCUPF_dyn_fnc():  # noqa
 
     pf.init_from_dist(distrib)
 
+    filt_state = pf.save_filter_state()
+    pf = gfilts.MaxCorrEntUPF()
+    pf.load_filter_state(filt_state)
+
     if debug_figs:
         pf.plot_particles(0, title='Init Particle Distribution')
 
@@ -1252,6 +1292,10 @@ def test_QKF_dynObj():  # noqa
 
     vx0 = 2
     vy0 = 1
+
+    filt_state = filt.save_filter_state()
+    filt = gfilts.QuadratureKalmanFilter()
+    filt.load_filter_state(filt_state)
 
     time = np.arange(t0, t1, dt)
     states = np.nan * np.ones((time.size, 4))
@@ -1386,6 +1430,10 @@ def test_SQKF_dynObj():  # noqa
     vx0 = 2
     vy0 = 1
 
+    filt_state = filt.save_filter_state()
+    filt = gfilts.SquareRootQKF()
+    filt.load_filter_state(filt_state)
+
     time = np.arange(t0, t1, dt)
     states = np.nan * np.ones((time.size, 4))
     stds = np.nan * np.ones(states.shape)
@@ -1491,6 +1539,189 @@ def test_SQKF_dynObj():  # noqa
         assert chi_stat < crit_val, "values are different"
 
 
+def test_SQKF_GSM_dyn_fnc():
+    print('Test SQKF-GSM')
+
+    dt = 1
+    t0, t1 = 0, 100 + dt
+
+    rng = rnd.default_rng(global_seed)
+
+    # define state and measurement models
+    state_mat = np.vstack((np.hstack((np.eye(2), dt * np.eye(2), dt**2 / 2 * np.eye(2))),
+                          np.hstack((np.zeros((2, 2)), np.eye(2), dt * np.eye(2))),
+                          np.hstack((np.zeros((2, 2)), np.zeros((2, 2)), np.eye(2)))))
+    proc_cov = np.diag((4, 4, 4, 4, 0.01, 0.01))
+
+    def meas_fun(t, x, *args):
+        return np.array([[np.sqrt(x[0, 0]**2 + x[1, 0]**2)],
+                         [np.arctan2(x[1, 0], x[0, 0])]])
+
+    m_dfs = (2, 2)
+    m_vars = (100, 0.001)
+
+    # define base GSM parameters
+    filt = gfilts.SQKFGaussianScaleMixtureFilter()
+    filt.enable_meas_noise_estimation = True
+    filt.set_state_model(state_mat=state_mat)
+    filt.proc_noise = proc_cov
+    filt.set_measurement_model(meas_fun=meas_fun)
+    filt.cov = np.diag((5 * 10**4, 5 * 10**4, 8, 8, 0.02, 0.02))
+
+    # define measurement noise filters
+    def range_rvs():
+        idx = 0
+        return stats.invgamma.rvs(m_dfs[idx] / 2,
+                                  scale=m_vars[idx] / (2 / m_dfs[idx]),
+                                  random_state=rng)
+
+    def angle_rvs():
+        idx = 1
+        return stats.invgamma.rvs(m_dfs[idx] / 2,
+                                  scale=m_vars[idx] / (2 / m_dfs[idx]),
+                                  random_state=rng)
+
+    filt.set_meas_noise_model(500, [range_rvs, angle_rvs],
+                              rng=rng)
+
+    # define SKQF specific parameters for core filter
+    filt.points_per_axis = 3
+
+    # test save/load filter
+    filt_state = filt.save_filter_state()
+    filt = gfilts.SQKFGaussianScaleMixtureFilter()
+    filt.load_filter_state(filt_state)
+
+    # sim loop
+    time = np.arange(t0, t1, dt)
+    t_states = np.nan * np.ones((time.size, 6))
+    t_states[0, :] = np.array([2000, 2000, 20, 20, 0, 0])
+    states = t_states.copy()
+    meas_lst = np.nan * np.ones((time.size, 2))
+    stds = np.nan * np.ones((time.size, 6))
+    stds[0, :] = np.sqrt(np.diag(filt.cov))
+    m_stds = np.nan * np.ones((time.size, 2))
+    m_stds[0, :] = np.array([np.sqrt(f._calc_state())
+                             for f in filt._meas_noise_filters]).ravel()
+
+    for kk, t in enumerate(time[:-1]):
+        if np.mod(kk, int(10 / dt)) == 0:
+            print('\t\t{:.2f}'.format(t))
+            sys.stdout.flush()
+
+        states[kk + 1, :] = filt.predict(t, states[kk, :].reshape((6, 1))).ravel()
+
+        p_noise = rng.multivariate_normal(np.zeros(6), proc_cov)
+        t_states[kk + 1, :] = (state_mat @ t_states[[kk], :].T).ravel()
+        meas = meas_fun(t, (t_states[kk + 1, :] + p_noise).reshape((6, 1)))
+        for ii, (df, var) in enumerate(zip(m_dfs, m_vars)):
+            meas[ii, 0] += stats.t.rvs(df, scale=np.sqrt(var), random_state=rng)
+
+        meas_lst[kk + 1, :] = meas.ravel()
+
+        core_filt_args = (states[kk + 1, :].reshape((6, 1)), )
+        states[kk + 1, :] = filt.correct(t, meas,
+                                         core_filt_args=core_filt_args)[0].ravel()
+        stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
+        m_stds[kk + 1, :] = np.sqrt(np.diag(filt.meas_noise))
+
+    errs = t_states - states
+
+    if debug_figs:
+        figs = {}
+
+        # plot measurement standard
+        figs['m_stds'] = plt.figure()
+        ttl = 'Estimated Measurement Standard Deviations'
+        y_lbls = ('range std (m)', 'az std (deg)')
+        for ii in range(m_stds.shape[1]):
+            figs['m_stds'].add_subplot(2, 1, ii + 1)
+            if ii == 1:
+                c_fac = 180 / np.pi
+            else:
+                c_fac = 1
+            figs['m_stds'].axes[ii].plot(time, m_stds[:, ii] * c_fac)
+            figs['m_stds'].axes[ii].grid(True)
+            figs['m_stds'].axes[ii].set_ylabel(y_lbls[ii])
+        figs['m_stds'].axes[-1].set_xlabel('Time (s)')
+        figs['m_stds'].suptitle(ttl)
+
+        figs['m_pdfs'] = plt.figure()
+        ttl = 'Estimated vs True PDF'
+        for ii in range(len(m_vars)):
+            bnd = 6 * np.sqrt(m_vars[ii])
+            gauss = stats.norm.rvs(size=time.size,
+                                   random_state=rnd.default_rng(global_seed))
+            gsm = m_stds[:, ii] * gauss
+            figs['m_pdfs'].add_subplot(1, 2, ii + 1)
+            figs['m_pdfs'].axes[ii].hist(gsm, bins='auto', density=True,
+                                         histtype='stepfilled', alpha=0.2, color='b')
+            x = np.arange(-bnd, bnd, 1e-3)
+            y = stats.t.pdf(x, m_dfs[ii], scale=np.sqrt(m_vars[ii]))
+            figs['m_pdfs'].axes[ii].plot(x, y, color='b')
+            figs['m_pdfs'].axes[ii].grid(True)
+            figs['m_pdfs'].axes[ii].set_xlabel('value')
+            figs['m_pdfs'].axes[ii].set_xlim((-bnd, bnd))
+        figs['m_pdfs'].axes[0].set_ylabel('probability')
+        figs['m_pdfs'].suptitle(ttl)
+
+        figs['mix_range_samps'] = plt.figure()
+        ttl = 'Mixing Distribution Estimates'
+        steps = (1e-1, 1e-5)
+        bnds = (500, 0.1)
+        for ii in range(len(m_vars)):
+            figs['mix_range_samps'].add_subplot(1, len(m_vars), ii + 1)
+            figs['mix_range_samps'].axes[ii].hist(m_stds[:, ii], bins='auto',
+                                                  density=True, histtype='stepfilled',
+                                                  alpha=0.2, color='b')
+            x = np.arange(0, bnds[ii], steps[ii])
+            y = stats.invgamma.pdf(x, m_dfs[ii] / 2, scale=m_vars[ii] / (2 / m_dfs[ii]))
+            figs['mix_range_samps'].axes[ii].plot(x, y, color='b')
+            figs['mix_range_samps'].axes[ii].grid(True)
+            figs['mix_range_samps'].axes[ii].set_xlabel('value')
+            figs['mix_range_samps'].axes[ii].set_xlim((0, bnds[ii]))
+        figs['mix_range_samps'].axes[0].set_ylabel('probability')
+        figs['mix_range_samps'].suptitle(ttl)
+
+        figs['pos'] = plt.figure()
+        ttl = 'Estimated vs True Position'
+        figs['pos'].add_subplot(1, 1, 1)
+        figs['pos'].axes[0].plot(t_states[:, 0], t_states[:, 1], label='true',
+                                 marker='.')
+        figs['pos'].axes[0].plot(states[:, 0], states[:, 1], label='estimated',
+                                 marker='.')
+        x_pos = np.nan * np.ones(time.size)
+        y_pos = np.nan * np.ones(time.size)
+        for ii, meas in enumerate(meas_lst):
+            if np.isnan(meas[0]):
+                continue
+            x_pos[ii] = meas[0] * np.cos(meas[1])
+            y_pos[ii] = meas[0] * np.sin(meas[1])
+        figs['pos'].axes[0].scatter(x_pos, y_pos, marker='^', alpha=0.5, c='g',
+                                    label='measurement')
+        figs['pos'].axes[0].legend()
+        figs['pos'].axes[0].grid(True)
+        figs['pos'].axes[0].set_ylabel('y position (m)')
+        figs['pos'].axes[0].set_xlabel('x position (m)')
+        figs['pos'].suptitle(ttl)
+
+        figs['pos_err'] = plt.figure()
+        ttl = 'Position Errors'
+        y_lbls = ('x pos (m)', 'y pos (m)')
+        for ii in range(2):
+            figs['pos_err'].add_subplot(2, 1, ii + 1)
+            figs['pos_err'].axes[ii].plot(time, np.abs(errs[:, ii]), color='r')
+            figs['pos_err'].axes[ii].plot(time, stds[:, ii], color='k',
+                                          label='Standard deviation')
+            figs['pos_err'].axes[ii].grid(True)
+            figs['pos_err'].axes[ii].set_ylabel(y_lbls[ii])
+
+        figs['pos_err'].axes[-1].set_xlabel('Time (s)')
+        figs['pos_err'].suptitle(ttl)
+
+    plt.show()
+
+
 # %% Main
 if __name__ == "__main__":
     from timeit import default_timer as timer
@@ -1518,8 +1749,10 @@ if __name__ == "__main__":
     # test_MCUPF_dyn_fnc()
     # test_MCMC_MCUPF_dyn_fnc()
 
-    test_QKF_dynObj()
+    # test_QKF_dynObj()
     # test_SQKF_dynObj()
+
+    test_SQKF_GSM_dyn_fnc()
 
     end = timer()
     print('{:.2f} s'.format(end - start))
