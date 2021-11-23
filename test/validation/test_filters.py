@@ -1571,15 +1571,15 @@ def test_SQKF_GSM_dyn_fnc():
     # define measurement noise filters
     def range_rvs():
         idx = 0
-        return stats.invgamma.rvs(m_dfs[idx] / 2,
-                                  scale=m_vars[idx] / (2 / m_dfs[idx]),
-                                  random_state=rng)
+        return np.array([[stats.invgamma.rvs(m_dfs[idx] / 2,
+                                             scale=m_vars[idx] / (2 / m_dfs[idx]),
+                                             random_state=rng)]])
 
     def angle_rvs():
         idx = 1
-        return stats.invgamma.rvs(m_dfs[idx] / 2,
-                                  scale=m_vars[idx] / (2 / m_dfs[idx]),
-                                  random_state=rng)
+        return np.array([[stats.invgamma.rvs(m_dfs[idx] / 2,
+                                             scale=m_vars[idx] / (2 / m_dfs[idx]),
+                                             random_state=rng)]])
 
     filt.set_meas_noise_model(500, [range_rvs, angle_rvs],
                               rng=rng)
@@ -1632,15 +1632,15 @@ def test_SQKF_GSM_dyn_fnc():
 
         # plot measurement standard
         figs['m_stds'] = plt.figure()
-        ttl = 'Estimated Measurement Standard Deviations'
-        y_lbls = ('range std (m)', 'az std (deg)')
+        ttl = 'Estimated Measurement Noise Scalings (sqrt(z))'
+        y_lbls = ('range (m)', 'az (deg)')
         for ii in range(m_stds.shape[1]):
             figs['m_stds'].add_subplot(2, 1, ii + 1)
             if ii == 1:
                 c_fac = 180 / np.pi
             else:
                 c_fac = 1
-            figs['m_stds'].axes[ii].plot(time, m_stds[:, ii] * c_fac)
+            figs['m_stds'].axes[ii].scatter(time, m_stds[:, ii] * c_fac)
             figs['m_stds'].axes[ii].grid(True)
             figs['m_stds'].axes[ii].set_ylabel(y_lbls[ii])
         figs['m_stds'].axes[-1].set_xlabel('Time (s)')
@@ -1665,23 +1665,36 @@ def test_SQKF_GSM_dyn_fnc():
         figs['m_pdfs'].axes[0].set_ylabel('probability')
         figs['m_pdfs'].suptitle(ttl)
 
-        figs['mix_range_samps'] = plt.figure()
-        ttl = 'Mixing Distribution Estimates'
         steps = (1e-1, 1e-5)
-        bnds = (500, 0.1)
+        bnds = (3000, 0.03)
+        lbls = ('Range (m)', 'Az (rad))')
         for ii in range(len(m_vars)):
-            figs['mix_range_samps'].add_subplot(1, len(m_vars), ii + 1)
-            figs['mix_range_samps'].axes[ii].hist(m_stds[:, ii], bins='auto',
-                                                  density=True, histtype='stepfilled',
-                                                  alpha=0.2, color='b')
+            ttl = '{} Measurement Noise Particles'.format(lbls[ii])
+            key = 'meas_noise_particles_{:02d}'.format(ii)
+            figs.update(filt.plot_particles(ii, title=ttl))
             x = np.arange(0, bnds[ii], steps[ii])
             y = stats.invgamma.pdf(x, m_dfs[ii] / 2, scale=m_vars[ii] / (2 / m_dfs[ii]))
-            figs['mix_range_samps'].axes[ii].plot(x, y, color='b')
-            figs['mix_range_samps'].axes[ii].grid(True)
-            figs['mix_range_samps'].axes[ii].set_xlabel('value')
-            figs['mix_range_samps'].axes[ii].set_xlim((0, bnds[ii]))
-        figs['mix_range_samps'].axes[0].set_ylabel('probability')
-        figs['mix_range_samps'].suptitle(ttl)
+            figs[key].axes[0].plot(x, y, color='b')
+            figs[key].axes[0].grid(True)
+            figs[key].axes[0].set_xlim((0, bnds[ii]))
+
+        figs['mix_dist_samps'] = plt.figure()
+        ttl = 'Mixing Distribution Estimates'
+        steps = (1e-1, 1e-5)
+        bnds = (500, 0.02)
+        for ii in range(len(m_vars)):
+            figs['mix_dist_samps'].add_subplot(1, len(m_vars), ii + 1)
+            figs['mix_dist_samps'].axes[ii].hist(m_stds[:, ii]**2, bins='auto',
+                                                 density=True, histtype='stepfilled',
+                                                 alpha=0.2, color='b')
+            x = np.arange(0, bnds[ii], steps[ii])
+            y = stats.invgamma.pdf(x, m_dfs[ii] / 2, scale=m_vars[ii] / (2 / m_dfs[ii]))
+            figs['mix_dist_samps'].axes[ii].plot(x, y, color='b')
+            figs['mix_dist_samps'].axes[ii].grid(True)
+            figs['mix_dist_samps'].axes[ii].set_xlabel('value')
+            figs['mix_dist_samps'].axes[ii].set_xlim((0, bnds[ii]))
+        figs['mix_dist_samps'].axes[0].set_ylabel('probability')
+        figs['mix_dist_samps'].suptitle(ttl)
 
         figs['pos'] = plt.figure()
         ttl = 'Estimated vs True Position'
@@ -1718,6 +1731,9 @@ def test_SQKF_GSM_dyn_fnc():
 
         figs['pos_err'].axes[-1].set_xlabel('Time (s)')
         figs['pos_err'].suptitle(ttl)
+
+        print('State bounding:')
+        print(np.sum(np.abs(errs) <= stds, axis=0) / time.size)
 
     plt.show()
 

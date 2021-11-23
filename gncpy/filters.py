@@ -1691,7 +1691,7 @@ class ParticleFilter(BayesFilter):
         return inds_removed, old_weights, rel_likeli_out
 
     def correct(self, timestep, meas, meas_fun_args=(), meas_likely_args=(),
-                proposal_args=()):
+                proposal_args=(), selection=True):
         """Corrects the state estimate.
 
         Parameters
@@ -1709,6 +1709,9 @@ class ParticleFilter(BayesFilter):
         proposal_args : tuple, optional
             Additional arguments for the proposal distribution function. The
             default is ().
+        selection : bool, optional
+            Flag indicating if the selection step should be performed. The
+            default is True.
 
         Raises
         ------
@@ -1754,13 +1757,16 @@ class ParticleFilter(BayesFilter):
         self._particleDist.update_weights(weights)
 
         # resample
-        inds_removed, rel_likeli = self._selection(unnorm_weights,
-                                                   rel_likeli_in=rel_likeli.tolist())[0:3:2]
+        if selection:
+            inds_removed, rel_likeli = self._selection(unnorm_weights,
+                                                       rel_likeli_in=rel_likeli.tolist())[0:3:2]
+        else:
+            inds_removed = []
 
         return (self._calc_state(), rel_likeli, inds_removed)
 
     def plot_particles(self, inds, title='Particle Distribution',
-                       x_lbl='State', y_lbl='Count', **kwargs):
+                       x_lbl='State', y_lbl='Probability', **kwargs):
         opts = pltUtil.init_plotting_opts(**kwargs)
         f_hndl = opts['f_hndl']
         lgnd_loc = opts['lgnd_loc']
@@ -1769,7 +1775,7 @@ class ParticleFilter(BayesFilter):
             f_hndl = plt.figure()
             f_hndl.add_subplot(1, 1, 1)
 
-        h_opts = {"histtype": "stepfilled"}
+        h_opts = {"histtype": "stepfilled", "bins": 'auto', "density": True}
         if (not isinstance(inds, list)) or len(inds) == 1:
             if isinstance(inds, list):
                 ii = inds[0]
@@ -2874,10 +2880,6 @@ class SquareRootQKF(QuadratureKalmanFilter):
         meas_mat = np.concatenate([z.reshape((z.size, 1)) - est_meas
                                    for z in measQuads.points], axis=1) @ weight_mat
         if self.est_meas_noise_fnc is not None:
-            # inov_cov = np.zeros((est_meas.size, est_meas.size))
-            # for w, z in zip(self.quadPoints.weights, measQuads.points):
-            #     inov_cov += w**2 * z @ z.T
-            # inov_cov -= est_meas @ est_meas.T
             self.meas_noise = self.est_meas_noise_fnc(est_meas, meas_mat @ meas_mat.T)
 
         sqrt_inov_cov = la.qr(np.concatenate((meas_mat,
@@ -2967,12 +2969,14 @@ class GSMFilterBase(BayesFilter):
 
     def __mfilt_prop_samp_factory(self, rvs):
         def f(x, rng):
-            return np.array([[rvs()]])
+            return rvs()
         return f
 
     def __mfilt_meas_like_factory(self):
         def f(meas, est, *args):
-            return stats.norm.pdf(meas)
+            # note: here est is the particle which is an estimate of the variance
+            # of the Gaussian and meas has had the estimated measurement subtracted off
+            return stats.norm.pdf(meas, scale=np.sqrt(est))
         return f
 
     def __mfilt_dyn_fun_factory(self):
@@ -3001,14 +3005,11 @@ class GSMFilterBase(BayesFilter):
 
             filt = ParticleFilter(rng=rng)
             filt.set_state_model(dyn_fun=self.__mfilt_dyn_fun_factory())
-            filt.set_measurement_model(meas_mat=np.zeros((1, 1)))
-            filt.meas_likelihood_fnc = self.__mfilt_meas_like_factory()
+            filt.set_measurement_model(meas_mat=np.ones((1, 1)))
             filt.proposal_sampling_fnc = self.__mfilt_prop_samp_factory(rvs)
             filt.init_from_dist(distrib)
 
-            # when calling use f_meas = [(meas - est_meas) / sqrt(diag(inv_cov)]_ii)
             self._meas_noise_filters[ii] = filt
-
 
     @property
     def cov(self):
@@ -3063,14 +3064,16 @@ class GSMFilterBase(BayesFilter):
         This optionally estimates the measurement noise then calls the core
         filters correction function.
         """
-        # TODO: setup core filter for estimating measurement noise during
+        # setup core filter for estimating measurement noise during
         # correction function call
         def est_meas_noise(est_meas, inov_cov):
             m_diag = np.nan * np.ones(est_meas.size)
-            f_meas = (meas - est_meas).ravel() / np.sqrt(np.diag(inov_cov))
+            f_meas = (meas - est_meas).ravel()
             for ii, filt in enumerate(self._meas_noise_filters):
+                filt.meas_likelihood_fnc = self.__mfilt_meas_like_factory()
                 filt.predict(timestep)
-                m_diag[ii] = filt.correct(timestep, f_meas[ii].reshape((1, 1)))[0]
+                m_diag[ii] = filt.correct(timestep, f_meas[ii].reshape((1, 1)),
+                                          selection=False)[0]
 
             return np.diag(m_diag)
 
@@ -3079,7 +3082,21 @@ class GSMFilterBase(BayesFilter):
         return self._coreFilter.correct(timestep, meas, *core_filt_args,
                                         **core_filt_kwargs)
 
+    def plot_particles(self, inds, **kwargs):
+        figs = {}
+        key_base = 'meas_noise_particles_{:02d}'
+        if not isinstance(inds, list):
+            key = key_base.format(inds)
+            figs[key] = self._meas_noise_filters[inds].plot_particles(0, **kwargs)
+        else:
+            for ii in inds:
+                key = key_base.format(ii)
+                figs[key] = self._meas_noise_filters[ii].plot_particles(0, **kwargs)
 
+        return figs
+
+
+# TODO: modify the QKF to allow for estimating the measuremnt noise online (like the SQKF)
 class QKFGaussianScaleMixtureFilter(GSMFilterBase):
     """Implementation of a QKF Gaussian Scale Mixture filter."""
 
