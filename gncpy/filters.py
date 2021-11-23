@@ -971,6 +971,7 @@ class UnscentedKalmanFilter(ExtendedKalmanFilter):
 
         self._use_lin_dyn = False
         self._use_non_lin_dyn = False
+        self._est_meas_noise_fnc = None
 
         super().__init__(**kwargs)
 
@@ -981,6 +982,7 @@ class UnscentedKalmanFilter(ExtendedKalmanFilter):
         filt_state['_stateSigmaPoints'] = deepcopy(self._stateSigmaPoints)
         filt_state['_use_lin_dyn'] = self._use_lin_dyn
         filt_state['_use_non_lin_dyn'] = self._use_non_lin_dyn
+        filt_state['_est_meas_noise_fnc'] = self._est_meas_noise_fnc
 
         return filt_state
 
@@ -997,6 +999,7 @@ class UnscentedKalmanFilter(ExtendedKalmanFilter):
         self._stateSigmaPoints = filt_state['_stateSigmaPoints']
         self._use_lin_dyn = filt_state['_use_lin_dyn']
         self._use_non_lin_dyn = filt_state['_use_non_lin_dyn']
+        self._est_meas_noise_fnc = filt_state['_est_meas_noise_fnc']
 
     def init_sigma_points(self, state0, alpha, kappa, beta=2):
         """Initializes the sigma points used by the filter.
@@ -1082,6 +1085,29 @@ class UnscentedKalmanFilter(ExtendedKalmanFilter):
         else:
             raise RuntimeError('Invalid state model.')
 
+    def set_measurement_noise_estimator(self, function):
+        """Sets the model used for estimating the measurement noise parameters.
+
+        This is an optional step and the filter will work properly if this is
+        not called. If it is called, the measurement noise will be estimated
+        during the filter's correction step and the measurement noise attribute
+        will not be used.
+
+        Parameters
+        ----------
+        function : callable
+            A function that implements the prediction and correction steps for
+            an appropriate filter to estimate the measurement noise covariance
+            matrix. It must have the signature `f(est_meas)` where `est_meas`
+            is an Nm x 1 numpy array and it must return an Nm x Nm numpy array
+            representing the measurement noise covariance matrix.
+
+        Returns
+        -------
+        None.
+        """
+        self._est_meas_noise_fnc = function
+
     def predict(self, timestep, cur_state, cur_input=None, state_mat_args=(),
                 input_mat_args=(), dyn_fun_params=()):
         """Prediction step of the UKF.
@@ -1163,6 +1189,11 @@ class UnscentedKalmanFilter(ExtendedKalmanFilter):
                                           est_points)
         diff = est_points - est_meas
         meas_cov_lst = diff @ diff.reshape((est_points.shape[0], 1, est_meas.size))
+
+        # estimate the measurement noise if applicable
+        if self._est_meas_noise_fnc is not None:
+            self.meas_noise = self._est_meas_noise_fnc(est_meas)
+
         meas_cov = self.meas_noise \
             + gmath.weighted_sum_mat(self._stateSigmaPoints.weights_cov,
                                      meas_cov_lst)
@@ -2547,6 +2578,8 @@ class QuadratureKalmanFilter(KalmanFilter):
         self._sqrt_cov = np.array([[]])
         self._dyn_fnc = None
 
+        self._est_meas_noise_fnc = None
+
     def save_filter_state(self):
         """Saves filter variables so they can be restored later."""
         filt_state = super().save_filter_state()
@@ -2555,6 +2588,7 @@ class QuadratureKalmanFilter(KalmanFilter):
 
         filt_state['_sqrt_cov'] = self._sqrt_cov
         filt_state['_dyn_fnc'] = self._dyn_fnc
+        filt_state['_est_meas_noise_fnc'] = self._est_meas_noise_fnc
 
         return filt_state
 
@@ -2571,6 +2605,7 @@ class QuadratureKalmanFilter(KalmanFilter):
         self.quadPoints = filt_state['quadPoints']
         self._sqrt_cov = filt_state['_sqrt_cov']
         self._dyn_fnc = filt_state['_dyn_fnc']
+        self._est_meas_noise_fnc = filt_state['_est_meas_noise_fnc']
 
     @property
     def points_per_axis(self):
@@ -2641,6 +2676,29 @@ class QuadratureKalmanFilter(KalmanFilter):
             Rasied if no arguments are specified.
         """
         super().set_measurement_model(meas_mat=meas_mat, meas_fun=meas_fun)
+
+    def set_measurement_noise_estimator(self, function):
+        """Sets the model used for estimating the measurement noise parameters.
+
+        This is an optional step and the filter will work properly if this is
+        not called. If it is called, the measurement noise will be estimated
+        during the filter's correction step and the measurement noise attribute
+        will not be used.
+
+        Parameters
+        ----------
+        function : callable
+            A function that implements the prediction and correction steps for
+            an appropriate filter to estimate the measurement noise covariance
+            matrix. It must have the signature `f(est_meas)` where `est_meas`
+            is an Nm x 1 numpy array and it must return an Nm x Nm numpy array
+            representing the measurement noise covariance matrix.
+
+        Returns
+        -------
+        None.
+        """
+        self._est_meas_noise_fnc = function
 
     def _factorize_cov(self, val=None):
         if val is None:
@@ -2765,6 +2823,10 @@ class QuadratureKalmanFilter(KalmanFilter):
         measQuads, est_meas = self._corr_core(timestep, cur_state, meas,
                                               meas_fun_args)
 
+        # estimate the measurement noise online if applicable
+        if self._est_meas_noise_fnc is not None:
+            self.meas_noise = self._est_meas_noise_fnc(est_meas)
+
         # estimate innovation cov as P_zz = R - m * z_hat * z_hat^T + sum(w_i * Z_i * Z_i^T)
         inov_cov = self.meas_noise + measQuads.cov
         if self.use_cholesky_inverse:
@@ -2811,8 +2873,6 @@ class SquareRootQKF(QuadratureKalmanFilter):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self._est_meas_noise_fnc = None
-
         self._meas_noise = np.array([[]])
         self._sqrt_p_noise = np.array([[]])
         self._sqrt_m_noise = np.array([[]])
@@ -2820,8 +2880,6 @@ class SquareRootQKF(QuadratureKalmanFilter):
     def save_filter_state(self):
         """Saves filter variables so they can be restored later."""
         filt_state = super().save_filter_state()
-
-        filt_state['_est_meas_noise_fnc'] = self._est_meas_noise_fnc
 
         filt_state['_meas_noise'] = self._meas_noise
         filt_state['_sqrt_p_noise'] = self._sqrt_p_noise
@@ -2838,8 +2896,6 @@ class SquareRootQKF(QuadratureKalmanFilter):
             Dictionary generated by :meth:`save_filter_state`.
         """
         super().load_filter_state(filt_state)
-
-        self._est_meas_noise_fnc = filt_state['_est_meas_noise_fnc']
 
         self._meas_noise = filt_state['_meas_noise']
         self._sqrt_p_noise = filt_state['_sqrt_p_noise']
@@ -3072,6 +3128,22 @@ class GSMFilterBase(BayesFilter):
                 self._meas_noise_filters[ii] = cls_type()
                 self._meas_noise_filters[ii].load_filter_state(vals)
 
+    def set_state_model(self, **kwargs):
+        """Wrapper for the core filters set state model function."""
+        if self._coreFilter is not None:
+            self._coreFilter.set_state_model(**kwargs)
+        else:
+            warn('Core filter is not set, use an inherited class.',
+                 RuntimeWarning)
+
+    def set_measurement_model(self, **kwargs):
+        """Wrapper for the core filters set measurement model function."""
+        if self._coreFilter is not None:
+            self._coreFilter.set_measurement_model(**kwargs)
+        else:
+            warn('Core filter is not set, use an inherited class.',
+                 RuntimeWarning)
+
     def __mfilt_prop_samp_factory(self, rvs):
         def f(x, rng):
             return rvs()
@@ -3248,7 +3320,6 @@ class GSMFilterBase(BayesFilter):
         return figs
 
 
-# TODO: modify the QKF to allow for estimating the measuremnt noise online (like the SQKF)
 class QKFGaussianScaleMixtureFilter(GSMFilterBase):
     """Implementation of a QKF Gaussian Scale Mixture filter."""
 
@@ -3267,18 +3338,12 @@ class QKFGaussianScaleMixtureFilter(GSMFilterBase):
         self._coreFilter.quadPoints.points_per_axis = val
 
     def set_state_model(self, **kwargs):
-        """Wrapper for the core filters set state model function.
-
-        See :meth:`.QuadratureKalmanFilter.set_state_model` for details.
-        """
-        self._coreFilter.set_state_model(**kwargs)
+        """Wrapper for the core filter; see :meth:`.QuadratureKalmanFilter.set_state_model` for details."""
+        super().set_state_model(**kwargs)
 
     def set_measurement_model(self, **kwargs):
-        """Wrapper for the core filters set measurement model function.
-
-        See :meth:`.QuadratureKalmanFilter.set_measurement_model` for details.
-        """
-        self._coreFilter.set_measurement_model(**kwargs)
+        """Wrapper for the core filter; see :meth:`.QuadratureKalmanFilter.set_measurement_model` for details."""
+        super().set_measurement_model(**kwargs)
 
 
 class SQKFGaussianScaleMixtureFilter(QKFGaussianScaleMixtureFilter):
@@ -3286,6 +3351,14 @@ class SQKFGaussianScaleMixtureFilter(QKFGaussianScaleMixtureFilter):
 
     This is provided for documentation purposes. It functions the same as
     the :class:`.QKFGaussianScaleMixtureFilter` class.
+
+    Notes
+    -----
+    This is a slight deviation from the derivation in
+    :cite:`VilaValls2012_NonlinearBayesianFilteringintheGaussianScaleMixtureContext`
+    because it does not require the explicit modeling of each term in the mixing
+    distribution but instead estimates the mixing (scale) variable directly for
+    the measurement noise estimators.
     """
 
     def __init__(self, **kwargs):
@@ -3294,15 +3367,30 @@ class SQKFGaussianScaleMixtureFilter(QKFGaussianScaleMixtureFilter):
         self._coreFilter = SquareRootQKF()
 
     def set_state_model(self, **kwargs):
-        """Wrapper for the core filters set state model function.
-
-        See :meth:`.SquareRootQKF.set_state_model` for details.
-        """
-        self._coreFilter.set_state_model(**kwargs)
+        """Wrapper for the core filter; see :meth:`.SquareRootQKF.set_state_model` for details."""
+        super().set_state_model(**kwargs)
 
     def set_measurement_model(self, **kwargs):
-        """Wrapper for the core filters set measurement model function.
+        """Wrapper for the core filter; see :meth:`.SquareRootQKF.set_measurement_model` for details."""
+        super().set_measurement_model(**kwargs)
 
-        See :meth:`.SquareRootQKF.set_measurement_model` for details.
-        """
-        self._coreFilter.set_measurement_model(**kwargs)
+
+class UKFGaussianScaleMixtureFilter(GSMFilterBase):
+    """Implementation of a UKF Gaussian Scale Mixture filter."""
+
+    def __init__(self, sigmaPoints=None, **kwargs):
+        super().__init__(**kwargs)
+
+        self._coreFilter = UnscentedKalmanFilter(sigmaPoints=sigmaPoints)
+
+    def set_state_model(self, **kwargs):
+        """Wrapper for the core filter; see :meth:`.UnscentedKalmanFilter.set_state_model` for details."""
+        super().set_state_model(**kwargs)
+
+    def set_measurement_model(self, **kwargs):
+        """Wrapper for the core filter; see :meth:`.UnscentedKalmanFilter.set_measurement_model` for details."""
+        super().set_measurement_model(**kwargs)
+
+    def init_sigma_points(self, *args, **kwargs):
+        """Wrapper for the core filter; see :meth:`.UnscentedKalmanFilter.init_sigma_points` for details."""
+        self._coreFilter.init_sigma_points(*args, **kwargs)
