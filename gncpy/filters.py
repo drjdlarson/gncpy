@@ -1767,6 +1767,32 @@ class ParticleFilter(BayesFilter):
 
     def plot_particles(self, inds, title='Particle Distribution',
                        x_lbl='State', y_lbl='Probability', **kwargs):
+        """Plots the particle distribution.
+
+        This will either plot a histogram for a single index, or plot a 2-d
+        heatmap/histogram if a list of 2 indices are given. The 1-d case will
+        have the counts normalized to represent the probability.
+
+        Parameters
+        ----------
+        inds : int or list
+            Index of the particle vector to plot.
+        title : string, optional
+            Title of the plot. The default is 'Particle Distribution'.
+        x_lbl : string, optional
+            X-axis label. The default is 'State'.
+        y_lbl : string, optional
+            Y-axis label. The default is 'Probability'.
+        **kwargs : dict
+            Additional plotting options for :meth:`gncpy.plotting.init_plotting_opts`
+            function. Values implemented here are `f_hndl`, `lgnd_loc`, and
+            any values relating to title/axis text formatting.
+
+        Returns
+        -------
+        f_hndl : matplotlib figure
+            Figure object the data was plotted on.
+        """
         opts = pltUtil.init_plotting_opts(**kwargs)
         f_hndl = opts['f_hndl']
         lgnd_loc = opts['lgnd_loc']
@@ -1799,6 +1825,30 @@ class ParticleFilter(BayesFilter):
     def plot_weighted_particles(self, inds, x_lbl='State', y_lbl='Weight',
                                 title='Weighted Particle Distribution',
                                 **kwargs):
+        """Plots the weight vs state distribution of the particles.
+
+        This generates a bar chart and only works for single indices.
+
+        Parameters
+        ----------
+        inds : int
+            Index of the particle vector to plot.
+        x_lbl : string, optional
+            X-axis label. The default is 'State'.
+        y_lbl : string, optional
+            Y-axis label. The default is 'Weight'.
+        title : string, optional
+            Title of the plot. The default is 'Weighted Particle Distribution'.
+        **kwargs : dict
+            Additional plotting options for :meth:`gncpy.plotting.init_plotting_opts`
+            function. Values implemented here are `f_hndl`, `lgnd_loc`, and
+            any values relating to title/axis text formatting.
+
+        Returns
+        -------
+        f_hndl : matplotlib figure
+            Figure object the data was plotted on.
+        """
         opts = pltUtil.init_plotting_opts(**kwargs)
         f_hndl = opts['f_hndl']
         lgnd_loc = opts['lgnd_loc']
@@ -2761,7 +2811,7 @@ class SquareRootQKF(QuadratureKalmanFilter):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.est_meas_noise_fnc = None
+        self._est_meas_noise_fnc = None
 
         self._meas_noise = np.array([[]])
         self._sqrt_p_noise = np.array([[]])
@@ -2771,8 +2821,9 @@ class SquareRootQKF(QuadratureKalmanFilter):
         """Saves filter variables so they can be restored later."""
         filt_state = super().save_filter_state()
 
-        filt_state['_meas_noise'] = self._meas_noise
+        filt_state['_est_meas_noise_fnc'] = self._est_meas_noise_fnc
 
+        filt_state['_meas_noise'] = self._meas_noise
         filt_state['_sqrt_p_noise'] = self._sqrt_p_noise
         filt_state['_sqrt_m_noise'] = self._sqrt_m_noise
 
@@ -2788,9 +2839,34 @@ class SquareRootQKF(QuadratureKalmanFilter):
         """
         super().load_filter_state(filt_state)
 
+        self._est_meas_noise_fnc = filt_state['_est_meas_noise_fnc']
+
         self._meas_noise = filt_state['_meas_noise']
         self._sqrt_p_noise = filt_state['_sqrt_p_noise']
         self._sqrt_m_noise = filt_state['_sqrt_m_noise']
+
+    def set_measurement_noise_estimator(self, function):
+        """Sets the model used for estimating the measurement noise parameters.
+
+        This is an optional step and the filter will work properly if this is
+        not called. If it is called, the measurement noise will be estimated
+        during the filter's correction step and the measurement noise attribute
+        will not be used.
+
+        Parameters
+        ----------
+        function : callable
+            A function that implements the prediction and correction steps for
+            an appropriate filter to estimate the measurement noise covariance
+            matrix. It must have the signature `f(est_meas)` where `est_meas`
+            is an Nm x 1 numpy array and it must return an Nm x Nm numpy array
+            representing the measurement noise covariance matrix.
+
+        Returns
+        -------
+        None.
+        """
+        self._est_meas_noise_fnc = function
 
     @property
     def cov(self):
@@ -2879,8 +2955,8 @@ class SquareRootQKF(QuadratureKalmanFilter):
         # calculate sqrt of the measurement covariance
         meas_mat = np.concatenate([z.reshape((z.size, 1)) - est_meas
                                    for z in measQuads.points], axis=1) @ weight_mat
-        if self.est_meas_noise_fnc is not None:
-            self.meas_noise = self.est_meas_noise_fnc(est_meas, meas_mat @ meas_mat.T)
+        if self._est_meas_noise_fnc is not None:
+            self.meas_noise = self._est_meas_noise_fnc(est_meas)
 
         sqrt_inov_cov = la.qr(np.concatenate((meas_mat,
                                               self._sqrt_m_noise), axis=1).T,
@@ -2917,8 +2993,36 @@ class SquareRootQKF(QuadratureKalmanFilter):
 
 
 class GSMFilterBase(BayesFilter):
-    def __init__(self, enable_proc_noise_estimation=False,
-                enable_meas_noise_estimation=False, **kwargs):
+    """Base implementation of a Gaussian Scale Mixture (GSM) filter.
+
+    This should be inherited from to include specific implementations of the
+    core filter by exposing the necessary core filter attributes.
+
+    Notes
+    -----
+    This is based on a generic version of
+    :cite:`VilaValls2012_NonlinearBayesianFilteringintheGaussianScaleMixtureContext`
+    which extends :cite:`VilaValls2011_BayesianFilteringforNonlinearStateSpaceModelsinSymmetricStableMeasurementNoise`.
+    This class does not implement a specific core filter, that is up to the
+    child classes.
+
+    Attributes
+    ----------
+    enable_proc_noise_estimation : bool
+        Flag indicating if the process noise should be estimated.
+    """
+
+    def __init__(self, enable_proc_noise_estimation=False, **kwargs):
+        """Initializes the class.
+
+        Parameters
+        ----------
+        enable_proc_noise_estimation : bool, optional
+            Flag indicating if the process noise should be estimated. The
+            default is False.
+        **kwargs : dict
+            Additional keyword arguements for the parent class.
+        """
         super().__init__(**kwargs)
 
         self.enable_proc_noise_estimation = enable_proc_noise_estimation
@@ -2931,7 +3035,6 @@ class GSMFilterBase(BayesFilter):
         filt_state = super().save_filter_state()
 
         filt_state['enable_proc_noise_estimation'] = self.enable_proc_noise_estimation
-        filt_state['enable_meas_noise_estimation'] = self.enable_meas_noise_estimation
 
         if self._coreFilter is not None:
             filt_state['_coreFilter'] = (type(self._coreFilter),
@@ -2954,18 +3057,20 @@ class GSMFilterBase(BayesFilter):
         super().load_filter_state(filt_state)
 
         self.enable_proc_noise_estimation = filt_state['enable_proc_noise_estimation']
-        self.enable_meas_noise_estimation = filt_state['enable_meas_noise_estimation']
 
         cls_type = filt_state['_coreFilter'][0]
         if cls_type is not None:
             self._coreFilter = cls_type()
             self._coreFilter.load_filter_state(filt_state['_coreFilter'][1])
+        else:
+            self._coreFilter = None
 
         num_m_filts = len(filt_state['_meas_noise_filters'])
         self._meas_noise_filters = [None] * num_m_filts
         for ii, (cls_type, vals) in enumerate(filt_state['_meas_noise_filters']):
-            self._meas_noise_filters[ii] = cls_type()
-            self._meas_noise_filters[ii].load_filter_state(vals)
+            if cls_type is not None:
+                self._meas_noise_filters[ii] = cls_type()
+                self._meas_noise_filters[ii].load_filter_state(vals)
 
     def __mfilt_prop_samp_factory(self, rvs):
         def f(x, rng):
@@ -2986,6 +3091,29 @@ class GSMFilterBase(BayesFilter):
 
     def set_meas_noise_model(self, num_particles, mix_dist_samp_fnc_lst,
                              rng=None):
+        """Initializes the measurement noise estimators.
+
+        Notes
+        -----
+        This sets up bootstrap particle filters independently for each measurement
+        based on the provided model information.
+
+        Parameters
+        ----------
+        num_particles : int
+            Number of particles to use in each filter.
+        mix_dist_samp_fnc_lst : list
+            List of callables, each element must take no arguments and return
+            a random sample from a proposal distribution for the measurement noise
+            as a 1 x 1 numpy array.
+        rng : numpy random generator, optional
+            Random number generator to use in each particle filter. The default
+            is None, which is passed to the constructor for the :class:`.ParticleFilter`.
+
+        Returns
+        -------
+        None.
+        """
         num_meas = len(mix_dist_samp_fnc_lst)
 
         if not isinstance(num_particles, list):
@@ -3025,6 +3153,7 @@ class GSMFilterBase(BayesFilter):
 
     @property
     def proc_noise(self):
+        """Wrapper for the process noise covariance of the core filter."""
         if self._coreFilter is None:
             return np.array([[]])
         else:
@@ -3036,6 +3165,7 @@ class GSMFilterBase(BayesFilter):
 
     @property
     def meas_noise(self):
+        """Measurement noise of the core filter, estimated online and does not need to be set."""
         if self._coreFilter is None:
             return np.array([[]])
         else:
@@ -3043,13 +3173,18 @@ class GSMFilterBase(BayesFilter):
 
     @meas_noise.setter
     def meas_noise(self, val):
-        raise RuntimeError('Should not be here, or need to handle this somehow')
+        warn('Measurement noise is estimated online. NOT SETTING VALUE HERE.',
+             RuntimeWarning)
 
     def predict(self, timestep, *args, **kwargs):
         """Prediction step of the GSM filter.
 
         This optionally estimates the process noise then calls the core filters
         prediction function.
+
+        Todo
+        ----
+        Implement the process noise esatimation
         """
         if self.enable_proc_noise_estimation:
             # TODO: estimate process noise and update inner filter
@@ -3066,7 +3201,7 @@ class GSMFilterBase(BayesFilter):
         """
         # setup core filter for estimating measurement noise during
         # correction function call
-        def est_meas_noise(est_meas, inov_cov):
+        def est_meas_noise(est_meas):
             m_diag = np.nan * np.ones(est_meas.size)
             f_meas = (meas - est_meas).ravel()
             for ii, filt in enumerate(self._meas_noise_filters):
@@ -3077,12 +3212,29 @@ class GSMFilterBase(BayesFilter):
 
             return np.diag(m_diag)
 
-        self._coreFilter.est_meas_noise_fnc = est_meas_noise
+        self._coreFilter.set_measurement_noise_estimator(est_meas_noise)
 
         return self._coreFilter.correct(timestep, meas, *core_filt_args,
                                         **core_filt_kwargs)
 
     def plot_particles(self, inds, **kwargs):
+        """Plots the particle distribution for every given measurement index.
+
+        Parameters
+        ----------
+        inds : int or list
+            Index of the measurement index/indices to plot the particle distribution
+            for.
+        **kwargs : dict
+            Additional keyword arguements. See :meth:`.ParticleFilter.plot_particles`.
+
+        Returns
+        -------
+        figs : dict
+            Each value in the dictionary is a matplotlib figure handle. The keys
+            have the value :code:`meas_noise_particles_{:02d}` with the appropriate
+            index number.
+        """
         figs = {}
         key_base = 'meas_noise_particles_{:02d}'
         if not isinstance(inds, list):

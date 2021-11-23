@@ -1735,8 +1735,6 @@ def test_SQKF_GSM_dyn_fnc():
         print('State bounding:')
         print(np.sum(np.abs(errs) <= stds, axis=0) / time.size)
 
-    plt.show()
-
 
 # %% Main
 if __name__ == "__main__":
