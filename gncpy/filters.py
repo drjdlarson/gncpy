@@ -996,7 +996,7 @@ class UnscentedKalmanFilter(ExtendedKalmanFilter):
         """
         super().load_filter_state(filt_state)
 
-        self._stateSigmaPoints = filt_state['_stateSigmaPoints']
+        self._stateSigmaPoints = deepcopy(filt_state['_stateSigmaPoints'])
         self._use_lin_dyn = filt_state['_use_lin_dyn']
         self._use_non_lin_dyn = filt_state['_use_non_lin_dyn']
         self._est_meas_noise_fnc = filt_state['_est_meas_noise_fnc']
@@ -1768,8 +1768,8 @@ class ParticleFilter(BayesFilter):
         else:
             rel_likeli = np.array([self.meas_likelihood_fnc(meas, y, *meas_likely_args)
                                    for y in est_meas]).ravel()
-        if self.proposal_fnc is None:
-            prop_fit = np.ones(len(self.prop_parts))
+        if self.proposal_fnc is None or len(self.prop_parts) == 0:
+            prop_fit = np.ones(len(self._particleDist.particles))
         else:
             prop_fit = np.array([self.proposal_fnc(x_hat, cond, meas, *proposal_args)
                                  for x_hat, cond in zip(self._particleDist.particles,
@@ -2073,6 +2073,7 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
         """Saves filter variables so they can be restored later."""
         filt_state = super().save_filter_state()
 
+        filt_state['candDist'] = deepcopy(self.candDist)
         filt_state['_filt'] = self._filt.save_filter_state()
 
         return filt_state
@@ -2087,6 +2088,7 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
         """
         super().load_filter_state(filt_state)
 
+        self.candDist = filt_state['candDist']
         self._filt.load_filter_state(filt_state['_filt'])
 
     @property
@@ -2406,6 +2408,10 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
             each element is an int representing the index of any particles
             that were removed during the selection process.
         """
+        # if first timestep and have not called predict yet
+        if self.use_MCMC and self.candDist is None:
+            self.candDist = deepcopy(self._particleDist)
+
         # call UKF correction on each particle
         (self._particleDist, rel_likeli,
          unnorm_weights) = self._correct_loop(timestep, meas, ukf_kwargs,
