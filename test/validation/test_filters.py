@@ -1543,7 +1543,8 @@ def test_QKF_GSM_dyn_fnc():
     print('Test QKF-GSM')
 
     dt = 1
-    t0, t1 = 0, 100 + dt
+    t0, t1 = 0, 170 + dt
+    print_interval = 20
 
     rng = rnd.default_rng(global_seed)
 
@@ -1568,20 +1569,109 @@ def test_QKF_GSM_dyn_fnc():
     filt.cov = np.diag((5 * 10**4, 5 * 10**4, 8, 8, 0.02, 0.02))
 
     # define measurement noise filters
-    def range_rvs():
+    # def range_rvs():
+    #     idx = 0
+    #     return np.array([[stats.invgamma.rvs(m_dfs[idx] / 2,
+    #                                          scale=m_vars[idx] / (2 / m_dfs[idx]),
+    #                                          random_state=rng)]])
+
+    # def angle_rvs():
+    #     idx = 1
+    #     return np.array([[stats.invgamma.rvs(m_dfs[idx] / 2,
+    #                                          scale=m_vars[idx] / (2 / m_dfs[idx]),
+    #                                          random_state=rng)]])
+
+    # filt.set_meas_noise_model(500, [range_rvs, angle_rvs],
+    #                           rng=rng)
+
+    num_parts = 500
+    filt._meas_noise_filters = [None] * 2
+
+    mf = gfilts.BootstrapFilter()
+
+    def import_dist_fnc(parts, _rng):
         idx = 0
-        return np.array([[stats.invgamma.rvs(m_dfs[idx] / 2,
-                                             scale=m_vars[idx] / (2 / m_dfs[idx]),
-                                             random_state=rng)]])
+        n_parts = parts.num_particles
+        df = stats.uniform.rvs(loc=1, scale=4,
+                               size=n_parts, random_state=_rng)
+        z = np.nan * np.ones(n_parts)
+        for ii, v in enumerate(df):
+            z[ii] = stats.invgamma.rvs(v / 2, scale=1 / (2 / v),
+                                       random_state=_rng)
 
-    def angle_rvs():
+        sig = stats.uniform.rvs(loc=0, scale=5 * np.sqrt(m_vars[idx]),
+                                size=n_parts, random_state=_rng)
+
+        return z * sig**2
+
+    def import_w_fnc(meas, parts):
+        return np.array([stats.norm.pdf(meas.item(), scale=np.sqrt(var))
+                         for var in parts])
+
+    mf.importance_dist_fnc = import_dist_fnc
+    mf.importance_weight_fnc = import_w_fnc
+    mf.particleDistribution = gdistrib.SimpleParticleDistribution()
+    df_distrib = gdistrib.SimpleParticleDistribution()
+    df_distrib.particles = stats.uniform.rvs(loc=1, scale=4, size=num_parts,
+                                             random_state=rng)
+    df_distrib.num_parts_per_ind = np.ones(num_parts)
+    sig_distrib = gdistrib.SimpleParticleDistribution()
+    sig_distrib.particles = stats.uniform.rvs(loc=0, scale=5 * np.sqrt(m_vars[0]),
+                                              size=num_parts, random_state=rng)
+    sig_distrib.num_parts_per_ind = np.ones(num_parts)
+    z_distrib = gdistrib.SimpleParticleDistribution()
+    z_distrib.rng = rng
+    z_distrib.particles = np.nan * np.ones(num_parts)
+    for ii, v in enumerate(df_distrib.particles):
+        z_distrib.particles[ii] = stats.invgamma.rvs(v / 2, scale=1 / (2 / v),
+                                                     random_state=rng)
+    z_distrib.num_parts_per_ind = np.ones(num_parts)
+    mf.particleDistribution.particles = z_distrib.particles * sig_distrib.particles**2
+    mf.particleDistribution.num_parts_per_ind = np.ones(num_parts)
+    mf.rng = rng
+
+    filt._meas_noise_filters[0] = mf
+
+    mf = gfilts.BootstrapFilter()
+
+    def import_dist_fnc(parts, _rng):
         idx = 1
-        return np.array([[stats.invgamma.rvs(m_dfs[idx] / 2,
-                                             scale=m_vars[idx] / (2 / m_dfs[idx]),
-                                             random_state=rng)]])
+        n_parts = parts.num_particles
+        df = stats.uniform.rvs(loc=1, scale=4,
+                               size=n_parts, random_state=_rng)
+        z = np.nan * np.ones(n_parts)
+        for ii, v in enumerate(df):
+            z[ii] = stats.invgamma.rvs(v / 2, scale=1 / (2 / v),
+                                       random_state=_rng)
 
-    filt.set_meas_noise_model(500, [range_rvs, angle_rvs],
-                              rng=rng)
+        sig = stats.uniform.rvs(loc=0, scale=5 * np.sqrt(m_vars[idx]),
+                                size=n_parts, random_state=_rng)
+
+        return z * sig**2
+
+    mf.importance_dist_fnc = import_dist_fnc
+    mf.importance_weight_fnc = import_w_fnc
+    mf.particleDistribution = gdistrib.SimpleParticleDistribution()
+    df_distrib = gdistrib.SimpleParticleDistribution()
+    df_distrib.particles = stats.uniform.rvs(loc=1, scale=4, size=num_parts,
+                                             random_state=rng)
+    df_distrib.num_parts_per_ind = np.ones(num_parts)
+    sig_distrib = gdistrib.SimpleParticleDistribution()
+    sig_distrib.particles = stats.uniform.rvs(loc=0, scale=5 * np.sqrt(m_vars[1]),
+                                              size=num_parts, random_state=rng)
+    sig_distrib.num_parts_per_ind = np.ones(num_parts)
+    z_distrib = gdistrib.SimpleParticleDistribution()
+    z_distrib.rng = rng
+    z_distrib.particles = np.nan * np.ones(num_parts)
+    for ii, v in enumerate(df_distrib.particles):
+        z_distrib.particles[ii] = stats.invgamma.rvs(v / 2, scale=1 / (2 / v),
+                                                     random_state=rng)
+    z_distrib.num_parts_per_ind = np.ones(num_parts)
+    mf.particleDistribution.particles = z_distrib.particles * sig_distrib.particles**2
+    mf.particleDistribution.num_parts_per_ind = np.ones(num_parts)
+    mf.rng = rng
+
+    filt._meas_noise_filters[1] = mf
 
     # define QKF specific parameters for core filter
     filt.points_per_axis = 3
@@ -1590,6 +1680,21 @@ def test_QKF_GSM_dyn_fnc():
     filt_state = filt.save_filter_state()
     filt = gfilts.QKFGaussianScaleMixtureFilter()
     filt.load_filter_state(filt_state)
+
+    if debug_figs:
+        figs = {}
+        steps = (1e-1, 1e-5)
+        bnds = (3000, 0.03)
+        lbls = ('Range (m)', 'Az (rad))')
+        for ii in range(len(m_vars)):
+            ttl = 'Init {} Measurement Noise Particles'.format(lbls[ii])
+            key = 'meas_noise_particles_{:02d}'.format(ii)
+            figs.update(filt.plot_particles(ii, title=ttl))
+            x = np.arange(0, bnds[ii], steps[ii])
+            y = stats.invgamma.pdf(x, m_dfs[ii] / 2, scale=m_vars[ii] / (2 / m_dfs[ii]))
+            figs[key].axes[0].plot(x, y, color='b')
+            figs[key].axes[0].grid(True)
+            figs[key].axes[0].set_xlim((0, bnds[ii]))
 
     # sim loop
     time = np.arange(t0, t1, dt)
@@ -1600,27 +1705,28 @@ def test_QKF_GSM_dyn_fnc():
     stds = np.nan * np.ones((time.size, 6))
     stds[0, :] = np.sqrt(np.diag(filt.cov))
     m_stds = np.nan * np.ones((time.size, 2))
-    m_stds[0, :] = np.array([np.sqrt(f._calc_state())
+    m_stds[0, :] = np.array([np.sqrt(np.mean(f.particleDistribution.particles))
                              for f in filt._meas_noise_filters]).ravel()
+    # m_stds[0, :] = np.array([np.sqrt(f._calc_state())
+    #                          for f in filt._meas_noise_filters]).ravel()
 
     for kk, t in enumerate(time[:-1]):
-        if np.mod(kk, int(10 / dt)) == 0:
+        if np.mod(kk, int(print_interval / dt)) == 0:
             print('\t\t{:.2f}'.format(t))
             sys.stdout.flush()
 
         states[kk + 1, :] = filt.predict(t, states[kk, :].reshape((6, 1))).ravel()
 
         p_noise = rng.multivariate_normal(np.zeros(6), proc_cov)
-        t_states[kk + 1, :] = (state_mat @ t_states[[kk], :].T).ravel()
+        t_states[kk + 1, :] = (state_mat @ t_states[[kk], :].T).ravel() + 0*p_noise
         meas = meas_fun(t, (t_states[kk + 1, :] + p_noise).reshape((6, 1)))
         for ii, (df, var) in enumerate(zip(m_dfs, m_vars)):
             meas[ii, 0] += stats.t.rvs(df, scale=np.sqrt(var), random_state=rng)
 
         meas_lst[kk + 1, :] = meas.ravel()
 
-        core_filt_args = (states[kk + 1, :].reshape((6, 1)), )
         states[kk + 1, :] = filt.correct(t, meas,
-                                         core_filt_args=core_filt_args)[0].ravel()
+                                         states[kk + 1, :].reshape((6, 1)))[0].ravel()
         stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
         m_stds[kk + 1, :] = np.sqrt(np.diag(filt.meas_noise))
 
@@ -1814,9 +1920,8 @@ def test_SQKF_GSM_dyn_fnc():
 
         meas_lst[kk + 1, :] = meas.ravel()
 
-        core_filt_args = (states[kk + 1, :].reshape((6, 1)), )
         states[kk + 1, :] = filt.correct(t, meas,
-                                         core_filt_args=core_filt_args)[0].ravel()
+                                         states[kk + 1, :].reshape((6, 1)))[0].ravel()
         stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
         m_stds[kk + 1, :] = np.sqrt(np.diag(filt.meas_noise))
 
@@ -2021,9 +2126,8 @@ def test_UKF_GSM_dyn_fnc():
 
         meas_lst[kk + 1, :] = meas.ravel()
 
-        core_filt_args = (states[kk + 1, :].reshape((6, 1)), )
         states[kk + 1, :] = filt.correct(t, meas,
-                                         core_filt_args=core_filt_args)[0].ravel()
+                                         states[kk + 1, :].reshape((6, 1)))[0].ravel()
         stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
         m_stds[kk + 1, :] = np.sqrt(np.diag(filt.meas_noise))
 
@@ -2168,9 +2272,9 @@ if __name__ == "__main__":
     # test_QKF_dynObj()
     # test_SQKF_dynObj()
 
-    # test_QKF_GSM_dyn_fnc()
+    test_QKF_GSM_dyn_fnc()
     # test_SQKF_GSM_dyn_fnc()
-    test_UKF_GSM_dyn_fnc()
+    # test_UKF_GSM_dyn_fnc()
 
     end = timer()
     print('{:.2f} s'.format(end - start))

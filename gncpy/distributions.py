@@ -391,6 +391,68 @@ class _ParticleDistIter:
         return result
 
 
+class SimpleParticleDistribution:
+    def __init__(self, **kwargs):
+        self.num_parts_per_ind = np.array([])
+        self.particles = np.array([[]])
+
+    @property
+    def num_particles(self):
+        return int(np.sum(self.num_parts_per_ind))
+
+    def plot_particles(self, ind, title='Approximate PDF from Particle Distribution',
+                       x_lbl='State', y_lbl='Probability', **kwargs):
+        """Plots the approximate PDF represented by the particle distribution
+
+        Parameters
+        ----------
+        ind : int
+            Index of the particle vector to plot.
+        title : string, optional
+            Title of the plot. The default is 'Particle Distribution'.
+        x_lbl : string, optional
+            X-axis label. The default is 'State'.
+        y_lbl : string, optional
+            Y-axis label. The default is 'Probability'.
+        **kwargs : dict
+            Additional plotting options for :meth:`gncpy.plotting.init_plotting_opts`
+            function. Values implemented here are `f_hndl`, `lgnd_loc`, and
+            any values relating to title/axis text formatting.
+
+        Returns
+        -------
+        fig : matplotlib figure
+            Figure object the data was plotted on.
+        """
+        opts = pltUtil.init_plotting_opts(**kwargs)
+        fig = opts['f_hndl']
+        lgnd_loc = opts['lgnd_loc']
+
+        if fig is None:
+            fig = plt.figure()
+            fig.add_subplot(1, 1, 1)
+
+        all_inds = []
+        for ii, num_dups in enumerate(self.num_parts_per_ind):
+            all_inds.extend([ii] * int(num_dups))
+
+        x = self.particles[all_inds, ind]
+        h_opts = {"histtype": "stepfilled", "bins": 'auto', "density": True}
+        fig.axes[0].hist(x, **h_opts)
+
+        # x = np.sort(self.particles)
+        # y = self.num_parts_per_ind / self.num_particles
+        # fig.axes[0].plot(x, y)
+
+        pltUtil.set_title_label(fig, 0, opts, ttl=title,
+                                x_lbl=x_lbl, y_lbl=y_lbl)
+        if lgnd_loc is not None:
+            fig.legend(loc=lgnd_loc)
+        fig.tight_layout()
+
+        return fig
+
+
 class ParticleDistribution:
     """Particle distribution object.
 
