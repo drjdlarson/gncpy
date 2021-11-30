@@ -1539,12 +1539,62 @@ def test_SQKF_dynObj():  # noqa
         assert chi_stat < crit_val, "values are different"
 
 
+def __gsm_import_dist_factory():
+    def import_dist_fnc(parts, rng):
+        new_parts = np.nan * np.ones(parts.particles.shape)
+
+        disc = 0.99
+        a = (3 * disc - 1) / (2 * disc)
+        h = np.sqrt(1 - a**2)
+        last_means = np.mean(parts.particles, axis=0)
+        means = a * parts.particles[:, 0:2]  + (1 - a) * last_means[0:2]
+
+        # df, sig
+        for ind in range(means.shape[1]):
+            std = np.sqrt(h**2 * np.cov(parts.particles[:, ind]))
+
+            for ii, m in enumerate(means):
+                samp = stats.norm.rvs(loc=m[ind], scale=std, random_state=rng)
+                # while samp <= 0:
+                #     samp = stats.norm.rvs(loc=m[ind], scale=std,
+                #                           random_state=rng)
+                new_parts[ii, ind] = samp
+
+        for ii in range(new_parts.shape[0]):
+            new_parts[ii, 2] = stats.invgamma.rvs(np.abs(new_parts[ii, 0]) / 2,
+                                                  scale=1 / (2 / np.abs(new_parts[ii, 0])),
+                                                  random_state=rng)
+
+        # for ii in range(new_parts.shape[0]):
+        #     new_parts[ii, 2] = stats.invgamma.rvs(np.abs(parts.particles[ii, 0]) / 2,
+        #                                           scale=1 / (2 / np.abs(parts.particles[ii, 0])),
+        #                                           random_state=rng)
+
+        # new_parts[:, 2] = stats.invgamma.rvs(last_means[0] / 2,
+        #                                       scale=1 / (2 / last_means[0]),
+        #                                       random_state=rng,
+        #                                       size=new_parts.shape[0])
+
+        return new_parts
+
+    return import_dist_fnc
+
+
+# def __gsm_import_w_factory():
+#     def import_w_fnc(meas, parts):
+#         stds = np.sqrt(parts[:, 2] * parts[:, 1]**2)
+#         return np.array([stats.norm.pdf(meas.item(), scale=scale)
+#                          for scale in stds])
+
+#     return import_w_fnc
+
+
 def test_QKF_GSM_dyn_fnc():
     print('Test QKF-GSM')
 
     dt = 1
-    t0, t1 = 0, 170 + dt
-    print_interval = 20
+    t0, t1 = 0, 100 + dt
+    print_interval = 25
 
     rng = rnd.default_rng(global_seed)
 
@@ -1558,7 +1608,7 @@ def test_QKF_GSM_dyn_fnc():
         return np.array([[np.sqrt(x[0, 0]**2 + x[1, 0]**2)],
                          [np.arctan2(x[1, 0], x[0, 0])]])
 
-    m_dfs = (2, 2)
+    m_dfs = (1.5, 70)
     m_vars = (100, 0.001)
 
     # define base GSM parameters
@@ -1587,91 +1637,27 @@ def test_QKF_GSM_dyn_fnc():
     num_parts = 500
     filt._meas_noise_filters = [None] * 2
 
-    mf = gfilts.BootstrapFilter()
+    for ind in range(len(filt._meas_noise_filters)):
+        mf = gfilts.BootstrapFilter()
+        mf.importance_dist_fnc = __gsm_import_dist_factory()
+        # mf.importance_weight_fnc = __gsm_import_w_factory()
+        mf.particleDistribution = gdistrib.SimpleParticleDistribution()
+        df_particles = stats.uniform.rvs(loc=40, scale=40, size=num_parts,
+                                         random_state=rng)
+        sig_particles = stats.uniform.rvs(loc=0, scale=5 * np.sqrt(m_vars[ind]),
+                                          size=num_parts, random_state=rng)
+        z_particles = np.nan * np.ones(num_parts)
+        for ii, v in enumerate(df_particles):
+            z_particles[ii] = stats.invgamma.rvs(v / 2, scale=1 / (2 / v),
+                                                 random_state=rng)
+        mf.particleDistribution.particles = np.stack((df_particles, sig_particles,
+                                                      z_particles), axis=1)
 
-    def import_dist_fnc(parts, _rng):
-        idx = 0
-        n_parts = parts.num_particles
-        df = stats.uniform.rvs(loc=1, scale=4,
-                               size=n_parts, random_state=_rng)
-        z = np.nan * np.ones(n_parts)
-        for ii, v in enumerate(df):
-            z[ii] = stats.invgamma.rvs(v / 2, scale=1 / (2 / v),
-                                       random_state=_rng)
+        mf.particleDistribution.num_parts_per_ind = np.ones(num_parts)
+        mf.particleDistribution.weights = 1 / num_parts * np.ones(num_parts)
+        mf.rng = rng
 
-        sig = stats.uniform.rvs(loc=0, scale=5 * np.sqrt(m_vars[idx]),
-                                size=n_parts, random_state=_rng)
-
-        return z * sig**2
-
-    def import_w_fnc(meas, parts):
-        return np.array([stats.norm.pdf(meas.item(), scale=np.sqrt(var))
-                         for var in parts])
-
-    mf.importance_dist_fnc = import_dist_fnc
-    mf.importance_weight_fnc = import_w_fnc
-    mf.particleDistribution = gdistrib.SimpleParticleDistribution()
-    df_distrib = gdistrib.SimpleParticleDistribution()
-    df_distrib.particles = stats.uniform.rvs(loc=1, scale=4, size=num_parts,
-                                             random_state=rng)
-    df_distrib.num_parts_per_ind = np.ones(num_parts)
-    sig_distrib = gdistrib.SimpleParticleDistribution()
-    sig_distrib.particles = stats.uniform.rvs(loc=0, scale=5 * np.sqrt(m_vars[0]),
-                                              size=num_parts, random_state=rng)
-    sig_distrib.num_parts_per_ind = np.ones(num_parts)
-    z_distrib = gdistrib.SimpleParticleDistribution()
-    z_distrib.rng = rng
-    z_distrib.particles = np.nan * np.ones(num_parts)
-    for ii, v in enumerate(df_distrib.particles):
-        z_distrib.particles[ii] = stats.invgamma.rvs(v / 2, scale=1 / (2 / v),
-                                                     random_state=rng)
-    z_distrib.num_parts_per_ind = np.ones(num_parts)
-    mf.particleDistribution.particles = z_distrib.particles * sig_distrib.particles**2
-    mf.particleDistribution.num_parts_per_ind = np.ones(num_parts)
-    mf.rng = rng
-
-    filt._meas_noise_filters[0] = mf
-
-    mf = gfilts.BootstrapFilter()
-
-    def import_dist_fnc(parts, _rng):
-        idx = 1
-        n_parts = parts.num_particles
-        df = stats.uniform.rvs(loc=1, scale=4,
-                               size=n_parts, random_state=_rng)
-        z = np.nan * np.ones(n_parts)
-        for ii, v in enumerate(df):
-            z[ii] = stats.invgamma.rvs(v / 2, scale=1 / (2 / v),
-                                       random_state=_rng)
-
-        sig = stats.uniform.rvs(loc=0, scale=5 * np.sqrt(m_vars[idx]),
-                                size=n_parts, random_state=_rng)
-
-        return z * sig**2
-
-    mf.importance_dist_fnc = import_dist_fnc
-    mf.importance_weight_fnc = import_w_fnc
-    mf.particleDistribution = gdistrib.SimpleParticleDistribution()
-    df_distrib = gdistrib.SimpleParticleDistribution()
-    df_distrib.particles = stats.uniform.rvs(loc=1, scale=4, size=num_parts,
-                                             random_state=rng)
-    df_distrib.num_parts_per_ind = np.ones(num_parts)
-    sig_distrib = gdistrib.SimpleParticleDistribution()
-    sig_distrib.particles = stats.uniform.rvs(loc=0, scale=5 * np.sqrt(m_vars[1]),
-                                              size=num_parts, random_state=rng)
-    sig_distrib.num_parts_per_ind = np.ones(num_parts)
-    z_distrib = gdistrib.SimpleParticleDistribution()
-    z_distrib.rng = rng
-    z_distrib.particles = np.nan * np.ones(num_parts)
-    for ii, v in enumerate(df_distrib.particles):
-        z_distrib.particles[ii] = stats.invgamma.rvs(v / 2, scale=1 / (2 / v),
-                                                     random_state=rng)
-    z_distrib.num_parts_per_ind = np.ones(num_parts)
-    mf.particleDistribution.particles = z_distrib.particles * sig_distrib.particles**2
-    mf.particleDistribution.num_parts_per_ind = np.ones(num_parts)
-    mf.rng = rng
-
-    filt._meas_noise_filters[1] = mf
+        filt._meas_noise_filters[ind] = mf
 
     # define QKF specific parameters for core filter
     filt.points_per_axis = 3
@@ -1682,19 +1668,30 @@ def test_QKF_GSM_dyn_fnc():
     filt.load_filter_state(filt_state)
 
     if debug_figs:
-        figs = {}
-        steps = (1e-1, 1e-5)
-        bnds = (3000, 0.03)
-        lbls = ('Range (m)', 'Az (rad))')
-        for ii in range(len(m_vars)):
-            ttl = 'Init {} Measurement Noise Particles'.format(lbls[ii])
-            key = 'meas_noise_particles_{:02d}'.format(ii)
-            figs.update(filt.plot_particles(ii, title=ttl))
-            x = np.arange(0, bnds[ii], steps[ii])
-            y = stats.invgamma.pdf(x, m_dfs[ii] / 2, scale=m_vars[ii] / (2 / m_dfs[ii]))
-            figs[key].axes[0].plot(x, y, color='b')
-            figs[key].axes[0].grid(True)
-            figs[key].axes[0].set_xlim((0, bnds[ii]))
+        lbls = ('df', 'sig', 'z')
+        bnds = (6, 60, 40)
+        for ii, lbl in enumerate(lbls):
+            ttl = 'Init Range {} particles'.format(lbl)
+            figs, keys = filt.plot_particles(0, ii,
+                                             title=ttl)
+            # figs[keys[0]].axes[0].grid(True)
+            figs[keys[0]].axes[0].set_xlim((0, bnds[ii]))
+
+    # if debug_figs:
+    #     figs = {}
+    #     steps = (1e-3, 1e-3)
+    #     bnds = (40, 40)
+    #     lbls = ('Range', 'Az')
+    #     for ii in range(len(lbls)):
+    #         ttl = 'Init {} z Noise Particles'.format(lbls[ii])
+    #         n_figs, n_keys = filt.plot_particles(ii, 2, title=ttl)
+    #         key = n_keys[0]
+    #         figs.update(n_figs)
+    #         x = np.arange(0, bnds[ii], steps[ii])
+    #         y = stats.invgamma.pdf(x, m_dfs[ii] / 2, scale=1 / (2 / m_dfs[ii]))
+    #         figs[key].axes[0].plot(x, y, color='b')
+    #         figs[key].axes[0].grid(True)
+    #         figs[key].axes[0].set_xlim((0, bnds[ii]))
 
     # sim loop
     time = np.arange(t0, t1, dt)
@@ -1710,25 +1707,38 @@ def test_QKF_GSM_dyn_fnc():
     # m_stds[0, :] = np.array([np.sqrt(f._calc_state())
     #                          for f in filt._meas_noise_filters]).ravel()
 
-    for kk, t in enumerate(time[:-1]):
-        if np.mod(kk, int(print_interval / dt)) == 0:
+    for ind, t in enumerate(time[1:]):
+        kk = ind + 1
+        if debug_figs and np.mod(kk, int(print_interval / dt)) == 0:
             print('\t\t{:.2f}'.format(t))
             sys.stdout.flush()
+            lbls = ('df', 'sig', 'z')
+            bnds = (6, 60, 40)
+            for ii, lbl in enumerate(lbls):
+                if ii >= 2:
+                    break
+                ttl = 'Range {} particles at t={:.2f}'.format(lbl, t)
+                figs, keys = filt.plot_particles(0, ii,
+                                                  title=ttl)
+                figs[keys[0]].axes[0].grid(True)
+                if ii == 2:
+                    figs[keys[0]].axes[0].set_xlim((0, bnds[ii]))
+                else:
+                    figs[keys[0]].axes[0].set_xlim((-bnds[ii], bnds[ii]))
 
-        states[kk + 1, :] = filt.predict(t, states[kk, :].reshape((6, 1))).ravel()
+        states[kk, :] = filt.predict(t, states[kk - 1, :].reshape((6, 1))).ravel()
 
         p_noise = rng.multivariate_normal(np.zeros(6), proc_cov)
-        t_states[kk + 1, :] = (state_mat @ t_states[[kk], :].T).ravel() + 0*p_noise
-        meas = meas_fun(t, (t_states[kk + 1, :] + p_noise).reshape((6, 1)))
+        t_states[kk, :] = (state_mat @ t_states[[kk - 1], :].T).ravel() + 0*p_noise
+        meas = meas_fun(t, (t_states[kk, :] + p_noise).reshape((6, 1)))
         for ii, (df, var) in enumerate(zip(m_dfs, m_vars)):
             meas[ii, 0] += stats.t.rvs(df, scale=np.sqrt(var), random_state=rng)
 
-        meas_lst[kk + 1, :] = meas.ravel()
+        meas_lst[kk, :] = meas.ravel()
 
-        states[kk + 1, :] = filt.correct(t, meas,
-                                         states[kk + 1, :].reshape((6, 1)))[0].ravel()
-        stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
-        m_stds[kk + 1, :] = np.sqrt(np.diag(filt.meas_noise))
+        states[kk, :] = filt.correct(t, meas, states[kk, :].reshape((6, 1)))[0].ravel()
+        stds[kk, :] = np.sqrt(np.diag(filt.cov))
+        m_stds[kk, :] = np.sqrt(np.diag(filt.meas_noise))
 
     errs = t_states - states
 
@@ -1736,70 +1746,71 @@ def test_QKF_GSM_dyn_fnc():
         figs = {}
 
         # plot measurement standard
-        figs['m_stds'] = plt.figure()
-        ttl = 'Estimated Measurement Noise Scalings (sqrt(z))'
-        y_lbls = ('range (m)', 'az (deg)')
-        for ii in range(m_stds.shape[1]):
-            figs['m_stds'].add_subplot(2, 1, ii + 1)
-            if ii == 1:
-                c_fac = 180 / np.pi
-            else:
-                c_fac = 1
-            figs['m_stds'].axes[ii].scatter(time, m_stds[:, ii] * c_fac)
-            figs['m_stds'].axes[ii].grid(True)
-            figs['m_stds'].axes[ii].set_ylabel(y_lbls[ii])
-        figs['m_stds'].axes[-1].set_xlabel('Time (s)')
-        figs['m_stds'].suptitle(ttl)
+        # figs['m_stds'] = plt.figure()
+        # ttl = 'Estimated Measurement Noise Scalings (sqrt(z))'
+        # y_lbls = ('range (m)', 'az (deg)')
+        # for ii in range(m_stds.shape[1]):
+        #     figs['m_stds'].add_subplot(2, 1, ii + 1)
+        #     if ii == 1:
+        #         c_fac = 180 / np.pi
+        #     else:
+        #         c_fac = 1
+        #     figs['m_stds'].axes[ii].scatter(time, m_stds[:, ii] * c_fac)
+        #     figs['m_stds'].axes[ii].grid(True)
+        #     figs['m_stds'].axes[ii].set_ylabel(y_lbls[ii])
+        # figs['m_stds'].axes[-1].set_xlabel('Time (s)')
+        # figs['m_stds'].suptitle(ttl)
 
-        figs['m_pdfs'] = plt.figure()
-        ttl = 'Estimated vs True PDF'
-        for ii in range(len(m_vars)):
-            bnd = 6 * np.sqrt(m_vars[ii])
-            gauss = stats.norm.rvs(size=time.size,
-                                   random_state=rnd.default_rng(global_seed))
-            gsm = m_stds[:, ii] * gauss
-            figs['m_pdfs'].add_subplot(1, 2, ii + 1)
-            figs['m_pdfs'].axes[ii].hist(gsm, bins='auto', density=True,
-                                         histtype='stepfilled', alpha=0.2, color='b')
-            x = np.arange(-bnd, bnd, 1e-3)
-            y = stats.t.pdf(x, m_dfs[ii], scale=np.sqrt(m_vars[ii]))
-            figs['m_pdfs'].axes[ii].plot(x, y, color='b')
-            figs['m_pdfs'].axes[ii].grid(True)
-            figs['m_pdfs'].axes[ii].set_xlabel('value')
-            figs['m_pdfs'].axes[ii].set_xlim((-bnd, bnd))
-        figs['m_pdfs'].axes[0].set_ylabel('probability')
-        figs['m_pdfs'].suptitle(ttl)
+        # figs['m_pdfs'] = plt.figure()
+        # ttl = 'Estimated vs True PDF'
+        # for ii in range(len(m_vars)):
+        #     bnd = 6 * np.sqrt(m_vars[ii])
+        #     gauss = stats.norm.rvs(size=time.size,
+        #                            random_state=rnd.default_rng(global_seed))
+        #     gsm = m_stds[:, ii] * gauss
+        #     figs['m_pdfs'].add_subplot(1, 2, ii + 1)
+        #     figs['m_pdfs'].axes[ii].hist(gsm, bins='auto', density=True,
+        #                                  histtype='stepfilled', alpha=0.2, color='b')
+        #     x = np.arange(-bnd, bnd, 1e-3)
+        #     y = stats.t.pdf(x, m_dfs[ii], scale=np.sqrt(m_vars[ii]))
+        #     figs['m_pdfs'].axes[ii].plot(x, y, color='b')
+        #     figs['m_pdfs'].axes[ii].grid(True)
+        #     figs['m_pdfs'].axes[ii].set_xlabel('value')
+        #     figs['m_pdfs'].axes[ii].set_xlim((-bnd, bnd))
+        # figs['m_pdfs'].axes[0].set_ylabel('probability')
+        # figs['m_pdfs'].suptitle(ttl)
 
-        steps = (1e-1, 1e-5)
-        bnds = (3000, 0.03)
-        lbls = ('Range (m)', 'Az (rad))')
-        for ii in range(len(m_vars)):
-            ttl = '{} Measurement Noise Particles'.format(lbls[ii])
-            key = 'meas_noise_particles_{:02d}'.format(ii)
-            figs.update(filt.plot_particles(ii, title=ttl))
-            x = np.arange(0, bnds[ii], steps[ii])
-            y = stats.invgamma.pdf(x, m_dfs[ii] / 2, scale=m_vars[ii] / (2 / m_dfs[ii]))
-            figs[key].axes[0].plot(x, y, color='b')
-            figs[key].axes[0].grid(True)
-            figs[key].axes[0].set_xlim((0, bnds[ii]))
+        # steps = (1e-3, 1e-3)
+        # bnds = (40, 40)
+        # lbls = ('Range', 'Az')
+        # for ii in range(len(lbls)):
+        #     ttl = '{} z Noise Particles'.format(lbls[ii])
+        #     n_figs, n_keys = filt.plot_particles(ii, 2, title=ttl)
+        #     key = n_keys[0]
+        #     figs.update(n_figs)
+        #     x = np.arange(0, bnds[ii], steps[ii])
+        #     y = stats.invgamma.pdf(x, m_dfs[ii] / 2, scale=1 / (2 / m_dfs[ii]))
+        #     figs[key].axes[0].plot(x, y, color='b')
+        #     figs[key].axes[0].grid(True)
+        #     figs[key].axes[0].set_xlim((0, bnds[ii]))
 
-        figs['mix_dist_samps'] = plt.figure()
-        ttl = 'Mixing Distribution Estimates'
-        steps = (1e-1, 1e-5)
-        bnds = (500, 0.02)
-        for ii in range(len(m_vars)):
-            figs['mix_dist_samps'].add_subplot(1, len(m_vars), ii + 1)
-            figs['mix_dist_samps'].axes[ii].hist(m_stds[:, ii]**2, bins='auto',
-                                                 density=True, histtype='stepfilled',
-                                                 alpha=0.2, color='b')
-            x = np.arange(0, bnds[ii], steps[ii])
-            y = stats.invgamma.pdf(x, m_dfs[ii] / 2, scale=m_vars[ii] / (2 / m_dfs[ii]))
-            figs['mix_dist_samps'].axes[ii].plot(x, y, color='b')
-            figs['mix_dist_samps'].axes[ii].grid(True)
-            figs['mix_dist_samps'].axes[ii].set_xlabel('value')
-            figs['mix_dist_samps'].axes[ii].set_xlim((0, bnds[ii]))
-        figs['mix_dist_samps'].axes[0].set_ylabel('probability')
-        figs['mix_dist_samps'].suptitle(ttl)
+        # figs['mix_dist_samps'] = plt.figure()
+        # ttl = 'Mixing Distribution Estimates'
+        # steps = (1e-1, 1e-5)
+        # bnds = (500, 0.02)
+        # for ii in range(len(m_vars)):
+        #     figs['mix_dist_samps'].add_subplot(1, len(m_vars), ii + 1)
+        #     figs['mix_dist_samps'].axes[ii].hist(m_stds[:, ii]**2, bins='auto',
+        #                                          density=True, histtype='stepfilled',
+        #                                          alpha=0.2, color='b')
+        #     x = np.arange(0, bnds[ii], steps[ii])
+        #     y = stats.invgamma.pdf(x, m_dfs[ii] / 2, scale=m_vars[ii] / (2 / m_dfs[ii]))
+        #     figs['mix_dist_samps'].axes[ii].plot(x, y, color='b')
+        #     figs['mix_dist_samps'].axes[ii].grid(True)
+        #     figs['mix_dist_samps'].axes[ii].set_xlabel('value')
+        #     figs['mix_dist_samps'].axes[ii].set_xlim((0, bnds[ii]))
+        # figs['mix_dist_samps'].axes[0].set_ylabel('probability')
+        # figs['mix_dist_samps'].suptitle(ttl)
 
         figs['pos'] = plt.figure()
         ttl = 'Estimated vs True Position'
@@ -1839,6 +1850,11 @@ def test_QKF_GSM_dyn_fnc():
 
         print('State bounding:')
         print(np.sum(np.abs(errs) <= stds, axis=0) / time.size)
+
+        print('Final Range particle estimates:')
+        print(np.mean(filt._meas_noise_filters[0].particleDistribution.particles, axis=0))
+        print('Final Range particle stds:')
+        print(np.std(filt._meas_noise_filters[0].particleDistribution.particles, axis=0))
 
 
 def test_SQKF_GSM_dyn_fnc():

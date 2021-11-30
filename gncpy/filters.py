@@ -1295,28 +1295,33 @@ class BootstrapFilter(BayesFilter):
         return np.mean(self.particleDistribution.particles, axis=0)
 
     def correct(self, timestep, meas):
-        importance_weights = self.importance_weight_fnc(meas,
-                                                        self.particleDistribution.particles)
-        tot = np.sum(importance_weights)
+        self.particleDistribution.weights *= self.importance_weight_fnc(meas,
+                                                                        self.particleDistribution.particles)
+        tot = np.sum(self.particleDistribution.weights)
         if tot <= 0:
             raise gerr.ParticleDepletionError('Importance weights sum to 0.')
-        importance_weights = importance_weights / tot
+        self.particleDistribution.weights /= tot
 
         # selection
         num_parts = self.particleDistribution.num_particles
-        keep_inds = self.rng.choice(np.array(range(num_parts)),
-                                    p=importance_weights, size=num_parts)
+        keep_inds = self.rng.choice(np.array(range(self.particleDistribution.weights.size)),
+                                    p=self.particleDistribution.weights, size=num_parts)
         keep_inds, counts = np.unique(keep_inds, return_counts=True)
         self.particleDistribution.num_parts_per_ind = counts
-        self.particleDistribution.particles = self.particleDistribution.particles[keep_inds]
+        self.particleDistribution.particles = self.particleDistribution.particles[keep_inds, :]
+        self.particleDistribution.weights = (1 / num_parts
+                                             * np.ones(self.particleDistribution.particles.shape[0]))
 
+        # weights are all equal here so don't need weighted sum
         return np.mean(self.particleDistribution.particles, axis=0)
 
     def set_state_model(self, **kwargs):
-        pass
+        warn('Not used by BootstrapFilter, directly handled by importance_dist_fnc.',
+             RuntimeWarning)
 
     def set_measurement_model(self, **kwargs):
-        pass
+        warn('Not used by BootstrapFilter, directly handled by importance_weight_fnc.',
+             RuntimeWarning)
 
     def plot_particles(self, inds, **kwargs):
         return self.particleDistribution.plot_particles(inds, **kwargs)
@@ -2899,10 +2904,12 @@ class QuadratureKalmanFilter(KalmanFilter):
 
         # estimate the measurement noise online if applicable
         if self._est_meas_noise_fnc is not None:
+            inov_cov = measQuads.cov
             self.meas_noise, meas_fit_prob = self._est_meas_noise_fnc(est_meas, measQuads.cov)
 
         # estimate innovation cov as P_zz = R - m * z_hat * z_hat^T + sum(w_i * Z_i * Z_i^T)
         inov_cov = self.meas_noise + measQuads.cov
+
         if self.use_cholesky_inverse:
             sqrt_inv_inov_cov = la.inv(la.cholesky(inov_cov))
             inv_inov_cov = sqrt_inv_inov_cov.T @ sqrt_inv_inov_cov
@@ -3121,6 +3128,15 @@ class SquareRootQKF(QuadratureKalmanFilter):
                                                       cov=inov_cov)
 
         return (cor_state, meas_fit_prob)
+
+
+def _gsm_import_w_factory(inov_cov):
+    def import_w_fnc(meas, parts):
+        stds = np.sqrt(parts[:, 2] * parts[:, 1]**2 + inov_cov)
+        return np.array([stats.norm.pdf(meas.item(), scale=scale)
+                         for scale in stds])
+
+    return import_w_fnc
 
 
 class GSMFilterBase(BayesFilter):
@@ -3350,12 +3366,14 @@ class GSMFilterBase(BayesFilter):
         # correction function call
         def est_meas_noise(est_meas, inov_cov):
             m_diag = np.nan * np.ones(est_meas.size)
-            f_meas = (meas - est_meas).ravel() / np.sqrt(np.diag(inov_cov))
+            f_meas = (meas - est_meas).ravel()  # / np.sqrt(np.diag(inov_cov))
+            inov_cov = np.diag(inov_cov)
             meas_fit = 1
             for ii, filt in enumerate(self._meas_noise_filters):
-                filt.meas_likelihood_fnc = self.__mfilt_meas_like_factory()
+                filt.importance_weight_fnc = _gsm_import_w_factory(inov_cov[ii])
                 filt.predict(timestep)
-                m_diag[ii] = filt.correct(timestep, f_meas[ii].reshape((1, 1)))
+                state = filt.correct(timestep, f_meas[ii].reshape((1, 1)))
+                m_diag[ii] = state[2] * state[1]**2  # z * sig^2
 
             return np.diag(m_diag), meas_fit
 
@@ -3376,12 +3394,12 @@ class GSMFilterBase(BayesFilter):
         return self._coreFilter.correct(timestep, meas, cur_state,
                                         **core_filt_kwargs)
 
-    def plot_particles(self, inds, **kwargs):
+    def plot_particles(self, filt_inds, dist_inds, **kwargs):
         """Plots the particle distribution for every given measurement index.
 
         Parameters
         ----------
-        inds : int or list
+        filt_inds : int or list
             Index of the measurement index/indices to plot the particle distribution
             for.
         **kwargs : dict
@@ -3395,16 +3413,19 @@ class GSMFilterBase(BayesFilter):
             index number.
         """
         figs = {}
-        key_base = 'meas_noise_particles_{:02d}'
-        if not isinstance(inds, list):
-            key = key_base.format(inds)
-            figs[key] = self._meas_noise_filters[inds].plot_particles(0, **kwargs)
+        key_base = 'meas_noise_particles_F{:02d}_D{:02d}'
+        keys = []
+        if not isinstance(filt_inds, list):
+            key = key_base.format(filt_inds, dist_inds)
+            figs[key] = self._meas_noise_filters[filt_inds].plot_particles(dist_inds, **kwargs)
+            keys.append(key)
         else:
-            for ii in inds:
-                key = key_base.format(ii)
-                figs[key] = self._meas_noise_filters[ii].plot_particles(0, **kwargs)
+            for ii in filt_inds:
+                key = key_base.format(ii, dist_inds)
+                figs[key] = self._meas_noise_filters[ii].plot_particles(dist_inds, **kwargs)
+                keys.append(key)
 
-        return figs
+        return figs, keys
 
 
 class QKFGaussianScaleMixtureFilter(GSMFilterBase):

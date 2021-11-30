@@ -395,6 +395,7 @@ class SimpleParticleDistribution:
     def __init__(self, **kwargs):
         self.num_parts_per_ind = np.array([])
         self.particles = np.array([[]])
+        self.weights = np.array([])
 
     @property
     def num_particles(self):
