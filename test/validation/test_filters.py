@@ -2129,9 +2129,9 @@ if __name__ == "__main__":
     # test_QKF_dynObj()
     # test_SQKF_dynObj()
 
-    test_QKF_GSM_dyn_fnc()
+    # test_QKF_GSM_dyn_fnc()
     # test_SQKF_GSM_dyn_fnc()
-    # test_UKF_GSM_dyn_fnc()
+    test_UKF_GSM_dyn_fnc()
 
     end = timer()
     print('{:.2f} s'.format(end - start))

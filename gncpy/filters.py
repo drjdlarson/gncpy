@@ -964,6 +964,10 @@ class UnscentedKalmanFilter(ExtendedKalmanFilter):
     """
 
     def __init__(self, sigmaPoints=None, **kwargs):
+        self.alpha = 1
+        self.kappa = 0
+        self.beta = 2
+
         self._stateSigmaPoints = None
         if isinstance(sigmaPoints, gdistrib.SigmaPoints):
             self._stateSigmaPoints = sigmaPoints
@@ -977,6 +981,10 @@ class UnscentedKalmanFilter(ExtendedKalmanFilter):
     def save_filter_state(self):
         """Saves filter variables so they can be restored later."""
         filt_state = super().save_filter_state()
+
+        filt_state['alpha'] = self.alpha
+        filt_state['kappa'] = self.kappa
+        filt_state['beta'] = self.beta
 
         filt_state['_stateSigmaPoints'] = deepcopy(self._stateSigmaPoints)
         filt_state['_use_lin_dyn'] = self._use_lin_dyn
@@ -995,29 +1003,50 @@ class UnscentedKalmanFilter(ExtendedKalmanFilter):
         """
         super().load_filter_state(filt_state)
 
+        self.alpha = filt_state['alpha']
+        self.kappa = filt_state['kappa']
+        self.beta = filt_state['beta']
+
         self._stateSigmaPoints = deepcopy(filt_state['_stateSigmaPoints'])
         self._use_lin_dyn = filt_state['_use_lin_dyn']
         self._use_non_lin_dyn = filt_state['_use_non_lin_dyn']
         self._est_meas_noise_fnc = filt_state['_est_meas_noise_fnc']
 
-    def init_sigma_points(self, state0, alpha, kappa, beta=2):
+    def init_sigma_points(self, state0, alpha=None, kappa=None, beta=None):
         """Initializes the sigma points used by the filter.
 
         Parameters
         ----------
         state0 : N x 1 numpy array
             Initial state.
-        alpha : float
+        alpha : float, optional
             Tunig parameter, influences the spread of sigma points about the
-            mean. In range (0, 1].
-        kappa : float
+            mean. In range (0, 1]. If not supplied the class value will be used.
+            If a value is given here then the class value will be updated.
+        kappa : float, optional
             Tunig parameter, influences the spread of sigma points about the
-            mean. In range [0, inf].
+            mean. In range [0, inf]. If not supplied the class value will be used.
+            If a value is given here then the class value will be updated.
         beta : float, optional
-            Tunig parameter for distribution type. In range [0, Inf].
+            Tunig parameter for distribution type. In range [0, Inf]. If not
+            supplied the class value will be used. If a value is given here
+            then the class value will be updated.
             Defaults to 2 for gaussians.
         """
         num_axes = state0.size
+        if alpha is None:
+            alpha = self.alpha
+        else:
+            self.alpha = alpha
+        if kappa is None:
+            kappa = self.kappa
+        else:
+            self.kappa = kappa
+        if beta is None:
+            beta = self.beta
+        else:
+            self.beta = beta
+
         self._stateSigmaPoints = gdistrib.SigmaPoints(alpha=alpha,
                                                       kappa=kappa,
                                                       beta=beta,
