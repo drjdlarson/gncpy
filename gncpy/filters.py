@@ -472,10 +472,9 @@ class KalmanFilter(BayesFilter):
         self.cov = (np.eye(n_states) - kalman_gain @ meas_mat) @ self.cov
 
         # calculate the measuremnt fit probability assuming Gaussian
-        meas_fit_prob = np.exp(-0.5 * (meas.size * np.log(2 * np.pi)
-                                       + np.log(la.det(inov_cov))
-                                       + inov.T @ inv_inov_cov @ inov))
-        meas_fit_prob = meas_fit_prob.item()
+        meas_fit_prob = stats.multivariate_normal.pdf(meas.ravel(),
+                                                      mean=est_meas.ravel(),
+                                                      cov=inov_cov)
 
         return (next_state, meas_fit_prob)
 
@@ -1190,13 +1189,13 @@ class UnscentedKalmanFilter(ExtendedKalmanFilter):
         diff = est_points - est_meas
         meas_cov_lst = diff @ diff.reshape((est_points.shape[0], 1, est_meas.size))
 
+        partial_cov = gmath.weighted_sum_mat(self._stateSigmaPoints.weights_cov,
+                                             meas_cov_lst)
         # estimate the measurement noise if applicable
         if self._est_meas_noise_fnc is not None:
-            self.meas_noise = self._est_meas_noise_fnc(est_meas)
+            self.meas_noise = self._est_meas_noise_fnc(est_meas, partial_cov)
 
-        meas_cov = self.meas_noise \
-            + gmath.weighted_sum_mat(self._stateSigmaPoints.weights_cov,
-                                     meas_cov_lst)
+        meas_cov = self.meas_noise + partial_cov
 
         return meas_cov, est_points, est_meas
 
@@ -1306,11 +1305,14 @@ class BootstrapFilter(BayesFilter):
         num_parts = self.particleDistribution.num_particles
         keep_inds = self.rng.choice(np.array(range(self.particleDistribution.weights.size)),
                                     p=self.particleDistribution.weights, size=num_parts)
-        keep_inds, counts = np.unique(keep_inds, return_counts=True)
+        unique_inds, counts = np.unique(keep_inds, return_counts=True)
         self.particleDistribution.num_parts_per_ind = counts
-        self.particleDistribution.particles = self.particleDistribution.particles[keep_inds, :]
+        self.particleDistribution.particles = self.particleDistribution.particles[unique_inds, :]
         self.particleDistribution.weights = (1 / num_parts
                                              * np.ones(self.particleDistribution.particles.shape[0]))
+        if unique_inds.size <= 1:
+            msg = "Only {:d} particles selected".format(unique_inds.size)
+            raise gerr.ParticleDepletionError(msg)
 
         # weights are all equal here so don't need weighted sum
         return np.mean(self.particleDistribution.particles, axis=0)
@@ -2904,8 +2906,7 @@ class QuadratureKalmanFilter(KalmanFilter):
 
         # estimate the measurement noise online if applicable
         if self._est_meas_noise_fnc is not None:
-            inov_cov = measQuads.cov
-            self.meas_noise, meas_fit_prob = self._est_meas_noise_fnc(est_meas, measQuads.cov)
+            self.meas_noise = self._est_meas_noise_fnc(est_meas, measQuads.cov)
 
         # estimate innovation cov as P_zz = R - m * z_hat * z_hat^T + sum(w_i * Z_i * Z_i^T)
         inov_cov = self.meas_noise + measQuads.cov
@@ -2932,7 +2933,6 @@ class QuadratureKalmanFilter(KalmanFilter):
         # update covariance as P = P_k - K * P_zz * K^T
         self._corr_update_cov(gain, inov_cov)
 
-        # if self._est_meas_noise_fnc is None:
         meas_fit_prob = stats.multivariate_normal.pdf(meas.ravel(),
                                                       mean=est_meas.ravel(),
                                                       cov=inov_cov)
@@ -3094,7 +3094,7 @@ class SquareRootQKF(QuadratureKalmanFilter):
         meas_mat = np.concatenate([z.reshape((z.size, 1)) - est_meas
                                    for z in measQuads.points], axis=1) @ weight_mat
         if self._est_meas_noise_fnc is not None:
-            self.meas_noise = self._est_meas_noise_fnc(est_meas)
+            self.meas_noise = self._est_meas_noise_fnc(est_meas, meas_mat @ meas_mat.T)
 
         sqrt_inov_cov = la.qr(np.concatenate((meas_mat,
                                               self._sqrt_m_noise), axis=1).T,
@@ -3128,15 +3128,6 @@ class SquareRootQKF(QuadratureKalmanFilter):
                                                       cov=inov_cov)
 
         return (cor_state, meas_fit_prob)
-
-
-def _gsm_import_w_factory(inov_cov):
-    def import_w_fnc(meas, parts):
-        stds = np.sqrt(parts[:, 2] * parts[:, 1]**2 + inov_cov)
-        return np.array([stats.norm.pdf(meas.item(), scale=scale)
-                         for scale in stds])
-
-    return import_w_fnc
 
 
 class GSMFilterBase(BayesFilter):
@@ -3176,6 +3167,7 @@ class GSMFilterBase(BayesFilter):
 
         self._coreFilter = None
         self._meas_noise_filters = []
+        self._import_w_factory_lst = None
 
     def save_filter_state(self):
         """Saves filter variables so they can be restored later."""
@@ -3191,6 +3183,8 @@ class GSMFilterBase(BayesFilter):
 
         filt_state['_meas_noise_filters'] = [(type(f), f.save_filter_state())
                                              for f in self._meas_noise_filters]
+
+        filt_state['_import_w_factory_lst'] = self._import_w_factory_lst
         return filt_state
 
     def load_filter_state(self, filt_state):
@@ -3219,6 +3213,8 @@ class GSMFilterBase(BayesFilter):
                 self._meas_noise_filters[ii] = cls_type()
                 self._meas_noise_filters[ii].load_filter_state(vals)
 
+        self._import_w_factory_lst = filt_state['_import_w_factory_lst']
+
     def set_state_model(self, **kwargs):
         """Wrapper for the core filters set state model function."""
         if self._coreFilter is not None:
@@ -3235,25 +3231,8 @@ class GSMFilterBase(BayesFilter):
             warn('Core filter is not set, use an inherited class.',
                  RuntimeWarning)
 
-    def __mfilt_prop_samp_factory(self, rvs):
-        def f(x, rng):
-            return rvs()
-        return f
-
-    def __mfilt_meas_like_factory(self):
-        def f(meas, est, *args):
-            # note: here est is the particle which is an estimate of the variance
-            # of the Gaussian and meas has had the estimated measurement subtracted off
-            return stats.norm.pdf(meas, scale=np.sqrt(est))
-        return f
-
-    def __mfilt_dyn_fun_factory(self):
-        def f(t, x, *args):
-            return x
-        return f
-
-    def set_meas_noise_model(self, num_particles, mix_dist_samp_fnc_lst,
-                             rng=None):
+    def set_meas_noise_model(self, bootstrap_lst=None,
+                             importance_weight_factory_lst=None):
         """Initializes the measurement noise estimators.
 
         Notes
@@ -3277,30 +3256,22 @@ class GSMFilterBase(BayesFilter):
         -------
         None.
         """
-        num_meas = len(mix_dist_samp_fnc_lst)
+        if bootstrap_lst is not None:
+            self._meas_noise_filters = deepcopy(bootstrap_lst)
+            if importance_weight_factory_lst is not None:
+                if not len(importance_weight_factory_lst) == len(bootstrap_lst):
+                    msg = 'Importance weight factory list ' \
+                        + 'length ({:d}) '.format(len(importance_weight_factory_lst)) \
+                        + 'does not match the number of bootstrap filters ({:d})'.format(len(bootstrap_lst))
+                    raise RuntimeError(msg)
 
-        if not isinstance(num_particles, list):
-            n_parts_lst = [num_particles] * num_meas
+                self._import_w_factory_lst = importance_weight_factory_lst
+            else:
+                msg = 'Must supply an importance weight factory when ' \
+                    + 'specifying the bootstrap filters.'
+                raise RuntimeError(msg)
         else:
-            n_parts_lst = num_particles.copy()
-
-        self._meas_noise_filters = [None] * num_meas
-        for ii, (rvs, n_parts) in enumerate(zip(mix_dist_samp_fnc_lst,
-                                                n_parts_lst)):
-            distrib = gdistrib.ParticleDistribution()
-            weight = 1 / n_parts
-            for _ in range(n_parts):
-                part = gdistrib.Particle()
-                part.point = rvs()
-                distrib.add_particle(part, weight)
-
-            filt = ParticleFilter(rng=rng)
-            filt.set_state_model(dyn_fun=self.__mfilt_dyn_fun_factory())
-            filt.set_measurement_model(meas_mat=np.ones((1, 1)))
-            filt.proposal_sampling_fnc = self.__mfilt_prop_samp_factory(rvs)
-            filt.init_from_dist(distrib)
-
-            self._meas_noise_filters[ii] = filt
+            raise RuntimeError('Not implemented yet')
 
     @property
     def cov(self):
@@ -3366,28 +3337,15 @@ class GSMFilterBase(BayesFilter):
         # correction function call
         def est_meas_noise(est_meas, inov_cov):
             m_diag = np.nan * np.ones(est_meas.size)
-            f_meas = (meas - est_meas).ravel()  # / np.sqrt(np.diag(inov_cov))
+            f_meas = (meas - est_meas).ravel()
             inov_cov = np.diag(inov_cov)
-            meas_fit = 1
             for ii, filt in enumerate(self._meas_noise_filters):
-                filt.importance_weight_fnc = _gsm_import_w_factory(inov_cov[ii])
+                filt.importance_weight_fnc = self._import_w_factory_lst[ii](inov_cov[ii])
                 filt.predict(timestep)
                 state = filt.correct(timestep, f_meas[ii].reshape((1, 1)))
                 m_diag[ii] = state[2] * state[1]**2  # z * sig^2
 
-            return np.diag(m_diag), meas_fit
-
-            # m_diag = np.nan * np.ones(est_meas.size)
-            # f_meas = (meas - est_meas).ravel()
-            # meas_fit = 1
-            # for ii, filt in enumerate(self._meas_noise_filters):
-            #     filt.meas_likelihood_fnc = self.__mfilt_meas_like_factory()
-            #     filt.predict(timestep)
-            #     m_diag[ii], qz = filt.correct(timestep, f_meas[ii].reshape((1, 1)),
-            #                                   selection=False)[0:2]
-            #     # meas_fit *= np.sum(qz).item()
-
-            # return np.diag(m_diag), meas_fit
+            return np.diag(m_diag)
 
         self._coreFilter.set_measurement_noise_estimator(est_meas_noise)
 

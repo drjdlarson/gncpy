@@ -197,7 +197,7 @@ class QuadraturePoints:
                 fig.axes[0].bar(self.points[:, inds[0]],
                                 self.weights)
         else:
-            fig.axes[0].bar(self.points[:, inds[0]],
+            fig.axes[0].bar(self.points[:, inds],
                             self.weights)
 
         pltUtil.set_title_label(fig, 0, opts, ttl=ttl, x_lbl=x_lbl,
