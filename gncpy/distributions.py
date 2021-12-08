@@ -1,20 +1,225 @@
 """Standard distributions for use with the package classes."""
 import numpy as np
 import numpy.linalg as la
+import numpy.polynomial.hermite_e as herm_e
+import numpy.random as rnd
 from warnings import warn
+import itertools
+import matplotlib.pyplot as plt
+import enum
+import scipy.stats as stats
 
 import gncpy.math as gmath
+import gncpy.plotting as pltUtil
 
 
-class SigmaPoints():
-    """Helper class that defines sigma points.
+class _QuadPointIter:
+    def __init__(self, quadPoints):
+        self._quadPoints = quadPoints
+        self.__index = 0
+
+    def __next__(self):
+        try:
+            point = self._quadPoints.points[self.__index, :]
+            result = (point.reshape((self._quadPoints.num_axes, 1)),
+                      self._quadPoints.weights[self.__index])
+        except IndexError:
+            raise StopIteration
+        self.__index += 1
+        return result
+
+
+class QuadraturePoints:
+    r"""Helper class that defines quadrature points.
+
+    Notes
+    -----
+    This implements the Probabilist's version of the Gauss-Hermite quadrature
+    points. This consists of the Hermite polynomial
+
+    .. math::
+        H_{e_n}(x) = (-1)^n \exp{\frac{x^2}{2}} \frac{\partial^n}{\partial x^n} \exp{-\frac{x^2}{2}}
+
+    and its associated weights. For details see
+    :cite:`Press1992_NumericalRecipesinCtheArtofScientificComputing`,
+    :cite:`Golub1969_CalculationofGaussQuadratureRules` and for a multi-variate
+    extension :cite:`Jackel2005_ANoteonMultivariateGaussHermiteQuadrature`.
 
     Attributes
     ----------
-    weights_mean : list
-        List of integer weights for calculating the mean of the points.
-    weights_cov : list
-        List of integer weights for calculating the covariance of the points.
+    points_per_axis : int
+        Number of points to use per axis
+    num_axes : int
+        Number of axis in each point. This can be set manually, but will be updated
+        when :meth:`.update_points` is called to match the supplied mean.
+    weights : numpy array
+        Weight of each quadrature point
+    points : M x N numpy array
+        Each row corresponds to a quadrature point and the total number of rows
+        is the total number of points.
+    """
+
+    def __init__(self, points_per_axis=None, num_axes=None):
+        self.points_per_axis = points_per_axis
+        self.num_axes = num_axes
+        self.points = np.array([[]])
+        self.weights = np.array([])
+
+    @property
+    def num_points(self):
+        """Read only expected number of points."""
+        return int(self.points_per_axis**self.num_axes)
+
+    @property
+    def mean(self):
+        """Mean of the points, accounting for the weights."""
+        return gmath.weighted_sum_vec(self.weights,
+                                      self.points).reshape((self.num_axes, 1))
+
+    @property
+    def cov(self):
+        """Covariance of the points, accounting for the weights."""
+        x_bar = self.mean
+        diff = (self.points - x_bar.ravel()).reshape(self.points.shape[0], x_bar.size, 1)
+        return gmath.weighted_sum_mat(self.weights,
+                                      diff @ diff.reshape(self.points.shape[0],
+                                                          1, self.num_axes))
+
+    def _factor_scale_matrix(self, scale, have_sqrt):
+        if have_sqrt:
+            return scale
+        else:
+            return la.cholesky(scale)
+
+    def update_points(self, mean, scale, have_sqrt=False):
+        """Updates the quadrature points given some initial point and scale.
+
+        Parameters
+        ----------
+        mean : N x 1 numpy array
+            Point to represent by quadrature points.
+        scale : N x N numpy array
+            Covariance or square root of the covariance matrix of the given point.
+        have_sqrt : bool
+            Optional flag indicating if the square root of the matrix was
+            supplied. The default is False.
+
+        Returns
+        -------
+        None.
+        """
+        def create_combos(points_per_ax, num_ax, tot_points):
+            combos = np.meshgrid(*itertools.repeat(range(points_per_ax), num_ax))
+
+            return np.array(combos).reshape((num_ax, tot_points)).T
+
+        self.num_axes = mean.size
+
+        sqrt_cov = self._factor_scale_matrix(scale, have_sqrt)
+
+        self.points = np.nan * np.ones((self.num_points, self.num_axes))
+        self.weights = np.nan * np.ones(self.num_points)
+
+        # get standard values for 1 axis case, use "Probabilist's" Hermite polynomials
+        quad_points, weights = herm_e.hermegauss(self.points_per_axis)
+
+        ind_combos = create_combos(self.points_per_axis, self.num_axes,
+                                   self.num_points)
+
+        for ii, inds in enumerate(ind_combos):
+            point = quad_points[inds].reshape((inds.size, 1))
+            self.points[ii, :] = (mean + sqrt_cov @ point).ravel()
+            self.weights[ii] = np.prod(weights[inds])
+
+        self.weights = self.weights / np.sum(self.weights)
+
+        # note: Sum[w * p @ p.T] should equal the identity matrix here
+
+    def __iter__(self):
+        """Custom iterator for looping over the object.
+
+        Returns
+        -------
+        N x 1 numpy array
+            Current point in set.
+        float
+            Weight of the current point.
+        """
+        return _QuadPointIter(self)
+
+    def plot_points(self, inds, x_lbl='X Position', y_lbl='Y Position',
+                    ttl='Weighted Positions', size_factor=100**2, **kwargs):
+        """Plots the weighted points.
+
+        Keywrod arguments are processed with
+        :meth:`gncpy.plotting.init_plotting_opts`. This function
+        implements
+
+            - f_hndl
+            - Any title/axis/text options
+
+        Parameters
+        ----------
+        inds : list or int
+            Indices of the point vector to plot. Can be a list of at most 2
+            elements. If only 1 is given a bar chart is created.
+        x_lbl : string, optional
+            Label for the x-axis. The default is 'X Position'.
+        y_lbl : string, optional
+            Label for the y-axis. The default is 'Y Position'.
+        ttl : string, optional
+            Title of the plot. The default is 'Weighted positions'.
+        size_factor : int, optional
+            Factor to multiply the weight by when determining the marker size.
+            Only used if plotting 2 indices. The default is 100**2.
+        **kwargs : dict
+            Additional standard plotting options.
+
+        Returns
+        -------
+        fig : matplotlib figure handle
+            Handle to the figure used.
+        """
+        opts = pltUtil.init_plotting_opts(**kwargs)
+        fig = opts['f_hndl']
+
+        if fig is None:
+            fig = plt.figure()
+            fig.add_subplot(1, 1, 1)
+
+        if isinstance(inds, list):
+            if len(inds) >= 2:
+                fig.axes[0].scatter(self.points[:, inds[0]],
+                                    self.points[:, inds[1]],
+                                    s=size_factor * self.weights, color='k')
+                fig.axes[0].grid(True)
+
+            elif len(inds) == 1:
+                fig.axes[0].bar(self.points[:, inds[0]],
+                                self.weights)
+        else:
+            fig.axes[0].bar(self.points[:, inds],
+                            self.weights)
+
+        pltUtil.set_title_label(fig, 0, opts, ttl=ttl, x_lbl=x_lbl,
+                                y_lbl=y_lbl)
+
+        fig.tight_layout()
+
+        return fig
+
+
+class SigmaPoints(QuadraturePoints):
+    """Helper class that defines sigma points.
+
+    Notes
+    -----
+    This can be interpretted as a speacial case of the Quadrature points. See
+    :cite:`Sarkka2015_OntheRelationbetweenGaussianProcessQuadraturesandSigmaPointMethods`
+    for details.
+
+    Attributes
+    ----------
     alpha : float, optional
         Tunig parameter, influences the spread of sigma points about the mean.
         In range (0, 1]. The default is 1.
@@ -24,25 +229,46 @@ class SigmaPoints():
     beta : float, optional
         Tunig parameter for distribution type. In range [0, Inf]. Defaults
         to 2 which is ideal for Gaussians.
-    n : int
-        Length of a single point vector.
-    points : list
-        List of N x 1 numpy arrays representing the sigma points.
     """
 
-    def __init__(self, alpha=1, kappa=0, beta=2, n=0):
-        self.weights_mean = np.array([])
-        self.weights_cov = np.array([])
+    def __init__(self, alpha=1, kappa=0, beta=2, **kwargs):
+        super().__init__(**kwargs)
+
         self.alpha = alpha
         self.kappa = kappa
         self.beta = beta
-        self.n = n
-        self.points = []
 
     @property
     def lam(self):
         """Read only derived parameter of the sigma points."""
-        return self.alpha**2 * (self.n + self.kappa) - self.n
+        return self.alpha**2 * (self.num_axes + self.kappa) - self.num_axes
+
+    @property
+    def num_points(self):
+        """Read only expected number of points."""
+        return int(2 * self.num_axes + 1)
+
+    @property
+    def weights_mean(self):
+        """Wights for calculating the mean."""
+        return self.weights[0:self.num_points]
+
+    @weights_mean.setter
+    def weights_mean(self, val):
+        if self.weights.size != 2 * self.num_points:
+            self.weights = np.nan * np.ones(2 * self.num_points)
+        self.weights[0:self.num_points] = val
+
+    @property
+    def weights_cov(self):
+        """Wights for calculating the covariance."""
+        return self.weights[self.num_points:]
+
+    @weights_cov.setter
+    def weights_cov(self, val):
+        if self.weights.size != 2 * self.num_points:
+            self.weights = np.nan * np.ones(2 * self.num_points)
+        self.weights[self.num_points:] = val
 
     @property
     def mean(self):
@@ -66,37 +292,44 @@ class SigmaPoints():
         `alpha`, `kappa`, `beta`, and `n`.
         """
         lam = self.lam
-        self.weights_mean = np.nan * np.ones(2 * self.n + 1)
-        self.weights_cov = np.nan * np.ones(2 * self.n + 1)
-        self.weights_mean[0] = lam / (self.n + lam)
-        self.weights_cov[0] = lam / (self.n + lam) + 1 - self.alpha**2 \
+        self.weights_mean = np.nan * np.ones(self.num_points)
+        self.weights_cov = np.nan * np.ones(self.num_points)
+        self.weights_mean[0] = lam / (self.num_axes + lam)
+        self.weights_cov[0] = lam / (self.num_axes + lam) + 1 - self.alpha**2 \
             + self.beta
 
-        w = 1 / (2 * (self.n + lam))
+        w = 1 / (2 * (self.num_axes + lam))
         self.weights_mean[1:] = w
         self.weights_cov[1:] = w
 
-    def update_points(self, x, cov):
+    def update_points(self, x, scale, have_sqrt=False):
         """Updates the sigma points given some initial point and covariance.
 
         Parameters
         ----------
         x : N x 1 numpy array
             Point to represent by sigma points.
-        cov : N x N numpy array
-            Covariance matrix of the given point.
+        scale : N x N numpy array
+            Covariance or square root of the covariance matrix of the given point.
+        have_sqrt : bool
+            Optional flag indicating if the square root of the matrix was
+            supplied. The default is False.
 
         Returns
         -------
         None.
         """
-        loc_cov = cov
-        S = la.cholesky((self.n + self.lam) * loc_cov)
+        self.num_axes = x.size
+        if have_sqrt:
+            factor = np.sqrt(self.num_axes + self.lam)
+        else:
+            factor = self.num_axes + self.lam
+        S = self._factor_scale_matrix(factor * scale, have_sqrt)
 
-        self.points = np.nan * np.ones((2 * self.n + 1, x.size))
+        self.points = np.nan * np.ones((2 * self.num_axes + 1, self.num_axes))
         self.points[0, :] = x.flatten()
-        self.points[1:self.n + 1, :] = x.ravel() + S.T
-        self.points[self.n + 1:, :] = x.ravel() - S.T
+        self.points[1:self.num_axes + 1, :] = x.ravel() + S.T
+        self.points[self.num_axes + 1:, :] = x.ravel() - S.T
 
 
 class Particle:
@@ -157,6 +390,69 @@ class _ParticleDistIter:
             raise StopIteration
         self.__index += 1
         return result
+
+
+class SimpleParticleDistribution:
+    def __init__(self, **kwargs):
+        self.num_parts_per_ind = np.array([])
+        self.particles = np.array([[]])
+        self.weights = np.array([])
+
+    @property
+    def num_particles(self):
+        return int(np.sum(self.num_parts_per_ind))
+
+    def plot_particles(self, ind, title='Approximate PDF from Particle Distribution',
+                       x_lbl='State', y_lbl='Probability', **kwargs):
+        """Plots the approximate PDF represented by the particle distribution
+
+        Parameters
+        ----------
+        ind : int
+            Index of the particle vector to plot.
+        title : string, optional
+            Title of the plot. The default is 'Particle Distribution'.
+        x_lbl : string, optional
+            X-axis label. The default is 'State'.
+        y_lbl : string, optional
+            Y-axis label. The default is 'Probability'.
+        **kwargs : dict
+            Additional plotting options for :meth:`gncpy.plotting.init_plotting_opts`
+            function. Values implemented here are `f_hndl`, `lgnd_loc`, and
+            any values relating to title/axis text formatting.
+
+        Returns
+        -------
+        fig : matplotlib figure
+            Figure object the data was plotted on.
+        """
+        opts = pltUtil.init_plotting_opts(**kwargs)
+        fig = opts['f_hndl']
+        lgnd_loc = opts['lgnd_loc']
+
+        if fig is None:
+            fig = plt.figure()
+            fig.add_subplot(1, 1, 1)
+
+        all_inds = []
+        for ii, num_dups in enumerate(self.num_parts_per_ind):
+            all_inds.extend([ii] * int(num_dups))
+
+        x = self.particles[all_inds, ind]
+        h_opts = {"histtype": "stepfilled", "bins": 'auto', "density": True}
+        fig.axes[0].hist(x, **h_opts)
+
+        # x = np.sort(self.particles)
+        # y = self.num_parts_per_ind / self.num_particles
+        # fig.axes[0].plot(x, y)
+
+        pltUtil.set_title_label(fig, 0, opts, ttl=title,
+                                x_lbl=x_lbl, y_lbl=y_lbl)
+        if lgnd_loc is not None:
+            fig.legend(loc=lgnd_loc)
+        fig.tight_layout()
+
+        return fig
 
 
 class ParticleDistribution:
@@ -318,3 +614,193 @@ class ParticleDistribution:
             Weight of the current particle.
         """
         return _ParticleDistIter(self)
+
+
+class GSMTypes(enum.Enum):
+    STUDENTS_T = enum.auto()
+    CAUCHY = enum.auto()
+    SYMMETRIC_A_STABLE = enum.auto()
+
+    def __str__(self):
+        """Return the enum name for strings."""
+        return self.name
+
+
+class GaussianScaleMixture:
+    r"""Helper class for defining Gaussian Scale Mixture objects.
+
+    Note
+    ----
+    This is an alternative method for representing heavy-tailed distributions
+    by modeling them as a combination of a standard Gaussian, :math:`v`, and
+    another positive random variable known as the generating variate, :math:`z`
+
+    .. math::
+        x \overset{d}{=} \sqrt{z} v
+
+    where :math:`\overset{d}{=}` means equal in distribution and :math:`x`
+    follows a GSM distribution (in general, a heavy tailed distribution).
+    This formulation is based on
+    :cite:`VilaValls2012_NonlinearBayesianFilteringintheGaussianScaleMixtureContext`,
+    :cite:`Wainwright1999_ScaleMixturesofGaussiansandtheStatisticsofNaturalImages`, and
+    :cite:`Kuruoglu1998_ApproximationofAStableProbabilityDensitiesUsingFiniteGaussianMixtures`.
+
+    Attributes
+    ----------
+    type : :class:`.GSMTypes`
+        Type of the distribution to represent as a GSM.
+    location_range : tuple, optional
+        Minimum and maximum values for the location parameter. Useful if being
+        fed to a filter for estimating the location parameter. Each element must
+        match the type of the :attr:`.location` attribute.
+    """
+
+    __df_types = (GSMTypes.STUDENTS_T, GSMTypes.CAUCHY)
+
+    def __init__(self, gsm_type, location=None, location_range=None,
+                 scale=None, scale_range=None, degrees_of_freedom=None,
+                 df_range=None):
+        """Initialize a GSM Object.
+
+        Parameters
+        ----------
+        gsm_type : :class:`.GSMTypes`
+            Type of the distribution to represent as a GSM.
+        location : TYPE, optional
+            DESCRIPTION. The default is None.
+        location_range : tuple, optional
+            Minimum and maximum values for the location parameter. Useful if being
+            fed to a filter for estimating the location parameter. Each element must
+            match the type of the :attr:`.location` attribute. The default is None
+        scale : N x N numpy array, optional
+            Scale parameter of the distribution being represented as a GSM.
+            The default is None.
+        scale_range : tuple, optional
+            Minimum and maximum values for the scale parameter. Useful if being
+            fed to a filter for estimating the scale parameter. Each element must
+            match the type of the :attr:`.scale` attribute. The default is None.
+        degrees_of_freedom : float, optional
+            Degrees of freedom parameter of the distribution being represented
+            as a GSM. This is not needed by all types. The default is None.
+        df_range : tuple, optional
+            Minimum and maximum values for the degree of freedom parameter.
+            Useful if being fed to a filter for estimating the degree of freedom
+            parameter. Each element must be a float. The default is None.
+
+        Raises
+        ------
+        RuntimeError
+            If a `gsm_type` is given that is of the incorrect data type.
+        """
+        if not isinstance(gsm_type, GSMTypes):
+            raise RuntimeError('Type ({}) must be a GSMType'.format(gsm_type))
+
+        self.type = gsm_type
+
+        self._loc = np.zeros((1, 1))
+        self._scale = np.ones((1, 1))
+        self._df = None
+
+        if location is not None:
+            self.location = location
+        self.location_range = location_range
+
+        if scale is not None:
+            self.scale = scale
+        self.scale_range = scale_range
+
+        if degrees_of_freedom is not None:
+            self.degrees_of_freedom = degrees_of_freedom
+
+        if self.type is GSMTypes.CAUCHY:
+            self._df = 1
+
+        self.df_range = df_range
+
+    @property
+    def location(self):
+        """Location parameter of the distribution being represented as a GSM.
+
+        Returns
+        -------
+        N x 1 numpy array, optional
+        """
+        return self._loc
+
+    @location.setter
+    def location(self, val):
+        self._loc = val
+
+    @property
+    def scale(self):
+        """Scale parameter of the distribution being represented as a GSM.
+
+        Returns
+        -------
+        N x N numpy array, optional
+        """
+        return self._scale
+
+    @scale.setter
+    def scale(self, val):
+        self._scale = val
+
+    @property
+    def degrees_of_freedom(self):
+        """Degrees of freedom parameter of the distribution being represented as a GSM.
+
+        Returns
+        -------
+        float, optional
+        """
+        if self.type in self.__df_types:
+            return self._df
+        else:
+            msg = 'GSM type {:s} does not have a degree of freedom.'.format(self.type)
+            warn(msg)
+            return None
+
+    @degrees_of_freedom.setter
+    def degrees_of_freedom(self, val):
+        if self.type in self.__df_types:
+            if self.type is GSMTypes.CAUCHY:
+                warn('GSM type {:s} requires degree of freedom = 1'.format(self.type))
+                return
+            self._df = val
+        else:
+            msg = ('GSM type {:s} does not have a degree of freedom. '
+                   + 'Skipping').format(self.type)
+            warn(msg)
+
+    def sample(self, rng=None):
+        """Draw a sample from the specified GSM type.
+
+        Parameters
+        ----------
+        rng : numpy random generator, optional
+            Random number generator to use. If none is given then the numpy
+            default is used. The default is None.
+
+        Returns
+        -------
+        float
+            randomly sampled value from the GSM.
+        """
+        if rng is None:
+            rng = rnd.default_rng()
+
+        if self.type in [GSMTypes.STUDENTS_T, GSMTypes.CAUCHY]:
+            return self._sample_student_t(rng)
+
+        elif self.type is GSMTypes.SYMMETRIC_A_STABLE:
+            return self._sample_SaS(rng)
+
+        else:
+            raise RuntimeError('GSM type: {} is not supported'.format(self.type))
+
+    def _sample_student_t(self, rng):
+        return stats.t.rvs(self.degrees_of_freedom, scale=self.scale,
+                           random_state=rng)
+
+    def _sample_SaS(self, rng):
+        raise RuntimeError('sampling SaS distribution not implemented')
