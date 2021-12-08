@@ -1576,8 +1576,8 @@ def __gsm_import_w_factory(inov_cov):
     return import_w_fnc
 
 
-def test_QKF_GSM_dyn_fnc():
-    print('Test QKF-GSM')
+def test_QKF_GSM_bootstrap():
+    print('Test QKF-GSM (bootstrap init)')
 
     dt = 1
     t0, t1 = 0, 100 + dt
@@ -1747,7 +1747,167 @@ def test_QKF_GSM_dyn_fnc():
     assert all(bounding > (stats.norm.sf(-sig_num) - stats.norm.sf(sig_num))), 'bounding failed'
 
 
-def test_SQKF_GSM_dyn_fnc():
+def test_QKF_GSM_gsm():
+    print('Test QKF-GSM (gsm init)')
+
+    dt = 1
+    t0, t1 = 0, 100 + dt
+    print_interval = 25
+
+    rng = rnd.default_rng(global_seed)
+
+    # define state and measurement models
+    state_mat = np.vstack((np.hstack((np.eye(2), dt * np.eye(2), dt**2 / 2 * np.eye(2))),
+                          np.hstack((np.zeros((2, 2)), np.eye(2), dt * np.eye(2))),
+                          np.hstack((np.zeros((2, 2)), np.zeros((2, 2)), np.eye(2)))))
+    proc_cov = np.diag((4, 4, 4, 4, 0.01, 0.01))
+
+    def meas_fun(t, x, *args):
+        return np.array([[np.sqrt(x[0, 0]**2 + x[1, 0]**2)],
+                         [np.arctan2(x[1, 0], x[0, 0])]])
+
+    m_dfs = (2, 2)
+    m_vars = (100, 0.001)
+
+    # define base GSM parameters
+    filt = gfilts.QKFGaussianScaleMixtureFilter()
+    filt.set_state_model(state_mat=state_mat)
+    filt.proc_noise = proc_cov
+    filt.set_measurement_model(meas_fun=meas_fun)
+    filt.cov = np.diag((5 * 10**4, 5 * 10**4, 8, 8, 0.02, 0.02))
+
+    # define measurement noise filters
+    num_parts = 500
+
+    range_gsm = gdistrib.GaussianScaleMixture(gsm_type=gdistrib.GSMTypes.STUDENTS_T,
+                                              degrees_of_freedom=m_dfs[0],
+                                              df_range=(1, 5),
+                                              scale=np.sqrt(m_vars[0]).reshape((1, 1)),
+                                              scale_range=(0, 5 * np.sqrt(m_vars[0])))
+
+    bearing_gsm = gdistrib.GaussianScaleMixture(gsm_type=gdistrib.GSMTypes.STUDENTS_T,
+                                                degrees_of_freedom=m_dfs[1],
+                                                df_range=(1, 5),
+                                                scale=np.sqrt(m_vars[1]).reshape((1, 1)),
+                                                scale_range=(0, 5 * np.sqrt(m_vars[1])))
+
+    filt.set_meas_noise_model(gsm_lst=[range_gsm, bearing_gsm], num_parts=num_parts,
+                              rng=rng)
+
+    # define QKF specific parameters for core filter
+    filt.points_per_axis = 3
+
+    # test save/load filter
+    filt_state = filt.save_filter_state()
+    filt = gfilts.QKFGaussianScaleMixtureFilter()
+    filt.load_filter_state(filt_state)
+
+    if debug_figs:
+        lbls = ('df', 'sig', 'z')
+        bnds = (6, 60, 40)
+        for ii, lbl in enumerate(lbls):
+            ttl = 'Init Range {} particles'.format(lbl)
+            figs, keys = filt.plot_particles(0, ii,
+                                             title=ttl)
+            # figs[keys[0]].axes[0].grid(True)
+            figs[keys[0]].axes[0].set_xlim((0, bnds[ii]))
+
+    # sim loop
+    time = np.arange(t0, t1, dt)
+    t_states = np.nan * np.ones((time.size, 6))
+    t_states[0, :] = np.array([2000, 2000, 20, 20, 0, 0])
+    states = t_states.copy()
+    meas_lst = np.nan * np.ones((time.size, 2))
+    stds = np.nan * np.ones((time.size, 6))
+    stds[0, :] = np.sqrt(np.diag(filt.cov))
+
+    for ind, t in enumerate(time[1:]):
+        kk = ind + 1
+        if debug_figs and np.mod(kk, int(print_interval / dt)) == 0:
+            print('\t\t{:.2f}'.format(t))
+            sys.stdout.flush()
+            lbls = ('df', 'sig', 'z')
+            bnds = (6, 60, 40)
+            for ii, lbl in enumerate(lbls):
+                ttl = 'Range {} particles at t={:.2f}'.format(lbl, t)
+                figs, keys = filt.plot_particles(0, ii,
+                                                 title=ttl)
+                figs[keys[0]].axes[0].grid(True)
+                if ii == 2:
+                    figs[keys[0]].axes[0].set_xlim((0, bnds[ii]))
+                else:
+                    figs[keys[0]].axes[0].set_xlim((-bnds[ii], bnds[ii]))
+
+        states[kk, :] = filt.predict(t, states[kk - 1, :].reshape((6, 1))).ravel()
+
+        p_noise = rng.multivariate_normal(np.zeros(6), proc_cov)
+        t_states[kk, :] = (state_mat @ t_states[[kk - 1], :].T).ravel()
+        meas = meas_fun(t, (t_states[kk, :] + p_noise).reshape((6, 1)))
+        for ii, (df, var) in enumerate(zip(m_dfs, m_vars)):
+            meas[ii, 0] += stats.t.rvs(df, scale=np.sqrt(var), random_state=rng)
+
+        meas_lst[kk, :] = meas.ravel()
+
+        states[kk, :] = filt.correct(t, meas, states[kk, :].reshape((6, 1)))[0].ravel()
+        stds[kk, :] = np.sqrt(np.diag(filt.cov))
+
+    errs = t_states - states
+
+    if debug_figs:
+        figs = {}
+
+        figs['pos'] = plt.figure()
+        ttl = 'Estimated vs True Position'
+        figs['pos'].add_subplot(1, 1, 1)
+        figs['pos'].axes[0].plot(t_states[:, 0], t_states[:, 1], label='true',
+                                 marker='.')
+        figs['pos'].axes[0].plot(states[:, 0], states[:, 1], label='estimated',
+                                 marker='.')
+        x_pos = np.nan * np.ones(time.size)
+        y_pos = np.nan * np.ones(time.size)
+        for ii, meas in enumerate(meas_lst):
+            if np.isnan(meas[0]):
+                continue
+            x_pos[ii] = meas[0] * np.cos(meas[1])
+            y_pos[ii] = meas[0] * np.sin(meas[1])
+        figs['pos'].axes[0].scatter(x_pos, y_pos, marker='^', alpha=0.5, c='g',
+                                    label='measurement')
+        figs['pos'].axes[0].legend()
+        figs['pos'].axes[0].grid(True)
+        figs['pos'].axes[0].set_ylabel('y position (m)')
+        figs['pos'].axes[0].set_xlabel('x position (m)')
+        figs['pos'].suptitle(ttl)
+
+        figs['pos_err'] = plt.figure()
+        ttl = 'Position Errors'
+        y_lbls = ('x pos (m)', 'y pos (m)')
+        for ii in range(2):
+            figs['pos_err'].add_subplot(2, 1, ii + 1)
+            figs['pos_err'].axes[ii].plot(time, np.abs(errs[:, ii]), color='r')
+            figs['pos_err'].axes[ii].plot(time, stds[:, ii], color='k',
+                                          label='Standard deviation')
+            figs['pos_err'].axes[ii].grid(True)
+            figs['pos_err'].axes[ii].set_ylabel(y_lbls[ii])
+
+        figs['pos_err'].axes[-1].set_xlabel('Time (s)')
+        figs['pos_err'].suptitle(ttl)
+
+        print('State bounding:')
+        print(np.sum(np.abs(errs) < stds, axis=0) / time.size)
+
+        print('Final Range particle estimates:')
+        print(np.mean(filt._meas_noise_filters[0].particleDistribution.particles, axis=0))
+        print('Expecting:')
+        print(np.array([m_dfs[0], np.sqrt(m_vars[0])]))
+        print('Final Range particle stds:')
+        print(np.std(filt._meas_noise_filters[0].particleDistribution.particles, axis=0))
+
+    sig_num = 1
+    bounding = np.sum(np.abs(errs) < sig_num * stds, axis=0) / time.size
+    assert all(bounding > (stats.norm.sf(-sig_num) - stats.norm.sf(sig_num))), 'bounding failed'
+
+
+def test_SQKF_GSM_bootstrap():
     print('Test SQKF-GSM')
 
     dt = 1
@@ -1777,7 +1937,7 @@ def test_SQKF_GSM_dyn_fnc():
     filt.cov = np.diag((5 * 10**4, 5 * 10**4, 8, 8, 0.02, 0.02))
 
     # define measurement noise filters
-    num_parts = 500
+    num_parts = 600
     bootstrap_lst = [None] * 2
 
     # manually setup each bootstrap filter (stripped down PF)
@@ -1820,7 +1980,6 @@ def test_SQKF_GSM_dyn_fnc():
             ttl = 'Init Range {} particles'.format(lbl)
             figs, keys = filt.plot_particles(0, ii,
                                              title=ttl)
-            # figs[keys[0]].axes[0].grid(True)
             figs[keys[0]].axes[0].set_xlim((0, bnds[ii]))
 
     # sim loop
@@ -1918,7 +2077,7 @@ def test_SQKF_GSM_dyn_fnc():
     assert all(bounding > (stats.norm.sf(-sig_num) - stats.norm.sf(sig_num))), 'bounding failed'
 
 
-def test_UKF_GSM_dyn_fnc():
+def test_UKF_GSM_bootstrap():
     print('Test UKF-GSM')
 
     dt = 1
@@ -2129,9 +2288,10 @@ if __name__ == "__main__":
     # test_QKF_dynObj()
     # test_SQKF_dynObj()
 
-    # test_QKF_GSM_dyn_fnc()
-    # test_SQKF_GSM_dyn_fnc()
-    test_UKF_GSM_dyn_fnc()
+    # test_QKF_GSM_bootstrap()
+    # test_QKF_GSM_gsm()
+    test_SQKF_GSM_bootstrap()
+    # test_UKF_GSM_bootstrap()
 
     end = timer()
     print('{:.2f} s'.format(end - start))

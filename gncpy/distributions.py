@@ -7,6 +7,7 @@ from warnings import warn
 import itertools
 import matplotlib.pyplot as plt
 import enum
+import scipy.stats as stats
 
 import gncpy.math as gmath
 import gncpy.plotting as pltUtil
@@ -617,6 +618,7 @@ class ParticleDistribution:
 
 class GSMTypes(enum.Enum):
     STUDENTS_T = enum.auto()
+    CAUCHY = enum.auto()
     SYMMETRIC_A_STABLE = enum.auto()
 
     def __str__(self):
@@ -625,8 +627,150 @@ class GSMTypes(enum.Enum):
 
 
 class GaussianScaleMixture:
-    def __init__(self):
-        self.type = None
+    r"""Helper class for defining Gaussian Scale Mixture objects.
+
+    Note
+    ----
+    This is an alternative method for representing heavy-tailed distributions
+    by modeling them as a combination of a standard Gaussian, :math:`v`, and
+    another positive random variable known as the generating variate, :math:`z`
+
+    .. math::
+        x \overset{d}{=} \sqrt{z} v
+
+    where :math:`\overset{d}{=}` means equal in distribution and :math:`x`
+    follows a GSM distribution (in general, a heavy tailed distribution).
+    This formulation is based on
+    :cite:`VilaValls2012_NonlinearBayesianFilteringintheGaussianScaleMixtureContext`,
+    :cite:`Wainwright1999_ScaleMixturesofGaussiansandtheStatisticsofNaturalImages`, and
+    :cite:`Kuruoglu1998_ApproximationofAStableProbabilityDensitiesUsingFiniteGaussianMixtures`.
+
+    Attributes
+    ----------
+    type : :class:`.GSMTypes`
+        Type of the distribution to represent as a GSM.
+    location_range : tuple, optional
+        Minimum and maximum values for the location parameter. Useful if being
+        fed to a filter for estimating the location parameter. Each element must
+        match the type of the :attr:`.location` attribute.
+    """
+
+    __df_types = (GSMTypes.STUDENTS_T, GSMTypes.CAUCHY)
+
+    def __init__(self, gsm_type, location=None, location_range=None,
+                 scale=None, scale_range=None, degrees_of_freedom=None,
+                 df_range=None):
+        """Initialize a GSM Object.
+
+        Parameters
+        ----------
+        gsm_type : :class:`.GSMTypes`
+            Type of the distribution to represent as a GSM.
+        location : TYPE, optional
+            DESCRIPTION. The default is None.
+        location_range : tuple, optional
+            Minimum and maximum values for the location parameter. Useful if being
+            fed to a filter for estimating the location parameter. Each element must
+            match the type of the :attr:`.location` attribute. The default is None
+        scale : N x N numpy array, optional
+            Scale parameter of the distribution being represented as a GSM.
+            The default is None.
+        scale_range : tuple, optional
+            Minimum and maximum values for the scale parameter. Useful if being
+            fed to a filter for estimating the scale parameter. Each element must
+            match the type of the :attr:`.scale` attribute. The default is None.
+        degrees_of_freedom : float, optional
+            Degrees of freedom parameter of the distribution being represented
+            as a GSM. This is not needed by all types. The default is None.
+        df_range : tuple, optional
+            Minimum and maximum values for the degree of freedom parameter.
+            Useful if being fed to a filter for estimating the degree of freedom
+            parameter. Each element must be a float. The default is None.
+
+        Raises
+        ------
+        RuntimeError
+            If a `gsm_type` is given that is of the incorrect data type.
+        """
+        if not isinstance(gsm_type, GSMTypes):
+            raise RuntimeError('Type ({}) must be a GSMType'.format(gsm_type))
+
+        self.type = gsm_type
+
+        self._loc = np.zeros((1, 1))
+        self._scale = np.ones((1, 1))
+        self._df = None
+
+        if location is not None:
+            self.location = location
+        self.location_range = location_range
+
+        if scale is not None:
+            self.scale = scale
+        self.scale_range = scale_range
+
+        if degrees_of_freedom is not None:
+            self.degrees_of_freedom = degrees_of_freedom
+
+        if self.type is GSMTypes.CAUCHY:
+            self._df = 1
+
+        self.df_range = df_range
+
+    @property
+    def location(self):
+        """Location parameter of the distribution being represented as a GSM.
+
+        Returns
+        -------
+        N x 1 numpy array, optional
+        """
+        return self._loc
+
+    @location.setter
+    def location(self, val):
+        self._loc = val
+
+    @property
+    def scale(self):
+        """Scale parameter of the distribution being represented as a GSM.
+
+        Returns
+        -------
+        N x N numpy array, optional
+        """
+        return self._scale
+
+    @scale.setter
+    def scale(self, val):
+        self._scale = val
+
+    @property
+    def degrees_of_freedom(self):
+        """Degrees of freedom parameter of the distribution being represented as a GSM.
+
+        Returns
+        -------
+        float, optional
+        """
+        if self.type in self.__df_types:
+            return self._df
+        else:
+            msg = 'GSM type {:s} does not have a degree of freedom.'.format(self.type)
+            warn(msg)
+            return None
+
+    @degrees_of_freedom.setter
+    def degrees_of_freedom(self, val):
+        if self.type in self.__df_types:
+            if self.type is GSMTypes.CAUCHY:
+                warn('GSM type {:s} requires degree of freedom = 1'.format(self.type))
+                return
+            self._df = val
+        else:
+            msg = ('GSM type {:s} does not have a degree of freedom. '
+                   + 'Skipping').format(self.type)
+            warn(msg)
 
     def sample(self, rng=None):
         """Draw a sample from the specified GSM type.
@@ -645,7 +789,7 @@ class GaussianScaleMixture:
         if rng is None:
             rng = rnd.default_rng()
 
-        if self.type is GSMTypes.STUDENTS_T:
+        if self.type in [GSMTypes.STUDENTS_T, GSMTypes.CAUCHY]:
             return self._sample_student_t(rng)
 
         elif self.type is GSMTypes.SYMMETRIC_A_STABLE:
@@ -655,7 +799,8 @@ class GaussianScaleMixture:
             raise RuntimeError('GSM type: {} is not supported'.format(self.type))
 
     def _sample_student_t(self, rng):
-        pass
+        return stats.t.rvs(self.degrees_of_freedom, scale=self.scale,
+                           random_state=rng)
 
     def _sample_SaS(self, rng):
-        pass
+        raise RuntimeError('sampling SaS distribution not implemented')

@@ -961,9 +961,33 @@ class UnscentedKalmanFilter(ExtendedKalmanFilter):
     appropriate simplifications have been made. These simplifications include
     not using sigma points to track the noise, and using the fixed process and
     measurement noise covariance matrices in the filter's covariance updates.
+
+    Attributes
+    ----------
+    alpha : float
+        Tunig parameter for sigma points, influences the spread of sigma points about the
+        mean. In range (0, 1]. If specified then a value does not need to be
+        given to the :meth:`.init_sigma_points` function.
+    kappa : float
+        Tunig parameter for sigma points, influences the spread of sigma points about the
+        mean. In range [0, inf]. If specified then a value does not need to be
+        given to the :meth:`.init_sigma_points` function.
+    beta : float
+        Tunig parameter for sigma points. In range [0, Inf]. If specified then
+        a value does not need to be given to the :meth:`.init_sigma_points` function.
+        Defaults to 2 (ideal for gaussians).
     """
 
     def __init__(self, sigmaPoints=None, **kwargs):
+        """Initialize an instance.
+
+        Parameters
+        ----------
+        sigmaPoints : :class:`.distributions.SigmaPoints`, optional
+            Set of initialized sigma points to use. The default is None.
+        **kwargs : dict, optional
+            Additional arguments for parent constructors.
+        """
         self.alpha = 1
         self.kappa = 0
         self.beta = 2
@@ -971,6 +995,9 @@ class UnscentedKalmanFilter(ExtendedKalmanFilter):
         self._stateSigmaPoints = None
         if isinstance(sigmaPoints, gdistrib.SigmaPoints):
             self._stateSigmaPoints = sigmaPoints
+            self.alpha = sigmaPoints.alpha
+            self.beta = sigmaPoints.beta
+            self.kappa = sigmaPoints.kappa
 
         self._use_lin_dyn = False
         self._use_non_lin_dyn = False
@@ -1243,6 +1270,13 @@ class UnscentedKalmanFilter(ExtendedKalmanFilter):
             Arguments for the measurement matrix function if one has
             been specified. The default is ().
 
+        Raises
+        ------
+        :class:`.errors.ExtremeMeasurementNoiseError`
+            If estimating the measurement noise and the measurement fit calculation fails.
+        LinAlgError
+            Numpy exception raised if not estimating noise and measurement fit fails.
+
         Returns
         -------
         next_state : N x 1 numpy array
@@ -1274,22 +1308,70 @@ class UnscentedKalmanFilter(ExtendedKalmanFilter):
         self.cov = (self.cov + self.cov.T) * 0.5
         next_state = cur_state + gain @ inov
 
-        meas_fit_prob = stats.multivariate_normal.pdf(meas.ravel(),
-                                                      mean=est_meas.ravel(),
-                                                      cov=meas_cov)
+        try:
+            meas_fit_prob = stats.multivariate_normal.pdf(meas.ravel(),
+                                                          mean=est_meas.ravel(),
+                                                          cov=meas_cov)
+        except la.LinAlgError:
+            if self._est_meas_noise_fnc is None:
+                raise
+
+            msg = 'Inovation matrix is singular, likely from bad ' \
+                + 'measurement-state pairing for measurement noise estimation.'
+            raise gerr.ExtremeMeasurementNoiseError(msg) from None
 
         return next_state, meas_fit_prob
 
 
 class BootstrapFilter(BayesFilter):
-    """Stripped down version of the :class:`.ParticleFilter`."""
+    """Stripped down version of the :class:`.ParticleFilter`.
 
-    def __init__(self, **kwargs):
+    This is an alternative implementation of a basic Particle filter. This
+    removes some of the quality of life features of the :class:`.ParticleFilter`
+    class and can be more complicated to setup. But it may provide runtime improvements
+    for simple cases. Most times it is advised to use the :class:`.ParticleFilter`
+    instead of this class. Most other derived classes use the :class:`.ParticleFilter`
+    class as a base.
+    """
+
+    def __init__(self, importance_dist_fnc=None, importance_weight_fnc=None,
+                 particleDistribution=None, rng=None, **kwargs):
+        """Initializes the object.
+
+        Parameters
+        ----------
+        importance_dist_fnc : callable, optional
+            Must have the signature `f(parts, rng)` where `parts` is an
+            instance of :class:`.distributions.SimpleParticleDistribution`
+            and `rng` is a numpy random generator. It must return a numpy array
+            of new particles for a :class:`.distributions.SimpleParticleDistribution`.
+            Any state transitions to a new timestep must happen within this
+            function. The default is None.
+        importance_weight_fnc : callable, optional
+            Must have the signature `f(meas, parts)` where `meas` is an Nm x 1
+            numpy array representing the measurement and `parts` is the
+            numpy array of particles from a :class:`.distributions.SimpleParticleDistribution`
+            object. It must return a numpy array of weights, one for each
+            particle. The default is None.
+        particleDistribution : :class:`.distributions.SimpleParticleDistribution`, optional
+            Initial particle distribution to use. The default is None.
+        rng : numpy random generator, optional
+            Random number generator to use. If none supplied then the numpy default
+            is used. The default is None.
+        **kwargs : dict
+            Additional arguments for the parent constructor.
+        """
         super().__init__(**kwargs)
-        self.importance_dist_fnc = None
-        self.importance_weight_fnc = None
-        self.particleDistribution = gdistrib.SimpleParticleDistribution()
-        self.rng = None
+        self.importance_dist_fnc = importance_dist_fnc
+        self.importance_weight_fnc = importance_weight_fnc
+        if particleDistribution is None:
+            self.particleDistribution = gdistrib.SimpleParticleDistribution()
+        else:
+            self.particleDistribution = particleDistribution
+        if rng is None:
+            self.rng = rnd.default_rng()
+        else:
+            self.rng = rng
 
     def save_filter_state(self):
         """Saves filter variables so they can be restored later."""
@@ -1317,12 +1399,47 @@ class BootstrapFilter(BayesFilter):
         self.rng = filt_state['rng']
 
     def predict(self, timestep):
+        """Prediction step of the filter.
+
+        Calls the importance distribution function to generate new samples of
+        particles.
+
+        Parameters
+        ----------
+        timestep : float
+            Current timestep.
+
+        Returns
+        -------
+        N x 1
+            mean estimate of the particles.
+        """
         self.particleDistribution.particles = self.importance_dist_fnc(self.particleDistribution,
                                                                        self.rng)
 
-        return np.mean(self.particleDistribution.particles, axis=0)
+        shape = (self.particleDistribution.particles.shape[1], 1)
+        return np.mean(self.particleDistribution.particles, axis=0).reshape(shape)
 
     def correct(self, timestep, meas):
+        """Correction step of the filter.
+
+        Parameters
+        ----------
+        timestep : float
+            Current timestep.
+        meas : Nm x 1 numpy array
+            Current measurement.
+
+        Raises
+        ------
+        :class:`gerr.ParticleDepletionError`
+            If all particles weights sum to zero (all particles will be removed).
+
+        Returns
+        -------
+        N x 1 numpy array
+            mean estimate of the particles.
+        """
         self.particleDistribution.weights *= self.importance_weight_fnc(meas,
                                                                         self.particleDistribution.particles)
         tot = np.sum(self.particleDistribution.weights)
@@ -1339,23 +1456,29 @@ class BootstrapFilter(BayesFilter):
         self.particleDistribution.particles = self.particleDistribution.particles[unique_inds, :]
         self.particleDistribution.weights = (1 / num_parts
                                              * np.ones(self.particleDistribution.particles.shape[0]))
+
         if unique_inds.size <= 1:
             msg = "Only {:d} particles selected".format(unique_inds.size)
             raise gerr.ParticleDepletionError(msg)
 
         # weights are all equal here so don't need weighted sum
-        return np.mean(self.particleDistribution.particles, axis=0)
+        shape = (self.particleDistribution.particles.shape[1], 1)
+        return np.mean(self.particleDistribution.particles, axis=0).reshape(shape)
 
     def set_state_model(self, **kwargs):
+        """Not used by the Bootstrap filter."""
         warn('Not used by BootstrapFilter, directly handled by importance_dist_fnc.',
              RuntimeWarning)
 
     def set_measurement_model(self, **kwargs):
+        """Not used by the Bootstrap filter."""
         warn('Not used by BootstrapFilter, directly handled by importance_weight_fnc.',
              RuntimeWarning)
 
     def plot_particles(self, inds, **kwargs):
+        """Wrapper for :class:`.distributions.SimpleParticleDistribution.plot_particles`."""
         return self.particleDistribution.plot_particles(inds, **kwargs)
+
 
 class ParticleFilter(BayesFilter):
     """Implements a basic Particle Filter.
@@ -2921,6 +3044,13 @@ class QuadratureKalmanFilter(KalmanFilter):
             Arguments for the measurement matrix function if one has
             been specified. The default is ().
 
+        Raises
+        ------
+        :class:`.errors.ExtremeMeasurementNoiseError`
+            If estimating the measurement noise and the measurement fit calculation fails.
+        LinAlgError
+            Numpy exception raised if not estimating noise and measurement fit fails.
+
         Returns
         -------
         next_state : N x 1 numpy array
@@ -2962,9 +3092,17 @@ class QuadratureKalmanFilter(KalmanFilter):
         # update covariance as P = P_k - K * P_zz * K^T
         self._corr_update_cov(gain, inov_cov)
 
-        meas_fit_prob = stats.multivariate_normal.pdf(meas.ravel(),
-                                                      mean=est_meas.ravel(),
-                                                      cov=inov_cov)
+        try:
+            meas_fit_prob = stats.multivariate_normal.pdf(meas.ravel(),
+                                                          mean=est_meas.ravel(),
+                                                          cov=inov_cov)
+        except la.LinAlgError:
+            if self._est_meas_noise_fnc is None:
+                raise
+
+            msg = 'Inovation matrix is singular, likely from bad ' \
+                + 'measurement-state pairing for measurement noise estimation.'
+            raise gerr.ExtremeMeasurementNoiseError(msg) from None
 
         return (cor_state, meas_fit_prob)
 
@@ -3105,6 +3243,13 @@ class SquareRootQKF(QuadratureKalmanFilter):
             Arguments for the measurement matrix function if one has
             been specified. The default is ().
 
+        Raises
+        ------
+        :class:`.errors.ExtremeMeasurementNoiseError`
+            If estimating the measurement noise and the measurement fit calculation fails.
+        LinAlgError
+            Numpy exception raised if not estimating noise and measurement fit fails.
+
         Returns
         -------
         next_state : N x 1 numpy array
@@ -3152,9 +3297,17 @@ class SquareRootQKF(QuadratureKalmanFilter):
 
         self._corr_update_cov(gain, state_mat, meas_mat)
 
-        meas_fit_prob = stats.multivariate_normal.pdf(meas.ravel(),
-                                                      mean=est_meas.ravel(),
-                                                      cov=inov_cov)
+        try:
+            meas_fit_prob = stats.multivariate_normal.pdf(meas.ravel(),
+                                                          mean=est_meas.ravel(),
+                                                          cov=inov_cov)
+        except la.LinAlgError:
+            if self._est_meas_noise_fnc is None:
+                raise
+
+            msg = 'Inovation matrix is singular, likely from bad ' \
+                + 'measurement-state pairing for measurement noise estimation.'
+            raise gerr.ExtremeMeasurementNoiseError(msg) from None
 
         return (cor_state, meas_fit_prob)
 
@@ -3199,7 +3352,11 @@ class GSMFilterBase(BayesFilter):
         self._import_w_factory_lst = None
 
     def save_filter_state(self):
-        """Saves filter variables so they can be restored later."""
+        """Saves filter variables so they can be restored later.
+
+        Note that to pickle the resulting dictionary the :code:`dill` package
+        may need to be used due to potential pickling of functions.
+        """
         filt_state = super().save_filter_state()
 
         filt_state['enable_proc_noise_estimation'] = self.enable_proc_noise_estimation
@@ -3260,33 +3417,125 @@ class GSMFilterBase(BayesFilter):
             warn('Core filter is not set, use an inherited class.',
                  RuntimeWarning)
 
+    def _define_student_t_pf(self, gsm, rng, num_parts):
+        def import_w_factory(inov_cov):
+            def import_w_fnc(meas, parts):
+                stds = np.sqrt(parts[:, 2] * parts[:, 1]**2 + inov_cov)
+                return np.array([stats.norm.pdf(meas.item(), scale=scale)
+                                 for scale in stds])
+            return import_w_fnc
+
+        def gsm_import_dist_factory():
+            def import_dist_fnc(parts, _rng):
+                new_parts = np.nan * np.ones(parts.particles.shape)
+
+                disc = 0.99
+                a = (3 * disc - 1) / (2 * disc)
+                h = np.sqrt(1 - a**2)
+                last_means = np.mean(parts.particles, axis=0)
+                means = a * parts.particles[:, 0:2] + (1 - a) * last_means[0:2]
+
+                # df, sig
+                for ind in range(means.shape[1]):
+                    std = np.sqrt(h**2 * np.cov(parts.particles[:, ind]))
+
+                    for ii, m in enumerate(means):
+                        samp = stats.norm.rvs(loc=m[ind], scale=std, random_state=_rng)
+                        new_parts[ii, ind] = samp
+
+                for ii in range(new_parts.shape[0]):
+                    new_parts[ii, 2] = stats.invgamma.rvs(np.abs(new_parts[ii, 0]) / 2,
+                                                          scale=1 / (2 / np.abs(new_parts[ii, 0])),
+                                                          random_state=_rng)
+
+                return new_parts
+
+            return import_dist_fnc
+
+        pf = BootstrapFilter()
+        pf.importance_dist_fnc = gsm_import_dist_factory()
+        pf.particleDistribution = gdistrib.SimpleParticleDistribution()
+
+        df_scale = gsm.df_range[1] - gsm.df_range[0]
+        df_loc = gsm.df_range[0]
+        df_particles = stats.uniform.rvs(loc=df_loc, scale=df_scale,
+                                         size=num_parts, random_state=rng)
+
+        sig_scale = gsm.scale_range[1] - gsm.scale_range[0]
+        sig_loc = gsm.scale_range[0]
+        sig_particles = stats.uniform.rvs(loc=sig_loc, scale=sig_scale,
+                                          size=num_parts, random_state=rng)
+
+        z_particles = np.nan * np.ones(num_parts)
+        for ii, v in enumerate(df_particles):
+            z_particles[ii] = stats.invgamma.rvs(v / 2, scale=1 / (2 / v),
+                                                 random_state=rng)
+
+        pf.particleDistribution.particles = np.stack((df_particles, sig_particles,
+                                                      z_particles), axis=1)
+        pf.particleDistribution.num_parts_per_ind = np.ones(num_parts)
+        pf.particleDistribution.weights = 1 / num_parts * np.ones(num_parts)
+        pf.rng = rng
+
+        return pf, import_w_factory
+
     def set_meas_noise_model(self, bootstrap_lst=None,
-                             importance_weight_factory_lst=None):
+                             importance_weight_factory_lst=None,
+                             gsm_lst=None, num_parts=None, rng=None):
         """Initializes the measurement noise estimators.
+
+        The filters and importance
+        weight factories can be provided or a list of
+        :class:`.distributions.GaussianScaleMixture` objecst, list of particles,
+        and a random number generator. If the latter set is given then
+        bootstrap filters are constructed automatically. The recommended way
+        of specifying the filters is to provide GSM objects.
 
         Notes
         -----
-        This sets up bootstrap particle filters independently for each measurement
+        This uses independent bootstrap particle filters for each measurement
         based on the provided model information.
 
         Parameters
         ----------
-        num_particles : int
-            Number of particles to use in each filter.
-        mix_dist_samp_fnc_lst : list
-            List of callables, each element must take no arguments and return
-            a random sample from a proposal distribution for the measurement noise
-            as a 1 x 1 numpy array.
+        bootstrap_lst : list, optional
+            List of :class:`.BootstrapFilter` objects that have already been
+            initialized. If given then importance weight factory list must also
+            be given and of the same length. The default is None.
+        importance_weight_factory_lst : list, optional
+            List of callables, each takes a 1 x 1 numpy array or float as input
+            and returns a callable with the signature `f(z, parts)` where
+            `z` is a float that is the difference between the estimated measurement
+            and actual measurement (so the distribution is 0 mean) and `parts` is
+            a numpy array of all the particles from the bootrap filter `f` must
+            return a numpy array of weights for each particle. See the
+            :attr:`.BootstrapFilter.importance_weight_fnc` for more details. The
+            default is None.
+        gsm_lst : list, optional
+            List of :class:`.distributions.GaussianScaleMixture` objects, one
+            per measurement. Requires `num_parts` also be specified and optionally
+            `rng`. The default is None.
+        num_parts : list or int, optional
+            Number of particles to use in each automatically constructed filter.
+            If only one number is supplied all filters will use the same number
+            of particles. The default is None.
         rng : numpy random generator, optional
-            Random number generator to use in each particle filter. The default
-            is None, which is passed to the constructor for the :class:`.ParticleFilter`.
+            Random number generator to use in constructed filters. If supplied,
+            each filter uses the same instance, otherwise a new generator is
+            created for each filter using numpy's default initialization routine
+            with no supplied seed. Only used if a `gsm_lst` is supplied.
 
-        Returns
-        -------
-        None.
+        Raises
+        ------
+        RuntimeError
+            If an incorrect combination of input arguments is provided.
+
+        Todo
+        ----
+        Allow for GSM Object to use location parameter when specifying noise models
         """
         if bootstrap_lst is not None:
-            self._meas_noise_filters = deepcopy(bootstrap_lst)
+            self._meas_noise_filters = bootstrap_lst
             if importance_weight_factory_lst is not None:
                 if not len(importance_weight_factory_lst) == len(bootstrap_lst):
                     msg = 'Importance weight factory list ' \
@@ -3299,8 +3548,34 @@ class GSMFilterBase(BayesFilter):
                 msg = 'Must supply an importance weight factory when ' \
                     + 'specifying the bootstrap filters.'
                 raise RuntimeError(msg)
+        elif gsm_lst is not None:
+            num_filts = len(gsm_lst)
+            if not (isinstance(num_parts, list) or isinstance(num_parts, tuple)):
+                if num_parts is None:
+                    msg = 'Must specify number of particles when giving a list of GSM objects.'
+                    raise RuntimeError(msg)
+                else:
+                    num_parts = [num_parts] * num_filts
+
+            self._meas_noise_filters = [None] * num_filts
+            self._import_w_factory_lst = [None] * num_filts
+            for ii, gsm in enumerate(gsm_lst):
+                if rng is None:
+                    rng = rnd.default_rng()
+
+                if gsm.type in [gdistrib.GSMTypes.STUDENTS_T,
+                                gdistrib.GSMTypes.CAUCHY]:
+                    (self._meas_noise_filters[ii],
+                     self._import_w_factory_lst[ii]) = self._define_student_t_pf(gsm, rng, num_parts[ii])
+
+                else:
+                    msg = 'GSM filter can not automatically setup Bootstrap ' \
+                        + 'filter for GSM Type {:s}. '.format(gsm.type) \
+                        + 'Update implementation.'
+                    raise RuntimeError(msg)
         else:
-            raise RuntimeError('Not implemented yet')
+            msg = 'Incorrect input arguement combination. See documentation for details.'
+            raise RuntimeError(msg)
 
     @property
     def cov(self):
@@ -3389,15 +3664,18 @@ class GSMFilterBase(BayesFilter):
         filt_inds : int or list
             Index of the measurement index/indices to plot the particle distribution
             for.
+        dist_inds : int or list
+            Index of the particle(s) in the given filter(s) to plot. See the
+            :meth:`.BootstrapFilter.plot_particles` for details.
         **kwargs : dict
-            Additional keyword arguements. See :meth:`.ParticleFilter.plot_particles`.
+            Additional keyword arguements. See :meth:`.BootstrapFilter.plot_particles`.
 
         Returns
         -------
         figs : dict
-            Each value in the dictionary is a matplotlib figure handle. The keys
-            have the value :code:`meas_noise_particles_{:02d}` with the appropriate
-            index number.
+            Each value in the dictionary is a matplotlib figure handle.
+        keys : list
+            Each value is a string corresponding to a key in the resulting dictionary
         """
         figs = {}
         key_base = 'meas_noise_particles_F{:02d}_D{:02d}'
@@ -3416,9 +3694,20 @@ class GSMFilterBase(BayesFilter):
 
 
 class QKFGaussianScaleMixtureFilter(GSMFilterBase):
-    """Implementation of a QKF Gaussian Scale Mixture filter."""
+    """Implementation of a QKF Gaussian Scale Mixture filter.
+
+    Notes
+    -----
+    This is based on the derivation in
+    :cite:`VilaValls2012_NonlinearBayesianFilteringintheGaussianScaleMixtureContext`
+    but uses a QKF as the core filter instead of an SQKF. It should functionally
+    be the same and provide the same results, however this should have better
+    runtime performance at the cost of potential numerical problems with the
+    covariance matrix.
+    """
 
     def __init__(self, **kwargs):
+        """Initialize the object."""
         super().__init__(**kwargs)
 
         self._coreFilter = QuadratureKalmanFilter()
@@ -3449,14 +3738,12 @@ class SQKFGaussianScaleMixtureFilter(QKFGaussianScaleMixtureFilter):
 
     Notes
     -----
-    This is a slight deviation from the derivation in
-    :cite:`VilaValls2012_NonlinearBayesianFilteringintheGaussianScaleMixtureContext`
-    because it does not require the explicit modeling of each term in the mixing
-    distribution but instead estimates the mixing (scale) variable directly for
-    the measurement noise estimators.
+    This is based on the derivation in
+    :cite:`VilaValls2012_NonlinearBayesianFilteringintheGaussianScaleMixtureContext`.
     """
 
     def __init__(self, **kwargs):
+        """Initialize the object."""
         super().__init__(**kwargs)
 
         self._coreFilter = SquareRootQKF()
@@ -3471,9 +3758,17 @@ class SQKFGaussianScaleMixtureFilter(QKFGaussianScaleMixtureFilter):
 
 
 class UKFGaussianScaleMixtureFilter(GSMFilterBase):
-    """Implementation of a UKF Gaussian Scale Mixture filter."""
+    """Implementation of a UKF Gaussian Scale Mixture filter.
+
+    Notes
+    -----
+    This is based on the SKQF GSM derivation in
+    :cite:`VilaValls2012_NonlinearBayesianFilteringintheGaussianScaleMixtureContext`
+    but utilizes a UKF as the core filter instead.
+    """
 
     def __init__(self, sigmaPoints=None, **kwargs):
+        """Initialize the object."""
         super().__init__(**kwargs)
 
         self._coreFilter = UnscentedKalmanFilter(sigmaPoints=sigmaPoints)
