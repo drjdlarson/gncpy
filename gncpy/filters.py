@@ -138,6 +138,8 @@ class KalmanFilter(BayesFilter):
         self._meas_mat = np.array([[]])
         self._meas_fnc = None
 
+        self._est_meas_noise_fnc = None
+
         super().__init__(**kwargs)
 
     def save_filter_state(self):
@@ -177,6 +179,7 @@ class KalmanFilter(BayesFilter):
             filt_state['_meas_mat'] = self._meas_mat
 
         filt_state['_meas_fnc'] = self._meas_fnc
+        filt_state['_est_meas_noise_fnc'] = self._est_meas_noise_fnc
 
         return filt_state
 
@@ -202,6 +205,7 @@ class KalmanFilter(BayesFilter):
         self._get_input_mat = filt_state['_get_input_mat']
         self._meas_mat = filt_state['_meas_mat']
         self._meas_fnc = filt_state['_meas_fnc']
+        self._est_meas_noise_fnc = filt_state['_est_meas_noise_fnc']
 
     def set_state_model(self, state_mat=None, input_mat=None, cont_time=False,
                         state_mat_fun=None, input_mat_fun=None, dyn_obj=None):
@@ -338,6 +342,29 @@ class KalmanFilter(BayesFilter):
         else:
             raise RuntimeError('Invalid combination of inputs')
 
+    def set_measurement_noise_estimator(self, function):
+        """Sets the model used for estimating the measurement noise parameters.
+
+        This is an optional step and the filter will work properly if this is
+        not called. If it is called, the measurement noise will be estimated
+        during the filter's correction step and the measurement noise attribute
+        will not be used.
+
+        Parameters
+        ----------
+        function : callable
+            A function that implements the prediction and correction steps for
+            an appropriate filter to estimate the measurement noise covariance
+            matrix. It must have the signature `f(est_meas)` where `est_meas`
+            is an Nm x 1 numpy array and it must return an Nm x Nm numpy array
+            representing the measurement noise covariance matrix.
+
+        Returns
+        -------
+        None.
+        """
+        self._est_meas_noise_fnc = function
+
     def _predict_next_state(self, timestep, cur_state, cur_input, state_mat_args,
                             input_mat_args):
         if self._dyn_obj is not None:
@@ -455,7 +482,13 @@ class KalmanFilter(BayesFilter):
 
         # get the Kalman gain
         cov_meas_T = self.cov @ meas_mat.T
-        inov_cov = meas_mat @ cov_meas_T + self.meas_noise
+        inov_cov = meas_mat @ cov_meas_T
+
+        # estimate the measurement noise online if applicable
+        if self._est_meas_noise_fnc is not None:
+            self.meas_noise = self._est_meas_noise_fnc(est_meas, inov_cov)
+
+        inov_cov += self.meas_noise
         inov_cov = (inov_cov + inov_cov.T) * 0.5
         if self.use_cholesky_inverse:
             sqrt_inv_inov_cov = la.inv(la.cholesky(inov_cov))
@@ -600,6 +633,9 @@ class ExtendedKalmanFilter(KalmanFilter):
                                             **self.integrator_params)
             self._integrator.set_initial_value(cur_state, timestep)
             self._integrator.set_f_params(*dyn_fun_params)
+
+            if self.dt is None:
+                raise RuntimeError('dt must be set when using an ODE list')
 
             next_time = timestep + self.dt
             next_state = self._integrator.integrate(next_time).reshape(cur_state.shape)
@@ -2821,8 +2857,6 @@ class QuadratureKalmanFilter(KalmanFilter):
         self._sqrt_cov = np.array([[]])
         self._dyn_fnc = None
 
-        self._est_meas_noise_fnc = None
-
     def save_filter_state(self):
         """Saves filter variables so they can be restored later."""
         filt_state = super().save_filter_state()
@@ -2831,7 +2865,6 @@ class QuadratureKalmanFilter(KalmanFilter):
 
         filt_state['_sqrt_cov'] = self._sqrt_cov
         filt_state['_dyn_fnc'] = self._dyn_fnc
-        filt_state['_est_meas_noise_fnc'] = self._est_meas_noise_fnc
 
         return filt_state
 
@@ -2848,7 +2881,6 @@ class QuadratureKalmanFilter(KalmanFilter):
         self.quadPoints = filt_state['quadPoints']
         self._sqrt_cov = filt_state['_sqrt_cov']
         self._dyn_fnc = filt_state['_dyn_fnc']
-        self._est_meas_noise_fnc = filt_state['_est_meas_noise_fnc']
 
     @property
     def points_per_axis(self):
@@ -2919,29 +2951,6 @@ class QuadratureKalmanFilter(KalmanFilter):
             Rasied if no arguments are specified.
         """
         super().set_measurement_model(meas_mat=meas_mat, meas_fun=meas_fun)
-
-    def set_measurement_noise_estimator(self, function):
-        """Sets the model used for estimating the measurement noise parameters.
-
-        This is an optional step and the filter will work properly if this is
-        not called. If it is called, the measurement noise will be estimated
-        during the filter's correction step and the measurement noise attribute
-        will not be used.
-
-        Parameters
-        ----------
-        function : callable
-            A function that implements the prediction and correction steps for
-            an appropriate filter to estimate the measurement noise covariance
-            matrix. It must have the signature `f(est_meas)` where `est_meas`
-            is an Nm x 1 numpy array and it must return an Nm x Nm numpy array
-            representing the measurement noise covariance matrix.
-
-        Returns
-        -------
-        None.
-        """
-        self._est_meas_noise_fnc = function
 
     def _factorize_cov(self, val=None):
         if val is None:
@@ -3821,3 +3830,83 @@ class UKFGaussianScaleMixtureFilter(GSMFilterBase):
     @kappa.setter
     def kappa(self, val):
         self._coreFilter.kappa = val
+
+
+class KFGaussianScaleMixtureFilter(GSMFilterBase):
+    """Implementation of a KF Gaussian Scale Mixture filter.
+
+    This is provided for documentation mostly for purposes. It exposes some of
+    the core KF variables.
+    """
+
+    def __init__(self, **kwargs):
+        """Initialize the object."""
+        super().__init__(**kwargs)
+
+        self._coreFilter = KalmanFilter()
+
+    @property
+    def dt(self):
+        """Wrapper for the core filter; see :attr:`.KalmanFilter.dt`."""
+        return self._coreFilter.dt
+
+    @dt.setter
+    def dt(self, val):
+        self._coreFilter.dt = val
+
+    def set_state_model(self, **kwargs):
+        """Wrapper for the core filter; see :meth:`.KalmanFilter.set_state_model` for details."""
+        super().set_state_model(**kwargs)
+
+    def set_measurement_model(self, **kwargs):
+        """Wrapper for the core filter; see :meth:`.KalmanFilter.set_measurement_model` for details."""
+        super().set_measurement_model(**kwargs)
+
+
+class EKFGaussianScaleMixtureFilter(KFGaussianScaleMixtureFilter):
+    """Implementation of a EKF Gaussian Scale Mixture filter.
+
+    This is provided for documentation purposes. It has the same functionality
+    as the :class:`.GSMFilterBase` class.
+    """
+
+    def __init__(self, **kwargs):
+        """Initialize the object."""
+        super().__init__(**kwargs)
+
+        self._coreFilter = ExtendedKalmanFilter()
+
+    @property
+    def cont_cov(self):
+        """Wrapper for the core filter; see :attr:`.ExtendedKalmanFilter.cont_cov`."""
+        return self._coreFilter.cont_cov
+
+    @cont_cov.setter
+    def cont_cov(self, val):
+        self._coreFilter.cont_cov = val
+
+    @property
+    def integrator_type(self):
+        """Wrapper for the core filter; see :attr:`.ExtendedKalmanFilter.integrator_type`."""
+        return self._coreFilter.integrator_type
+
+    @integrator_type.setter
+    def integrator_type(self, val):
+        self._coreFilter.integrator_type = val
+
+    @property
+    def integrator_params(self):
+        """Wrapper for the core filter; see :attr:`.ExtendedKalmanFilter.integrator_params`."""
+        return self._coreFilter.integrator_params
+
+    @integrator_params.setter
+    def integrator_params(self, val):
+        self._coreFilter.integrator_params = val
+
+    def set_state_model(self, **kwargs):
+        """Wrapper for the core filter; see :meth:`.ExtendedKalmanFilter.set_state_model` for details."""
+        super().set_state_model(**kwargs)
+
+    def set_measurement_model(self, **kwargs):
+        """Wrapper for the core filter; see :meth:`.ExtendedKalmanFilter.set_measurement_model` for details."""
+        super().set_measurement_model(**kwargs)
