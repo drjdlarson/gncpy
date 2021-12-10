@@ -2278,7 +2278,7 @@ if __name__ == "__main__":
     # test_max_corr_ent_UKF_dynObj()
 
     # test_PF_dyn_fnc()
-    # test_UPF_dyn_fnc()
+    test_UPF_dyn_fnc()
     # test_UPF_dynObj()
     # test_MCMC_UPF_dyn_fnc()
     # test_MCMC_UPF_dynObj()
@@ -2290,7 +2290,7 @@ if __name__ == "__main__":
 
     # test_QKF_GSM_bootstrap()
     # test_QKF_GSM_gsm()
-    test_SQKF_GSM_bootstrap()
+    # test_SQKF_GSM_bootstrap()
     # test_UKF_GSM_bootstrap()
 
     end = timer()

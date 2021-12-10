@@ -117,8 +117,9 @@ class KalmanFilter(BayesFilter):
         Measurement noise matrix
     proc_noise : N x N numpy array
         Process noise matrix
-    dt : float, optional
-        Time difference between simulation steps.
+    dt : float
+        Time difference between simulation steps. Required if not using a
+        dynamic object for the state model.
 
     """
 
@@ -506,8 +507,8 @@ class ExtendedKalmanFilter(KalmanFilter):
 
         self._ode_lst = None
 
-        if dyn_obj is not None or ode_lst is not None:
-            self.set_state_model(dyn_obj=dyn_obj, ode_lst=ode_lst)
+        # if dyn_obj is not None or ode_lst is not None:
+        #     self.set_state_model(dyn_obj=dyn_obj, ode_lst=ode_lst)
 
         self._integrator = None
 
@@ -577,6 +578,15 @@ class ExtendedKalmanFilter(KalmanFilter):
             msg = 'Invalid state model specified. Check arguments'
             raise RuntimeError(msg)
 
+    def _cont_dyn(self, t, x, *args):
+        """Used in integrator if an ode list is specified."""
+        out = np.zeros(x.shape)
+
+        for ii, f in enumerate(self._ode_lst):
+            out[ii] = f(t, x, *args)
+
+        return out
+
     def _predict_next_state(self, timestep, cur_state, dyn_fun_params):
         if self._dyn_obj is not None:
             next_state = self._dyn_obj.propagate_state(timestep, cur_state,
@@ -585,19 +595,17 @@ class ExtendedKalmanFilter(KalmanFilter):
                                                     dyn_fun_params)
             dt = self._dyn_obj.dt
         elif self._ode_lst is not None:
-            next_state = np.nan * np.ones(cur_state.shape)
-            for ii, f in enumerate(self._ode_lst):
-                self._integrator = s_integrate.ode(f)
-                self._integrator.set_integrator(self.integrator_type,
-                                                **self.integrator_params)
-                self._integrator.set_initial_value(cur_state, timestep)
-                self._integrator.set_f_params(*dyn_fun_params)
+            self._integrator = s_integrate.ode(self._cont_dyn)
+            self._integrator.set_integrator(self.integrator_type,
+                                            **self.integrator_params)
+            self._integrator.set_initial_value(cur_state, timestep)
+            self._integrator.set_f_params(*dyn_fun_params)
 
-                next_time = timestep + self.dt
-                next_state[ii, 0] = self._integrator.integrate(next_time)
-                if not self._integrator.successful():
-                    msg = 'Integration failed at time {}'.format(timestep)
-                    raise RuntimeError(msg)
+            next_time = timestep + self.dt
+            next_state = self._integrator.integrate(next_time).reshape(cur_state.shape)
+            if not self._integrator.successful():
+                msg = 'Integration failed at time {}'.format(timestep)
+                raise RuntimeError(msg)
 
             state_mat = gmath.get_state_jacobian(timestep, cur_state,
                                                  self._ode_lst, dyn_fun_params)
@@ -608,7 +616,7 @@ class ExtendedKalmanFilter(KalmanFilter):
 
         return next_state, state_mat, dt
 
-    def predict(self, timestep, cur_state, dyn_fun_params=()):
+    def predict(self, timestep, cur_state, dyn_fun_params=None):
         r"""Prediction step of the EKF.
 
         This assumes continuous time dynamics and integrates the ode's to get
@@ -628,7 +636,7 @@ class ExtendedKalmanFilter(KalmanFilter):
             Current state.
         dyn_fun_params : tuple, optional
             Extra arguments to be passed to the dynamics function. The default
-            is ().
+            is None.
 
         Raises
         ------
@@ -641,6 +649,8 @@ class ExtendedKalmanFilter(KalmanFilter):
             The predicted state.
 
         """
+        if dyn_fun_params is None:
+            dyn_fun_params = ()
         next_state, state_mat, dt = self._predict_next_state(timestep,
                                                              cur_state,
                                                              dyn_fun_params)
@@ -3784,3 +3794,30 @@ class UKFGaussianScaleMixtureFilter(GSMFilterBase):
     def init_sigma_points(self, *args, **kwargs):
         """Wrapper for the core filter; see :meth:`.UnscentedKalmanFilter.init_sigma_points` for details."""
         self._coreFilter.init_sigma_points(*args, **kwargs)
+
+    @property
+    def alpha(self):
+        """Wrapper for the core filter: see :attr:`.UnscentedKalmanFilter.alpha` for details."""
+        return self._coreFilter.alpha
+
+    @alpha.setter
+    def alpha(self, val):
+        self._coreFilter.alpha = val
+
+    @property
+    def beta(self):
+        """Wrapper for the core filter: see :attr:`.UnscentedKalmanFilter.beta` for details."""
+        return self._coreFilter.beta
+
+    @beta.setter
+    def beta(self, val):
+        self._coreFilter.beta = val
+
+    @property
+    def kappa(self):
+        """Wrapper for the core filter: see :attr:`.UnscentedKalmanFilter.kappa` for details."""
+        return self._coreFilter.kappa
+
+    @kappa.setter
+    def kappa(self, val):
+        self._coreFilter.kappa = val
