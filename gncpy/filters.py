@@ -506,9 +506,17 @@ class KalmanFilter(BayesFilter):
         self.cov = (np.eye(n_states) - kalman_gain @ meas_mat) @ self.cov
 
         # calculate the measuremnt fit probability assuming Gaussian
-        meas_fit_prob = stats.multivariate_normal.pdf(meas.ravel(),
-                                                      mean=est_meas.ravel(),
-                                                      cov=inov_cov)
+        try:
+            meas_fit_prob = stats.multivariate_normal.pdf(meas.ravel(),
+                                                          mean=est_meas.ravel(),
+                                                          cov=inov_cov)
+        except la.LinAlgError:
+            if self._est_meas_noise_fnc is None:
+                raise
+
+            msg = 'Inovation matrix is singular, likely from bad ' \
+                + 'measurement-state pairing for measurement noise estimation.'
+            raise gerr.ExtremeMeasurementNoiseError(msg) from None
 
         return (next_state, meas_fit_prob)
 
