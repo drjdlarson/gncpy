@@ -2264,9 +2264,6 @@ def test_EKF_GSM_gsm():
     dt = 1
     t0, t1 = 0, 100 + dt
     print_interval = 25
-    alpha = 0.5
-    kappa = 1
-    beta = 1.5
     x0 = np.array([2000, 2000, 20, 20, 0, 0]).reshape((6, 1))
 
     rng = rnd.default_rng(global_seed)

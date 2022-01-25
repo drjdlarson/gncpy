@@ -3470,13 +3470,15 @@ class GSMFilterBase(BayesFilter):
                         samp = stats.norm.rvs(loc=m[ind], scale=std, random_state=_rng)
                         new_parts[ii, ind] = samp
 
-                for ii in range(new_parts.shape[0]):
-                    new_parts[ii, 2] = stats.invgamma.rvs(np.abs(new_parts[ii, 0]) / 2,
-                                                          scale=1 / (2 / np.abs(new_parts[ii, 0])),
-                                                          random_state=_rng)
-
+                df = np.mean(new_parts[:, 0])
+                if df < 0:
+                    msg = 'Degree of freedom must be > 0 {:.4f}'.format(df)
+                    raise gerr.ParticleEstimationDomainError(msg)
+                new_parts[:, 2] = stats.invgamma.rvs(df / 2,
+                                                     scale=1 / (2 / df),
+                                                     random_state=_rng,
+                                                     size=new_parts.shape[0])
                 return new_parts
-
             return import_dist_fnc
 
         pf = BootstrapFilter()
