@@ -3815,6 +3815,15 @@ class UKFGaussianScaleMixtureFilter(GSMFilterBase):
         self._coreFilter.init_sigma_points(*args, **kwargs)
 
     @property
+    def dt(self):
+        """Wrapper for the core filter: see :attr:`.UnscentedKalmanFilter.dt` for details."""
+        return self._coreFilter.dt
+
+    @dt.setter
+    def dt(self, val):
+        self._coreFilter.dt = val
+
+    @property
     def alpha(self):
         """Wrapper for the core filter: see :attr:`.UnscentedKalmanFilter.alpha` for details."""
         return self._coreFilter.alpha
