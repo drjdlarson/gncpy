@@ -453,6 +453,23 @@ class KalmanFilter(BayesFilter):
 
         return est_meas, meas_mat
 
+    def _meas_fit_pdf(self, meas, est_meas, meas_cov):
+        return stats.multivariate_normal.pdf(meas.ravel(),
+                                             mean=est_meas.ravel(),
+                                             cov=meas_cov)
+
+    def _calc_meas_fit(self, meas, est_meas, meas_cov):
+        try:
+            meas_fit_prob = self._meas_fit_pdf(meas, est_meas, meas_cov)
+        except la.LinAlgError:
+            if self._est_meas_noise_fnc is None:
+                raise
+
+            msg = 'Inovation matrix is singular, likely from bad ' \
+                + 'measurement-state pairing for measurement noise estimation.'
+            raise gerr.ExtremeMeasurementNoiseError(msg) from None
+        return meas_fit_prob
+
     def correct(self, timestep, meas, cur_state, meas_fun_args=()):
         """Implements a discrete time correction step for a Kalman Filter.
 
@@ -467,6 +484,11 @@ class KalmanFilter(BayesFilter):
         meas_fun_args : tuple, optional
             Arguments for the measurement matrix function if one has
             been specified. The default is ().
+
+        Raises
+        ------
+        gncpy.errors.ExtremeMeasurementNoiseError
+            If the measurement fit probability calculation fails.
 
         Returns
         -------
@@ -506,17 +528,7 @@ class KalmanFilter(BayesFilter):
         self.cov = (np.eye(n_states) - kalman_gain @ meas_mat) @ self.cov
 
         # calculate the measuremnt fit probability assuming Gaussian
-        try:
-            meas_fit_prob = stats.multivariate_normal.pdf(meas.ravel(),
-                                                          mean=est_meas.ravel(),
-                                                          cov=inov_cov)
-        except la.LinAlgError:
-            if self._est_meas_noise_fnc is None:
-                raise
-
-            msg = 'Inovation matrix is singular, likely from bad ' \
-                + 'measurement-state pairing for measurement noise estimation.'
-            raise gerr.ExtremeMeasurementNoiseError(msg) from None
+        meas_fit_prob = self._calc_meas_fit(meas, est_meas, inov_cov)
 
         return (next_state, meas_fit_prob)
 
@@ -932,6 +944,10 @@ class StudentsTFilter(KalmanFilter):
 
         return next_state
 
+    def _meas_fit_pdf(self, meas, est_meas, meas_cov):
+        return stats.multivariate_t.pdf(meas.ravel(), loc=est_meas.ravel(),
+                                        shape=meas_cov, df=self.meas_noise_dof)
+
     def correct(self, timestep, meas, cur_state, meas_fun_args=()):
         """Implements the correction step of the students T filter.
 
@@ -992,10 +1008,7 @@ class StudentsTFilter(KalmanFilter):
             self.scale = P_kk
 
         # get measurement fit
-        meas_fit_prob = stats.multivariate_t.pdf(meas.ravel(),
-                                                 loc=est_meas.ravel(),
-                                                 shape=inov_cov,
-                                                 df=self.meas_noise_dof)
+        meas_fit_prob = self._calc_meas_fit(meas, est_meas, inov_cov)
 
         return next_state, meas_fit_prob
 
@@ -1362,17 +1375,7 @@ class UnscentedKalmanFilter(ExtendedKalmanFilter):
         self.cov = (self.cov + self.cov.T) * 0.5
         next_state = cur_state + gain @ inov
 
-        try:
-            meas_fit_prob = stats.multivariate_normal.pdf(meas.ravel(),
-                                                          mean=est_meas.ravel(),
-                                                          cov=meas_cov)
-        except la.LinAlgError:
-            if self._est_meas_noise_fnc is None:
-                raise
-
-            msg = 'Inovation matrix is singular, likely from bad ' \
-                + 'measurement-state pairing for measurement noise estimation.'
-            raise gerr.ExtremeMeasurementNoiseError(msg) from None
+        meas_fit_prob = self._calc_meas_fit(meas, est_meas, meas_cov)
 
         return next_state, meas_fit_prob
 
@@ -3119,17 +3122,7 @@ class QuadratureKalmanFilter(KalmanFilter):
         # update covariance as P = P_k - K * P_zz * K^T
         self._corr_update_cov(gain, inov_cov)
 
-        try:
-            meas_fit_prob = stats.multivariate_normal.pdf(meas.ravel(),
-                                                          mean=est_meas.ravel(),
-                                                          cov=inov_cov)
-        except la.LinAlgError:
-            if self._est_meas_noise_fnc is None:
-                raise
-
-            msg = 'Inovation matrix is singular, likely from bad ' \
-                + 'measurement-state pairing for measurement noise estimation.'
-            raise gerr.ExtremeMeasurementNoiseError(msg) from None
+        meas_fit_prob = self._calc_meas_fit(meas, est_meas, inov_cov)
 
         return (cor_state, meas_fit_prob)
 
@@ -3324,17 +3317,7 @@ class SquareRootQKF(QuadratureKalmanFilter):
 
         self._corr_update_cov(gain, state_mat, meas_mat)
 
-        try:
-            meas_fit_prob = stats.multivariate_normal.pdf(meas.ravel(),
-                                                          mean=est_meas.ravel(),
-                                                          cov=inov_cov)
-        except la.LinAlgError:
-            if self._est_meas_noise_fnc is None:
-                raise
-
-            msg = 'Inovation matrix is singular, likely from bad ' \
-                + 'measurement-state pairing for measurement noise estimation.'
-            raise gerr.ExtremeMeasurementNoiseError(msg) from None
+        meas_fit_prob = self._calc_meas_fit(meas, est_meas, inov_cov)
 
         return (cor_state, meas_fit_prob)
 
