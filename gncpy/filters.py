@@ -6,6 +6,7 @@ import scipy.linalg as sla
 import scipy.integrate as s_integrate
 import scipy.stats as stats
 import abc
+from collections import deque
 from warnings import warn
 from copy import deepcopy
 import matplotlib.pyplot as plt
@@ -3322,6 +3323,79 @@ class SquareRootQKF(QuadratureKalmanFilter):
         return (cor_state, meas_fit_prob)
 
 
+class _GSMProcNoiseEstimator:
+    """Helper class for estimating proc noise in the GSM filters."""
+
+    def __init__(self):
+        self.q_fifo = deque([], None)
+        self.b_fifo = deque([], None)
+
+        self.startup_delay = 1
+
+        self._last_q_hat = None
+        self._call_count = 0
+
+    @property
+    def maxlen(self):
+        return self.q_fifo.maxlen
+
+    @maxlen.setter
+    def maxlen(self, val):
+        self.q_fifo = deque([], val)
+        self.b_fifo = deque([], val)
+
+    @property
+    def win_len(self):
+        return len(self.q_fifo)
+
+    def estimate_next(self, cur_est, pred_state, pred_cov, cor_state, cor_cov):
+        self._call_count += 1
+
+        # update bk
+        bk = pred_cov - cur_est - cor_cov
+        if self.b_fifo.maxlen is None or len(self.b_fifo) < self.b_fifo.maxlen:
+            bk_last = np.zeros(bk.shape)
+        else:
+            bk_last = self.b_fifo.pop()
+        self.b_fifo.appendleft(bk)
+
+        # update qk and qk_hat
+        qk = cor_state - pred_state
+        if self._last_q_hat is None:
+            self._last_q_hat = np.zeros(qk.shape)
+
+        if self.q_fifo.maxlen is None or len(self.q_fifo) < self.q_fifo.maxlen:
+            qk_last = np.zeros(qk.shape)
+        else:
+            qk_last = self.q_fifo.pop()
+        self.q_fifo.appendleft(qk)
+
+        qk_klast_diff = qk - qk_last
+        win_len = self.win_len
+        inv_win_len = 1 / win_len
+        win_len_m1 = win_len - 1
+        if self._call_count <= np.max([1, self.startup_delay]):
+            return cur_est
+
+        self._last_q_hat += inv_win_len * qk_klast_diff
+
+        # estimate cov
+        qk_khat_diff = qk - self._last_q_hat
+        qklast_khat_diff = qk_last - self._last_q_hat
+        bk_diff = bk_last - bk
+        next_est = cur_est + 1 / win_len_m1 \
+            * (qk_khat_diff @ qk_khat_diff.T
+               - qklast_khat_diff @ qklast_khat_diff.T
+               + inv_win_len * qk_klast_diff @ qk_klast_diff.T
+               + win_len_m1 * inv_win_len * bk_diff)
+
+        # for numerical reasons
+        for ii in range(next_est.shape[0]):
+            next_est[ii, ii] = np.abs(next_est[ii, ii])
+
+        return next_est
+
+
 class GSMFilterBase(BayesFilter):
     """Base implementation of a Gaussian Scale Mixture (GSM) filter.
 
@@ -3360,6 +3434,7 @@ class GSMFilterBase(BayesFilter):
         self._coreFilter = None
         self._meas_noise_filters = []
         self._import_w_factory_lst = None
+        self._procNoiseEstimator = _GSMProcNoiseEstimator()
 
     def save_filter_state(self):
         """Saves filter variables so they can be restored later.
@@ -3381,6 +3456,8 @@ class GSMFilterBase(BayesFilter):
                                              for f in self._meas_noise_filters]
 
         filt_state['_import_w_factory_lst'] = self._import_w_factory_lst
+        filt_state['_procNoiseEstimator'] = self._procNoiseEstimator
+
         return filt_state
 
     def load_filter_state(self, filt_state):
@@ -3410,6 +3487,7 @@ class GSMFilterBase(BayesFilter):
                 self._meas_noise_filters[ii].load_filter_state(vals)
 
         self._import_w_factory_lst = filt_state['_import_w_factory_lst']
+        self._procNoiseEstimator = filt_state['_procNoiseEstimator']
 
     def set_state_model(self, **kwargs):
         """Wrapper for the core filters set state model function."""
@@ -3589,6 +3667,48 @@ class GSMFilterBase(BayesFilter):
             msg = 'Incorrect input arguement combination. See documentation for details.'
             raise RuntimeError(msg)
 
+    def set_process_noise_model(self, initial_est=None, filter_length=None,
+                                startup_delay=None):
+        """Sets the filter parameters for estimating process noise.
+
+        This assumes the same process noise model as in
+        :cite:`VilaValls2011_BayesianFilteringforNonlinearStateSpaceModelsinSymmetricStableMeasurementNoise`.
+
+        Parameters
+        ----------
+        initial_est : N x N numpy array, optional
+            Initial estimate of the covariance, can either be set here or by
+            manually setting the process noise variable. The default is None,
+            this assumes process noise was manually set.
+        filter_length : int, optional
+            Number of past samples to use in the filter, must be > 1. The
+            default is None, this implies all past samples are used or the
+            previously set value is maintained.
+        startup_delay : int, optional
+            Number of samples to delay before runing the filter, used to fill
+            the FIFO buffers. Must be >= 1. The default is None, this means
+            either the previous value is maintained or a value of 1 is used.
+
+        Returns
+        -------
+        None.
+        """
+        self.enable_proc_noise_estimation = True
+
+        if filter_length is not None:
+            self._procNoiseEstimator.maxlen = filter_length
+
+        if initial_est is None and (self.proc_noise is None
+                                    or self.proc_noise.size <= 0):
+            msg = 'Please manually set the initial process noise ' \
+                + 'or specify a value here.'
+            warn(msg)
+        elif initial_est is not None:
+            self.proc_noise = initial_est
+
+        if startup_delay is not None:
+            self._procNoiseEstimator.startup_delay = startup_delay
+
     @property
     def cov(self):
         """Covariance of the filter."""
@@ -3631,16 +3751,7 @@ class GSMFilterBase(BayesFilter):
 
         This optionally estimates the process noise then calls the core filters
         prediction function.
-
-        Todo
-        ----
-        Implement the process noise esatimation
         """
-        if self.enable_proc_noise_estimation:
-            # TODO: estimate process noise and update inner filter
-            # TODO: does this go before or after the prediction?
-            warn('Proc noise estimation not implemented yet')
-
         return self._coreFilter.predict(timestep, cur_state, **kwargs)
 
     def correct(self, timestep, meas, cur_state, core_filt_kwargs={}):
@@ -3665,8 +3776,20 @@ class GSMFilterBase(BayesFilter):
 
         self._coreFilter.set_measurement_noise_estimator(est_meas_noise)
 
-        return self._coreFilter.correct(timestep, meas, cur_state,
-                                        **core_filt_kwargs)
+        pred_cov = self.cov.copy()
+        cor_state, meas_fit_prob = self._coreFilter.correct(timestep, meas,
+                                                            cur_state,
+                                                            **core_filt_kwargs)
+
+        # update process noise estimate (if applicable)
+        if self.enable_proc_noise_estimation:
+            self.proc_noise = self._procNoiseEstimator.estimate_next(self.proc_noise,
+                                                                     cur_state,
+                                                                     pred_cov,
+                                                                     cor_state,
+                                                                     self.cov)
+
+        return cor_state, meas_fit_prob
 
     def plot_particles(self, filt_inds, dist_inds, **kwargs):
         """Plots the particle distribution for every given measurement index.
