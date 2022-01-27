@@ -462,8 +462,8 @@ class KalmanFilter(BayesFilter):
         try:
             meas_fit_prob = self._meas_fit_pdf(meas, est_meas, meas_cov)
         except la.LinAlgError:
-            if self._est_meas_noise_fnc is None:
-                raise
+            # if self._est_meas_noise_fnc is None:
+            #     raise
 
             msg = 'Inovation matrix is singular, likely from bad ' \
                 + 'measurement-state pairing for measurement noise estimation.'
