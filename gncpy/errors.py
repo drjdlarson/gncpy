@@ -7,6 +7,12 @@ class ParticleDepletionError(Exception):
     pass
 
 
+class ParticleEstimationDomainError(Exception):
+    """Thrown when a PF has an estimate for a particle outside its valid domain."""
+
+    pass
+
+
 class ExtremeMeasurementNoiseError(Exception):
     """Thrown when the estimated measurement noise covariance is ill formed.
 

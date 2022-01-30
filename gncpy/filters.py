@@ -6,6 +6,7 @@ import scipy.linalg as sla
 import scipy.integrate as s_integrate
 import scipy.stats as stats
 import abc
+from collections import deque
 from warnings import warn
 from copy import deepcopy
 import matplotlib.pyplot as plt
@@ -117,8 +118,9 @@ class KalmanFilter(BayesFilter):
         Measurement noise matrix
     proc_noise : N x N numpy array
         Process noise matrix
-    dt : float, optional
-        Time difference between simulation steps.
+    dt : float
+        Time difference between simulation steps. Required if not using a
+        dynamic object for the state model.
 
     """
 
@@ -136,6 +138,8 @@ class KalmanFilter(BayesFilter):
         self._get_input_mat = None
         self._meas_mat = np.array([[]])
         self._meas_fnc = None
+
+        self._est_meas_noise_fnc = None
 
         super().__init__(**kwargs)
 
@@ -176,6 +180,7 @@ class KalmanFilter(BayesFilter):
             filt_state['_meas_mat'] = self._meas_mat
 
         filt_state['_meas_fnc'] = self._meas_fnc
+        filt_state['_est_meas_noise_fnc'] = self._est_meas_noise_fnc
 
         return filt_state
 
@@ -201,6 +206,7 @@ class KalmanFilter(BayesFilter):
         self._get_input_mat = filt_state['_get_input_mat']
         self._meas_mat = filt_state['_meas_mat']
         self._meas_fnc = filt_state['_meas_fnc']
+        self._est_meas_noise_fnc = filt_state['_est_meas_noise_fnc']
 
     def set_state_model(self, state_mat=None, input_mat=None, cont_time=False,
                         state_mat_fun=None, input_mat_fun=None, dyn_obj=None):
@@ -337,6 +343,29 @@ class KalmanFilter(BayesFilter):
         else:
             raise RuntimeError('Invalid combination of inputs')
 
+    def set_measurement_noise_estimator(self, function):
+        """Sets the model used for estimating the measurement noise parameters.
+
+        This is an optional step and the filter will work properly if this is
+        not called. If it is called, the measurement noise will be estimated
+        during the filter's correction step and the measurement noise attribute
+        will not be used.
+
+        Parameters
+        ----------
+        function : callable
+            A function that implements the prediction and correction steps for
+            an appropriate filter to estimate the measurement noise covariance
+            matrix. It must have the signature `f(est_meas)` where `est_meas`
+            is an Nm x 1 numpy array and it must return an Nm x Nm numpy array
+            representing the measurement noise covariance matrix.
+
+        Returns
+        -------
+        None.
+        """
+        self._est_meas_noise_fnc = function
+
     def _predict_next_state(self, timestep, cur_state, cur_input, state_mat_args,
                             input_mat_args):
         if self._dyn_obj is not None:
@@ -425,6 +454,23 @@ class KalmanFilter(BayesFilter):
 
         return est_meas, meas_mat
 
+    def _meas_fit_pdf(self, meas, est_meas, meas_cov):
+        return stats.multivariate_normal.pdf(meas.ravel(),
+                                             mean=est_meas.ravel(),
+                                             cov=meas_cov)
+
+    def _calc_meas_fit(self, meas, est_meas, meas_cov):
+        try:
+            meas_fit_prob = self._meas_fit_pdf(meas, est_meas, meas_cov)
+        except la.LinAlgError:
+            # if self._est_meas_noise_fnc is None:
+            #     raise
+
+            msg = 'Inovation matrix is singular, likely from bad ' \
+                + 'measurement-state pairing for measurement noise estimation.'
+            raise gerr.ExtremeMeasurementNoiseError(msg) from None
+        return meas_fit_prob
+
     def correct(self, timestep, meas, cur_state, meas_fun_args=()):
         """Implements a discrete time correction step for a Kalman Filter.
 
@@ -440,6 +486,11 @@ class KalmanFilter(BayesFilter):
             Arguments for the measurement matrix function if one has
             been specified. The default is ().
 
+        Raises
+        ------
+        gncpy.errors.ExtremeMeasurementNoiseError
+            If the measurement fit probability calculation fails.
+
         Returns
         -------
         next_state : N x 1 numpy array
@@ -454,7 +505,13 @@ class KalmanFilter(BayesFilter):
 
         # get the Kalman gain
         cov_meas_T = self.cov @ meas_mat.T
-        inov_cov = meas_mat @ cov_meas_T + self.meas_noise
+        inov_cov = meas_mat @ cov_meas_T
+
+        # estimate the measurement noise online if applicable
+        if self._est_meas_noise_fnc is not None:
+            self.meas_noise = self._est_meas_noise_fnc(est_meas, inov_cov)
+
+        inov_cov += self.meas_noise
         inov_cov = (inov_cov + inov_cov.T) * 0.5
         if self.use_cholesky_inverse:
             sqrt_inv_inov_cov = la.inv(la.cholesky(inov_cov))
@@ -472,9 +529,7 @@ class KalmanFilter(BayesFilter):
         self.cov = (np.eye(n_states) - kalman_gain @ meas_mat) @ self.cov
 
         # calculate the measuremnt fit probability assuming Gaussian
-        meas_fit_prob = stats.multivariate_normal.pdf(meas.ravel(),
-                                                      mean=est_meas.ravel(),
-                                                      cov=inov_cov)
+        meas_fit_prob = self._calc_meas_fit(meas, est_meas, inov_cov)
 
         return (next_state, meas_fit_prob)
 
@@ -506,8 +561,8 @@ class ExtendedKalmanFilter(KalmanFilter):
 
         self._ode_lst = None
 
-        if dyn_obj is not None or ode_lst is not None:
-            self.set_state_model(dyn_obj=dyn_obj, ode_lst=ode_lst)
+        # if dyn_obj is not None or ode_lst is not None:
+        #     self.set_state_model(dyn_obj=dyn_obj, ode_lst=ode_lst)
 
         self._integrator = None
 
@@ -577,6 +632,15 @@ class ExtendedKalmanFilter(KalmanFilter):
             msg = 'Invalid state model specified. Check arguments'
             raise RuntimeError(msg)
 
+    def _cont_dyn(self, t, x, *args):
+        """Used in integrator if an ode list is specified."""
+        out = np.zeros(x.shape)
+
+        for ii, f in enumerate(self._ode_lst):
+            out[ii] = f(t, x, *args)
+
+        return out
+
     def _predict_next_state(self, timestep, cur_state, dyn_fun_params):
         if self._dyn_obj is not None:
             next_state = self._dyn_obj.propagate_state(timestep, cur_state,
@@ -585,19 +649,20 @@ class ExtendedKalmanFilter(KalmanFilter):
                                                     dyn_fun_params)
             dt = self._dyn_obj.dt
         elif self._ode_lst is not None:
-            next_state = np.nan * np.ones(cur_state.shape)
-            for ii, f in enumerate(self._ode_lst):
-                self._integrator = s_integrate.ode(f)
-                self._integrator.set_integrator(self.integrator_type,
-                                                **self.integrator_params)
-                self._integrator.set_initial_value(cur_state, timestep)
-                self._integrator.set_f_params(*dyn_fun_params)
+            self._integrator = s_integrate.ode(self._cont_dyn)
+            self._integrator.set_integrator(self.integrator_type,
+                                            **self.integrator_params)
+            self._integrator.set_initial_value(cur_state, timestep)
+            self._integrator.set_f_params(*dyn_fun_params)
 
-                next_time = timestep + self.dt
-                next_state[ii, 0] = self._integrator.integrate(next_time)
-                if not self._integrator.successful():
-                    msg = 'Integration failed at time {}'.format(timestep)
-                    raise RuntimeError(msg)
+            if self.dt is None:
+                raise RuntimeError('dt must be set when using an ODE list')
+
+            next_time = timestep + self.dt
+            next_state = self._integrator.integrate(next_time).reshape(cur_state.shape)
+            if not self._integrator.successful():
+                msg = 'Integration failed at time {}'.format(timestep)
+                raise RuntimeError(msg)
 
             state_mat = gmath.get_state_jacobian(timestep, cur_state,
                                                  self._ode_lst, dyn_fun_params)
@@ -608,7 +673,7 @@ class ExtendedKalmanFilter(KalmanFilter):
 
         return next_state, state_mat, dt
 
-    def predict(self, timestep, cur_state, dyn_fun_params=()):
+    def predict(self, timestep, cur_state, dyn_fun_params=None):
         r"""Prediction step of the EKF.
 
         This assumes continuous time dynamics and integrates the ode's to get
@@ -628,7 +693,7 @@ class ExtendedKalmanFilter(KalmanFilter):
             Current state.
         dyn_fun_params : tuple, optional
             Extra arguments to be passed to the dynamics function. The default
-            is ().
+            is None.
 
         Raises
         ------
@@ -641,6 +706,8 @@ class ExtendedKalmanFilter(KalmanFilter):
             The predicted state.
 
         """
+        if dyn_fun_params is None:
+            dyn_fun_params = ()
         next_state, state_mat, dt = self._predict_next_state(timestep,
                                                              cur_state,
                                                              dyn_fun_params)
@@ -878,6 +945,10 @@ class StudentsTFilter(KalmanFilter):
 
         return next_state
 
+    def _meas_fit_pdf(self, meas, est_meas, meas_cov):
+        return stats.multivariate_t.pdf(meas.ravel(), loc=est_meas.ravel(),
+                                        shape=meas_cov, df=self.meas_noise_dof)
+
     def correct(self, timestep, meas, cur_state, meas_fun_args=()):
         """Implements the correction step of the students T filter.
 
@@ -938,10 +1009,7 @@ class StudentsTFilter(KalmanFilter):
             self.scale = P_kk
 
         # get measurement fit
-        meas_fit_prob = stats.multivariate_t.pdf(meas.ravel(),
-                                                 loc=est_meas.ravel(),
-                                                 shape=inov_cov,
-                                                 df=self.meas_noise_dof)
+        meas_fit_prob = self._calc_meas_fit(meas, est_meas, inov_cov)
 
         return next_state, meas_fit_prob
 
@@ -1308,17 +1376,7 @@ class UnscentedKalmanFilter(ExtendedKalmanFilter):
         self.cov = (self.cov + self.cov.T) * 0.5
         next_state = cur_state + gain @ inov
 
-        try:
-            meas_fit_prob = stats.multivariate_normal.pdf(meas.ravel(),
-                                                          mean=est_meas.ravel(),
-                                                          cov=meas_cov)
-        except la.LinAlgError:
-            if self._est_meas_noise_fnc is None:
-                raise
-
-            msg = 'Inovation matrix is singular, likely from bad ' \
-                + 'measurement-state pairing for measurement noise estimation.'
-            raise gerr.ExtremeMeasurementNoiseError(msg) from None
+        meas_fit_prob = self._calc_meas_fit(meas, est_meas, meas_cov)
 
         return next_state, meas_fit_prob
 
@@ -2811,8 +2869,6 @@ class QuadratureKalmanFilter(KalmanFilter):
         self._sqrt_cov = np.array([[]])
         self._dyn_fnc = None
 
-        self._est_meas_noise_fnc = None
-
     def save_filter_state(self):
         """Saves filter variables so they can be restored later."""
         filt_state = super().save_filter_state()
@@ -2821,7 +2877,6 @@ class QuadratureKalmanFilter(KalmanFilter):
 
         filt_state['_sqrt_cov'] = self._sqrt_cov
         filt_state['_dyn_fnc'] = self._dyn_fnc
-        filt_state['_est_meas_noise_fnc'] = self._est_meas_noise_fnc
 
         return filt_state
 
@@ -2838,7 +2893,6 @@ class QuadratureKalmanFilter(KalmanFilter):
         self.quadPoints = filt_state['quadPoints']
         self._sqrt_cov = filt_state['_sqrt_cov']
         self._dyn_fnc = filt_state['_dyn_fnc']
-        self._est_meas_noise_fnc = filt_state['_est_meas_noise_fnc']
 
     @property
     def points_per_axis(self):
@@ -2909,29 +2963,6 @@ class QuadratureKalmanFilter(KalmanFilter):
             Rasied if no arguments are specified.
         """
         super().set_measurement_model(meas_mat=meas_mat, meas_fun=meas_fun)
-
-    def set_measurement_noise_estimator(self, function):
-        """Sets the model used for estimating the measurement noise parameters.
-
-        This is an optional step and the filter will work properly if this is
-        not called. If it is called, the measurement noise will be estimated
-        during the filter's correction step and the measurement noise attribute
-        will not be used.
-
-        Parameters
-        ----------
-        function : callable
-            A function that implements the prediction and correction steps for
-            an appropriate filter to estimate the measurement noise covariance
-            matrix. It must have the signature `f(est_meas)` where `est_meas`
-            is an Nm x 1 numpy array and it must return an Nm x Nm numpy array
-            representing the measurement noise covariance matrix.
-
-        Returns
-        -------
-        None.
-        """
-        self._est_meas_noise_fnc = function
 
     def _factorize_cov(self, val=None):
         if val is None:
@@ -3092,17 +3123,7 @@ class QuadratureKalmanFilter(KalmanFilter):
         # update covariance as P = P_k - K * P_zz * K^T
         self._corr_update_cov(gain, inov_cov)
 
-        try:
-            meas_fit_prob = stats.multivariate_normal.pdf(meas.ravel(),
-                                                          mean=est_meas.ravel(),
-                                                          cov=inov_cov)
-        except la.LinAlgError:
-            if self._est_meas_noise_fnc is None:
-                raise
-
-            msg = 'Inovation matrix is singular, likely from bad ' \
-                + 'measurement-state pairing for measurement noise estimation.'
-            raise gerr.ExtremeMeasurementNoiseError(msg) from None
+        meas_fit_prob = self._calc_meas_fit(meas, est_meas, inov_cov)
 
         return (cor_state, meas_fit_prob)
 
@@ -3297,19 +3318,82 @@ class SquareRootQKF(QuadratureKalmanFilter):
 
         self._corr_update_cov(gain, state_mat, meas_mat)
 
-        try:
-            meas_fit_prob = stats.multivariate_normal.pdf(meas.ravel(),
-                                                          mean=est_meas.ravel(),
-                                                          cov=inov_cov)
-        except la.LinAlgError:
-            if self._est_meas_noise_fnc is None:
-                raise
-
-            msg = 'Inovation matrix is singular, likely from bad ' \
-                + 'measurement-state pairing for measurement noise estimation.'
-            raise gerr.ExtremeMeasurementNoiseError(msg) from None
+        meas_fit_prob = self._calc_meas_fit(meas, est_meas, inov_cov)
 
         return (cor_state, meas_fit_prob)
+
+
+class _GSMProcNoiseEstimator:
+    """Helper class for estimating proc noise in the GSM filters."""
+
+    def __init__(self):
+        self.q_fifo = deque([], None)
+        self.b_fifo = deque([], None)
+
+        self.startup_delay = 1
+
+        self._last_q_hat = None
+        self._call_count = 0
+
+    @property
+    def maxlen(self):
+        return self.q_fifo.maxlen
+
+    @maxlen.setter
+    def maxlen(self, val):
+        self.q_fifo = deque([], val)
+        self.b_fifo = deque([], val)
+
+    @property
+    def win_len(self):
+        return len(self.q_fifo)
+
+    def estimate_next(self, cur_est, pred_state, pred_cov, cor_state, cor_cov):
+        self._call_count += 1
+
+        # update bk
+        bk = pred_cov - cur_est - cor_cov
+        if self.b_fifo.maxlen is None or len(self.b_fifo) < self.b_fifo.maxlen:
+            bk_last = np.zeros(bk.shape)
+        else:
+            bk_last = self.b_fifo.pop()
+        self.b_fifo.appendleft(bk)
+
+        # update qk and qk_hat
+        qk = cor_state - pred_state
+        if self._last_q_hat is None:
+            self._last_q_hat = np.zeros(qk.shape)
+
+        if self.q_fifo.maxlen is None or len(self.q_fifo) < self.q_fifo.maxlen:
+            qk_last = np.zeros(qk.shape)
+        else:
+            qk_last = self.q_fifo.pop()
+        self.q_fifo.appendleft(qk)
+
+        qk_klast_diff = qk - qk_last
+        win_len = self.win_len
+        inv_win_len = 1 / win_len
+        win_len_m1 = win_len - 1
+        if self._call_count <= np.max([1, self.startup_delay]):
+            return cur_est
+
+        self._last_q_hat += inv_win_len * qk_klast_diff
+
+        # estimate cov
+        qk_khat_diff = qk - self._last_q_hat
+        qklast_khat_diff = qk_last - self._last_q_hat
+        bk_diff = bk_last - bk
+        next_est = cur_est + 1 / win_len_m1 \
+            * (qk_khat_diff @ qk_khat_diff.T
+               - qklast_khat_diff @ qklast_khat_diff.T
+               + inv_win_len * qk_klast_diff @ qk_klast_diff.T
+               + win_len_m1 * inv_win_len * bk_diff)
+
+        # for numerical reasons
+        for ii in range(next_est.shape[0]):
+            next_est[ii, ii] = np.abs(next_est[ii, ii])
+
+        return next_est
 
 
 class GSMFilterBase(BayesFilter):
@@ -3350,6 +3434,7 @@ class GSMFilterBase(BayesFilter):
         self._coreFilter = None
         self._meas_noise_filters = []
         self._import_w_factory_lst = None
+        self._procNoiseEstimator = _GSMProcNoiseEstimator()
 
     def save_filter_state(self):
         """Saves filter variables so they can be restored later.
@@ -3371,6 +3456,8 @@ class GSMFilterBase(BayesFilter):
                                              for f in self._meas_noise_filters]
 
         filt_state['_import_w_factory_lst'] = self._import_w_factory_lst
+        filt_state['_procNoiseEstimator'] = self._procNoiseEstimator
+
         return filt_state
 
     def load_filter_state(self, filt_state):
@@ -3400,6 +3487,7 @@ class GSMFilterBase(BayesFilter):
                 self._meas_noise_filters[ii].load_filter_state(vals)
 
         self._import_w_factory_lst = filt_state['_import_w_factory_lst']
+        self._procNoiseEstimator = filt_state['_procNoiseEstimator']
 
     def set_state_model(self, **kwargs):
         """Wrapper for the core filters set state model function."""
@@ -3443,13 +3531,15 @@ class GSMFilterBase(BayesFilter):
                         samp = stats.norm.rvs(loc=m[ind], scale=std, random_state=_rng)
                         new_parts[ii, ind] = samp
 
-                for ii in range(new_parts.shape[0]):
-                    new_parts[ii, 2] = stats.invgamma.rvs(np.abs(new_parts[ii, 0]) / 2,
-                                                          scale=1 / (2 / np.abs(new_parts[ii, 0])),
-                                                          random_state=_rng)
-
+                df = np.mean(new_parts[:, 0])
+                if df < 0:
+                    msg = 'Degree of freedom must be > 0 {:.4f}'.format(df)
+                    raise gerr.ParticleEstimationDomainError(msg)
+                new_parts[:, 2] = stats.invgamma.rvs(df / 2,
+                                                     scale=1 / (2 / df),
+                                                     random_state=_rng,
+                                                     size=new_parts.shape[0])
                 return new_parts
-
             return import_dist_fnc
 
         pf = BootstrapFilter()
@@ -3577,6 +3667,48 @@ class GSMFilterBase(BayesFilter):
             msg = 'Incorrect input arguement combination. See documentation for details.'
             raise RuntimeError(msg)
 
+    def set_process_noise_model(self, initial_est=None, filter_length=None,
+                                startup_delay=None):
+        """Sets the filter parameters for estimating process noise.
+
+        This assumes the same process noise model as in
+        :cite:`VilaValls2011_BayesianFilteringforNonlinearStateSpaceModelsinSymmetricStableMeasurementNoise`.
+
+        Parameters
+        ----------
+        initial_est : N x N numpy array, optional
+            Initial estimate of the covariance, can either be set here or by
+            manually setting the process noise variable. The default is None,
+            this assumes process noise was manually set.
+        filter_length : int, optional
+            Number of past samples to use in the filter, must be > 1. The
+            default is None, this implies all past samples are used or the
+            previously set value is maintained.
+        startup_delay : int, optional
+            Number of samples to delay before runing the filter, used to fill
+            the FIFO buffers. Must be >= 1. The default is None, this means
+            either the previous value is maintained or a value of 1 is used.
+
+        Returns
+        -------
+        None.
+        """
+        self.enable_proc_noise_estimation = True
+
+        if filter_length is not None:
+            self._procNoiseEstimator.maxlen = filter_length
+
+        if initial_est is None and (self.proc_noise is None
+                                    or self.proc_noise.size <= 0):
+            msg = 'Please manually set the initial process noise ' \
+                + 'or specify a value here.'
+            warn(msg)
+        elif initial_est is not None:
+            self.proc_noise = initial_est
+
+        if startup_delay is not None:
+            self._procNoiseEstimator.startup_delay = startup_delay
+
     @property
     def cov(self):
         """Covariance of the filter."""
@@ -3619,16 +3751,7 @@ class GSMFilterBase(BayesFilter):
 
         This optionally estimates the process noise then calls the core filters
         prediction function.
-
-        Todo
-        ----
-        Implement the process noise esatimation
         """
-        if self.enable_proc_noise_estimation:
-            # TODO: estimate process noise and update inner filter
-            # TODO: does this go before or after the prediction?
-            warn('Proc noise estimation not implemented yet')
-
         return self._coreFilter.predict(timestep, cur_state, **kwargs)
 
     def correct(self, timestep, meas, cur_state, core_filt_kwargs={}):
@@ -3653,8 +3776,20 @@ class GSMFilterBase(BayesFilter):
 
         self._coreFilter.set_measurement_noise_estimator(est_meas_noise)
 
-        return self._coreFilter.correct(timestep, meas, cur_state,
-                                        **core_filt_kwargs)
+        pred_cov = self.cov.copy()
+        cor_state, meas_fit_prob = self._coreFilter.correct(timestep, meas,
+                                                            cur_state,
+                                                            **core_filt_kwargs)
+
+        # update process noise estimate (if applicable)
+        if self.enable_proc_noise_estimation:
+            self.proc_noise = self._procNoiseEstimator.estimate_next(self.proc_noise,
+                                                                     cur_state,
+                                                                     pred_cov,
+                                                                     cor_state,
+                                                                     self.cov)
+
+        return cor_state, meas_fit_prob
 
     def plot_particles(self, filt_inds, dist_inds, **kwargs):
         """Plots the particle distribution for every given measurement index.
@@ -3784,3 +3919,119 @@ class UKFGaussianScaleMixtureFilter(GSMFilterBase):
     def init_sigma_points(self, *args, **kwargs):
         """Wrapper for the core filter; see :meth:`.UnscentedKalmanFilter.init_sigma_points` for details."""
         self._coreFilter.init_sigma_points(*args, **kwargs)
+
+    @property
+    def dt(self):
+        """Wrapper for the core filter: see :attr:`.UnscentedKalmanFilter.dt` for details."""
+        return self._coreFilter.dt
+
+    @dt.setter
+    def dt(self, val):
+        self._coreFilter.dt = val
+
+    @property
+    def alpha(self):
+        """Wrapper for the core filter: see :attr:`.UnscentedKalmanFilter.alpha` for details."""
+        return self._coreFilter.alpha
+
+    @alpha.setter
+    def alpha(self, val):
+        self._coreFilter.alpha = val
+
+    @property
+    def beta(self):
+        """Wrapper for the core filter: see :attr:`.UnscentedKalmanFilter.beta` for details."""
+        return self._coreFilter.beta
+
+    @beta.setter
+    def beta(self, val):
+        self._coreFilter.beta = val
+
+    @property
+    def kappa(self):
+        """Wrapper for the core filter: see :attr:`.UnscentedKalmanFilter.kappa` for details."""
+        return self._coreFilter.kappa
+
+    @kappa.setter
+    def kappa(self, val):
+        self._coreFilter.kappa = val
+
+
+class KFGaussianScaleMixtureFilter(GSMFilterBase):
+    """Implementation of a KF Gaussian Scale Mixture filter.
+
+    This is provided for documentation mostly for purposes. It exposes some of
+    the core KF variables.
+    """
+
+    def __init__(self, **kwargs):
+        """Initialize the object."""
+        super().__init__(**kwargs)
+
+        self._coreFilter = KalmanFilter()
+
+    @property
+    def dt(self):
+        """Wrapper for the core filter; see :attr:`.KalmanFilter.dt`."""
+        return self._coreFilter.dt
+
+    @dt.setter
+    def dt(self, val):
+        self._coreFilter.dt = val
+
+    def set_state_model(self, **kwargs):
+        """Wrapper for the core filter; see :meth:`.KalmanFilter.set_state_model` for details."""
+        super().set_state_model(**kwargs)
+
+    def set_measurement_model(self, **kwargs):
+        """Wrapper for the core filter; see :meth:`.KalmanFilter.set_measurement_model` for details."""
+        super().set_measurement_model(**kwargs)
+
+
+class EKFGaussianScaleMixtureFilter(KFGaussianScaleMixtureFilter):
+    """Implementation of a EKF Gaussian Scale Mixture filter.
+
+    This is provided for documentation purposes. It has the same functionality
+    as the :class:`.GSMFilterBase` class.
+    """
+
+    def __init__(self, **kwargs):
+        """Initialize the object."""
+        super().__init__(**kwargs)
+
+        self._coreFilter = ExtendedKalmanFilter()
+
+    @property
+    def cont_cov(self):
+        """Wrapper for the core filter; see :attr:`.ExtendedKalmanFilter.cont_cov`."""
+        return self._coreFilter.cont_cov
+
+    @cont_cov.setter
+    def cont_cov(self, val):
+        self._coreFilter.cont_cov = val
+
+    @property
+    def integrator_type(self):
+        """Wrapper for the core filter; see :attr:`.ExtendedKalmanFilter.integrator_type`."""
+        return self._coreFilter.integrator_type
+
+    @integrator_type.setter
+    def integrator_type(self, val):
+        self._coreFilter.integrator_type = val
+
+    @property
+    def integrator_params(self):
+        """Wrapper for the core filter; see :attr:`.ExtendedKalmanFilter.integrator_params`."""
+        return self._coreFilter.integrator_params
+
+    @integrator_params.setter
+    def integrator_params(self, val):
+        self._coreFilter.integrator_params = val
+
+    def set_state_model(self, **kwargs):
+        """Wrapper for the core filter; see :meth:`.ExtendedKalmanFilter.set_state_model` for details."""
+        super().set_state_model(**kwargs)
+
+    def set_measurement_model(self, **kwargs):
+        """Wrapper for the core filter; see :meth:`.ExtendedKalmanFilter.set_measurement_model` for details."""
+        super().set_measurement_model(**kwargs)
