@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 import gncpy.filters as gfilts
 import gncpy.dynamics as gdyn
 import gncpy.distributions as gdistrib
+from serums.enums import GSMTypes
+from serums.models import GaussianScaleMixture
 
 
 global_seed = 69
@@ -1779,17 +1781,17 @@ def test_QKF_GSM_gsm():
     # define measurement noise filters
     num_parts = 500
 
-    range_gsm = gdistrib.GaussianScaleMixture(gsm_type=gdistrib.GSMTypes.STUDENTS_T,
-                                              degrees_of_freedom=m_dfs[0],
-                                              df_range=(1, 5),
-                                              scale=np.sqrt(m_vars[0]).reshape((1, 1)),
-                                              scale_range=(0, 5 * np.sqrt(m_vars[0])))
+    range_gsm = GaussianScaleMixture(gsm_type=GSMTypes.STUDENTS_T,
+                                     degrees_of_freedom=m_dfs[0],
+                                     df_range=(1, 5),
+                                     scale=np.sqrt(m_vars[0]).reshape((1, 1)),
+                                     scale_range=(0, 5 * np.sqrt(m_vars[0])))
 
-    bearing_gsm = gdistrib.GaussianScaleMixture(gsm_type=gdistrib.GSMTypes.STUDENTS_T,
-                                                degrees_of_freedom=m_dfs[1],
-                                                df_range=(1, 5),
-                                                scale=np.sqrt(m_vars[1]).reshape((1, 1)),
-                                                scale_range=(0, 5 * np.sqrt(m_vars[1])))
+    bearing_gsm = GaussianScaleMixture(gsm_type=GSMTypes.STUDENTS_T,
+                                       degrees_of_freedom=m_dfs[1],
+                                       df_range=(1, 5),
+                                       scale=np.sqrt(m_vars[1]).reshape((1, 1)),
+                                       scale_range=(0, 5 * np.sqrt(m_vars[1])))
 
     filt.set_meas_noise_model(gsm_lst=[range_gsm, bearing_gsm], num_parts=num_parts,
                               rng=rng)
@@ -1942,17 +1944,17 @@ def test_QKF_GSM_gsm_proc_est():
     # define measurement noise filters
     num_parts = 500
 
-    range_gsm = gdistrib.GaussianScaleMixture(gsm_type=gdistrib.GSMTypes.STUDENTS_T,
-                                              degrees_of_freedom=m_dfs[0],
-                                              df_range=(1, 5),
-                                              scale=np.sqrt(m_vars[0]).reshape((1, 1)),
-                                              scale_range=(0, 5 * np.sqrt(m_vars[0])))
+    range_gsm = GaussianScaleMixture(gsm_type=GSMTypes.STUDENTS_T,
+                                     degrees_of_freedom=m_dfs[0],
+                                     df_range=(1, 5),
+                                     scale=np.sqrt(m_vars[0]).reshape((1, 1)),
+                                     scale_range=(0, 5 * np.sqrt(m_vars[0])))
 
-    bearing_gsm = gdistrib.GaussianScaleMixture(gsm_type=gdistrib.GSMTypes.STUDENTS_T,
-                                                degrees_of_freedom=m_dfs[1],
-                                                df_range=(1, 5),
-                                                scale=np.sqrt(m_vars[1]).reshape((1, 1)),
-                                                scale_range=(0, 5 * np.sqrt(m_vars[1])))
+    bearing_gsm = GaussianScaleMixture(gsm_type=GSMTypes.STUDENTS_T,
+                                       degrees_of_freedom=m_dfs[1],
+                                       df_range=(1, 5),
+                                       scale=np.sqrt(m_vars[1]).reshape((1, 1)),
+                                       scale_range=(0, 5 * np.sqrt(m_vars[1])))
 
     filt.set_meas_noise_model(gsm_lst=[range_gsm, bearing_gsm], num_parts=num_parts,
                               rng=rng)
@@ -2513,17 +2515,17 @@ def test_EKF_GSM_gsm():
     # define measurement noise filters
     num_parts = 500
 
-    range_gsm = gdistrib.GaussianScaleMixture(gsm_type=gdistrib.GSMTypes.STUDENTS_T,
-                                              degrees_of_freedom=m_dfs[0],
-                                              df_range=(1, 5),
-                                              scale=np.sqrt(m_vars[0]).reshape((1, 1)),
-                                              scale_range=(0, 5 * np.sqrt(m_vars[0])))
+    range_gsm = GaussianScaleMixture(gsm_type=GSMTypes.STUDENTS_T,
+                                     degrees_of_freedom=m_dfs[0],
+                                     df_range=(1, 5),
+                                     scale=np.sqrt(m_vars[0]).reshape((1, 1)),
+                                     scale_range=(0, 5 * np.sqrt(m_vars[0])))
 
-    bearing_gsm = gdistrib.GaussianScaleMixture(gsm_type=gdistrib.GSMTypes.STUDENTS_T,
-                                                degrees_of_freedom=m_dfs[1],
-                                                df_range=(1, 5),
-                                                scale=np.sqrt(m_vars[1]).reshape((1, 1)),
-                                                scale_range=(0, 5 * np.sqrt(m_vars[1])))
+    bearing_gsm = GaussianScaleMixture(gsm_type=GSMTypes.STUDENTS_T,
+                                       degrees_of_freedom=m_dfs[1],
+                                       df_range=(1, 5),
+                                       scale=np.sqrt(m_vars[1]).reshape((1, 1)),
+                                       scale_range=(0, 5 * np.sqrt(m_vars[1])))
 
     filt.set_meas_noise_model(gsm_lst=[range_gsm, bearing_gsm], num_parts=num_parts,
                               rng=rng)

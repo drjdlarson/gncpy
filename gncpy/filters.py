@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import gncpy.math as gmath
 import gncpy.plotting as pltUtil
 import gncpy.distributions as gdistrib
+from serums.enums import GSMTypes
 import gncpy.dynamics as gdyn
 import gncpy.errors as gerr
 
@@ -3576,7 +3577,7 @@ class GSMFilterBase(BayesFilter):
 
         The filters and importance
         weight factories can be provided or a list of
-        :class:`.distributions.GaussianScaleMixture` objecst, list of particles,
+        :class:`serums.models.GaussianScaleMixture` objecst, list of particles,
         and a random number generator. If the latter set is given then
         bootstrap filters are constructed automatically. The recommended way
         of specifying the filters is to provide GSM objects.
@@ -3602,7 +3603,7 @@ class GSMFilterBase(BayesFilter):
             :attr:`.BootstrapFilter.importance_weight_fnc` for more details. The
             default is None.
         gsm_lst : list, optional
-            List of :class:`.distributions.GaussianScaleMixture` objects, one
+            List of :class:`serums.models.GaussianScaleMixture` objects, one
             per measurement. Requires `num_parts` also be specified and optionally
             `rng`. The default is None.
         num_parts : list or int, optional
@@ -3653,8 +3654,7 @@ class GSMFilterBase(BayesFilter):
                 if rng is None:
                     rng = rnd.default_rng()
 
-                if gsm.type in [gdistrib.GSMTypes.STUDENTS_T,
-                                gdistrib.GSMTypes.CAUCHY]:
+                if gsm.type in [GSMTypes.STUDENTS_T, GSMTypes.CAUCHY]:
                     (self._meas_noise_filters[ii],
                      self._import_w_factory_lst[ii]) = self._define_student_t_pf(gsm, rng, num_parts[ii])
 
