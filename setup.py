@@ -8,7 +8,7 @@ def readme():
 setuptools.setup(name='gncpy',
                  version='0.0.0',
                  description='A package for Guidance, Navigation, and Control (GNC) algorithms.',
-                 long_description=readme(),
+                 # long_description=readme(),
                  url='https://github.com/drjdlarson/gncpy',
                  author='Laboratory for Autonomy GNC and Estimation Research (LAGER)',
                  author_email='',

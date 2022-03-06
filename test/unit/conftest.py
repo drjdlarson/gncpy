@@ -43,26 +43,6 @@ def inv_state_func_list():
     return [f1, f2]
 
 
-@pytest.fixture(scope="session")
-def yaml_file():
-    root_dir = path.dirname(path.abspath(__file__))
-    return path.abspath(path.join(root_dir, '../fixtures/test_yaml1.yaml'))
-
-
-@pytest.fixture(scope="session")
-def yaml_file_lst():
-    root_dir = path.dirname(path.abspath(__file__))
-    f1 = path.abspath(path.join(root_dir, '../fixtures/test_yaml1.yaml'))
-    f2 = path.abspath(path.join(root_dir, '../fixtures/test_yaml2.yaml'))
-    return (f1, f2)
-
-
-@pytest.fixture(scope="session")
-def alm_file():
-    root_dir = path.dirname(path.abspath(__file__))
-    return path.abspath(path.join(root_dir, '../fixtures/test_alm.alm'))
-
-
 @pytest.fixture(scope="function")
 def kalmanFilter():
     filt = filters.KalmanFilter()
