@@ -6,8 +6,8 @@ Welcome to GNCPy's documentation!
    :caption: Contents:
 
    api
+   toolchain
    References
-   Publications
    license
 
 
