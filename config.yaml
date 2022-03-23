@@ -1,0 +1,56 @@
+window:
+    width: 640
+    height: 480
+
+physics:
+    dt: 0.1
+    max_time: 100
+
+player:
+    birth_model:
+        type: Gaussian
+        location:
+            - 200
+            - 100
+        scale:
+            - 2
+            - 2
+        params: None
+
+    dynamics_model: TODO implement this
+
+    shape_model:
+        type: 'rect'
+        radius: 10
+        color:
+            - 0
+            - 0
+            - 255
+
+    collision_model:
+        width: 20
+        height: 20
+
+obstacles:
+    -
+      loc_x: 20
+      loc_y: 20
+      radius: 3
+      shape_type: 'rect'
+      shape_color:
+          - 0
+          - 0
+          - 0
+      collision_width: 6
+      collision_height: 6
+    -
+      loc_x: 200
+      loc_y: 80
+      radius: 3
+      shape_type: 'rect'
+      shape_color:
+          - 0
+          - 0
+          - 0
+      collision_width: 6
+      collision_height: 6
