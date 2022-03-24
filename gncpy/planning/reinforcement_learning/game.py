@@ -176,6 +176,9 @@ class Game2d(ABC):
         self._render_mode = render_mode
         self._render_fps = render_fps
 
+        self.origin_pos = None
+        self.dist_per_pix = None
+
         with open(config_file, 'r') as fin:
             conf = yaml.safe_load(fin)
 
@@ -210,6 +213,18 @@ class Game2d(ABC):
 
             else:
                 print('Unrecognized key ({}) in config file'.format(key))
+
+    def _pixels_to_dist(self, pt, pos_ind=None):
+        if pos_ind is not None:
+            return pt * self.dist_per_pix + self.origin_pos[pos_ind].item()
+        else:
+            return pt * self.dist_per_pix
+
+    def _dist_to_pixels(self, pt, pos_ind=None):
+        if pos_ind is not None:
+            return int((pt - self.origin_pos[pos_ind]) / self.dist_per_pix)
+        else:
+            return int(pt / self.dist_per_pix)
 
     def setup_window(self, params):
         extra = {}
@@ -250,10 +265,9 @@ class Game2d(ABC):
         for o_params in params:
             e = self._entity_manager.add_entity('obstacle')
 
-            # TODO: scale from real coordinates to pixels
             e.c_transform = CTransform()
-            e.c_transform.pos[0] = o_params['loc_x']
-            e.c_transform.pos[1] = o_params['loc_y']
+            e.c_transform.pos[0] = self._dist_to_pixels(o_params['loc_x'], pos_ind=0)
+            e.c_transform.pos[1] = self._idst_to_pixels(o_params['loc_y'], pos_ind=1)
 
             e.c_shape = CShape(o_params['shape_type'], o_params['radius'],
                                tuple(o_params['shape_color']))
@@ -270,6 +284,20 @@ class Game2d(ABC):
     def setup_physics(self, params):
         self.dt = float(params['dt'])
         self.max_time = float(params['max_time'])
+        self.origin_pos = np.array([[float(params['origin_x'])],
+                                    [float(params['origin_y'])]])
+        if 'dist_per_pix' in params:
+            self.dist_per_pix = float(params['dist_per_pix'])
+
+        elif 'dist_width' in params:
+            self.dist_per_pix = float(params['dist_width'] / self._window.get_width())
+
+        elif 'dist_height' in params:
+            self.dist_per_pix = float(params['dist_height'] / self._window.get_height())
+
+        else:
+            raise RuntimeError('Invalid distance to pixel mapping')
+
 
     def s_movement(self, action):
         """Move entities according to their dynamics.
@@ -303,9 +331,9 @@ class Game2d(ABC):
                                                              e.c_dynamics.min_vel)),
                                                   axis=1).reshape(shape)
 
-                # TODO: map from real space to pixels
-                e.c_transform.pos = e.c_dynamics.state[p_ii].astype(int)
-                e.c_transform.vel = e.c_dynamics.state[v_ii].astype(int)
+                e.c_transform.pos = self._dist_to_pixels(e.c_dynamics.state[p_ii],
+                                                         pos_ind=[0, 1])
+                e.c_transform.vel = self._dist_to_pixels(e.c_dynamics.state[v_ii])
 
     def s_collision(self):
         """Check for collisions between entities.
@@ -405,9 +433,9 @@ class Game2d(ABC):
                     p_ii = e.c_dynamics.pos_inds
                     v_ii = e.c_dynamics.vel_inds
 
-                    # TODO: map from pixels to real space
-                    e.c_dynamics.state[p_ii] = e.c_transform.pos
-                    e.c_dynamics.state[v_ii] = e.c_transform.vel
+                    e.c_dynamics.state[p_ii] = self._pixels_to_dist(e.c_transform.pos,
+                                                                    pos_ind=[0, 1])
+                    e.c_dynamics.state[v_ii] = self._pixels_to_dist(e.c_transform.vel)
 
     def step(self, action):
         """Perform one iteration of the game loop.
