@@ -24,21 +24,23 @@ player:
 
     shape_model:
         type: 'rect'
-        radius: 10
+        width: 2
+        height: 2
         color:
             - 0
             - 0
             - 255
 
     collision_model:
-        width: 20
-        height: 20
+        width: 10
+        height: 10
 
 obstacles:
     -
       loc_x: 20
       loc_y: 20
-      radius: 3
+      width: 3
+      height: 3
       shape_type: 'rect'
       shape_color:
           - 0
@@ -49,7 +51,8 @@ obstacles:
     -
       loc_x: 200
       loc_y: 80
-      radius: 3
+      width: 6
+      height: 6
       shape_type: 'rect'
       shape_color:
           - 0

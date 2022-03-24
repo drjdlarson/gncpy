@@ -117,9 +117,9 @@ class CDynamics:
 
 
 class CShape:
-    def __init__(self, shape, radius, color):
+    def __init__(self, shape, w, h, color):
         if shape.lower() == 'rect':
-            self.shape = pygame.Rect((0, 0), (2 * radius, 2 * radius))
+            self.shape = pygame.Rect((0, 0), (w, h))
 
         self.color = color
 
@@ -253,7 +253,8 @@ class Game2d(ABC):
 
         # TODO: allow for other shape types
         s_params = params['shape_model']
-        e.c_shape = CShape(s_params['type'], s_params['radius'], tuple(s_params['color']))
+        e.c_shape = CShape(s_params['type'], s_params['width'],
+                           s_params['height'], tuple(s_params['color']))
 
         c_params = params['collision_model']
         e.c_collision = CCollision(c_params['width'], c_params['height'])
@@ -269,7 +270,8 @@ class Game2d(ABC):
             e.c_transform.pos[0] = self._dist_to_pixels(o_params['loc_x'], pos_ind=0)
             e.c_transform.pos[1] = self._idst_to_pixels(o_params['loc_y'], pos_ind=1)
 
-            e.c_shape = CShape(o_params['shape_type'], o_params['radius'],
+            e.c_shape = CShape(o_params['shape_type'], o_params['width'],
+                               o_params['height'],
                                tuple(o_params['shape_color']))
             e.c_collision = CCollision(o_params['collision_width'],
                                        o_params['collision_height'])
@@ -353,25 +355,27 @@ class Game2d(ABC):
         # check for collision of player
         for e in self._entity_manager.get_entities('player'):
             if e.c_transform is not None and e.c_collision is not None:
-                r = e.c_collision.aabb.width / 2
+                w2 = e.c_collision.aabb.width / 2
 
                 # check for out of bounds, stop at out of bounds
                 went_oob = False
-                if e.c_transform.pos[0] - r < 0:
-                    e.c_transform.pos[0] = r
+                if e.c_transform.pos[0] - w2 < 0:
+                    e.c_transform.pos[0] = w2
                     e.c_transform.vel[0] = 0
                     went_oob = True
-                elif e.c_transform.pos[0] + r > self._window.get_width():
-                    e.c_transform.pos[0] = self._window.get_width() - r
+                elif e.c_transform.pos[0] + w2 > self._window.get_width():
+                    e.c_transform.pos[0] = self._window.get_width() - w2
                     e.c_transform.vel[0] = 0
                     went_oob = True
 
-                if e.c_transform.pos[1] - r < 0:
-                    e.c_transform.pos[1] = r
+                h2 = e.c_collision.aabb.height / 2
+
+                if e.c_transform.pos[1] - h2 < 0:
+                    e.c_transform.pos[1] = h2
                     e.c_transform.vel[1] = 0
                     went_oob = True
-                elif e.c_transform.pos[1] + r > self._window.get_height():
-                    e.c_transform.pos[1] = self._window.get_height() - r
+                elif e.c_transform.pos[1] + h2 > self._window.get_height():
+                    e.c_transform.pos[1] = self._window.get_height() - h2
                     e.c_transform.vel[1] = 0
                     went_oob = True
 
@@ -389,11 +393,11 @@ class Game2d(ABC):
                         dy = e.c_transform.pos[1] - w_aabb.centery
                         v = pygame.math.Vector2(e.c_transform.vel[0], e.c_transform.vel[1])
                         if abs(dx) > abs(dy):
-                            e.c_transform.pos[0] = w_aabb.left - r if dx < 0 else w_aabb.right + r
+                            e.c_transform.pos[0] = w_aabb.left - w2 if dx < 0 else w_aabb.right + w2
                             if (dx < 0 and v[0] > 0) or (dx > 0 and v[0] < 0):
                                 v.reflect_ip(pygame.math.Vector2(1, 0))
                         else:
-                            e.c_transform.pos[1] = w_aabb.top - r if dy < 0 else w_aabb.bottom + r
+                            e.c_transform.pos[1] = w_aabb.top - h2 if dy < 0 else w_aabb.bottom + h2
                             if (dy < 0 and v[1] > 0) or (dy > 0 and v[1] < 0):
                                 v.reflect_ip(pygame.math.Vector2(0, 1))
                         e.c_transform.vel[0], e.c_transform.vel[1] = v.x, v.y
