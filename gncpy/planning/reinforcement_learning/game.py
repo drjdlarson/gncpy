@@ -152,7 +152,67 @@ class CEvents:
 
 
 # %% Systems
-class Game2d(ABC):
+class Game(ABC):
+    """Base class for defining games.
+
+    This should implement all the necessary systems (i.e. game logic) by operating
+    on entities.
+    """
+
+    def __init__(self, render_mode, render_fps=60):
+        """Initalize an object.
+
+        The child class should call the :meth:`.parse_config_file` function
+        after declaring all its attributes.
+        """
+        super().__init__()
+
+        self._entity_manager = EntityManager()
+        self._current_frame = 0
+        self._render_mode = render_mode
+        self._render_fps = render_fps
+
+        self.game_over = False
+
+    @abstractmethod
+    def parse_config_file(self, config_file):
+        pass
+
+    @abstractmethod
+    def step(self, action):
+        pass
+
+    @abstractmethod
+    def render(self):
+        pass
+
+    @abstractmethod
+    def s_movement(self, action):
+        """Move entities according to their dynamics.
+
+        Parameters
+        ----------
+        action : TYPE
+            DESCRIPTION.
+
+        Returns
+        -------
+        None.
+        """
+        pass
+
+    @abstractmethod
+    def s_collision(self):
+        """Check for collisions between entities.
+
+        Returns
+        -------
+        None.
+        """
+        pass
+
+
+class Game2d(Game):
     """Base class for defining 2d games.
 
     This should implement all the necessary systems (i.e. game logic) by operating
@@ -160,30 +220,24 @@ class Game2d(ABC):
     """
 
     def __init__(self, config_file, render_mode, render_fps=60):
+        super().__init__(render_mode, render_fps=render_fps)
+
         pygame.init()
 
         self._window = None
         self._clock = pygame.time.Clock()
-
-        self._entity_manager = EntityManager()
-        self._current_frame = 0
-
         self._img = np.array([[]])
+
         self.dt = None
         self.max_time = None
-        self.game_over = False
-
-        self._render_mode = render_mode
-        self._render_fps = render_fps
-
         self.origin_pos = None
         self.dist_per_pix = None
 
+        self.parse_config_file(config_file)
+
+    def parse_config_file(self, config_file, verbose=True):
         with open(config_file, 'r') as fin:
             conf = yaml.safe_load(fin)
-
-            # except yaml.YAMLError as exc:
-            #     print(exc)
 
         if 'window' in conf.keys():
             self.setup_window(conf['window'])
@@ -211,7 +265,7 @@ class Game2d(ABC):
             elif key == 'hazards':
                 self.setup_hazards(params)
 
-            else:
+            elif verbose:
                 print('Unrecognized key ({}) in config file'.format(key))
 
     def _pixels_to_dist(self, pt, pos_ind=None):
@@ -231,10 +285,100 @@ class Game2d(ABC):
         if self._render_mode !='human':
             extra['flags'] = pygame.HIDDEN
 
-        self._window = pygame.display.set_mode((int(params['width']), int(params['height'])),
+        self._window = pygame.display.set_mode((int(params['width']),
+                                                int(params['height'])),
                                                **extra)
 
-    # @abstractmethod
+    @abstractmethod
+    def setup_player(self, params):
+        pass
+
+    @abstractmethod
+    def setup_obstacles(self, params):
+        pass
+
+    @abstractmethod
+    def setup_targets(self, params):
+        pass
+
+    @abstractmethod
+    def setup_hazards(self, params):
+        pass
+
+    def setup_physics(self, params):
+        self.dt = float(params['dt'])
+        self.max_time = float(params['max_time'])
+        self.origin_pos = np.array([[float(params['origin_x'])],
+                                    [float(params['origin_y'])]])
+        if 'dist_per_pix' in params:
+            self.dist_per_pix = float(params['dist_per_pix'])
+
+        elif 'dist_width' in params:
+            self.dist_per_pix = float(params['dist_width'] / self._window.get_width())
+
+        elif 'dist_height' in params:
+            self.dist_per_pix = float(params['dist_height'] / self._window.get_height())
+
+        else:
+            raise RuntimeError('Invalid distance to pixel mapping')
+
+    @abstractmethod
+    def s_game_over(self):
+        pass
+
+    def step(self, action):
+        """Perform one iteration of the game loop.
+
+        Parameters
+        ----------
+        action : TYPE
+            DESCRIPTION.
+        """
+        self._entity_manager.update()
+
+        self.s_game_over()
+
+        # clear events for entities
+        for e in self._entity_manager.get_entities():
+            if e.c_events is not None:
+                e.c_events.events = []
+
+        self.s_movement(action)
+        self.s_collision()
+
+        self.score = None
+
+        self._current_frame += 1
+        self.render()
+
+    def render(self):
+        """Render a frame of the game."""
+        surf = pygame.Surface(self._window.get_size())
+        surf.fill((255, 255, 255))
+
+        for e in self._entity_manager.get_entities():
+            if e.c_shape is not None and e.c_transform is not None:
+                e.c_shape.shape.centerx = e.c_transform.pos[0].item()
+                e.c_shape.shape.centery = e.c_transform.pos[1].item()
+
+                pygame.draw.rect(surf, e.c_shape.color, e.c_shape.shape)
+
+        surf = pygame.transform.flip(surf, False, True)
+        self._window.blit(surf, (0, 0))
+
+        if self._render_mode == 'human':
+            pygame.event.pump()
+            self._clock.tick(self._render_fps)
+            pygame.display.flip()
+
+        self._img = np.transpose(np.array(pygame.surfarray.pixels3d(self._window)),
+                                 axes=(1, 0, 2))
+
+
+class SimpleUAV2d(Game2d):
+    def __init__(self, config_file, render_mode, render_fps=60):
+        super().__init__(config_file, render_mode, render_fps=render_fps)
+
     def setup_player(self, params):
         e = self._entity_manager.add_entity('player')
 
@@ -261,14 +405,13 @@ class Game2d(ABC):
 
         e.c_events = CEvents()
 
-
     def setup_obstacles(self, params):
         for o_params in params:
             e = self._entity_manager.add_entity('obstacle')
 
             e.c_transform = CTransform()
             e.c_transform.pos[0] = self._dist_to_pixels(o_params['loc_x'], pos_ind=0)
-            e.c_transform.pos[1] = self._idst_to_pixels(o_params['loc_y'], pos_ind=1)
+            e.c_transform.pos[1] = self._dist_to_pixels(o_params['loc_y'], pos_ind=1)
 
             e.c_shape = CShape(o_params['shape_type'], o_params['width'],
                                o_params['height'],
@@ -276,30 +419,13 @@ class Game2d(ABC):
             e.c_collision = CCollision(o_params['collision_width'],
                                        o_params['collision_height'])
 
-    # @abstractmethod
+    # TODO: implement this
     def setup_targets(self, params):
         pass
 
+    # TODO implement this
     def setup_hazards(self, params):
         pass
-
-    def setup_physics(self, params):
-        self.dt = float(params['dt'])
-        self.max_time = float(params['max_time'])
-        self.origin_pos = np.array([[float(params['origin_x'])],
-                                    [float(params['origin_y'])]])
-        if 'dist_per_pix' in params:
-            self.dist_per_pix = float(params['dist_per_pix'])
-
-        elif 'dist_width' in params:
-            self.dist_per_pix = float(params['dist_width'] / self._window.get_width())
-
-        elif 'dist_height' in params:
-            self.dist_per_pix = float(params['dist_height'] / self._window.get_height())
-
-        else:
-            raise RuntimeError('Invalid distance to pixel mapping')
-
 
     def s_movement(self, action):
         """Move entities according to their dynamics.
@@ -441,52 +567,7 @@ class Game2d(ABC):
                                                                     pos_ind=[0, 1])
                     e.c_dynamics.state[v_ii] = self._pixels_to_dist(e.c_transform.vel)
 
-    def step(self, action):
-        """Perform one iteration of the game loop.
-
-        Parameters
-        ----------
-        action : TYPE
-            DESCRIPTION.
-        """
-        self._entity_manager.update()
-
+    def s_game_over(self):
         self.game_over = (self._current_frame * self.dt >= self.max_time
                           # or len(self._entity_manager.get_entities('target')) == 0
                           or len(self._entity_manager.get_entities('player')) == 0)
-
-        # clear events for entities
-        for e in self._entity_manager.get_entities():
-            if e.c_events is not None:
-                e.c_events.events = []
-
-        self.s_movement(action)
-        self.s_collision()
-
-        self.score = None
-
-        self._current_frame += 1
-        self.render()
-
-    def render(self):
-        """Render a frame of the game."""
-        surf = pygame.Surface(self._window.get_size())
-        surf.fill((255, 255, 255))
-
-        for e in self._entity_manager.get_entities():
-            if e.c_shape is not None and e.c_transform is not None:
-                e.c_shape.shape.centerx = e.c_transform.pos[0].item()
-                e.c_shape.shape.centery = e.c_transform.pos[1].item()
-
-                pygame.draw.rect(surf, e.c_shape.color, e.c_shape.shape)
-
-        surf = pygame.transform.flip(surf, False, True)
-        self._window.blit(surf, (0, 0))
-
-        if self._render_mode == 'human':
-            pygame.event.pump()
-            self._clock.tick(self._render_fps)
-            pygame.display.flip()
-
-        self._img = np.transpose(np.array(pygame.surfarray.pixels3d(self._window)),
-                                 axes=(1, 0, 2))
