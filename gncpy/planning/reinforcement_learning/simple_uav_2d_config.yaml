@@ -5,8 +5,8 @@ window:
 physics:
     dt: 0.1
     max_time: 10
-    origin_x: 0
-    origin_y: 0
+    min_x: 0
+    min_y: 0
     dist_width: 40
     dist_height: 40
 
@@ -142,31 +142,31 @@ targets:
           - 'radar'
           - 'lidar'
 
-# hazards:
-#     -
-#       loc_x: 15
-#       loc_y: 17
-#       width: 20
-#       height: 5
-#       shape_type: 'rect'
-#       shape_color:
-#           - 255
-#           - 215
-#           - 0
-#       collision_width: 20
-#       collision_height: 5
-#       prob_of_death: 0.1
+hazards:
+    -
+      loc_x: 15
+      loc_y: 17
+      width: 20
+      height: 5
+      shape_type: 'rect'
+      shape_color:
+          - 255
+          - 215
+          - 0
+      collision_width: 20
+      collision_height: 5
+      prob_of_death: 0.05
 
-#     -
-#       loc_x: 10
-#       loc_y: 38
-#       width: 3
-#       height: 6
-#       shape_type: 'rect'
-#       shape_color:
-#           - 255
-#           - 215
-#           - 0
-#       collision_width: 3
-#       collision_height: 6
-#       prob_of_death: 0.2
+    -
+      loc_x: 10
+      loc_y: 38
+      width: 3
+      height: 6
+      shape_type: 'rect'
+      shape_color:
+          - 255
+          - 215
+          - 0
+      collision_width: 3
+      collision_height: 6
+      prob_of_death: 0.1

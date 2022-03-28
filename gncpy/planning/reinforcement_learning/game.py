@@ -107,7 +107,7 @@ def _ctrl_mod(t, *args):
     return np.vstack((np.zeros((2, 2)), 5 * np.eye(2)))
 
 class CDynamics:
-    def __init__(self, dt):
+    def __init__(self, dt, x_width, y_width, min_posx, min_posy):
         self.dynObj = gdyn.DoubleIntegrator(control_model=_ctrl_mod)
 
         n_states = len(gdyn.DoubleIntegrator.state_names)
@@ -121,6 +121,10 @@ class CDynamics:
 
         self.max_vel = 10 * np.ones((2, 1))
         self.min_vel = -10 * np.ones((2, 1))
+
+        self.state_low = np.array([min_posx, min_posy, -10, -10])
+        self.state_high = np.array([min_posx + x_width, min_posy + y_width,
+                                    10, 10])
 
 
 class CShape:
@@ -268,9 +272,12 @@ class Game2d(Game):
         self._clock = pygame.time.Clock()
         self._img = None
 
+        self.max_n_targets = None
         self.dt = None
         self.max_time = None
-        self.origin_pos = None
+        self.min_pos = None
+        self.dist_width = None
+        self.dist_height = None
         self.dist_per_pix = None
 
     def reset(self):
@@ -310,9 +317,12 @@ class Game2d(Game):
             elif verbose:
                 print('Unrecognized key ({}) in config file'.format(key))
 
+        # ensure all things are properly added to the manager so wrappers can use values before calling step
+        self._entity_manager.update()
+
     def _pixels_to_dist(self, pt, ind, translate):
         if translate:
-            res = pt * self.dist_per_pix[ind] + self.origin_pos[ind]
+            res = pt * self.dist_per_pix[ind] + self.min_pos[ind]
         else:
             res = pt * self.dist_per_pix[ind]
 
@@ -326,7 +336,7 @@ class Game2d(Game):
 
     def _dist_to_pixels(self, pt, ind, translate):
         if translate:
-            res = (pt - self.origin_pos[ind]) / self.dist_per_pix[ind]
+            res = (pt - self.min_pos[ind]) / self.dist_per_pix[ind]
         else:
             res = pt / self.dist_per_pix[ind]
 
@@ -348,6 +358,18 @@ class Game2d(Game):
                                                **extra)
 
     @abstractmethod
+    def get_num_targets(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_player_state_bounds(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_player_state(self):
+        raise NotImplementedError
+
+    @abstractmethod
     def setup_player(self, params):
         pass
 
@@ -366,9 +388,11 @@ class Game2d(Game):
     def setup_physics(self, params):
         self.dt = float(params['dt'])
         self.max_time = float(params['max_time'])
-        self.origin_pos = np.array([[float(params['origin_x'])],
-                                    [float(params['origin_y'])]])
+        self.min_pos = np.array([[float(params['min_x'])],
+                                 [float(params['min_y'])]])
 
+        self.dist_width = float(params['dist_width'])
+        self.dist_height = float(params['dist_height'])
         self.dist_per_pix = np.array([[float(params['dist_width'] / self._window.get_width())],
                                       [float(params['dist_height'] / self._window.get_height())]])
 
@@ -383,8 +407,6 @@ class Game2d(Game):
         self._current_frame += 1
         self._entity_manager.update()
 
-        self.s_game_over()
-
         # clear events for entities
         for e in self._entity_manager.get_entities():
             if e.c_events is not None:
@@ -396,6 +418,8 @@ class Game2d(Game):
         self.s_score()
 
         self.render()
+
+        self.s_game_over()
 
     def render(self):
         """Render a frame of the game."""
@@ -537,6 +561,7 @@ class SimpleUAV2d(Game2d):
         self._config_file = config_file
         self._scoreCls = BasicScore()
         self._all_capabilities = []
+        self._player_state_size = None
 
         self.parse_config_file(self._config_file)
 
@@ -547,6 +572,28 @@ class SimpleUAV2d(Game2d):
         for c in lst:
             if c not in self._all_capabilities:
                 self._all_capabilities.append(c)
+
+    def get_num_targets(self):
+        return sum([1 for t in self._entity_manager.get_entities('target')
+                    if t.active])
+
+    def get_player_state_bounds(self):
+        p_lst = self._entity_manager.get_entities('player')
+        # if len(p_lst) == 0:
+        #     return self._player_state_bnds
+        # else:
+        p = p_lst[0]
+        return np.vstack((p.c_dynamics.state_low.copy(),
+                          p.c_dynamics.state_high.copy()))
+
+    def get_player_state(self):
+        p_lst = self._entity_manager.get_entities('player')
+        # if len(p_lst) == 0:
+        #     return np.zeros(self._player_state_size)
+        # else:
+        p = p_lst[0]
+        return p.c_dynamics.state.copy().ravel()
+
 
     @property
     def current_time(self):
@@ -569,8 +616,14 @@ class SimpleUAV2d(Game2d):
 
         # TODO: allow for other dyanmics models
         d_params = params['dynamics_model']
-        e.c_dynamics = CDynamics(self.dt)
+        e.c_dynamics = CDynamics(self.dt, self.dist_width, self.dist_height,
+                                 self.min_pos[0], self.min_pos[1])
         e.c_dynamics.state = np.vstack((e.c_birth.loc, 0, 0))
+        self._player_state_size = e.c_dynamics.state.size
+        # self._init_player_state = e.c_dynamics.state.copy()
+        # # hold state bounds for use before first frame
+        # self._player_state_bnds = np.vstack((e.c_dynamics.state_low,
+        #                                      e.c_dynamics.state_high))
 
         e.c_transform = CTransform()
 
@@ -614,6 +667,8 @@ class SimpleUAV2d(Game2d):
                                                             1, False))
 
     def setup_targets(self, params):
+        # TODO: modify this when allowing for sequences of targets
+        self.max_n_targets = len(params)
         for t_params in params:
             e = self._entity_manager.add_entity('target')
 
@@ -827,9 +882,11 @@ class SimpleUAV2d(Game2d):
                                                                     [0, 1], False)
 
     def s_game_over(self):
+        alive_players = list(filter(lambda _x: _x.active,
+                                    self._entity_manager.get_entities('player')))
         self.game_over = (self.current_time >= self.max_time
                           or len(self._entity_manager.get_entities('target')) == 0
-                          or len(self._entity_manager.get_entities('player')) == 0)
+                          or len(alive_players) == 0)
 
     def s_score(self):
         self.score = self._scoreCls.calc_score(self.current_time,
