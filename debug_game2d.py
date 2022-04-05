@@ -24,8 +24,8 @@ if __name__ == '__main__':
         obs = env.reset()
         tot_reward = 0
         while not done:
-            action = rng.uniform(low=-1, high=1, size=2).reshape((2, 1))
-            # action = np.array([[-1], [0]])
+            # action = rng.uniform(low=-1, high=1, size=2).reshape((2, 1))
+            action = np.array([[1], [1]])
             obs, rewards, done, info = env.step(action)
             env.render()
             # tot_reward += rewards

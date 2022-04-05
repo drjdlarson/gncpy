@@ -20,9 +20,11 @@ class BaseEnv(gym.Env):
         self._game = game
 
     def step(self, action):
-        self._game.step(action)
+        info = {}
 
-        info = self.generate_step_info()
+        info.update(self._game.step(action))
+
+        info.update(self.generate_step_info())
         obs = self.generate_observation()
 
         return obs, self._game.score, self._game.game_over, info
@@ -68,6 +70,7 @@ class SimpleUAV2d(BaseEnv):
         self._fig = None
 
         self.action_space = spaces.Box(low=-1., high=1., shape=(2,))
+        # self.action_space = spaces.Box(low=np.array([0, -1]), high=np.array([1, 1]))
         self.observation_space = self._calc_obs_space()
 
     def _calc_obs_space(self):
@@ -177,4 +180,5 @@ class SimpleUAV2d(BaseEnv):
 
     def reset(self):
         self._game.reset()
+        self._game.step(np.zeros_like(self.action_space.low))
         return self.generate_observation()

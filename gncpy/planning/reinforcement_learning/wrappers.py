@@ -2,198 +2,255 @@ import gym
 import numpy as np
 import cv2
 
-
-# class Preprocess2dGame(gym.Wrapper):
-#     r"""Atari 2600 preprocessings.
-#     This class follows the guidelines in
-#     Machado et al. (2018), "Revisiting the Arcade Learning Environment:
-#     Evaluation Protocols and Open Problems for General Agents".
-#     Specifically:
-#     * NoopReset: obtain initial state by taking random number of no-ops on reset.
-#     * Frame skipping: 4 by default
-#     * Max-pooling: most recent two observations
-#     * Termination signal when a life is lost: turned off by default. Not recommended by Machado et al. (2018).
-#     * Resize to a square image: 84x84 by default
-#     * Grayscale observation: optional
-#     * Scale observation: optional
-#     Args:
-#         env (Env): environment
-#         noop_max (int): max number of no-ops
-#         frame_skip (int): the frequency at which the agent experiences the game.
-#         screen_size (int): resize Atari frame
-#         terminal_on_life_loss (bool): if True, then step() returns done=True whenever a
-#             life is lost.
-#         grayscale_obs (bool): if True, then gray scale observation is returned, otherwise, RGB observation
-#             is returned.
-#         grayscale_newaxis (bool): if True and grayscale_obs=True, then a channel axis is added to
-#             grayscale observations to make them 3-dimensional.
-#         scale_obs (bool): if True, then observation normalized in range [0,1] is returned. It also limits memory
-#             optimization benefits of FrameStack Wrapper.
-#     """
-
-#     def __init__(
-#         self,
-#         env: gym.Env,
-#         frame_skip: int = 4,
-#         screen_size: int = 84,
-#         grayscale_obs: bool = True,
-#         grayscale_newaxis: bool = False,
-#         scale_obs: bool = False,
-#     ):
-#         super().__init__(env)
-#         assert frame_skip > 0
-#         assert screen_size > 0
-
-
-#         self.frame_skip = frame_skip
-#         self.screen_size = screen_size
-#         self.grayscale_obs = grayscale_obs
-#         self.grayscale_newaxis = grayscale_newaxis
-#         self.scale_obs = scale_obs
-
-#         # buffer of most recent two observations for max pooling
-#         if grayscale_obs:
-#             self.obs_buffer = [
-#                 np.empty(env.observation_space.shape[:2], dtype=np.uint8),
-#                 np.empty(env.observation_space.shape[:2], dtype=np.uint8),
-#             ]
-#         else:
-#             self.obs_buffer = [
-#                 np.empty(env.observation_space.shape, dtype=np.uint8),
-#                 np.empty(env.observation_space.shape, dtype=np.uint8),
-#             ]
-
-#         self.game_over = False
-
-#         _low, _high, _obs_dtype = (
-#             (0, 255, np.uint8) if not scale_obs else (0, 1, np.float32)
-#         )
-#         _shape = (screen_size, screen_size, 1 if grayscale_obs else 3)
-#         if grayscale_obs and not grayscale_newaxis:
-#             _shape = _shape[:-1]  # Remove channel axis
-#         self.observation_space = gym.spaces.Box(low=_low, high=_high,
-#                                                 shape=_shape, dtype=_obs_dtype)
-
-#     def step(self, action):
-#         R = 0.0
-
-#         for t in range(self.frame_skip):
-#             _, reward, done, info = self.env.step(action)
-#             R += reward
-#             self.game_over = done
-
-#             if done:
-#                 break
-#             if t == self.frame_skip - 2:
-#                 if self.grayscale_obs:
-#                     self.ale.getScreenGrayscale(self.obs_buffer[1])
-#                 else:
-#                     self.ale.getScreenRGB(self.obs_buffer[1])
-#             elif t == self.frame_skip - 1:
-#                 if self.grayscale_obs:
-#                     self.ale.getScreenGrayscale(self.obs_buffer[0])
-#                 else:
-#                     self.ale.getScreenRGB(self.obs_buffer[0])
-
-#         return self._get_obs(), R, done, info
-
-#     def reset(self):
-#         if self.grayscale_obs:
-#             self.ale.getScreenGrayscale(self.obs_buffer[0])
-#         else:
-#             self.ale.getScreenRGB(self.obs_buffer[0])
-#         self.obs_buffer[1].fill(0)
-
-#         return self._get_obs()
-
-#     def _get_obs(self):
-#         if self.frame_skip > 1:  # more efficient in-place pooling
-#             np.maximum(self.obs_buffer[0], self.obs_buffer[1], out=self.obs_buffer[0])
-#         obs = cv2.resize(
-#             self.obs_buffer[0],
-#             (self.screen_size, self.screen_size),
-#             interpolation=cv2.INTER_AREA,
-#         )
-
-#         if self.scale_obs:
-#             obs = np.asarray(obs, dtype=np.float32) / 255.0
-#         else:
-#             obs = np.asarray(obs, dtype=np.uint8)
-
-#         if self.grayscale_obs and self.grayscale_newaxis:
-#             obs = np.expand_dims(obs, axis=-1)  # Add a channel axis
-#         return obs
+from collections import deque
 
 
 class ResizeImage(gym.ObservationWrapper):
-    def __init__(self, env=None, n_rows=84, n_cols=84):
+    def __init__(self, env=None, n_rows=84, n_cols=84, key='img'):
         super().__init__(env)
         print('Wrapping the env in a', repr(type(self).__name__), 'wrapper.')
 
         self._nrows = n_rows
         self._ncols = n_cols
-        self.observation_space = gym.spaces.Box(low=0., high = 255.,
-                                                shape=(n_rows, n_cols, 3),
-                                                dtype=np.uint8)
+        self._key = key
+        if isinstance(self.observation_space, gym.spaces.Dict):
+            spaces = {}
+            for k, v in self.observation_space.spaces.items():
+                if k == key:
+                    new_space = gym.spaces.Box(low=0., high = 255.,
+                                               shape=(n_rows, n_cols, 3),
+                                               dtype=np.uint8)
+                else:
+                    new_space = v
+
+                spaces[k] = new_space
+            self.observation_space = gym.spaces.Dict(spaces)
+
+        else:
+            self.observation_space = gym.spaces.Box(low=0., high = 255.,
+                                                    shape=(n_rows, n_cols, 3),
+                                                    dtype=np.uint8)
 
     def observation(self, obs):
-        resized_screen = cv2.resize(obs, (self._ncols, self._nrows),
-                                    interpolation=cv2.INTER_AREA)
-        return resized_screen.astype(np.uint8)
+        if isinstance(obs, dict) or isinstance(obs, gym.spaces.Dict):
+            resized_screen = cv2.resize(obs[self._key], (self._ncols, self._nrows),
+                                        interpolation=cv2.INTER_AREA)
+            obs[self._key] = resized_screen.astype(np.uint8)
+            return obs
+        else:
+            resized_screen = cv2.resize(obs, (self._ncols, self._nrows),
+                                        interpolation=cv2.INTER_AREA)
+            return resized_screen.astype(np.uint8)
 
 
-# class ResizeImageToGrayscale(gym.ObservationWrapper):
-#     def __init__(self, env=None, n_rows=84, n_cols=84):
-#         super().__init__(env)
-#         print('Wrapping the env in a', repr(type(self).__name__), 'wrapper.')
+class GrayScaleObservation(gym.ObservationWrapper):
+    r"""Convert the image observation from RGB to gray scale.
 
-#         self._nrows = n_rows
-#         self._ncols = n_cols
-#         self.observation_space = gym.spaces.Box(low=0., high = 255.,
-#                                                 shape=(n_rows, n_cols, 1),
-#                                                 dtype=np.uint8)
+    Mostly the same as the open ai gym implementation except this allows
+    for the wrapper to be applied to a single element inside a Dict observation.
+    """
 
-#     def observation(self, obs):
-#         img = cv2.cvtColor(obs, cv2.COLOR_RGB2GRAY)
-#         resized_screen = cv2.resize(img, (self._nrows, self._ncols),
-#                                     interpolation=cv2.INTER_AREA)
-#         return resized_screen.reshape((self._nrows, self._ncols, 1)).astype(np.uint8)
+    def __init__(self, env, keep_dim=True, key='img'):
+        super().__init__(env)
+        print('Wrapping the env in a', repr(type(self).__name__), 'wrapper.')
+        self.keep_dim = keep_dim
+        self._key = key
+
+        if isinstance(self.observation_space, gym.spaces.Dict):
+            spaces = {}
+            for k, v in self.observation_space.spaces.items():
+                if k == key:
+                    assert (len(v.shape) == 3 and v.shape[-1] == 3)
+
+                    obs_shape = v.shape[:2]
+                    if self.keep_dim:
+                        new_space = gym.spaces.Box(low=0, high=255,
+                                                   shape=(obs_shape[0],
+                                                          obs_shape[1], 1),
+                                                   dtype=np.uint8)
+                    else:
+                        new_space = gym.spaces.Box(low=0, high=255,
+                                                   shape=obs_shape, dtype=np.uint8)
+                else:
+                    new_space = v
+
+                spaces[k] = new_space
+            self.observation_space = gym.spaces.Dict(spaces)
+
+        else:
+            assert (
+                len(env.observation_space.shape) == 3
+                and env.observation_space.shape[-1] == 3
+            )
+
+            obs_shape = self.observation_space.shape[:2]
+            if self.keep_dim:
+                self.observation_space = gym.spaces.Box(low=0, high=255,
+                                                        shape=(obs_shape[0],
+                                                               obs_shape[1], 1),
+                                                        dtype=np.uint8)
+            else:
+                self.observation_space = gym.spaces.Box(low=0, high=255,
+                                                        shape=obs_shape,
+                                                        dtype=np.uint8)
+
+    def observation(self, obs):
+        if isinstance(obs, dict) or isinstance(obs, gym.spaces.Dict):
+            obs[self._key] = cv2.cvtColor(obs[self._key], cv2.COLOR_RGB2GRAY)
+            if self.keep_dim:
+                obs[self._key] = np.expand_dims(obs[self._key], -1)
+            return obs
+        else:
+            obs = cv2.cvtColor(obs, cv2.COLOR_RGB2GRAY)
+            if self.keep_dim:
+                obs = np.expand_dims(obs, -1)
+            return obs
 
 
-# class BufferObservationWrapper(gym.ObservationWrapper):
-#     def __init__(self, env, n_steps):
-#         super().__init__(env)
-#         print('Wrapping the env in a', repr(type(self).__name__), 'wrapper.')
+class BufferFames(gym.ObservationWrapper):
+    """Buffer frames.
 
-#         self.dtype = env.observation_space.dtype
-#         old_space = env.observation_space
-#         self.observation_space = gym.spaces.Box(old_space.low.repeat(n_steps,
-#                                                                      axis=0),
-#                                                 old_space.high.repeat(n_steps,
-#                                                                       axis=0),
-#                                                 dtype=self.dtype)
-#         self.buffer = np.zeros_like(self.observation_space.low, dtype=self.dtype)
+    Similar to the open ai gym implementation except this allows
+    for the wrapper to be applied to a single element inside a Dict observation,
+    and does not use a LazyFrame wrapper.
+    """
+    def __init__(self, env, num_stack, key='img'):
+        super().__init__(env)
+        print('Wrapping the env in a', repr(type(self).__name__), 'wrapper.')
 
-#     def reset(self):
-#         self.buffer = np.zeros_like(self.observation_space.low, dtype=self.dtype)
-#         return self.observation(self.env.reset())
+        self._key = key
+        self._num_stack = num_stack
 
-#     def observation(self, obs):
-#         self.buffer[:-1] = self.buffer[1:]
-#         self.buffer[-1] = obs
-#         return self.buffer
+        if isinstance(self.observation_space, gym.spaces.Dict):
+            spaces = {}
+            for k, v in self.observation_space.spaces.items():
+                if k == key:
+                    low = np.repeat(v.low[np.newaxis, ...], num_stack, axis=0)
+                    high = np.repeat(v.high[np.newaxis, ...],
+                                      num_stack, axis=0)
+                    new_space = gym.spaces.Box(low=low, high=high,
+                                                dtype=v.dtype)
+                    self.buffer = 255 * np.ones_like(new_space.low)
 
 
-# class ImageToPyTorch(gym.ObservationWrapper):
-#     def __init__(self, env):
-#         super().__init__(env)
-#         print('Wrapping the env in a', repr(type(self).__name__), 'wrapper.')
+                    self.buffer = np.repeat(255 * np.ones_like(new_space.low[np.newaxis, ...]),
+                                            num_stack, axis=0).astype(np.uint8)
 
-#         old_shape = env.observation_space.shape
-#         self.observation_space = gym.spaces.Box(low=0, high=255,
-#                                                 shape=(old_shape[-1], old_shape[0],
-#                                                        old_shape[1]),
-#                                                 dtype=np.uint8)
+                else:
+                    new_space = v
 
-#     def observation(self, obs):
-#         return np.moveaxis(obs, 2, 0)
+                spaces[k] = new_space
+            self.observation_space = gym.spaces.Dict(spaces)
+        else:
+
+            low = np.repeat(self.observation_space.low[np.newaxis, ...], num_stack, axis=0)
+            high = np.repeat(self.observation_space.high[np.newaxis, ...],
+                             num_stack, axis=0)
+            self.observation_space = gym.spaces.Box(low=low, high=high,
+                                                    dtype=self.observation_space.dtype)
+            self.buffer = 255 * np.ones_like(self.observation_space.low)
+
+    def reset(self):
+        if isinstance(self.observation_space, gym.spaces.Dict):
+            self.buffer = 255 * np.ones_like(self.observation_space[self._key].low)
+        else:
+            self.buffer = np.zeros_like(self.observation_space.low)
+        return self.observation(self.env.reset())
+
+    def observation(self, obs):
+        if isinstance(obs, dict) or isinstance(obs, gym.spaces.Dict):
+            self.buffer[:-1] = self.buffer[1:]
+            self.buffer[-1] = obs[self._key]
+            obs[self._key] = self.buffer
+            return obs
+        else:
+            self.buffer[:-1] = self.buffer[1:]
+            self.buffer[-1] = obs
+            return self.buffer
+
+
+class StackFrames(gym.ObservationWrapper):
+    """Buffer frames.
+
+    Similar to the open ai gym implementation except this allows
+    for the wrapper to be applied to a single element inside a Dict observation,
+    and does not use a LazyFrame wrapper.
+    """
+    def __init__(self, env, num_stack, key='img'):
+        super().__init__(env)
+        print('Wrapping the env in a', repr(type(self).__name__), 'wrapper.')
+
+        self._key = key
+        if isinstance(self.observation_space, gym.spaces.Dict):
+            assert self._key in self.observation_space.spaces.keys(), f"Key {self._key} not in observation space"
+
+        self._num_stack = num_stack
+        self.buffer = deque([], maxlen=num_stack)
+
+    def reset(self):
+        self.buffer.clear()
+        return self.observation(self.env.reset())
+
+    def observation(self, obs):
+        if isinstance(obs, dict) or isinstance(obs, gym.spaces.Dict):
+            self.buffer.appendleft(obs[self._key])
+            obs[self._key] = (np.sum(self.buffer, axis=0) / len(self.buffer)).astype(np.uint8)
+            return obs
+        else:
+            self.buffer.appendleft(obs)
+            obs = (np.sum(self.buffer, axis=0) / len(self.buffer)).astype(np.uint8)
+            return obs
+
+
+class MaxFrames(gym.ObservationWrapper):
+    """Buffer frames.
+
+    Similar to the open ai gym implementation except this allows
+    for the wrapper to be applied to a single element inside a Dict observation,
+    and does not use a LazyFrame wrapper.
+    """
+    def __init__(self, env, num_stack, key='img'):
+        super().__init__(env)
+        print('Wrapping the env in a', repr(type(self).__name__), 'wrapper.')
+
+        self._key = key
+        if isinstance(self.observation_space, gym.spaces.Dict):
+            assert self._key in self.observation_space.spaces.keys(), f"Key {self._key} not in observation space"
+
+        self._num_stack = num_stack
+        self.buffer = deque([], maxlen=num_stack)
+
+    def reset(self):
+        self.buffer.clear()
+        return self.observation(self.env.reset())
+
+    def observation(self, obs):
+        if isinstance(obs, dict) or isinstance(obs, gym.spaces.Dict):
+            self.buffer.appendleft(obs[self._key])
+            obs[self._key] = np.max(self.buffer, axis=0).astype(np.uint8)
+            return obs
+        else:
+            self.buffer.appendleft(obs)
+            obs = np.max(self.buffer, axis=0).astype(np.uint8)
+            return obs
+
+
+class SkipFrames(gym.Wrapper):
+    def __init__(self, env, frame_skip):
+        super().__init__(env)
+        print('Wrapping the env in a', repr(type(self).__name__), 'wrapper.')
+        assert frame_skip > 0, "frame_skip must be > 0"
+
+        self.frame_skip = frame_skip
+
+    def step(self, action):
+        R = 0.0
+
+        for _ in range(self.frame_skip):
+            obs, reward, done, info = self.env.step(action)
+            R += reward
+
+            if done:
+                break
+
+        return obs, R, done, info

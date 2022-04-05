@@ -6,22 +6,13 @@ import os
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame
 
-import enum
 import yaml
 
 
 import gncpy.dynamics as gdyn
+import gncpy.planning.reinforcement_learning.rewards as grewards
+from gncpy.planning.reinforcement_learning.enums import EventType
 import serums.models as smodels
-
-
-@enum.unique
-class EventType(enum.Enum):
-    """Define the different types of events in the game."""
-
-    HAZARD = enum.auto()
-    DEATH = enum.auto()
-    TARGET = enum.auto()
-    WALL = enum.auto()
 
 
 # %% Entities
@@ -103,31 +94,28 @@ class Entity:
 
 
 # %% Components
-def _ctrl_mod(t, *args):
-    return np.vstack((np.zeros((2, 2)), 5 * np.eye(2)))
-
 class CDynamics:
-    def __init__(self, dt, x_width, y_width, min_posx, min_posy):
-        self.dynObj = gdyn.DoubleIntegrator(control_model=_ctrl_mod)
+    __slots__ = ('dynObj', 'last_state', 'state', 'pos_inds', 'vel_inds',
+                 'state_args', 'ctrl_args', 'state_low', 'state_high')
 
-        n_states = len(gdyn.DoubleIntegrator.state_names)
+    def __init__(self, dynObj, pos_inds, vel_inds, state_args, ctrl_args,
+                 state_low, state_high):
+        self.dynObj = dynObj
+        n_states = len(self.dynObj.state_names)
         self.last_state = np.nan * np.ones((n_states, 1))
-        self.state = np.nan * np.ones((n_states, 1))
+        self.state = np.zeros((n_states, 1))
 
-        self.pos_inds = [0, 1]
-        self.vel_inds = [2, 3]
-
-        self.state_args = (dt, )
-
-        self.max_vel = 10 * np.ones((2, 1))
-        self.min_vel = -10 * np.ones((2, 1))
-
-        self.state_low = np.array([min_posx, min_posy, -10, -10])
-        self.state_high = np.array([min_posx + x_width, min_posy + y_width,
-                                    10, 10])
+        self.pos_inds = pos_inds
+        self.vel_inds = vel_inds
+        self.state_args = state_args
+        self.ctrl_args = ctrl_args
+        self.state_low = state_low
+        self.state_high = state_high
 
 
 class CShape:
+    __slots__ = 'shape', 'color', 'zorder'
+
     def __init__(self, shape, w, h, color, zorder):
         if shape.lower() == 'rect':
             self.shape = pygame.Rect((0, 0), (w, h))
@@ -137,6 +125,8 @@ class CShape:
 
 
 class CTransform:
+    __slots__ = 'pos', 'last_pos', 'vel'
+
     def __init__(self):
         self.pos = np.nan * np.ones((2, 1))
         self.last_pos = np.nan * np.ones((2, 1))
@@ -144,11 +134,15 @@ class CTransform:
 
 
 class CCollision:
+    __slots__ = 'aabb'
+
     def __init__(self, w, h):
         self.aabb = pygame.Rect((0, 0), (w, h))
 
 
 class CBirth:
+    __slots__ = '_model'
+
     def __init__(self, b_type, loc, scale, params):
         self._model = smodels.Gaussian(mean=loc,
                                        covariance=scale**2)
@@ -160,21 +154,30 @@ class CBirth:
 
 
 class CEvents:
+    __slots__ = 'events'
+
     def __init__(self):
         self.events = []
 
 
 class CHazard:
+    __slots__ = 'prob_of_death', 'entrance_times'
+
     def __init__(self, prob_of_death):
         self.prob_of_death = prob_of_death
+        self.entrance_times = {}
 
 
 class CCapabilities:
+    __slots__ = 'capabilities'
+
     def __init__(self, capabilities):
         self.capabilities = capabilities
 
 
 class CPriority:
+    __slots__ = 'priority'
+
     def __init__(self, priority):
         self.priority = priority
 
@@ -188,6 +191,9 @@ class Game(ABC):
     on entities.
     """
 
+    __slots__ = ('_entity_manager', '_current_frame', '_render_mode',
+                 'render_fps', 'game_over', 'score')
+
     def __init__(self, render_mode, render_fps=60):
         """Initalize an object.
 
@@ -197,7 +203,7 @@ class Game(ABC):
         super().__init__()
 
         self._entity_manager = EntityManager()
-        self._current_frame = 0
+        self._current_frame = -1
         self._render_mode = render_mode
         self.render_fps = render_fps
 
@@ -218,7 +224,7 @@ class Game(ABC):
 
     def reset(self):
         self._entity_manager = EntityManager()
-        self._current_frame = 0
+        self._current_frame = -1
         self.game_over = False
         self.score = 0
 
@@ -235,7 +241,7 @@ class Game(ABC):
         -------
         None.
         """
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def s_collision(self):
@@ -245,15 +251,15 @@ class Game(ABC):
         -------
         None.
         """
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def s_game_over(self):
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def s_score(self):
-        pass
+        raise NotImplementedError
 
 
 class Game2d(Game):
@@ -262,6 +268,9 @@ class Game2d(Game):
     This should implement all the necessary systems (i.e. game logic) by operating
     on entities.
     """
+
+    __slots__ = ('_window', '_clock', '_img', 'max_n_targets', 'dt', 'max_time',
+                 'min_pos', 'dist_height', 'dist_width', 'dist_per_pix')
 
     def __init__(self, render_mode, render_fps=60):
         super().__init__(render_mode, render_fps=render_fps)
@@ -282,9 +291,12 @@ class Game2d(Game):
 
     def reset(self):
         super().reset()
-        self._img = np.zeros((*self.get_image_size(), 3))
+        self._img = 255 * np.ones((*self.get_image_size(), 3), dtype=np.uint8)
 
-    def parse_config_file(self, config_file, verbose=True):
+    def parse_config_file(self, config_file, extra_keys=None):
+        if extra_keys is None:
+            extra_keys = ()
+
         with open(config_file, 'r') as fin:
             conf = yaml.safe_load(fin)
 
@@ -314,11 +326,13 @@ class Game2d(Game):
             elif key == 'hazards':
                 self.setup_hazards(params)
 
-            elif verbose:
+            elif key not in extra_keys:
                 print('Unrecognized key ({}) in config file'.format(key))
 
         # ensure all things are properly added to the manager so wrappers can use values before calling step
         self._entity_manager.update()
+
+        return conf
 
     def _pixels_to_dist(self, pt, ind, translate):
         if translate:
@@ -396,6 +410,13 @@ class Game2d(Game):
         self.dist_per_pix = np.array([[float(params['dist_width'] / self._window.get_width())],
                                       [float(params['dist_height'] / self._window.get_height())]])
 
+    def _append_name_to_keys(self, in_dict, prefix):
+        out = {}
+        for key, val in in_dict.items():
+            n_key = '{:s}.{:s}'.format(prefix, key)
+            out[n_key] = val
+        return out
+
     def step(self, action):
         """Perform one iteration of the game loop.
 
@@ -404,6 +425,7 @@ class Game2d(Game):
         action : TYPE
             DESCRIPTION.
         """
+        info = {}
         self._current_frame += 1
         self._entity_manager.update()
 
@@ -415,11 +437,14 @@ class Game2d(Game):
         self.s_movement(action)
         self.s_collision()
 
-        self.s_score()
-
         self.render()
 
         self.s_game_over()
+
+        s_info = self.s_score()
+        info.update(self._append_name_to_keys(s_info, 'Reward'))
+
+        return info
 
     def render(self):
         """Render a frame of the game."""
@@ -436,15 +461,16 @@ class Game2d(Game):
 
                 pygame.draw.rect(surf, e.c_shape.color, e.c_shape.shape)
 
-        surf = pygame.transform.flip(surf, False, True)
-        self._window.blit(surf, (0, 0))
+        flip_surf = pygame.transform.flip(surf, False, True)
 
         if self._render_mode == 'human':
+            self._window.blit(flip_surf, (0, 0))
+
             pygame.event.pump()
             self._clock.tick(self.render_fps)
             pygame.display.flip()
 
-        self._img = np.transpose(np.array(pygame.surfarray.pixels3d(self._window),
+        self._img = np.transpose(np.array(pygame.surfarray.pixels3d(flip_surf),
                                           dtype=np.uint8),
                                  axes=(1, 0, 2))
 
@@ -461,112 +487,47 @@ class Game2d(Game):
 
 
 # %%% Custom Games
-class BasicScore:
-    def __init__(self, hazard_multiplier=5, death_scale=10, death_decay=0,
-                 death_penalty=10, time_penalty=1, missed_multiplier=5,
-                 target_multiplier=10, wall_penalty=5):
-        self.hazard_multiplier = hazard_multiplier
-
-        self.death_scale = death_scale
-        self.death_penalty = death_penalty
-        self.death_decay = death_decay
-
-        self.time_penalty = time_penalty
-        self.missed_multiplier = missed_multiplier
-        self.target_multiplier = target_multiplier
-
-        self.wall_penalty = wall_penalty
-
-    def match_function(self, test_cap, req_cap):
-        if len(req_cap) > 0:
-            return sum([1 for c in test_cap if c in req_cap]) / len(req_cap)
-        else:
-            return 1
-
-    def calc_score(self, t, player_lst, target_lst,
-                    all_capabilities, game_over):
-        """Reward function for simulated game.
-
-        Parameters
-        ----------
-        player_lst : list
-            Each element is an :class:`EntityBase`.
-        target_lst : list
-            Each elemenet is a :class:`Target`.
-        params : dict
-            Contains the tunable gains of the reward function.
-        match_function : callable
-            Function that returns a percentage of how well the capabilities match.
-            Must take in two lists and return a positive number.
-        all_capabilities : list
-            List of all possible capabilities for the current game.
-        game_over : bool
-            Flag indicating if this is the last frame of the game.
-
-        Returns
-        -------
-        score : float
-            Amount of reward for the current frame of the game.
-        """
-        score = 0
-
-        # accumulate rewards from all players
-        for player in player_lst:
-            s_hazard = 0
-            s_target = 0
-            s_death = 0
-            s_wall = 0
-
-            for e_type, info in player.c_events.events:
-                if e_type == EventType.HAZARD:
-                    s_hazard += -self.hazard_multiplier * info['prob']
-
-                elif e_type == EventType.DEATH:
-                    time_decay = self.death_scale * np.power(np.e, -self.death_decay * t)
-                    s_death = -(time_decay * self.match_function(player.c_capabilities.capabilities,
-                                                                 all_capabilities)
-                                + self.death_penalty)
-                    s_hazard = 0
-                    s_target = 0
-                    s_wall = 0
-                    break
-
-                elif e_type == EventType.TARGET:
-                    target = info['target']
-                    s_target = (target.c_priority.priority
-                                * self.match_function(player.c_capabilities.capabilities,
-                                                      target.c_capabilities.capabilities))
-
-                elif e_type == EventType.WALL:
-                    s_wall = -self.wall_penalty
-
-            score += s_hazard + self.target_multiplier * s_target + s_death + s_wall
-
-        # add fixed terms to reward
-        r_missed = 0
-        if game_over:
-            for target in target_lst:
-                if target.active:
-                    r_missed += -target.c_priority.priority
-
-        score += -self.time_penalty + self.missed_multiplier * r_missed
-
-        return score
-
-
 class SimpleUAV2d(Game2d):
+
+    __slots__ = ('_config_file', '_scoreCls', '_all_capabilities', '_reward_type')
+
+    supported_reward_types = ('BasicReward', )
+
     def __init__(self, config_file, render_mode, render_fps=None):
         super().__init__(render_mode, render_fps=render_fps)
 
         self._config_file = config_file
-        self._scoreCls = BasicScore()
+        self._scoreCls = None
         self._all_capabilities = []
-        self._player_state_size = None
+        self._reward_type = None
 
         self.parse_config_file(self._config_file)
 
         if self.render_fps is None:
             self.render_fps = 1 / self.dt
+
+    def setup_score(self, params):
+        rtype = params['type']
+        if rtype not in self.supported_reward_types:
+            raise RuntimeError('Unsupported score type given ({})'.format(rtype))
+
+        assert hasattr(grewards, rtype), "Failed to find reward class {}"
+
+        self._reward_type = rtype
+
+        cls_type = getattr(grewards, rtype)
+        kwargs = {}
+        if 'params' in params:
+            kwargs = params['params']
+        self._scoreCls = cls_type(**kwargs)
+
+    def parse_config_file(self, config_file, extra_keys=None):
+        conf = super().parse_config_file(config_file, extra_keys=('score'))
+
+        if 'score' in conf.keys():
+            self.setup_score(conf['score'])
+        else:
+            raise RuntimeError('Must specify score parameters in config')
 
     def _add_capabilities(self, lst):
         for c in lst:
@@ -579,18 +540,12 @@ class SimpleUAV2d(Game2d):
 
     def get_player_state_bounds(self):
         p_lst = self._entity_manager.get_entities('player')
-        # if len(p_lst) == 0:
-        #     return self._player_state_bnds
-        # else:
         p = p_lst[0]
         return np.vstack((p.c_dynamics.state_low.copy(),
                           p.c_dynamics.state_high.copy()))
 
     def get_player_state(self):
         p_lst = self._entity_manager.get_entities('player')
-        # if len(p_lst) == 0:
-        #     return np.zeros(self._player_state_size)
-        # else:
         p = p_lst[0]
         return p.c_dynamics.state.copy().ravel()
 
@@ -605,6 +560,146 @@ class SimpleUAV2d(Game2d):
 
         self.parse_config_file(self._config_file)
 
+    def _create_dynamics(self, params, c_birth):
+        if not hasattr(gdyn, params['type']):
+            msg = 'Failed to find dynamics model {}'.format(params['type'])
+            raise RuntimeError(msg)
+        cls_type = getattr(gdyn, params['type'])
+
+        kwargs = {}
+        if params['type'] == 'DoubleIntegrator':
+            pos_inds = [0, 1]
+            vel_inds = [2, 3]
+            state_args = (self.dt, )
+
+            c_params = params['control_model']
+            if c_params['type'] == 'velocity':
+                ctrl_args = ()
+
+                def _ctrl_mod(t, x, *args):
+                    if 'max_vel_x' in c_params and 'max_vel_y' in c_params:
+                        mat = np.diag((float(c_params['max_vel_x']),
+                                       float(c_params['max_vel_y'])))
+                    else:
+                        mat = c_params['max_vel'] * np.eye(2)
+                    return np.vstack((np.zeros((2, 2)), mat))
+
+            else:
+                msg = 'Control model type {} not implemented for dynamics {}'.format(c_params['type'],
+                                                                                     params['type'])
+                raise NotImplementedError(msg)
+            kwargs['control_model'] = _ctrl_mod
+
+            state_low = np.hstack((self.min_pos.ravel(),
+                                   np.array([-np.inf, -np.inf])))
+            state_high = np.hstack((self.min_pos.ravel() + np.array([self.dist_width, self.dist_height]),
+                                    np.array([np.inf, np.inf])))
+            if 'state_constraint' in params:
+                s_params = params['state_constraint']
+                if s_params['type'] == 'velocity':
+                    state_low = np.hstack((self.min_pos.ravel(),
+                                           np.array(s_params['min_vels'])))
+                    state_high = np.hstack((self.min_pos.ravel() + np.array([self.dist_width, self.dist_height]),
+                                            np.array(s_params['max_vels'])))
+
+                    def _state_constraint(t, x):
+                        x[vel_inds] = np.min(np.vstack((x[vel_inds].ravel(),
+                                                        np.array(s_params['max_vels']))),
+                                             axis=0).reshape((len(vel_inds), 1))
+                        x[vel_inds] = np.max(np.vstack((x[vel_inds].ravel(),
+                                                        np.array(s_params['min_vels']))),
+                                             axis=0).reshape((len(vel_inds), 1))
+                        return x
+                else:
+                    msg = 'State constraint type {} not implemented for dynamics {}'.format(s_params['type'],
+                                                                                            params['type'])
+                    raise NotImplementedError(msg)
+                kwargs['state_constraint'] = _state_constraint
+
+        elif params['type'] == 'CoordinatedTurn':
+            pos_inds = [0, 2]
+            vel_inds = [1, 3]
+            state_args = ()
+
+            c_params = params['control_model']
+            if c_params['type'] == 'velocity_turn':
+                ctrl_args = ()
+
+                def _g1(t, x, u, *args):
+                    return c_params['max_vel'] * np.cos(x[4].item()) * u[0].item()
+
+                def _g0(t, x, u, *args):
+                    return 0
+
+                def _g3(t, x, u, *args):
+                    return c_params['max_vel'] * np.sin(x[4].item()) * u[0].item()
+
+                def _g2(t, x, u, *args):
+                    return 0
+
+                def _g4(t, x, u, *args):
+                    return c_params['max_turn_rate'] * np.pi / 180 * u[1].item()
+
+            else:
+                msg = 'Control model type {} not implemented for dynamics {}'.format(c_params['type'],
+                                                                                     params['type'])
+                raise NotImplementedError(msg)
+            kwargs['control_model'] = [_g0, _g1, _g2, _g3, _g4]
+
+            state_low = np.hstack((self.min_pos[0],
+                                   np.array([-np.inf]),
+                                   self.min_pos[1],
+                                   np.array([-np.inf, -2 * np.pi])))
+            state_high = np.hstack((self.min_pos[0] + self.dist_width,
+                                    np.array([np.inf]),
+                                    self.min_pos[1] + self.dist_height,
+                                    np.array([np.inf, 2 * np.pi])))
+            if 'state_constraint' in params:
+                s_params = params['state_constraint']
+                if s_params['type'] == 'velocity':
+                    state_low = np.hstack((self.min_pos[0],
+                                           np.array([s_params['min_vels'][0]]),
+                                           self.min_pos[1],
+                                           np.array([s_params['min_vels'][1],
+                                                     -2 * np.pi])))
+                    state_high = np.hstack((self.min_pos[0] + self.dist_width,
+                                            np.array([s_params['max_vels'][0]]),
+                                            self.min_pos[1] + self.dist_height,
+                                            np.array([s_params['max_vels'][1],
+                                                      2 * np.pi])))
+
+                    def _state_constraint(t, x):
+                        x[vel_inds] = np.min(np.vstack((x[vel_inds].ravel(),
+                                                        np.array(s_params['max_vels']))),
+                                             axis=0).reshape((len(vel_inds), 1))
+                        x[vel_inds] = np.max(np.vstack((x[vel_inds].ravel(),
+                                                        np.array(s_params['min_vels']))),
+                                             axis=0).reshape((len(vel_inds), 1))
+                        if x[4] < 0:
+                            x[4] = np.mod(x[4], -2 * np.pi)
+                        else:
+                            x[4] = np.mod(x[4], 2 * np.pi)
+
+                        return x
+                else:
+                    msg = 'State constraint type {} not implemented for dynamics {}'.format(s_params['type'],
+                                                                                            params['type'])
+                    raise NotImplementedError(msg)
+                kwargs['state_constraint'] = _state_constraint
+
+        if 'params' in params:
+            kwargs.update(params['params'])
+
+        c_dynamics = CDynamics(cls_type(**kwargs), pos_inds, vel_inds, state_args,
+                               ctrl_args, state_low, state_high)
+        c_dynamics.state[pos_inds] = c_birth.loc
+
+        rng = np.random.default_rng()
+        if params['type'] == 'CoordinatedTurn':
+            c_dynamics.state[4] = rng.random() * 2 * np.pi
+
+        return c_dynamics
+
     def setup_player(self, params):
         e = self._entity_manager.add_entity('player')
 
@@ -615,15 +710,7 @@ class SimpleUAV2d(Game2d):
         e.c_birth = CBirth(b_params['type'], b_loc, b_scale, b_params['params'])
 
         # TODO: allow for other dyanmics models
-        d_params = params['dynamics_model']
-        e.c_dynamics = CDynamics(self.dt, self.dist_width, self.dist_height,
-                                 self.min_pos[0], self.min_pos[1])
-        e.c_dynamics.state = np.vstack((e.c_birth.loc, 0, 0))
-        self._player_state_size = e.c_dynamics.state.size
-        # self._init_player_state = e.c_dynamics.state.copy()
-        # # hold state bounds for use before first frame
-        # self._player_state_bnds = np.vstack((e.c_dynamics.state_low,
-        #                                      e.c_dynamics.state_high))
+        e.c_dynamics = self._create_dynamics(params['dynamics_model'], e.c_birth)
 
         e.c_transform = CTransform()
 
@@ -688,8 +775,8 @@ class SimpleUAV2d(Game2d):
                                                             1, False))
 
             key = 'capabilities'
-            if key in params:
-                capabilities = params[key]
+            if key in t_params:
+                capabilities = t_params[key]
             else:
                 capabilities = []
             e.c_capabilities = CCapabilities(capabilities)
@@ -743,18 +830,10 @@ class SimpleUAV2d(Game2d):
                                                                          e.c_dynamics.last_state,
                                                                          u=action.reshape((action.size, 1)),
                                                                          state_args=e.c_dynamics.state_args,
-                                                                         ctrl_args=())
+                                                                         ctrl_args=e.c_dynamics.ctrl_args)
 
                 p_ii = e.c_dynamics.pos_inds
                 v_ii = e.c_dynamics.vel_inds
-                shape = e.c_dynamics.state[v_ii].shape
-                e.c_dynamics.state[v_ii] = np.min(np.hstack((e.c_dynamics.state[v_ii],
-                                                             e.c_dynamics.max_vel)),
-                                                  axis=1).reshape(shape)
-                e.c_dynamics.state[v_ii] = np.max(np.hstack((e.c_dynamics.state[v_ii],
-                                                             e.c_dynamics.min_vel)),
-                                                  axis=1).reshape(shape)
-
                 e.c_transform.pos = self._dist_to_pixels(e.c_dynamics.state[p_ii],
                                                          [0, 1], True)
                 e.c_transform.vel = self._dist_to_pixels(e.c_dynamics.state[v_ii],
@@ -804,6 +883,10 @@ class SimpleUAV2d(Game2d):
                     p_trans.vel[0] = 0
                     went_oob = True
 
+                if went_oob and e.c_events is not None:
+                    e.c_events.events.append((EventType.WALL, None))
+                went_oob = False
+
                 if p_aabb.top < 0:
                     p_aabb.top = 0
                     p_trans.vel[1] = 0
@@ -844,15 +927,23 @@ class SimpleUAV2d(Game2d):
                 # check for collision with hazard
                 for h in self._entity_manager.get_entities('hazard'):
                     h_aabb = h.c_collision.aabb
-                    if pygame.Rect.colliderect(p_aabb, h_aabb):
+                    if not pygame.Rect.colliderect(p_aabb, h_aabb):
+                        if e.id in h.c_hazard.entrance_times:
+                            del h.c_hazard.entrance_times[e.id]
+                    else:
                         if rng.uniform(0., 1.) < h.c_hazard.prob_of_death:
                             e.destroy()
                             e.c_events.events.append((EventType.DEATH, None))
+                            if e.id in h.c_hazard.entrance_times:
+                                del h.c_hazard.entrance_times[e.id]
                             break
 
                         else:
+                            if e.id not in h.c_hazard.entrance_times:
+                                h.c_hazard.entrance_times[e.id] = self.current_time
                             e.c_events.events.append((EventType.HAZARD,
-                                                      {'prob': h.c_hazard.prob_of_death}))
+                                                      {'prob': h.c_hazard.prob_of_death,
+                                                       't_ent': h.c_hazard.entrance_times[e.id]}))
 
                 if not e.active:
                     continue
@@ -889,7 +980,13 @@ class SimpleUAV2d(Game2d):
                           or len(alive_players) == 0)
 
     def s_score(self):
-        self.score = self._scoreCls.calc_score(self.current_time,
-                                               self._entity_manager.get_entities('player'),
-                                               self._entity_manager.get_entities('target'),
-                                               self._all_capabilities, self.game_over)
+        if self._reward_type == 'BasicReward':
+            self.score, info = self._scoreCls.calc_reward(self.current_time,
+                                                          self._entity_manager.get_entities('player'),
+                                                          self._entity_manager.get_entities('target'),
+                                                          self._all_capabilities, self.game_over)
+        else:
+            msg = 'Score system has no implementation for reward type {}'.format(self._reward_type)
+            raise NotImplementedError(msg)
+
+        return info

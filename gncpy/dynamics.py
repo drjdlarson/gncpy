@@ -4,6 +4,7 @@ These provide an easy to use interface for some common dynamic objects and
 and their associated models. They have been designed to integrate well with the
 filters in :mod:`gncpy.filters`.
 """
+from abc import abstractmethod, ABC
 import numpy as np
 import scipy.integrate as s_integrate
 from warnings import warn
@@ -11,30 +12,61 @@ from warnings import warn
 import gncpy.math as gmath
 
 
-class DynamicsBase:
+class DynamicsBase(ABC):
     r"""Defines common attributes for all dynamics models.
 
     Attributes
     ----------
     control_model : callable or list of callables, optional
         For objects of :class:`gncpy.dynamics.LinearDynamicsBase` it is a
-        callable with the signature `t, *ctrl_args` and returns the
+        callable with the signature `t, x, *ctrl_args` and returns the
         input matrix :math:`G_k` from :math:`x_{k+1} = F_k x_k + G_k u_k`.
         For objects of :class:`gncpy.dynamics.NonlinearDynamicsBase` it is a
         list of callables where each callable returns the modification to the
-        corresponding state, :math:`g(t, u_i)`, in the differential equation
-        :math:`\dot{x}_i = f(t, x_i) + g(t, u_i)` and has the signature
+        corresponding state, :math:`g(t, x_i, u_i)`, in the differential equation
+        :math:`\dot{x}_i = f(t, x_i) + g(t, x_i, u_i)` and has the signature
         `t, u, *ctrl_args`.
+    state_constraint : callable
+        Has the signature `t, x` where `t` is the current timestep and `x`
+        is the propagated state. It returns the propagated state with
+        any constraints applied to it.
     """
+
+    __slots__ = 'control_model', 'state_constraint'
 
     state_names = ()
     """Tuple of strings for the name of each state. The order should match
     that of the state vector.
     """
 
-    def __init__(self, control_model=None):
-        self.control_model = control_model
+    def __init__(self, control_model=None, state_constraint=None):
         super().__init__()
+        self.control_model = control_model
+        self.state_constraint = state_constraint
+
+    @abstractmethod
+    def propagate_state(self, timestep, state, u=None, state_args=None, ctrl_args=None):
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_state_mat(self, timestep, *args):
+        """Class method for getting the discrete time state matrix.
+
+        Must be overridden in child classes.
+
+        Parameters
+        ----------
+        timestep : float
+            timestep.
+        args : tuple, optional
+            any additional arguments needed.
+
+        Returns
+        -------
+        N x N numpy array
+            state matrix.
+        """
+        raise NotImplementedError
 
 
 class LinearDynamicsBase(DynamicsBase):
@@ -45,6 +77,7 @@ class LinearDynamicsBase(DynamicsBase):
     based on these values.
 
     """
+    __slots__ = ()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -72,29 +105,7 @@ class LinearDynamicsBase(DynamicsBase):
         warn(msg, RuntimeWarning)
         return np.array([[]])
 
-    def get_state_mat(self, timestep, *f_args):
-        """Class method for getting the discrete time state matrix.
-
-        Must be overridden in child classes.
-
-        Parameters
-        ----------
-        timestep : float
-            timestep.
-        *f_args : dict, optional
-            any additional arguments needed.
-
-        Returns
-        -------
-        N x N numpy array
-            state matrix.
-
-        """
-        msg = 'get_state_mat function is undefined'
-        warn(msg, RuntimeWarning)
-        return np.array([[]])
-
-    def propagate_state(self, timestep, state, u=None, state_args=(), ctrl_args=()):
+    def propagate_state(self, timestep, state, u=None, state_args=None, ctrl_args=None):
         r"""Propagates the state to the next time step.
 
         Notes
@@ -125,21 +136,29 @@ class LinearDynamicsBase(DynamicsBase):
             The propagated state.
 
         """
+        if state_args is None:
+            state_args = ()
+        if ctrl_args is None:
+            ctrl_args = ()
+
         state_trans_mat = self.get_state_mat(timestep, *state_args)
         next_state = state_trans_mat @ state
 
         if self.control_model is not None:
-            input_mat = self.control_model(timestep, *ctrl_args)
+            input_mat = self.control_model(timestep, state, *ctrl_args)
             ctrl = input_mat @ u
             next_state += ctrl
+
+        if self.state_constraint is not None:
+            next_state = self.state_constraint(timestep, next_state)
 
         return next_state
 
 
-class NonlinearDynamicsBase(LinearDynamicsBase):
+class NonlinearDynamicsBase(DynamicsBase):
     """Base class for non-linear dynamics models.
 
-    Child classes should define their own _cont_fnc_lst property and set the
+    Child classes should define their own cont_fnc_lst property and set the
     state names class variable. The remainder of the functions autogenerate
     based on these values.
 
@@ -154,18 +173,21 @@ class NonlinearDynamicsBase(LinearDynamicsBase):
         additional parameters for the integrator. The default is {}.
     """
 
+    __slots__ = ('dt', 'integrator_type', 'integrator_params', '_integrator')
+
     def __init__(self, integrator_type='dopri5', integrator_params={},
                  dt=np.nan, **kwargs):
+        super().__init__(**kwargs)
+
         self.dt = dt
         self.integrator_type = integrator_type
         self.integrator_params = integrator_params
 
         self._integrator = None
 
-        super().__init__(**kwargs)
-
     @property
-    def _cont_fnc_lst(self):
+    @abstractmethod
+    def cont_fnc_lst(self):
         r"""Class property for the continuous time dynamics functions.
 
         Must be overridden in the child classes.
@@ -183,9 +205,10 @@ class NonlinearDynamicsBase(LinearDynamicsBase):
             *f_args. They must return the new state for the given index in the
             list/state vector.
         """
-        msg = 'cont_fnc_lst not implemented'
-        warn(msg, RuntimeWarning)
-        return []
+        raise NotImplementedError
+        # msg = 'cont_fnc_lst not implemented'
+        # warn(msg, RuntimeWarning)
+        # return []
 
     def _cont_dyn(self, t, x, u, state_args, ctrl_args):
         r"""Implements the continuous time dynamics.
@@ -217,12 +240,12 @@ class NonlinearDynamicsBase(LinearDynamicsBase):
             state derivative
         """
         out = np.zeros((len(self.state_names), 1))
-        for ii, f in enumerate(self._cont_fnc_lst):
+        for ii, f in enumerate(self.cont_fnc_lst):
             out[ii] = f(t, x, *state_args)
 
         if self.control_model is not None:
             for ii, g in enumerate(self.control_model):
-                out[ii] += g(t, u, *ctrl_args)
+                out[ii] += g(t, x, u, *ctrl_args)
 
         return out
 
@@ -243,10 +266,11 @@ class NonlinearDynamicsBase(LinearDynamicsBase):
         N x N numpy array
             state transition matrix.
         """
-        return gmath.get_state_jacobian(timestep, state, self._cont_fnc_lst,
+        return gmath.get_state_jacobian(timestep, state, self.cont_fnc_lst,
                                         f_args)
 
-    def propagate_state(self, timestep, state, u=None, state_args=(), ctrl_args=()):
+    def propagate_state(self, timestep, state, u=None, state_args=None,
+                        ctrl_args=None):
         """Propagates the continuous time dynamics.
 
         Automatically integrates the defined ode list and adds control inputs
@@ -276,8 +300,12 @@ class NonlinearDynamicsBase(LinearDynamicsBase):
         -------
         next_state : N x 1 numpy array
             the state at time :math:`t + dt`.
-
         """
+        if state_args is None:
+            state_args = ()
+        if ctrl_args is None:
+            ctrl_args = ()
+
         self._integrator = s_integrate.ode(lambda t, y, *f_args:
                                            self._cont_dyn(t, y, u, f_args,
                                                           ctrl_args).flatten())
@@ -286,6 +314,9 @@ class NonlinearDynamicsBase(LinearDynamicsBase):
         self._integrator.set_initial_value(state, timestep)
         self._integrator.set_f_params(*state_args)
 
+        if np.isnan(self.dt) or np.isinf(self.dt):
+            raise RuntimeError('Invalid value for dt ({}).'.format(self.dt))
+
         next_time = timestep + self.dt
         next_state = self._integrator.integrate(next_time)
         next_state = next_state.reshape((next_state.size, 1))
@@ -293,11 +324,16 @@ class NonlinearDynamicsBase(LinearDynamicsBase):
             msg = 'Integration failed at time {}'.format(timestep)
             raise RuntimeError(msg)
 
+        if self.state_constraint is not None:
+            next_state = self.state_constraint(timestep, next_state)
+
         return next_state
 
 
 class DoubleIntegrator(LinearDynamicsBase):
     """Implements a double integrator model."""
+
+    __slots__ = ()
 
     state_names = ('x pos', 'y pos', 'x vel', 'y vel')
 
@@ -348,13 +384,15 @@ class DoubleIntegrator(LinearDynamicsBase):
 class CoordinatedTurn(NonlinearDynamicsBase):
     """Implements the non-linear coordinated turn dynamics model."""
 
+    __slots__ = ()
+
     state_names = ('x pos', 'x vel', 'y pos', 'y vel', 'turn angle')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
     @property
-    def _cont_fnc_lst(self):
+    def cont_fnc_lst(self):
         # returns x_dot
         def f0(t, x, *args):
             return x[1]
@@ -508,7 +546,7 @@ class TschaunerHempelOrbit(NonlinearDynamicsBase):
         super().__init__(**kwargs)
 
     @property
-    def _cont_fnc_lst(self):
+    def cont_fnc_lst(self):
         # returns x velocity
         def f0(t, x, *args):
             return x[3]
@@ -578,21 +616,6 @@ class TschaunerHempelOrbit(NonlinearDynamicsBase):
 
         return [f0, f1, f2, f3, f4, f5, f6]
 
-    def get_dis_process_noise_mat(self, dt):
-        """Calculates the process noise.
-
-        Parameters
-        ----------
-        dt : float
-            time difference, not used but needed for standardized interface.
-
-        Returns
-        -------
-        7 x 7 numpy array
-            discrete time process noise matrix.
-        """
-        return np.zeros((len(self.state_names), len(self.state_names)))
-
 
 class KarlgaardOrbit(NonlinearDynamicsBase):
     """Implements the non-linear Karlgaar elliptical orbit model.
@@ -612,7 +635,7 @@ class KarlgaardOrbit(NonlinearDynamicsBase):
         super().__init__(**kwargs)
 
     @property
-    def _cont_fnc_lst(self):
+    def cont_fnc_lst(self):
         # returns non-dim radius ROC
         def f0(t, x, *args):
             return x[3]
@@ -652,18 +675,3 @@ class KarlgaardOrbit(NonlinearDynamicsBase):
             return ((-2 * theta_d * phi - 2 * phi_d * r_d) - phi)
 
         return [f0, f1, f2, f3, f4, f5]
-
-    def get_dis_process_noise_mat(self, dt):
-        """Calculates the process noise.
-
-        Parameters
-        ----------
-        dt : float
-            time difference, not used but needed for standardized interface.
-
-        Returns
-        -------
-        6 x 6 numpy array
-            discrete time process noise matrix.
-        """
-        return np.zeros((len(self.state_names), len(self.state_names)))
