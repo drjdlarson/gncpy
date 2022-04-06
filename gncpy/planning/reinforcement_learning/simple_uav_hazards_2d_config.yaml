@@ -24,10 +24,10 @@ score:
     #     vel_penalty: 1
     #     min_vel_per: 0.5
     params:
-        hazard_multiplier: 2
-        death_scale: 0
-        death_decay: 0.05
-        death_penalty: 100
+        hazard_multiplier: 1
+        death_scale: 20
+        death_decay: 0.2
+        death_penalty: 10
         time_penalty: 1
         missed_multiplier: 5
         target_multiplier: 50
@@ -195,3 +195,32 @@ targets:
       capabilities:
           - 'radar'
           - 'lidar'
+
+hazards:
+    -
+      loc_x: 7.5
+      loc_y: 8.5
+      width: 10
+      height: 2.5
+      shape_type: 'rect'
+      shape_color:
+          - 255
+          - 215
+          - 0
+      collision_width: 10
+      collision_height: 2.5
+      prob_of_death: 0.05
+
+    -
+      loc_x: 5
+      loc_y: 19
+      width: 1.5
+      height: 3
+      shape_type: 'rect'
+      shape_color:
+          - 255
+          - 215
+          - 0
+      collision_width: 1.5
+      collision_height: 3
+      prob_of_death: 0.1

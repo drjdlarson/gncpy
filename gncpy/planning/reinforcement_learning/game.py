@@ -17,6 +17,8 @@ import serums.models as smodels
 
 # %% Entities
 class EntityManager:
+    """Handles creation and deletion of entities."""
+
     def __init__(self):
         self._entities = []
         self._entities_to_add = []
@@ -33,6 +35,15 @@ class EntityManager:
             del vec[ii]
 
     def update(self):
+        """Updates the list of entities.
+
+        Should be called once per timestep. Adds new entities to the list and
+        and removes dead ones.
+
+        Returns
+        -------
+        None.
+        """
         for e in self._entities_to_add:
             self._entities.append(e)
             if e.tag not in self._entity_map:
@@ -46,6 +57,21 @@ class EntityManager:
             self._remove_dead_entities(ev)
 
     def add_entity(self, tag):
+        """Creates a new entity.
+
+        The entity is queued to be added. It is not part of the entity list
+        until after the update function has been called.
+
+        Parameters
+        ----------
+        tag : string
+            Tag to identify the type of entity.
+
+        Returns
+        -------
+        e : :class:`.Entity`
+            Reference to the created entity.
+        """
         self._total_entities += 1
         e = Entity(self._total_entities, tag)
         self._entities_to_add.append(e)
@@ -53,6 +79,21 @@ class EntityManager:
         return e
 
     def get_entities(self, tag=None):
+        """Return a list of references to entities.
+
+        Can also get all entities with a given tag. Note that changing entities
+        returned by this function modifies the entities managed by this class.
+
+        Parameters
+        ----------
+        tag : string, optional
+            If provided only return entities with this tag. The default is None.
+
+        Returns
+        -------
+        list
+            Each element is an :class:`.Entity`.
+        """
         if tag is None:
             return self._entities
         else:
@@ -63,7 +104,40 @@ class EntityManager:
 
 
 class Entity:
+    """Elements in a game.
+
+    Attributes
+    ----------
+    c_transform : :class:`.CTransform`
+        Transform component.
+    c_dynamics : :class:`.CDynamics`
+        Dynamics component.
+    c_shape : :class:`.CShape`
+        Shape component.
+    c_collision : :class:`.CCollision`
+        Collision component.
+    c_birth: :class:`.CBirth`
+        Birth component.
+    c_events: :class:`.CEvents`
+        Events component.
+    c_capabilities : :class:`.CCapabilities`
+        Capabilities component.
+    c_priority: :class:`.CPriority`
+        Priority component.
+    """
+
     def __init__(self, e_id, tag):
+        """Initialize an object.
+
+        This should not be called outside of the :class:`.EntityManager` class.
+
+        Parameters
+        ----------
+        e_id : int
+            Unique ID number for the entity.
+        tag : string
+            Type of entity.
+        """
         self._active = True
         self._id = e_id
         self._tag = tag
@@ -79,27 +153,73 @@ class Entity:
 
     @property
     def active(self):
+        """Flag indicating if the entity is alive."""
         return self._active
 
     @property
     def tag(self):
+        """Read only tag of for the entity."""
         return self._tag
 
     @property
     def id(self):
+        """Read only unique id of the entity."""
         return self._id
 
     def destroy(self):
+        """Handles destruction of the entity."""
         self._active = False
 
 
 # %% Components
 class CDynamics:
+    """Handles all the properties relaing to the dynamics.
+
+    Also implements the logic for propagating the state via a dynamics
+    object.
+
+    Attributes
+    ----------
+    dynObj : :class:`gncpy.dynamics.DynamicsBase`
+        Implements the dynamics equations, control, and state constraints.
+    pos_inds : list
+        Indices of the state vector containing the position info.
+    vel_inds : list
+        Indices of the state vector containing the velocity info.
+    state_args : tuple
+        Additional arguments for propagating the state.
+    ctrl_args : tuple
+        Additional arguments for propagating the state.
+    state_low : numpy array
+        Lower limit of each state.
+    state_high : numpy array
+        Upper limit of each state.
+    """
+
     __slots__ = ('dynObj', 'last_state', 'state', 'pos_inds', 'vel_inds',
                  'state_args', 'ctrl_args', 'state_low', 'state_high')
 
     def __init__(self, dynObj, pos_inds, vel_inds, state_args, ctrl_args,
                  state_low, state_high):
+        """Initialize an object.
+
+        Parameters
+        ----------
+        dynObj : :class:`gncpy.dynamics.DynamicsBase`
+            Implements the dynamics equations, control, and state constraints.
+        pos_inds : list
+            Indices of the state vector containing the position info.
+        vel_inds : list
+            Indices of the state vector containing the velocity info.
+        state_args : tuple
+            Additional arguments for propagating the state.
+        ctrl_args : tuple
+            Additional arguments for propagating the state.
+        state_low : numpy array
+            Lower limit of each state.
+        state_high : numpy array
+            Upper limit of each state.
+        """
         self.dynObj = dynObj
         n_states = len(self.dynObj.state_names)
         self.last_state = np.nan * np.ones((n_states, 1))
@@ -114,9 +234,40 @@ class CDynamics:
 
 
 class CShape:
+    """Contains properties related to the drawn shape.
+
+    Attributes
+    ----------
+    shape : string
+        type of shape to create.
+    color : tuple
+        RGB triplet for the color in range [0, 255].
+    zorder : int
+        Determines draw order, lower numbers are drawn first.
+    """
+
     __slots__ = 'shape', 'color', 'zorder'
 
     def __init__(self, shape, w, h, color, zorder):
+        """Initialize an object.
+
+        Parameters
+        ----------
+        shape : string
+            type of shape to create.
+        w : int
+            width in pixels.
+        h : int
+            height in pixels.
+        color : tuple
+            RGB triplet for the color in range [0, 255].
+        zorder : int
+            Determines draw order, lower numbers are drawn first.
+
+        Todo
+        ----
+        Allow for other shape types.
+        """
         if shape.lower() == 'rect':
             self.shape = pygame.Rect((0, 0), (w, h))
 
@@ -125,6 +276,18 @@ class CShape:
 
 
 class CTransform:
+    """Contains properties relating to the spatial components.
+
+    Attributes
+    ----------
+    pos : 2 x 1 numpy array
+        position of the center in pixels
+    last_pos : 2 x 1 numpy array
+        last position of the center in pixels.
+    vel 2 x 1 numpy array
+        velocity of the center in pixels per timestep
+    """
+
     __slots__ = 'pos', 'last_pos', 'vel'
 
     def __init__(self):
@@ -134,6 +297,14 @@ class CTransform:
 
 
 class CCollision:
+    """Handles the bounding box used for collisions.
+
+    Attrbutes
+    ---------
+    aabb : pygame Rect
+        Rectangle representing the axis aligned bounding box.
+    """
+
     __slots__ = 'aabb'
 
     def __init__(self, w, h):
@@ -141,19 +312,49 @@ class CCollision:
 
 
 class CBirth:
+    """Handles the birth model properties.
+
+    Also handles the generation of the birth location through the use of
+    a distribution object from SERUMS.
+    """
+
     __slots__ = '_model'
 
     def __init__(self, b_type, loc, scale, params):
+        """Initializes an object.
+
+        Parameters
+        ----------
+        b_type : string
+            Model type.
+        loc : numpy array
+            location parameter of the model.
+        scale : N x N numpy array
+            scale parameter of the model.
+        params : dict
+            additional parameters for the model.
+        """
         self._model = smodels.Gaussian(mean=loc,
                                        covariance=scale**2)
 
     @property
     def loc(self):
+        """Read only location sample from the distribution."""
         # TODO fix this hack by updating serums
         return self._model.sample().reshape((2, 1))
 
 
 class CEvents:
+    """Holds the events properties.
+
+    Attributes
+    ----------
+    events : list
+        Each element is a tuple with the first being a
+        :class:`gncpy.planning.reinforcement_learning.enums.EventType` and
+        the second a dict with extra info.
+    """
+
     __slots__ = 'events'
 
     def __init__(self):
@@ -161,24 +362,73 @@ class CEvents:
 
 
 class CHazard:
+    """Hold the properties for hazard info.
+
+    Attributes
+    ----------
+    prob_of_death : float
+        Probability of death at each timestep in the hazard. Must be in the
+        range (0, 1].
+    entrance_times : dict
+        mapping of player id to entrance time.
+    """
+
     __slots__ = 'prob_of_death', 'entrance_times'
 
     def __init__(self, prob_of_death):
+        """Initialize an object.
+
+        Parameters
+        ----------
+        prob_of_death : float
+            Probability of death at each timestep.
+        """
         self.prob_of_death = prob_of_death
         self.entrance_times = {}
 
 
 class CCapabilities:
+    """Hold properties about player/target capabilities.
+
+    Attributes
+    ----------
+    capabilities : list
+        Each element defines a capability. The :code:`in` keyword must work
+        for chcking if an item is in the list.
+    """
+
     __slots__ = 'capabilities'
 
     def __init__(self, capabilities):
+        """Initialize an object.
+
+        Parameters
+        ----------
+        capabilities : list
+            List of capabilities.
+        """
         self.capabilities = capabilities
 
 
 class CPriority:
+    """Hold properties about the priority.
+
+    Attributes
+    ----------
+    priority : float
+        Priority value.
+    """
+
     __slots__ = 'priority'
 
     def __init__(self, priority):
+        """Initialize an object.
+
+        Parameters
+        ----------
+        priority : float
+            priority of the object.
+        """
         self.priority = priority
 
 
@@ -188,7 +438,18 @@ class Game(ABC):
     """Base class for defining games.
 
     This should implement all the necessary systems (i.e. game logic) by operating
-    on entities.
+    on entities. It must be subclassed and defines the expected interface of games.
+
+    Attributes
+    ----------
+    _entity_manager : :class:`.EntityManager`
+        Handles creating and deleting entiies.
+    render_fps : int
+        fps to render the visualization at if in :code:`'human'` mode.
+    game_over : bool
+        Flag indicating if the game has ended.
+    score : float
+        The score from the last call to :meth:`.step`
     """
 
     __slots__ = ('_entity_manager', '_current_frame', '_render_mode',
@@ -199,6 +460,13 @@ class Game(ABC):
 
         The child class should call the :meth:`.parse_config_file` function
         after declaring all its attributes.
+
+        Parameters
+        ----------
+        render_mode : string
+            Mode to render in.
+        render_fps : int
+            FPS to render at.
         """
         super().__init__()
 
@@ -211,18 +479,51 @@ class Game(ABC):
         self.score = 0
 
     @abstractmethod
-    def parse_config_file(self, config_file):
-        pass
+    def parse_config_file(self, config_file, **kwargs):
+        """Abstract method for parsing the config file and setting up the game.
+
+        Must be implemented by the child class and should be called at the end
+        of the constructor.
+
+        Parameters
+        ----------
+        config_file : string
+            Full path of the configuration file.
+        kwargs : dict, optional
+            Additional arguments needed by subclasses.
+
+        Returns
+        -------
+        conf : dict
+            Dictionary containnig values read from config file.
+        """
+        raise NotImplementedError
 
     @abstractmethod
     def step(self, action):
-        pass
+        """Abstract method defining what to do each frame.
+
+        This must be implemented by the child class.
+
+        Parameters
+        ----------
+        action : numpy array, int, bool, etc.
+            action to take in the game.
+
+        Returns
+        -------
+        info : dict
+            Extra infomation for debugging.
+        """
+        raise NotImplementedError
 
     @abstractmethod
     def render(self):
-        pass
+        """Implements the rendering system."""
+        raise NotImplementedError
 
     def reset(self):
+        """Resets to the base state."""
         self._entity_manager = EntityManager()
         self._current_frame = -1
         self.game_over = False
@@ -234,31 +535,30 @@ class Game(ABC):
 
         Parameters
         ----------
-        action : TYPE
-            DESCRIPTION.
-
-        Returns
-        -------
-        None.
+        action : numpy array, int, bool, etc.
+            action to take in the game.
         """
         raise NotImplementedError
 
     @abstractmethod
     def s_collision(self):
-        """Check for collisions between entities.
-
-        Returns
-        -------
-        None.
-        """
+        """Check for collisions between entities."""
         raise NotImplementedError
 
     @abstractmethod
     def s_game_over(self):
+        """Checks for game over conditions."""
         raise NotImplementedError
 
     @abstractmethod
     def s_score(self):
+        """Calculates the score.
+
+        Returns
+        -------
+        info : dict
+            Extra info for debugging.
+        """
         raise NotImplementedError
 
 
@@ -266,13 +566,46 @@ class Game2d(Game):
     """Base class for defining 2d games.
 
     This should implement all the necessary systems (i.e. game logic) by operating
-    on entities.
+    on entities. It assumes the rendering will be done by pygame.
+
+    Attributes
+    ----------
+    _window : pygame surface
+        Main surface (window) to draw on.
+    _clock : pygame clock
+        main pygame clock for rendering at a given fps.
+    max_n_targets : int
+        maximum number of targets
+    dt : float
+        Time increment
+    max_time : float
+        Maximum game time.
+    min_pos : numpy array
+        minimum position in the x/y directions in real units
+    dist_height : float
+        Maximum distance along the vertical axis in real units.
+    dist_width : float
+        Maximum distance along the horizontal axis in real units.
+    dist_per_pix : float
+        Distance units per pixel on the scsreen.
     """
 
     __slots__ = ('_window', '_clock', '_img', 'max_n_targets', 'dt', 'max_time',
                  'min_pos', 'dist_height', 'dist_width', 'dist_per_pix')
 
     def __init__(self, render_mode, render_fps=60):
+        """Initalize an object.
+
+        The child class should call the :meth:`.parse_config_file` function
+        after declaring all its attributes.
+
+        Parameters
+        ----------
+        render_mode : string
+            Mode to render in.
+        render_fps : int
+            FPS to render at.
+        """
         super().__init__(render_mode, render_fps=render_fps)
 
         pygame.init()
@@ -290,10 +623,29 @@ class Game2d(Game):
         self.dist_per_pix = None
 
     def reset(self):
+        """Resets to the base state."""
         super().reset()
         self._img = 255 * np.ones((*self.get_image_size(), 3), dtype=np.uint8)
 
     def parse_config_file(self, config_file, extra_keys=None):
+        """Parses the config file and sets up the game.
+
+        Should be called at the end of the constructor.
+
+        Parameters
+        ----------
+        config_file : string
+            Full path of the configuration file.
+        extra_keys : list
+            Each element is a string of extra keys in the config file not
+            processed by this function. Errors are printed if any keys are
+            found that are not used and are not in extra_keys.
+
+        Returns
+        -------
+        conf : dict
+            Dictionary containnig values read from config file.
+        """
         if extra_keys is None:
             extra_keys = ()
 
@@ -335,6 +687,23 @@ class Game2d(Game):
         return conf
 
     def _pixels_to_dist(self, pt, ind, translate):
+        """Convert pixel units to real units.
+
+        Parameters
+        ----------
+        pt : numpy array, float
+            point to convert
+        ind : int, list
+            index to use from min_pos and dist_per_pix
+        translate : bool
+            Flag indicating if translation needs to be done (i.e. for position
+            conversion).
+
+        Returns
+        -------
+        numpy array, float
+            converted point
+        """
         if translate:
             res = pt * self.dist_per_pix[ind] + self.min_pos[ind]
         else:
@@ -349,6 +718,23 @@ class Game2d(Game):
             return res
 
     def _dist_to_pixels(self, pt, ind, translate):
+        """Convert real units to pixel units.
+
+        Parameters
+        ----------
+        pt : numpy array, float
+            point to convert
+        ind : int, list
+            index to use from min_pos and dist_per_pix
+        translate : bool
+            Flag indicating if translation needs to be done (i.e. for position
+            conversion).
+
+        Returns
+        -------
+        numpy array, float
+            converted point
+        """
         if translate:
             res = (pt - self.min_pos[ind]) / self.dist_per_pix[ind]
         else:
@@ -363,6 +749,18 @@ class Game2d(Game):
             return int(res)
 
     def setup_window(self, params):
+        """Setup the window based on the config file.
+
+        Must have the parameters:
+
+            - width
+            - height
+
+        Parameters
+        ----------
+        params : dict
+            window config.
+        """
         extra = {}
         if self._render_mode !='human':
             extra['flags'] = pygame.HIDDEN
@@ -373,33 +771,98 @@ class Game2d(Game):
 
     @abstractmethod
     def get_num_targets(self):
+        """Get the number of targets.
+
+        Returns
+        -------
+        int
+            Number of targets.
+        """
         raise NotImplementedError
 
     @abstractmethod
     def get_player_state_bounds(self):
+        """Calculate the bounds on the player state
+
+        Returns
+        -------
+        2 x N numpy array
+            minimum and maximum values of the player state.
+        """
         raise NotImplementedError
 
     @abstractmethod
     def get_player_state(self):
+        """Return the player state.
+
+        Returns
+        -------
+        numpy array
+            player state.
+        """
         raise NotImplementedError
 
     @abstractmethod
     def setup_player(self, params):
-        pass
+        """Setup the player based on the config file.
+
+        Parameters
+        ----------
+        params : dict
+            Config values.
+        """
+        raise NotImplementedError
 
     @abstractmethod
     def setup_obstacles(self, params):
-        pass
+        """Setup the obstacles based on the config file.
+
+        Parameters
+        ----------
+        params : dict
+            Config values.
+        """
+        raise NotImplementedError
 
     @abstractmethod
     def setup_targets(self, params):
-        pass
+        """Setup the targets based on the config file.
+
+        Parameters
+        ----------
+        params : dict
+            Config values.
+        """
+        raise NotImplementedError
 
     @abstractmethod
     def setup_hazards(self, params):
-        pass
+        """Setup the hazards based on the config file.
+
+        Parameters
+        ----------
+        params : dict
+            Config values.
+        """
+        raise NotImplementedError
 
     def setup_physics(self, params):
+        """Setup the physics based on the config file.
+
+        Must have parameters:
+
+            - dt
+            - max_time
+            - min_x
+            - min_y
+            - dist_width
+            - dist_height
+
+        Parameters
+        ----------
+        params : dict
+            Config values.
+        """
         self.dt = float(params['dt'])
         self.max_time = float(params['max_time'])
         self.min_pos = np.array([[float(params['min_x'])],
@@ -422,8 +885,13 @@ class Game2d(Game):
 
         Parameters
         ----------
-        action : TYPE
-            DESCRIPTION.
+        action : numpy array, int, bool, etc.
+            action to take in the game.
+
+        Returns
+        -------
+        info : dict
+            Extra infomation for debugging.
         """
         info = {}
         self._current_frame += 1
@@ -475,25 +943,60 @@ class Game2d(Game):
                                  axes=(1, 0, 2))
 
     def get_screen_rgb(self):
+        """Gets a maxtrix representing the screen.
+
+        The order is H, W, C.
+
+        Returns
+        -------
+        H x W x 3 numpy array
+            screen pixel values
+        """
         return self._img
 
     def get_image_size(self):
+        """Gets the size of the window.
+
+        Returns
+        -------
+        tuple
+            first is the height next is the width, in pixels.
+        """
         sz = self._window.get_size()
         return sz[1], sz[0]
 
     def close(self):
+        """Closes the game."""
         if self._window is not None:
             pygame.quit()
 
 
 # %%% Custom Games
 class SimpleUAV2d(Game2d):
+    """Implements a simple 2d UAV scenario.
+
+    Attributes
+    ----------
+    suppored_reward_types : tuple
+        "Each element is a string of a supported reward type.
+    """
 
     __slots__ = ('_config_file', '_scoreCls', '_all_capabilities', '_reward_type')
 
     supported_reward_types = ('BasicReward', )
 
     def __init__(self, config_file, render_mode, render_fps=None):
+        """Initialize an object.
+
+        Parameters
+        ----------
+        config_file : string
+            Ful path to the configuration YAML file.
+        render_mode : string
+            Render mode.
+        render_fps : int, optional
+            Render fps, if set to None then the game dt is used. The default is None.
+        """
         super().__init__(render_mode, render_fps=render_fps)
 
         self._config_file = config_file
@@ -507,6 +1010,21 @@ class SimpleUAV2d(Game2d):
             self.render_fps = 1 / self.dt
 
     def setup_score(self, params):
+        """Setup the score based on the config file.
+
+        Must have the parameters:
+
+            - type
+
+        Can also have:
+
+            - params
+
+        Parameters
+        ----------
+        params : dict
+            score config.
+        """
         rtype = params['type']
         if rtype not in self.supported_reward_types:
             raise RuntimeError('Unsupported score type given ({})'.format(rtype))
@@ -522,6 +1040,24 @@ class SimpleUAV2d(Game2d):
         self._scoreCls = cls_type(**kwargs)
 
     def parse_config_file(self, config_file, extra_keys=None):
+        """Parses the config file and sets up the game.
+
+        Should be called at the end of the constructor.
+
+        Parameters
+        ----------
+        config_file : string
+            Full path of the configuration file.
+        extra_keys : list
+            Each element is a string of extra keys in the config file not
+            processed by this function. Errors are printed if any keys are
+            found that are not used and are not in extra_keys.
+
+        Returns
+        -------
+        conf : dict
+            Dictionary containnig values read from config file.
+        """
         conf = super().parse_config_file(config_file, extra_keys=('score'))
 
         if 'score' in conf.keys():
@@ -529,32 +1065,56 @@ class SimpleUAV2d(Game2d):
         else:
             raise RuntimeError('Must specify score parameters in config')
 
+        return conf
+
     def _add_capabilities(self, lst):
         for c in lst:
             if c not in self._all_capabilities:
                 self._all_capabilities.append(c)
 
     def get_num_targets(self):
+        """Return the number of active targets.
+
+        Returns
+        -------
+        int
+            Number of active targets.
+        """
         return sum([1 for t in self._entity_manager.get_entities('target')
                     if t.active])
 
     def get_player_state_bounds(self):
+        """Calculate the bounds on the player state.
+
+        Returns
+        -------
+        2 x N numpy array
+            minimum and maximum values of the player state.
+        """
         p_lst = self._entity_manager.get_entities('player')
         p = p_lst[0]
         return np.vstack((p.c_dynamics.state_low.copy(),
                           p.c_dynamics.state_high.copy()))
 
     def get_player_state(self):
+        """Return the player state.
+
+        Returns
+        -------
+        numpy array
+            player state.
+        """
         p_lst = self._entity_manager.get_entities('player')
         p = p_lst[0]
         return p.c_dynamics.state.copy().ravel()
 
-
     @property
     def current_time(self):
+        """Current time in real units."""
         return self.dt * self._current_frame
 
     def reset(self):
+        """Resets to the base state."""
         super().reset()
         self._all_capabilities = []
 
@@ -701,6 +1261,44 @@ class SimpleUAV2d(Game2d):
         return c_dynamics
 
     def setup_player(self, params):
+        """Setup the player based on the config file.
+
+        Must have the parameters:
+
+            - birth_model
+                - location
+                - scale
+                - type
+                - params
+            - dynamics_model
+                - type
+                - params
+                - control_model
+                    - type
+                    - max_vel or (max_vel_x and max_vel_y)
+                    - max_turn_rate
+                - state_constraint
+                    - type
+                    - min_vels
+                    - max_vels
+            -shape_model
+                - type
+                - height
+                - width
+                - color
+            - collision_model
+                - width
+                - height
+
+        Can also have:
+
+            - capabilities
+
+        Parameters
+        ----------
+        params : dict
+            player config.
+        """
         e = self._entity_manager.add_entity('player')
 
         # TODO: allow for other birth types
@@ -735,6 +1333,24 @@ class SimpleUAV2d(Game2d):
         self._add_capabilities(capabilities)
 
     def setup_obstacles(self, params):
+        """Setup the obstacles based on the config file.
+
+        Must be a list where each element has the parameters:
+
+            - loc_x
+            - loc_y
+            - shape_type
+            - width
+            - height
+            - shape_color
+            - collision_width
+            - collision_height
+
+        Parameters
+        ----------
+        params : dict
+            obstacle config.
+        """
         for o_params in params:
             e = self._entity_manager.add_entity('obstacle')
 
@@ -754,7 +1370,32 @@ class SimpleUAV2d(Game2d):
                                                             1, False))
 
     def setup_targets(self, params):
-        # TODO: modify this when allowing for sequences of targets
+        """Setup the targets  based on the config file.
+
+        Must be a list where each element has the parameters:
+
+            - loc_x
+            - loc_y
+            - shape_type
+            - width
+            - height
+            - shape_color
+            - collision_width
+            - collision_height
+
+        Each can also have:
+
+            - capabilities
+
+        Parameters
+        ----------
+        params : dict
+            target config.
+
+        Todo
+        ----
+        Allow for a sequence of targets.
+        """
         self.max_n_targets = len(params)
         for t_params in params:
             e = self._entity_manager.add_entity('target')
@@ -785,6 +1426,25 @@ class SimpleUAV2d(Game2d):
             e.c_priority = CPriority(t_params['priority'])
 
     def setup_hazards(self, params):
+        """Setup the hazards  based on the config file.
+
+        Must be a list where each element has the parameters:
+
+            - loc_x
+            - loc_y
+            - shape_type
+            - width
+            - height
+            - shape_color
+            - collision_width
+            - collision_height
+            - prob_of_death
+
+        Parameters
+        ----------
+        params : dict
+            hazard config.
+        """
         for h_params in params:
             e = self._entity_manager.add_entity('hazard')
 
@@ -812,8 +1472,8 @@ class SimpleUAV2d(Game2d):
 
         Parameters
         ----------
-        action : TYPE
-            DESCRIPTION.
+        action : 2 x 1 numpy array
+            Control inputs for the given dynamics model.
 
         Returns
         -------
@@ -853,6 +1513,9 @@ class SimpleUAV2d(Game2d):
 
     def s_collision(self):
         """Check for collisions between entities.
+
+        This also handles player death if a hazard destroys a player, and
+        updates the events.
 
         Returns
         -------
@@ -973,6 +1636,15 @@ class SimpleUAV2d(Game2d):
                                                                     [0, 1], False)
 
     def s_game_over(self):
+        """Determines if the game ends.
+
+        Game ends if there are no active players, the entity manager has no
+        targets remaining, or the time is greater than or equal to the max time.
+
+        Returns
+        -------
+        None.
+        """
         alive_players = list(filter(lambda _x: _x.active,
                                     self._entity_manager.get_entities('player')))
         self.game_over = (self.current_time >= self.max_time
@@ -980,6 +1652,18 @@ class SimpleUAV2d(Game2d):
                           or len(alive_players) == 0)
 
     def s_score(self):
+        """Calculate the score using the reward class instance.
+
+        Raises
+        ------
+        NotImplementedError
+            If the reward type has not been implemented.
+
+        Returns
+        -------
+        info : dict
+            extra info for debugging.
+        """
         if self._reward_type == 'BasicReward':
             self.score, info = self._scoreCls.calc_reward(self.current_time,
                                                           self._entity_manager.get_entities('player'),

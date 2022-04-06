@@ -9,9 +9,21 @@ import gncpy.planning.reinforcement_learning.game as rl_games
 
 
 class BaseEnv(gym.Env):
+    """Abstract base class for all environments.
+
+    This defines the interrface common to all environment.
+    """
+
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 50}
 
     def __init__(self, game):
+        """Initialize an object.
+
+        Parameters
+        ----------
+        game : :class:`gncpy.planning.reinforcement_learning.game.Game`
+            game to learn to play.
+        """
         super().__init__()
 
         self.action_space = None
@@ -20,6 +32,24 @@ class BaseEnv(gym.Env):
         self._game = game
 
     def step(self, action):
+        """Perform one step of the environment.
+
+        Parameters
+        ----------
+        action : numpy array, float, int, dict, etc.
+            action to take.
+
+        Returns
+        -------
+        obs : numpy array, float, int, dict, etc.
+            observation after taking the action.
+        reward : float
+            reward from the current step.
+        done : bool
+            Flag indicating if the game is over.
+        info : dict
+            extra info for debugging.
+        """
         info = {}
 
         info.update(self._game.step(action))
@@ -31,24 +61,73 @@ class BaseEnv(gym.Env):
 
     @abstractmethod
     def generate_observation(self):
+        """Abstract method for generating observations."""
         raise NotImplementedError
 
     def generate_step_info(self):
+        """Create the dictionary containing extra info for debugging the step function.
+
+        Returns
+        -------
+        dict
+            extra debugging info.
+        """
         return {}
 
     @abstractmethod
     def render(self):
+        """Abstract method for implementing the rendering system."""
         raise NotImplementedError
 
     @abstractmethod
     def reset(self):
+        """Abstract method for implementing the reset function.
+
+        Returns
+        -------
+        obs : numpy arra, float, int, dict, etc
+            observation
+        """
         raise NotImplementedError
 
 
 class SimpleUAV2d(BaseEnv):
+    """Implements a simple 2d UAV scenario.
+
+    This is based on the simple uav 2d game. The state is configurable through
+    constructor parameters, and the scenario can be customized by supplying
+    a custom YAML configuration file.
+    """
+
     def __init__(self, config_file='simple_uav_2d_config.yaml',
                  render_mode='rgb_array', render_fps=None, obs_type='player_state',
                  aux_use_n_targets=False, aux_use_time=False):
+        """Initialize an object.
+
+        Parameters
+        ----------
+        config_file : string, optional
+            Full path to the config YAML file. The default is 'simple_uav_2d_config.yaml'.
+        render_mode : string, optional
+            render mode. If human is specified here then render does not need
+            to be called to visualize the results. The default is 'rgb_array'.
+        render_fps : int, optional
+            Render FPS if none then the games dt is used. The default is None.
+        obs_type : string, optional
+            Observation type to use. Can be `image` or `player_state`. The default
+            is 'player_state'.
+        aux_use_n_targets : bool, optional
+            Flag indicating if the auxilary state should use the number
+            of targets remaining. The default is False.
+        aux_use_time : bool, optional
+            Flag indicating if the axuilary state should use the timestep. The
+            default is False.
+
+        Raises
+        ------
+        RuntimeError
+            If the config file is not found.
+        """
         if os.pathsep in config_file:
             cf = config_file
         else:
@@ -121,9 +200,16 @@ class SimpleUAV2d(BaseEnv):
         return out
 
     def close(self):
+        """Closes the environment."""
         self._game.close()
 
     def render(self, mode='human'):
+        """Renders a frame of the environment according to the mode.
+
+        The mode should be set in the constructor, and if using human then this
+        function does not need to be called. If using rgb_array then this returns
+        a H x W x 3 numpy array of the screen pixels.
+        """
         img = self._game.get_screen_rgb()
 
         if mode == "rgb_array":
@@ -149,6 +235,7 @@ class SimpleUAV2d(BaseEnv):
             plt.pause(1 / self._game.render_fps)
 
     def generate_observation(self):
+        """Generates an observation."""
         # get main state
         if self._obs_type == 'image':
             main_state = self._game.get_screen_rgb()
@@ -158,7 +245,7 @@ class SimpleUAV2d(BaseEnv):
             msg = 'Failed to generate observation for type {}'.format(self._obs_type)
             raise NotImplementedError(msg)
 
-        #get aux state, if any
+        # get aux state, if any
         aux_state = np.array([])
         if self._aux_use_n_targets:
             aux_state = np.append(aux_state, self._game.get_num_targets())
@@ -179,6 +266,30 @@ class SimpleUAV2d(BaseEnv):
                 return main_state
 
     def reset(self):
+        """Resets the environment.
+
+        Returns
+        -------
+        numpy array, dict
+            observation
+        """
         self._game.reset()
         self._game.step(np.zeros_like(self.action_space.low))
+
+        # make sure the agent didn't die on first step
+        while self._game.game_over:
+            self._game.reset()
+            self._game.step(np.zeros_like(self.action_space.low))
         return self.generate_observation()
+
+
+class SimpleUAVHazards2d(SimpleUAV2d):
+    """Simple 2d UAV environment with hazards.
+
+    This follows the same underlying game logic as the :class:`.SimpleUAV2d`
+    environment but has some hazards added to its default configuration.
+    """
+
+    def __init__(self, config_file='simple_uav_hazards_2d_config.yaml', **kwargs):
+        """Initialize an object."""
+        super().__init__(config_file=config_file, **kwargs)
