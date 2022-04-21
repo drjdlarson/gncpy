@@ -14,7 +14,7 @@ class BaseEnv(gym.Env):
     This defines the interrface common to all environment.
     """
 
-    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 50}
+    metadata = {"render.modes": ["human", "rgb_array"], "render_fps": 50}
 
     def __init__(self, game):
         """Initialize an object.
@@ -30,6 +30,7 @@ class BaseEnv(gym.Env):
         self.observation_space = None
 
         self._game = game
+        self.metadata['render_fps'] = self._game.render_fps
 
     def step(self, action):
         """Perform one step of the environment.
