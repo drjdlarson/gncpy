@@ -1,4 +1,4 @@
-"""Standardized dynamics models with predefined functions for built in filters.
+"""Basic models and classes that can be extended.
 
 These provide an easy to use interface for some common dynamic objects and
 and their associated models. They have been designed to integrate well with the
@@ -45,12 +45,48 @@ class DynamicsBase(ABC):
         self.state_constraint = state_constraint
 
     @abstractmethod
-    def propagate_state(self, timestep, state, u=None, state_args=None, ctrl_args=None):
+    def propagate_state(self, *args, **kwargs):
+        """Abstract method for propagating the state forward in time.
+
+        Must be overridden in child classes.
+
+        Parameters
+        ----------
+        *args : tuple
+            Specifics defined by child class.
+        **kwargs : dict
+            Specifics defined by child class.
+
+        Raises
+        ------
+        NotImplementedError
+            If child class does not implement this function.
+
+        Returns
+        -------
+        next_state : N x 1 numpy array
+            The propagated state.
+        """
         raise NotImplementedError
+
+
+class LinearDynamicsBase(DynamicsBase):
+    """Base class for all linear dynamics models.
+
+    Child classes should define their own get_state_mat function and set the
+    state names class variable. The remainder of the functions autogenerate
+    based on these values.
+
+    """
+
+    __slots__ = ()
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     @abstractmethod
     def get_state_mat(self, timestep, *args):
-        """Class method for getting the discrete time state matrix.
+        """Abstract method for getting the discrete time state matrix.
 
         Must be overridden in child classes.
 
@@ -67,20 +103,6 @@ class DynamicsBase(ABC):
             state matrix.
         """
         raise NotImplementedError
-
-
-class LinearDynamicsBase(DynamicsBase):
-    """Base class for all linear dynamics models.
-
-    Child classes should define their own get_state_mat function and set the
-    state names class variable. The remainder of the functions autogenerate
-    based on these values.
-
-    """
-    __slots__ = ()
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
 
     def get_dis_process_noise_mat(self, dt, *f_args):
         """Class method for getting the process noise.

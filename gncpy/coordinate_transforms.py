@@ -104,3 +104,26 @@ def ecef_to_NED(ref_xyz, pos_xyz):
                   [-s_lat * s_lon, c_lon, -c_lat * s_lon],
                   [c_lat, 0, -s_lat]])
     return R.T @ (pos_xyz - ref_xyz)
+
+
+def ned_to_ecef(ned, ref_lat, ref_lon, ref_alt):
+    R = np.array([[0, 1, 0],
+                  [1, 0, 0],
+                  [0, 0, -1]])
+    enu = R @ ned.reshape((3, 1))
+
+    c_lat = np.cos(ref_lat)
+    s_lat = np.sin(ref_lat)
+    c_lon = np.cos(ref_lon)
+    s_lon = np.sin(ref_lon)
+    dcm_ecef2enu = np.array([[-s_lon, c_lon, 0],
+                             [-s_lat * c_lon, s_lat * s_lon, c_lat],
+                             [c_lat * c_lon, c_lat * s_lon, s_lat]])
+
+    delta = dcm_ecef2enu.T @ enu
+    pos_ref = lla_to_ECEF(ref_lat, ref_lon, ref_alt)
+    return pos_ref + delta
+
+
+def ned_to_LLA(ned, ref_lat, ref_lon, ref_alt):
+    return ecef_to_LLA(ned_to_ecef(ned, ref_lat, ref_lon, ref_alt))
