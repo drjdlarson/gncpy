@@ -1,7 +1,8 @@
 import numpy as np
 from scipy import integrate
 import enum
-from warnings import warn
+import pathlib
+import os
 from ruamel.yaml import YAML
 
 from gncpy.dynamics.basic import DynamicsBase
@@ -23,6 +24,7 @@ class MassParams:
     def __init__(self):
         self.cg_m = []
         self.mass_kg = 0
+        self.inertia_kgm2 = []
 
 
 class PropParams:
@@ -34,12 +36,19 @@ class PropParams:
 class MotorParams:
     def __init__(self):
         self.pos_m = []
+        self.dir = []
+
+
+class GeoParams:
+    def __init__(self):
+        self.front_area_m2 = []
 
 
 class AircraftParams:
     def __init__(self):
         self.aero = AeroParams()
         self.mass = MassParams()
+        self.geo = GeoParams()
         self.prop = PropParams()
         self.motor = MotorParams()
 
@@ -48,6 +57,7 @@ yaml.register_class(AeroParams)
 yaml.register_class(MassParams)
 yaml.register_class(PropParams)
 yaml.register_class(MotorParams)
+yaml.register_class(GeoParams)
 yaml.register_class(AircraftParams)
 
 
@@ -59,7 +69,6 @@ class Effector:
 class ListEnum(list, enum.Enum):
     def __new__(cls, *args):
             assert len(args) == 2
-            print(args)
             try:
                 inds = list(args[0])
             except TypeError:
@@ -87,6 +96,17 @@ class ListEnum(list, enum.Enum):
         elif len(self.value) == len(other):
             return self.value == other
         return NotImplemented()
+
+    @classmethod
+    def get_num_states(cls):
+        n_states = -1
+        for s in dir(cls):
+            if s[0] == '_':
+                continue
+            v = getattr(cls, s)
+            if max(v) > n_states:
+                n_states = max(v)
+        return n_states + 1
 
 
 class v_smap(ListEnum):
@@ -120,13 +140,14 @@ class v_smap(ListEnum):
     @classmethod
     def _get_ordered_key(cls, key, append_ind):
         lst = []
-        for attr in dir(cls):
-            if attr[0] == '_':
+        for attr_str in dir(cls):
+            if attr_str[0] == '_':
                 continue
 
+            attr = getattr(cls, attr_str)
             multi = len(attr.value) > 1
             is_dcm = multi and 'dcm' in attr.name
-            for ii in attr.value:
+            for ii, jj in enumerate(attr.value):
                 name = getattr(attr, key)
                 if append_ind:
                     if is_dcm:
@@ -135,9 +156,9 @@ class v_smap(ListEnum):
                     elif multi:
                         name += '_{:d}'.format(ii)
 
-                lst.append((ii, name))
+                lst.append((jj, name))
         lst.sort(key=lambda x: x[0])
-        return lst
+        return tuple([x[1] for x in lst])
 
     @classmethod
     def get_ordered_names(cls):
@@ -162,14 +183,7 @@ class Vehicle:
     __slots__ = ('state', 'params', 'ref_lat', 'ref_lon')
 
     def __init__(self, params):
-        n_states = -1
-        for s in dir(v_smap):
-            if s[0:2] == '__' or s[0] == '_':
-                continue
-            v = getattr(v_smap, s)
-            if max(v) > n_states:
-                n_states = max(v)
-        self.state = np.nan * np.ones(n_states).reshape((-1, 1))
+        self.state = np.nan * np.ones(v_smap.get_num_states())
         self.params = params
 
         self.ref_lat = np.nan
@@ -201,13 +215,13 @@ class Vehicle:
 
     def _calc_prop_force_mom(self, motor_cmds):
         # motor model
-        m_thrust = -np.polynomial.Polynomial(self.params.motor.poly_thrust[-1::-1])(motor_cmds)
-        m_torque = -np.polynomial.Polynomial(self.params.motor.poly_torque[-1::-1])(motor_cmds)
+        m_thrust = -np.polynomial.Polynomial(self.params.prop.poly_thrust[-1::-1])(motor_cmds)
+        m_torque = -np.polynomial.Polynomial(self.params.prop.poly_torque[-1::-1])(motor_cmds)
         m_torque = np.sum(m_torque * np.array(self.params.motor.dir))
 
         # thrust to moment
         motor_mom = np.zeros(3)
-        for ii, m_pos in enumerate(np.array(self.params.motor.pos_m).reshape((-1, 3))):
+        for ii, m_pos in enumerate(np.array(self.params.motor.pos_m)):
             dx = m_pos[0] - self.params.mass.cg_m[0]
             dy = m_pos[1] - self.params.mass.cg_m[1]
             motor_mom[0] += dy * m_thrust[ii]
@@ -230,7 +244,7 @@ class Vehicle:
 
     def _calc_pqr_dot(self, pqr, inertia, inertia_dot, moments):
         term0 = (inertia_dot @ pqr).ravel()
-        term1 = np.cross(pqr, (inertia @ pqr).ravel())
+        term1 = np.cross(pqr.ravel(), (inertia @ pqr).ravel())
 
         term2 = moments - term0 - term1
         pqr_dot = term2.reshape((1, 3)) @ np.linalg.inv(inertia)
@@ -269,13 +283,13 @@ class Vehicle:
     def _six_dof_model(self, force, mom, dt):
         ned_accel = force / self.params.mass.mass_kg
 
-        body_rot_accel = self._calc_pqr_dot(self.state[v_smap.body_rot_rate],
-                                            self.params.mass.inertia_kgm2,
+        body_rot_accel = self._calc_pqr_dot(self.state[v_smap.body_rot_rate].reshape((3, 1)),
+                                            np.array(self.params.mass.inertia_kgm2),
                                             np.zeros((3, 3)), mom)
 
         # integrator to get body rotation rate
         r = integrate.ode(lambda t, x: self._calc_pqr_dot(x.reshape((3, 1)),
-                                                          self.params.mass.inertia_kgm2,
+                                                          np.array(self.params.mass.inertia_kgm2),
                                                           np.zeros((3, 3)), mom))
         r.set_integrator('dopri5')
         r.set_initial_value(self.state[v_smap.body_rot_rate])
@@ -325,7 +339,7 @@ class Vehicle:
 
         dyn_pres = 0.5 * density * np.sum(body_vel * body_vel)
 
-        aoa = np.atan2(body_vel[2], body_vel[0])
+        aoa = np.arctan2(body_vel[2], body_vel[0])
         airspeed = np.linalg.norm(body_vel)
         sideslip_ang = np.arcsin(body_vel[1] / airspeed)
 
@@ -390,15 +404,7 @@ class Vehicle:
 
 class Environment:
     def __init__(self):
-        n_states = -1
-        for s in dir(v_smap):
-            if s[0:2] == '__' or s[0] == '_':
-                continue
-            v = getattr(v_smap, s)
-            if max(v) > n_states:
-                n_states = max(v)
-
-        self.state = np.nan * np.ones(n_states)
+        self.state = np.nan * np.ones(e_smap.get_num_states())
 
     def _lower_atmo(self, alt_km):
         """This code is extracted from the version hosted on https://www.pdas.com/atmos.html
@@ -441,14 +447,14 @@ class Environment:
         if 0.0 == tgrad:
             delta = ptab[i] * np.exp(-GMR * deltah / tbase).item()
         else:
-            delta = ptab[i] * np.pow(tbase / tlocal, GMR / tgrad).item()
+            delta = ptab[i] * (tbase / tlocal)**(GMR / tgrad)
         sigma = delta / theta
 
         return (sigma * DENSITY0, delta * PRES0, theta * TEMP0,
                 ASOUND0 * np.sqrt(theta))
 
     def _atmo(self, alt_msl):
-        alt_km = 1000 * alt_msl
+        alt_km = alt_msl / 1000.0
         if alt_km < 86:
             return self._lower_atmo(alt_km)
         else:
@@ -469,6 +475,7 @@ class Environment:
 class SimpleMultirotor(DynamicsBase):
     state_names = v_smap.get_ordered_names()
     state_units = v_smap.get_ordered_units()
+    state_map = v_smap
 
     def __init__(self, params_file, env=None, effector=None, egm_bin_file=None):
         super().__init__()
@@ -485,13 +492,26 @@ class SimpleMultirotor(DynamicsBase):
         else:
             self.env = env
 
-        with open(params_file, 'r') as fin:
-            data = yaml.load(fin)
+        with open(self.validate_params_file(params_file), 'r') as fin:
+            v_params = yaml.load(fin)
 
-        self.vehicle = Vehicle(data)
+        self.vehicle = Vehicle(v_params)
 
         if egm_bin_file is not None:
             wgs84.init_egm_lookup_table(egm_bin_file)
+
+    def validate_params_file(self, params_file):
+        if os.pathsep in params_file:
+            cf = params_file
+        else:
+            cf = os.path.join(os.getcwd(), params_file)
+            if not os.path.isfile(cf):
+                cf = os.path.join(pathlib.Path(__file__).parent.resolve(),
+                                  params_file)
+                if not os.path.isfile(cf):
+                    raise RuntimeError('Failed to find config file {}'.format(params_file))
+
+        return cf
 
     def propagate_state(self, desired_motor_cmds, dt):
         motor_cmds = self.effector.step(desired_motor_cmds)
@@ -567,5 +587,6 @@ class SimpleMultirotor(DynamicsBase):
 class SimpleLAGERSuper(SimpleMultirotor):
     def __init__(self, params_file=None, **kwargs):
         if params_file is None:
-            params_file = './lager_super.yaml'
+            params_file = 'lager_super.yaml'
+
         super().__init__(params_file, **kwargs)

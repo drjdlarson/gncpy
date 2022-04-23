@@ -83,7 +83,10 @@ def calc_gravity(lat, alt):
                                                 * np.sin(lat)**2)
     ch = 1 - 2 * (1 + FLATTENING + (EQ_RAD**3 * (1 - FLATTENING)
                   * EARTH_ROT_RATE**2) / MU) * frac + 3 * frac**2
-    return np.array([[0], [0], [ch * g0]])
+    g = ch * g0
+    if isinstance(g, np.ndarray):
+        g = g.item()
+    return np.array([[0], [0], [g]])
 
 
 def init_egm_lookup_table(bin_file):
