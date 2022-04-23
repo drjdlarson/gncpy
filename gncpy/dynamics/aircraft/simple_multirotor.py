@@ -466,7 +466,7 @@ class Environment:
         self.state[e_smap.gravity] = gravity
 
 
-class GenericMultirotor(DynamicsBase):
+class SimpleMultirotor(DynamicsBase):
     state_names = v_smap.get_ordered_names()
     state_units = v_smap.get_ordered_units()
 
@@ -564,7 +564,7 @@ class GenericMultirotor(DynamicsBase):
         self.vehicle.state[v_smap.alt_agl] = alt_agl
 
 
-class LAGERSuper(GenericMultirotor):
+class SimpleLAGERSuper(SimpleMultirotor):
     def __init__(self, params_file=None, **kwargs):
         if params_file is None:
             params_file = './lager_super.yaml'
