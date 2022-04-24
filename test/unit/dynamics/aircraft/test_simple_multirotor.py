@@ -1,6 +1,7 @@
 import numpy as np
 
-import gncpy.dynamics.aircraft.simple_multirotor as g_simple_multirotor
+from gncpy.dynamics.aircraft.simple_multirotor import SimpleMultirotor
+import gncpy.dynamics.aircraft as gaircraft
 
 
 VERBOSE = False
@@ -9,7 +10,7 @@ def test_simple_multirotor():
     if VERBOSE:
         print('Testing SimpleMultirotor', flush=True)
 
-    uav = g_simple_multirotor.SimpleMultirotor('lager_super.yaml')
+    uav = SimpleMultirotor('lager_super.yaml')
 
     ned_pos = np.array([0, 0, -5])
     body_vel = np.array([1, 0, 0])
@@ -33,7 +34,7 @@ def test_simple_LAGER_super():
     if VERBOSE:
         print('Testing SimpleLAGERSuper', flush=True)
 
-    uav = g_simple_multirotor.SimpleLAGERSuper()
+    uav = gaircraft.SimpleLAGERSuper()
 
     ned_pos = np.array([0, 0, -5])
     body_vel = np.array([1, 0, 0])
@@ -57,7 +58,7 @@ def test_simple_LAGER_super_custom():
     if VERBOSE:
         print('Testing SimpleLAGERSuper', flush=True)
 
-    uav = g_simple_multirotor.SimpleLAGERSuper('lager_super.yaml')
+    uav = gaircraft.SimpleLAGERSuper('lager_super.yaml')
 
     ned_pos = np.array([0, 0, -5])
     body_vel = np.array([1, 0, 0])
@@ -77,7 +78,7 @@ def test_simple_LAGER_super_custom():
     assert np.abs(x_pos_diff) < 0.01, 'NED x position is too far off'
 
     # check another way of specifying input args
-    uav = g_simple_multirotor.SimpleLAGERSuper(params_file='lager_super.yaml')
+    uav = gaircraft.SimpleLAGERSuper(params_file='lager_super.yaml')
 
     ned_pos = np.array([0, 0, -5])
     body_vel = np.array([1, 0, 0])

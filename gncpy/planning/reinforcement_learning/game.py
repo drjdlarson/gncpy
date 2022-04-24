@@ -1,18 +1,21 @@
 """Implements basic games for RL environments."""
 from abc import ABC, abstractmethod
 import numpy as np
+import pathlib
 
 import os
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame
 
-import yaml
-
+from ruamel.yaml import YAML
 
 import gncpy.dynamics as gdyn
 import gncpy.planning.reinforcement_learning.rewards as grewards
 from gncpy.planning.reinforcement_learning.enums import EventType
 import serums.models as smodels
+
+
+yaml = YAML()
 
 
 # %% Entities
@@ -591,9 +594,10 @@ class Game2d(Game):
     """
 
     __slots__ = ('_window', '_clock', '_img', 'max_n_targets', 'dt', 'max_time',
-                 'min_pos', 'dist_height', 'dist_width', 'dist_per_pix')
+                 'min_pos', 'dist_height', 'dist_width', 'dist_per_pix',
+                 '_config_file')
 
-    def __init__(self, render_mode, render_fps=60):
+    def __init__(self, config_file, render_mode, render_fps=60):
         """Initalize an object.
 
         The child class should call the :meth:`.parse_config_file` function
@@ -601,12 +605,16 @@ class Game2d(Game):
 
         Parameters
         ----------
+        config_file : string
+            Ful path to the configuration YAML file.
         render_mode : string
             Mode to render in.
         render_fps : int
             FPS to render at.
         """
         super().__init__(render_mode, render_fps=render_fps)
+
+        self._config_file = self.validate_config_file(config_file)
 
         pygame.init()
 
@@ -626,6 +634,18 @@ class Game2d(Game):
         """Resets to the base state."""
         super().reset()
         self._img = 255 * np.ones((*self.get_image_size(), 3), dtype=np.uint8)
+
+    def validate_config_file(self, config_file):
+        if os.pathsep in config_file:
+            cf = config_file
+        else:
+            cf = os.path.join(os.getcwd(), config_file)
+            if not os.path.isfile(cf):
+                cf = os.path.join(pathlib.Path(__file__).parent.resolve(),
+                                  config_file)
+                if not os.path.isfile(cf):
+                    raise RuntimeError('Failed to find config file {}'.format(config_file))
+        return cf
 
     def parse_config_file(self, config_file, extra_keys=None):
         """Parses the config file and sets up the game.
@@ -650,7 +670,7 @@ class Game2d(Game):
             extra_keys = ()
 
         with open(config_file, 'r') as fin:
-            conf = yaml.safe_load(fin)
+            conf = yaml.load(fin)
 
         if 'window' in conf.keys():
             self.setup_window(conf['window'])
@@ -981,25 +1001,27 @@ class SimpleUAV2d(Game2d):
         "Each element is a string of a supported reward type.
     """
 
-    __slots__ = ('_config_file', '_scoreCls', '_all_capabilities', '_reward_type')
+    __slots__ = ('_scoreCls', '_all_capabilities', '_reward_type')
 
     supported_reward_types = ('BasicReward', )
 
-    def __init__(self, config_file, render_mode, render_fps=None):
+    def __init__(self, render_mode, render_fps=None, config_file=None):
         """Initialize an object.
 
         Parameters
         ----------
-        config_file : string
-            Ful path to the configuration YAML file.
         render_mode : string
             Render mode.
         render_fps : int, optional
             Render fps, if set to None then the game dt is used. The default is None.
+        config_file : string, optional
+            Ful path to the configuration YAML file. The default is simple_uav_2d_config.yaml
         """
-        super().__init__(render_mode, render_fps=render_fps)
+        if config_file is None:
+            config_file = 'simple_uav_2d_config.yaml'
+        super().__init__(config_file, render_mode, render_fps=render_fps)
 
-        self._config_file = config_file
+        # self._config_file = config_file
         self._scoreCls = None
         self._all_capabilities = []
         self._reward_type = None
