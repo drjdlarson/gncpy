@@ -1,3 +1,7 @@
 [submodule "serums"]
 	path = serums
 	url = https://github.com/drjdlarson/serums.git
+[submodule "lib/pybind11"]
+	path = lib/pybind11
+	url = https://github.com/pybind/pybind11.git
+	branch = stable
