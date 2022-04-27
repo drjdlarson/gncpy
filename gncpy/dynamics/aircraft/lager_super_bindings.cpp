@@ -7,6 +7,7 @@
 #include "imu/imu.h"
 #include "gnss/gnss.h"
 #include "pres/pres.h"
+#include "global_defs/global_defs.h"
 
 
 namespace py = pybind11;
@@ -149,5 +150,97 @@ PYBIND11_MODULE(lager_queso_bindings, m) {
         .def_readwrite("diff_pres", &SensorData::diff_pres)
         .def_readwrite("adc", &SensorData::adc)
         .def_readwrite("power_module", &SensorData::power_module);
+
+    py::class_<NavData>(m, "NavData")
+        .def(py::init<>())
+        .def_readwrite("nav_initialized", &NavData::nav_initialized)
+        .def_readwrite("pitch_rad", &NavData::pitch_rad)
+        .def_readwrite("roll_rad", &NavData::roll_rad)
+        .def_readwrite("heading_rad", &NavData::heading_rad)
+        .def_readwrite("alt_wgs84_m", &NavData::alt_wgs84_m)
+        .def_readwrite("home_alt_wgs84_m", &NavData::home_alt_wgs84_m)
+        .def_readwrite("alt_msl_m", &NavData::alt_msl_m)
+        .def_readwrite("alt_rel_m", &NavData::alt_rel_m)
+        .def_readwrite("static_pres_pa", &NavData::static_pres_pa)
+        .def_readwrite("diff_pres_pa", &NavData::diff_pres_pa)
+        .def_readwrite("alt_pres_m", &NavData::alt_pres_m)
+        .def_readwrite("ias_mps", &NavData::ias_mps)
+        .def_readwrite("gnd_spd_mps", &NavData::gnd_spd_mps)
+        .def_readwrite("gnd_track_rad", &NavData::gnd_track_rad)
+        .def_readwrite("flight_path_rad", &NavData::flight_path_rad)
+        .def_readwrite("accel_bias_mps2", &NavData::accel_bias_mps2)
+        .def_readwrite("gyro_bias_radps", &NavData::gyro_bias_radps)
+        .def_readwrite("accel_mps2", &NavData::accel_mps2)
+        .def_readwrite("gyro_radps", &NavData::gyro_bias_radps)
+        .def_readwrite("mag_ut", &NavData::mag_ut)
+        .def_readwrite("ned_pos_m", &NavData::ned_pos_m)
+        .def_readwrite("ned_vel_mps", &NavData::ned_vel_mps)
+        .def_readwrite("lat_rad", &NavData::lat_rad)
+        .def_readwrite("lon_rad", &NavData::lon_rad)
+        .def_readwrite("home_lat_rad", &NavData::home_lat_rad)
+        .def_readwrite("home_lon_rad", &NavData::home_lon_rad);
+
+    py::class_<MissionItem>(m, "MissionItem")
+        .def(py::init<>())
+        .def_readwrite("autocontinue", &MissionItem::autocontinue)
+        .def_readwrite("frame", &MissionItem::frame)
+        .def_readwrite("cmd", &MissionItem::cmd)
+        .def_readwrite("param1", &MissionItem::param1)
+        .def_readwrite("param2", &MissionItem::param2)
+        .def_readwrite("param3", &MissionItem::param3)
+        .def_readwrite("param4", &MissionItem::param4)
+        .def_readwrite("x", &MissionItem::x)
+        .def_readwrite("y", &MissionItem::y)
+        .def_readwrite("z", &MissionItem::z);
+
+    py::class_<TelemData>(m, "TelemData")
+        .def(py::init<>())
+        .def_readwrite("waypoints_updated", &TelemData::waypoints_updated)
+        .def_readwrite("fence_updated", &TelemData::fence_updated)
+        .def_readwrite("rally_points_updated", &TelemData::rally_points_updated)
+        .def_readwrite("current_waypoint", &TelemData::current_waypoint)
+        .def_readwrite("num_waypoints", &TelemData::num_waypoints)
+        .def_readwrite("num_fence_items", &TelemData::num_fence_items)
+        .def_readwrite("num_rally_points", &TelemData::num_rally_points)
+        .def_readwrite("param", &TelemData::param)
+        .def_readwrite("flight_plan", &TelemData::flight_plan)
+        .def_readwrite("fence", &TelemData::fence)
+        .def_readwrite("rally", &TelemData::rally);
+
+    py::class_<SbusCmd>(m, "SbusCmd")
+        .def(py::init<>())
+        .def_readwrite("ch17", &SbusCmd::ch17)
+        .def_readwrite("ch18", &SbusCmd::ch18)
+        .def_readwrite("cnt", &SbusCmd::cnt)
+        .def_readwrite("cmd", &SbusCmd::cmd);
+
+    py::class_<PwmCmd>(m, "PwmCmd")
+        .def(py::init<>())
+        .def_readwrite("cnt", &PwmCmd::cnt)
+        .def_readwrite("cmd", &PwmCmd::cmd);
+
+    py::class_<AnalogData>(m, "AnalogData")
+        .def(py::init<>())
+        .def_readwrite("val", &AnalogData::val);
+
+    py::class_<BatteryData>(m, "BatteryData")
+        .def(py::init<>())
+        .def_readwrite("voltage_v", &BatteryData::voltage_v)
+        .def_readwrite("current_ma", &BatteryData::current_ma)
+        .def_readwrite("consumed_mah", &BatteryData::consumed_mah)
+        .def_readwrite("remaining_prcnt", &BatteryData::remaining_prcnt)
+        .def_readwrite("remaining_time_s", &BatteryData::remaining_time_s);
+
+    py::class_<VmsData>(m, "VmsData")
+        .def(py::init<>())
+        .def_readwrite("motors_enabled", &VmsData::motors_enabled)
+        .def_readwrite("waypoint_reached", &VmsData::waypoint_reached)
+        .def_readwrite("mode", &VmsData::mode)
+        .def_readwrite("throttle_cmd_prcnt", &VmsData::throttle_cmd_prcnt)
+        .def_readwrite("aux", &VmsData::aux)
+        .def_readwrite("sbus", &VmsData::sbus)
+        .def_readwrite("pwm", &VmsData::pwm)
+        .def_readwrite("analog", &VmsData::analog)
+        .def_readwrite("battery", &VmsData::battery);
 
 }
