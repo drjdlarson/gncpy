@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 
-set(TARGET lager_queso)
+set(TARGET lager_super)
 
 project(${TARGET} VERSION 0.1)
 message(STATUS "Building ${TARGET}")
@@ -26,23 +26,6 @@ target_compile_options(${TARGET} PRIVATE
     -MMD
     -fPIC
 )
-
-#target_compile_options(${TARGET} PRIVATE
-#    -std=c++2a
-#    -fconcepts
-#    -fno-exceptions
-#    -felide-constructors
-#    -Wno-error=narrowing
-#    -fno-rtti
-#    -Wno-volatile
-#    -g
-#    -Os
-#    -Wno-psabi
-#    -ffunction-sections
-#    -fdata-sections
-#    -nostdlib
-#    -MMD
-#)
 
 
 #################### from bfs make files ######################

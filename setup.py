@@ -103,7 +103,7 @@ setup(
     tests_require=['pytest', 'numpy'],
     include_package_data=True,
     zip_safe=False,
-    ext_modules=[CMakeExtension('gncpy/dynamics/aircraft/lager_queso_bindings')],
+    ext_modules=[CMakeExtension('gncpy/dynamics/aircraft/lager_super_bindings')],
     python_requires='>=3.6',
     cmdclass=dict(build_ext=CMakeBuild)
 )
