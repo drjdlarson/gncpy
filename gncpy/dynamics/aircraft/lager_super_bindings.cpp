@@ -16,6 +16,16 @@ using namespace bfs;
 PYBIND11_MODULE(lager_super_bindings, m) {
     m.doc() = "Wrapper for simulink autocode of LAGER's SUPER UAV control system.";
 
+    m.attr("NUM_SBUS_CH") = NUM_SBUS_CH;
+
+    py::enum_<GnssFix>(m, "GnssFix")
+        .value("GNSS_FIX_NONE", GNSS_FIX_NONE)
+        .value("GNSS_FIX_2D", GNSS_FIX_2D)
+        .value("GNSS_FIX_3D", GNSS_FIX_3D)
+        .value("GNSS_FIX_DGNSS", GNSS_FIX_DGNSS)
+        .value("GNSS_FIX_RTK_FLOAT", GNSS_FIX_RTK_FLOAT)
+        .value("GNSS_FIX_RTK_FIXED", GNSS_FIX_RTK_FIXED);
+
     py::class_<Autocode>(m, "Autocode")
         .def(py::init<>())
         .def("initialize", &Autocode::initialize)
