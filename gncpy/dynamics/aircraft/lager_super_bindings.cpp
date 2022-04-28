@@ -13,8 +13,8 @@
 namespace py = pybind11;
 using namespace bfs;
 
-PYBIND11_MODULE(lager_queso_bindings, m) {
-    m.doc() = "Wrapper for simulink autocode of LAGER's QUESO UAV control system.";
+PYBIND11_MODULE(lager_super_bindings, m) {
+    m.doc() = "Wrapper for simulink autocode of LAGER's SUPER UAV control system.";
 
     py::class_<Autocode>(m, "Autocode")
         .def(py::init<>())
