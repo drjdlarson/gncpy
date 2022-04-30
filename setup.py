@@ -101,7 +101,9 @@ setup(
     ],
     extras_require=extras,
     tests_require=['pytest', 'numpy'],
-    include_package_data=True,
+    package_data={
+        "": ["*.yaml"],  # include yaml files in all packages
+        },
     zip_safe=False,
     ext_modules=[CMakeExtension('gncpy/dynamics/aircraft/lager_super_bindings')],
     python_requires='>=3.6',

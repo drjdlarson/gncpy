@@ -1,4 +1,5 @@
 #include <cstddef>
+#include <cstdint>
 #include <array>
 
 #include "flight/hardware_defs.h"
