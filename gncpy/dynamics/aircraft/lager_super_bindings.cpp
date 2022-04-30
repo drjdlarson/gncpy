@@ -18,12 +18,12 @@ namespace py = pybind11;
 using namespace bfs;
 
 PYBIND11_MODULE(lager_super_bindings, m) {
-    PYBIND11_NUMPY_DTYPE(MissionItem, autocontinue, frame, cmd, param1, param2,
-                         param3, param4, x, y, z);
-
     m.doc() = "Wrapper for simulink autocode of LAGER's SUPER UAV control system.";
 
     m.attr("NUM_SBUS_CH") = NUM_SBUS_CH;
+    m.attr("NUM_FLIGHT_PLAN_POINTS") = NUM_FLIGHT_PLAN_POINTS;
+    m.attr("NUM_FENCE_POINTS") = NUM_FENCE_POINTS;
+    m.attr("NUM_RALLY_POINTS") = NUM_RALLY_POINTS;
 
     py::enum_<GnssFix>(m, "GnssFix")
         .value("GNSS_FIX_NONE", GNSS_FIX_NONE)
@@ -321,69 +321,33 @@ PYBIND11_MODULE(lager_super_bindings, m) {
                 dat.param[ii] = *(val.data(ii));
             }
         })
-        .def_property("flight_plan", [](TelemData &dat) -> py::array {
-            auto arr = py::array(py::buffer_info(nullptr, sizeof(MissionItem),
-                                                 py::format_descriptor<MissionItem>::format(),
-                                                 1, {dat.flight_plan.size()},
-                                                 {sizeof(MissionItem)}));
-            auto req = arr.request();
-            auto *ptr = static_cast<MissionItem *>(req.ptr);
-            for(int ii = 0; ii < dat.flight_plan.size(); ii++) {
-                ptr[ii] = dat.flight_plan[ii];
-            }
-            return arr;
-            /*
-            auto dtype = py::dtype(py::format_descriptor<MissionItem>::format());
-            auto base = py::array(dtype, {dat.flight_plan.size()}, {sizeof(MissionItem)});
-            return py::array(dtype, {dat.flight_plan.size()}, {sizeof(MissionItem)}, dat.flight_plan.data(), base);*/
-            /*
-            auto lst = py::list();
-            for(int ii = 0; ii < dat.flight_plan.size(); ii++) {
-                lst.append(dat.flight_plan[ii]);
-            }
-            return py::array(lst);*/
+        .def_property("flight_plan", [](TelemData &dat) -> py::list {
+            return py::cast(dat.flight_plan);
         }, [](TelemData& dat, py::list val) {
             int ii = 0;
             for(auto item : val) {
                 dat.flight_plan[ii] = item.cast<MissionItem>();
                 ii += 1;
             }
-/*
-            py::array_t<MissionItem> val_arr = py::array(val);
-            for(int ii = 0; ii < (val_arr.size() > NUM_FLIGHT_PLAN_POINTS ? NUM_FLIGHT_PLAN_POINTS : val_arr.size()); ii++) {
-                dat.flight_plan[ii] = *(val_arr.data(ii));
-            }*/
-
-            /*
-            //auto lst = py::list();
-            for(int ii = 0; ii < (val.size() > NUM_FLIGHT_PLAN_POINTS ? NUM_FLIGHT_PLAN_POINTS : val.size()); ii++) {
-                dat.flight_plan[ii] = *(val.data(ii));
-            }*/
-            //dat.flight_plan = py::array(lst);
-            /*
-            for(int ii = 0; ii < NUM_FLIGHT_PLAN_POINTS > val.size() ? NUM_FLIGHT_PLAN_POINTS : val.size(); ii++) {
-                dat.flight_plan[ii] = *(val.data(ii));
-            }
-            if(val.size() < NUM_FLIGHT_PLAN_POINTS) {
-                for(int ii = val.size(); ii < NUM_FLIGHT_PLAN_POINTS; ii++) {
-                    MissionItem item;
-                    item.autocontinue = false;
-                    item.frame = 0;
-                    item.cmd = 0;
-                    item.param1 = 0;
-                    item.param2 = 0;
-                    item.param3 = 0;
-                    item.param4 = 0;
-                    item.x = 0;
-                    item.y = 0;
-                    item.z = 0;
-                    dat.flight_plan[ii] = item;
-
-                }
-            }*/
         })
-        .def_readwrite("fence", &TelemData::fence)
-        .def_readwrite("rally", &TelemData::rally);
+        .def_property("fence", [](TelemData &dat) -> py::list {
+            return py::cast(dat.flight_plan);
+        }, [](TelemData& dat, py::list val) {
+            int ii = 0;
+            for(auto item : val) {
+                dat.fence[ii] = item.cast<MissionItem>();
+                ii += 1;
+            }
+        })
+        .def_property("rally", [](TelemData &dat) -> py::list {
+            return py::cast(dat.flight_plan);
+        }, [](TelemData& dat, py::list val) {
+            int ii = 0;
+            for(auto item : val) {
+                dat.rally[ii] = item.cast<MissionItem>();
+                ii += 1;
+            }
+        });
 
     py::class_<SbusCmd>(m, "SbusCmd")
         .def(py::init<>())
