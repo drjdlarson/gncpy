@@ -45,32 +45,10 @@ else()
 endif()
 
 # Fetch dependencies
-include(FetchContent)
-FetchContent_Declare(
-	global_defs
-	GIT_REPOSITORY https://github.com/bolderflight/global_defs.git
-	GIT_TAG v2.1.0
-)
-FetchContent_MakeAvailable(global_defs)
-FetchContent_Declare(
-	imu
-	GIT_REPOSITORY https://github.com/bolderflight/imu.git
-	GIT_TAG v3.0.0
-)
-FetchContent_MakeAvailable(imu)
-FetchContent_Declare(
-	gnss
-	GIT_REPOSITORY https://github.com/bolderflight/gnss.git
-	GIT_TAG v3.0.0
-)
-FetchContent_MakeAvailable(gnss)
-FetchContent_Declare(
-	pres
-	GIT_REPOSITORY https://github.com/bolderflight/pres.git
-	GIT_TAG v2.0.0
-)
-FetchContent_MakeAvailable(pres)
-
+add_subdirectory(bfs/global_defs)
+add_subdirectory(bfs/imu)
+add_subdirectory(bfs/gnss)
+add_subdirectory(bfs/pres)
 
 # Setup autocode
 target_compile_definitions(${TARGET} PUBLIC
@@ -80,6 +58,10 @@ target_compile_definitions(${TARGET} PUBLIC
 
 # Add the includes
 target_include_directories(${TARGET} PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/bfs/global_defs/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/bfs/imu/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/bfs/gnss/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/bfs/pres/include
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${AUTOCODE}_ert_rtw
 )

@@ -106,24 +106,14 @@ def ecef_to_NED(ref_xyz, pos_xyz):
     return R.T @ (pos_xyz - ref_xyz)
 
 
-def ned_to_ecef(ned, ref_lat, ref_lon, ref_alt):
-    R = np.array([[0, 1, 0],
-                  [1, 0, 0],
-                  [0, 0, -1]])
-    enu = R @ ned.reshape((3, 1))
-
-    c_lat = np.cos(ref_lat)
-    s_lat = np.sin(ref_lat)
-    c_lon = np.cos(ref_lon)
-    s_lon = np.sin(ref_lon)
-    dcm_ecef2enu = np.array([[-s_lon, c_lon, 0],
-                             [-s_lat * c_lon, s_lat * s_lon, c_lat],
-                             [c_lat * c_lon, c_lat * s_lon, s_lat]])
-
-    delta = dcm_ecef2enu.T @ enu
-    pos_ref = lla_to_ECEF(ref_lat, ref_lon, ref_alt)
-    return pos_ref + delta
-
-
 def ned_to_LLA(ned, ref_lat, ref_lon, ref_alt):
-    return ecef_to_LLA(ned_to_ecef(ned, ref_lat, ref_lon, ref_alt))
+    alt = ref_alt + -ned[2]
+    f_fact = (2 * wgs84.FLATTENING - wgs84.FLATTENING**2)
+    s_lat2 = np.sin(ref_lat)**2
+    Rn = wgs84.EQ_RAD / np.sqrt(1 - f_fact * s_lat2)
+    Rm = Rn * ((1 - f_fact) / (1 - f_fact * s_lat2))
+    dlat = ned[0] * np.arctan2(1, Rm)
+    dlon = ned[1] * np.arctan2(1, Rn * np.cos(ref_lat))
+    lat = ref_lat + dlat
+    lon = ref_lon + dlon
+    return np.array([lat.item(), lon.item(), alt.item()]).reshape((3, 1))

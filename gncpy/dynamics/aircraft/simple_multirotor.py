@@ -197,13 +197,21 @@ class Vehicle:
 
     def _calc_aero_force_mom(self, dyn_pres, body_vel):
         mom = np.zeros(3)
-        inc_ang = np.arctan(body_vel[2] / np.linalg.norm(body_vel[0:2]))
+        xy_spd = np.linalg.norm(body_vel[0:2])
+        if xy_spd < 1e-6:
+            inc_ang = 0
+        else:
+            inc_ang = np.arctan(body_vel[2] / xy_spd)
 
         lut_npts = len(self.params.geo.front_area_m2)
         front_area = np.interp(inc_ang, np.linspace(-np.pi / 2, np.pi / 2, lut_npts),
                                self.params.geo.front_area_m2)
 
-        force = -body_vel / np.linalg.norm(body_vel) * front_area * dyn_pres * self.params.aero.cd
+        vel_mag = np.linalg.norm(body_vel)
+        if np.abs(vel_mag) < 1e-6:
+            force = np.zeros(3)
+        else:
+            force = -body_vel / vel_mag * front_area * dyn_pres * self.params.aero.cd
 
         return force.ravel(), mom
 
@@ -247,19 +255,22 @@ class Vehicle:
         term1 = np.cross(pqr.ravel(), (inertia @ pqr).ravel())
 
         term2 = moments - term0 - term1
-        pqr_dot = term2.reshape((1, 3)) @ np.linalg.inv(inertia)
+        pqr_dot = term2.reshape((1, 3)) @ np.linalg.inv(inertia).T
 
         return pqr_dot.ravel()
 
     def _calc_uvw_dot(self, uvw, pqr, ned_accel):
-        return ned_accel + np.cross(uvw, pqr)
+        return ned_accel - np.cross(pqr, uvw)
 
     def _calc_eul_dot(self, eul, pqr):
-        s_eul = np.sin(eul)
-        c_eul = np.cos(eul)
-        return np.array([pqr[0] + (pqr[1] * s_eul[0] + pqr[2] * c_eul[0]) * (s_eul[1] / c_eul[1]),
-                         pqr[1] * c_eul[0] - pqr[2] * s_eul[0],
-                         (pqr[1] * s_eul[0] + pqr[2] * c_eul[0]) / c_eul[1]])
+        s_roll = np.sin(eul[0])
+        c_roll = np.cos(eul[0])
+        t_pitch = np.tan(eul[1])
+        sc_pitch = 1 / np.cos(eul[1])
+        R = np.array([[1, s_roll * t_pitch, c_roll * t_pitch],
+                      [0, c_roll, -s_roll],
+                      [0, s_roll * sc_pitch, c_roll * sc_pitch]])
+        return R @ pqr
 
     def eul_to_dcm(self, r1, r2, r3):
         c1 = np.cos(r1)
@@ -341,14 +352,17 @@ class Vehicle:
 
         aoa = np.arctan2(body_vel[2], body_vel[0])
         airspeed = np.linalg.norm(body_vel)
-        sideslip_ang = np.arcsin(body_vel[1] / airspeed)
+        if np.abs(airspeed) <= 1e-6:
+            sideslip_ang = 0
+        else:
+            sideslip_ang = np.arcsin(body_vel[1] / airspeed)
 
         aoa_rate = (aoa - self.state[v_smap.aoa]) / dt
         sideslip_rate = (sideslip_ang - self.state[v_smap.sideslip_ang]) / dt
 
         mach = airspeed / speed_of_sound
 
-        lla = ned_to_LLA(ned_pos, self.ref_lat, self.ref_lon, -terrain_alt_wgs84)
+        lla = ned_to_LLA(ned_pos, self.ref_lat, self.ref_lon, terrain_alt_wgs84)
         lat = lla[0]
         lon = lla[1]
         alt_wgs84 = lla[2]
@@ -361,6 +375,7 @@ class Vehicle:
 
     def step(self, dt, terrain_alt_wgs84, gravity, density, speed_of_sound,
              motor_cmds):
+        # gravity = np.array([0, 0, 9.81])
         force, mom = self._calc_force_mom(gravity, motor_cmds)
 
         (ned_vel, ned_pos, roll, pitch, yaw, dcm_earth2body, body_vel,
@@ -544,12 +559,13 @@ class SimpleMultirotor(DynamicsBase):
         self.vehicle.state[v_smap.body_rot_rate] = body_rot_rate.flatten()
         self.vehicle.state[v_smap.body_rot_accel] = 0
         self.vehicle.state[v_smap.body_accel] = 0
+        self.vehicle.state[v_smap.body_accel[2]] = 9.81
         self.vehicle.state[v_smap.ned_accel] = 0
         self.vehicle.ref_lat = ref_lat_deg * d2r
         self.vehicle.ref_lon = ref_lon_deg * d2r
 
         lla = ned_to_LLA(ned_pos, ref_lat_deg * d2r, ref_lon_deg * d2r,
-                         -terrain_alt_wgs84)
+                         terrain_alt_wgs84)
         self.vehicle.state[v_smap.lat] = lla[0]
         self.vehicle.state[v_smap.lon] = lla[1]
         self.vehicle.state[v_smap.alt_wgs84] = lla[2]

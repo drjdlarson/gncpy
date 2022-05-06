@@ -79,8 +79,8 @@ PYBIND11_MODULE(lager_super_bindings, m) {
 
     py::class_<ImuData>(m, "ImuData")
         .def(py::init<>())
-        .def_readwrite("new_data", &ImuData::new_data)
-        .def_readwrite("healthy", &ImuData::healthy)
+        //.def_readwrite("new_data", &ImuData::new_data)
+        //.def_readwrite("healthy", &ImuData::healthy)
         .def_readwrite("die_temp_c", &ImuData::die_temp_c)
         .def_property("accel_mps2", [](ImuData &i) -> py::array {
             auto dtype = py::dtype(py::format_descriptor<float>::format());

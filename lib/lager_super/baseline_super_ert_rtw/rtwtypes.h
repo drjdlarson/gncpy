@@ -5,14 +5,14 @@
 //
 // File: rtwtypes.h
 //
-// Code generated for Simulink model 'baseline_super'.
+// Code generated for Simulink model 'baseline_super_part2'.
 //
-// Model version                  : 2.492
+// Model version                  : 2.15
 // Simulink Coder version         : 9.5 (R2021a) 14-Nov-2020
-// C/C++ source code generated on : Tue Apr 26 10:56:42 2022
+// C/C++ source code generated on : Fri May  6 09:02:09 2022
 //
 // Target selection: ert.tlc
-// Embedded hardware selection: AMD->x86-64 (Linux 64)
+// Embedded hardware selection: Intel->x86-64 (Linux 64)
 // Code generation objective: Execution efficiency
 // Validation result: Not run
 //
@@ -33,7 +33,7 @@
 
 //=======================================================================*
 //  Target hardware information
-//    Device type: AMD->x86-64 (Linux 64)
+//    Device type: Intel->x86-64 (Linux 64)
 //    Number of bits:     char:   8    short:   16    int:  32
 //                        long:  64
 //                        native word size:  64

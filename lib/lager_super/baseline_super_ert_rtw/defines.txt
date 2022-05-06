@@ -1,4 +1,4 @@
-MODEL=baseline_super
+MODEL=baseline_super_part2
 NUMST=1
 NCSTATES=0
 HAVESTDIO
