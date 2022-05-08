@@ -104,3 +104,14 @@ def convert_wgs_to_msl(lat, lon, alt):
         raise NotImplemented
         # row, col = (None, None)
         # return alt - _egm_lut[row, col]
+
+
+def convert_msl_to_wgs(lat, lon, alt):
+    global _egm_lut
+    if _egm_lut.size == 0:
+        warn('EGM table was not loaded. Can not convert to wgs84 altitude')
+        return alt
+    else:
+        raise NotImplemented
+        # row, col = (None, None)
+        # return alt + _egm_lut[row, col]

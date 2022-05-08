@@ -79,8 +79,6 @@ PYBIND11_MODULE(lager_super_bindings, m) {
 
     py::class_<ImuData>(m, "ImuData")
         .def(py::init<>())
-        //.def_readwrite("new_data", &ImuData::new_data)
-        //.def_readwrite("healthy", &ImuData::healthy)
         .def_readwrite("die_temp_c", &ImuData::die_temp_c)
         .def_property("accel_mps2", [](ImuData &i) -> py::array {
             auto dtype = py::dtype(py::format_descriptor<float>::format());
@@ -101,32 +99,6 @@ PYBIND11_MODULE(lager_super_bindings, m) {
             i.gyro_radps[2] = *(val.data(2));
         });
 
-    /*
-    py::class_<GnssRelPosData>(m, "GnssRelPosData")
-        .def(py::init<>())
-        .def_readwrite("valid", &GnssRelPosData::valid)
-        .def_readwrite("baseline_acc_m", &GnssRelPosData::baseline_acc_m)
-        .def_property("ned_pos_acc_m", [](GnssRelPosData &i) -> py::array {
-            auto dtype = py::dtype(py::format_descriptor<float>::format());
-            auto base = py::array(dtype, {3}, {sizeof(float)});
-            return py::array(dtype, {3}, {sizeof(float)}, i.ned_pos_acc_m, base);
-        }, [](GnssRelPosData& i, py::array_t<float> val) {
-            i.ned_pos_acc_m[0] = *(val.data(0));
-            i.ned_pos_acc_m[1] = *(val.data(1));
-            i.ned_pos_acc_m[2] = *(val.data(2));
-        })
-        .def_readwrite("baseline_m", &GnssRelPosData::baseline_m)
-        .def_property("ned_pos_m", [](GnssRelPosData &i) -> py::array {
-            auto dtype = py::dtype(py::format_descriptor<float>::format());
-            auto base = py::array(dtype, {3}, {sizeof(float)});
-            return py::array(dtype, {3}, {sizeof(float)}, i.ned_pos_m, base);
-        }, [](GnssRelPosData& i, py::array_t<float> val) {
-            i.ned_pos_m[0] = *(val.data(0));
-            i.ned_pos_m[1] = *(val.data(1));
-            i.ned_pos_m[2] = *(val.data(2));
-        });
-*/
-
     py::class_<GnssData>(m, "GnssData")
         .def(py::init<>())
         .def_readwrite("new_data", &GnssData::new_data)
@@ -137,14 +109,8 @@ PYBIND11_MODULE(lager_super_bindings, m) {
         .def_readwrite("tow_ms", &GnssData::tow_ms)
         .def_readwrite("alt_wgs84_m", &GnssData::alt_wgs84_m)
         .def_readwrite("alt_msl_m", &GnssData::alt_msl_m)
-        //.def_readwrite("gdop", &GnssData::gdop)
-        //.def_readwrite("pdop", &GnssData::pdop)
-        //.def_readwrite("tdop", &GnssData::tdop)
         .def_readwrite("hdop", &GnssData::hdop)
         .def_readwrite("vdop", &GnssData::vdop)
-        //.def_readwrite("ndop", &GnssData::ndop)
-        //.def_readwrite("edop", &GnssData::edop)
-        //.def_readwrite("time_acc_s", &GnssData::time_acc_s)
         .def_readwrite("track_rad", &GnssData::track_rad)
         .def_readwrite("spd_mps", &GnssData::spd_mps)
         .def_readwrite("horz_acc_m", &GnssData::horz_acc_m)
@@ -162,7 +128,6 @@ PYBIND11_MODULE(lager_super_bindings, m) {
         })
         .def_readwrite("lat_rad", &GnssData::lat_rad)
         .def_readwrite("lon_rad", &GnssData::lon_rad);
-        //.def_readwrite("rel_pos", &GnssData::rel_pos);
 
     py::class_<PresData>(m, "PresData")
         .def(py::init<>())

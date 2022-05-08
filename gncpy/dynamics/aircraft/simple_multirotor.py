@@ -4,8 +4,11 @@ import enum
 import pathlib
 import os
 from ruamel.yaml import YAML
+from warnings import warn
+from copy import deepcopy
 
 from gncpy.dynamics.basic import DynamicsBase
+import gncpy.dynamics.aircraft.lager_super_bindings as super_bind
 from gncpy.coordinate_transforms import ned_to_LLA
 import gncpy.wgs84 as wgs84
 
@@ -37,6 +40,10 @@ class MotorParams:
     def __init__(self):
         self.pos_m = []
         self.dir = []
+
+    @property
+    def num_motors(self):
+        return len(self.dir)
 
 
 class GeoParams:
@@ -492,8 +499,8 @@ class SimpleMultirotor(DynamicsBase):
     state_units = v_smap.get_ordered_units()
     state_map = v_smap
 
-    def __init__(self, params_file, env=None, effector=None, egm_bin_file=None):
-        super().__init__()
+    def __init__(self, params_file, env=None, effector=None, egm_bin_file=None, **kwargs):
+        super().__init__(**kwargs)
 
         self._eff_req_init = effector is None
         if self._eff_req_init:
@@ -601,8 +608,275 @@ class SimpleMultirotor(DynamicsBase):
 
 
 class SimpleLAGERSuper(SimpleMultirotor):
+
+    _s2us = 1000000.0
+    wp_xy_scale = 1e7
+
     def __init__(self, params_file=None, **kwargs):
         if params_file is None:
             params_file = 'lager_super.yaml'
 
+        self.num_waypoints = 0
+
+        self._control_model = None
+        self._sysData = super_bind.SysData()
+        self._sensorData = super_bind.SensorData()
+        self._navData = super_bind.NavData()
+        self._telemData = super_bind.TelemData()
+        self._vmsData = super_bind.VmsData()
+        self._reached_wp_on_prev = False
+        self._last_gps_upd_time = -np.inf
+        self._gps_update_rate_hz = 5
+
         super().__init__(params_file, **kwargs)
+
+        if self.control_model is None:
+            self.control_model = super_bind.Autocode()
+
+    @property
+    def control_model(self):
+        return self._control_model
+
+    @control_model.setter
+    def control_model(self, val):
+        self._control_model = val
+
+        if val is None:
+            return
+
+        try:
+            self._control_model.initialize()
+        except AttributeError:
+            warn('Failed to call initialize function for control model')
+            self._control_model = None
+
+    @property
+    def dt(self):
+        return 0.01
+
+    @dt.setter
+    def dt(self, val):
+        raise RuntimeError('dt is readonly')
+
+    @property
+    def state(self):
+        return self.vehicle.state
+
+    @property
+    def waypoints(self):
+        if len(self._telemData.flight_plan) > 0:
+            return self._telemData.flight_plan[:self.num_waypoints]
+        else:
+            return []
+
+    @property
+    def home_alt_wgs84_m(self):
+        return self._navData.home_alt_wgs84_m
+
+    @property
+    def home_lat_rad(self):
+        return self._navData.home_lat_rad
+
+    @property
+    def home_lon_rad(self):
+        return self._navData.home_lon_rad
+
+    @property
+    def waypoint_reached(self):
+        return self._vmsData.waypoint_reached
+
+    @property
+    def finished_waypoints(self):
+        return self._telemData.current_waypoint >= self.num_waypoints
+
+    @property
+    def current_waypoint(self):
+        return self._telemData.current_waypoint
+
+    def parse_waypoint_file(self, file):
+        waypoints = [super_bind.MissionItem()] * super_bind.NUM_FLIGHT_PLAN_POINTS
+        home = super_bind.MissionItem()
+        num_waypoints = 0
+        with open(file, 'r') as fin:
+            for line_no, line in enumerate(fin):
+                if line_no == 0:
+                    continue
+                cols = [s.strip() for s in line.split()]
+                missionItem = super_bind.MissionItem()
+                missionItem.frame = int(cols[2])
+                missionItem.cmd = int(cols[3])
+                missionItem.param1 = float(cols[4])
+                missionItem.param2 = float(cols[5])
+                missionItem.param3 = float(cols[6])
+                missionItem.param4 = float(cols[7])
+                if missionItem.cmd == 16:
+                    mult = self.wp_xy_scale
+                missionItem.x = int(float(cols[8]) * mult)
+                missionItem.y = int(float(cols[9]) * mult)
+                missionItem.z = float(cols[10])
+                missionItem.autocontinue = cols[11] == '1'
+
+                if line_no == 1:
+                    home = missionItem
+                else:
+                    waypoints[num_waypoints] = missionItem
+                    num_waypoints += 1
+
+        self.num_waypoints = num_waypoints
+        return waypoints, num_waypoints, home
+
+    def upload_waypoints(self, waypoints, num_waypoints=None, current_waypoint=0):
+        if num_waypoints is None:
+            self.num_waypoints = len(waypoints)
+        else:
+            self.num_waypoints = num_waypoints
+
+        waypoint_lst = waypoints.copy()
+        if len(waypoint_lst) < super_bind.NUM_FLIGHT_PLAN_POINTS:
+            rem = super_bind.NUM_FLIGHT_PLAN_POINTS - len(waypoint_lst)
+            waypoint_lst.extend([super_bind.MissionItem()] * rem)
+        elif len(waypoint_lst) > super_bind.NUM_FLIGHT_PLAN_POINTS:
+            waypoint_lst = waypoint_lst[:super_bind.NUM_FLIGHT_PLAN_POINTS]
+
+        self._telemData.waypoints_updated = True
+        self._telemData.num_waypoints = self.num_waypoints
+        self._telemData.flight_plan = waypoint_lst  # NOTE: can only update full list at once
+        self._telemData.current_waypoint = int(current_waypoint)
+
+    def set_initial_conditions(self, ned_pos, body_vel, eul_deg, body_rot_rate,
+                               ned_mag_field, home_wp=None, waypoint_file=None,
+                               ref_lat_deg=None, ref_lon_deg=None, terrain_alt_wgs84=None):
+        if home_wp is not None or waypoint_file is not None:
+            if waypoint_file is not None:
+                waypoints, num_waypoints, home_wp = self.parse_waypoint_file(waypoint_file)
+                self.upload_waypoints(waypoints, num_waypoints=num_waypoints)
+
+            ref_lat_deg = home_wp.x / self.wp_xy_scale
+            ref_lon_deg = home_wp.y / self.wp_xy_scale
+            terrain_alt_wgs84 = wgs84.convert_msl_to_wgs(ref_lat_deg, ref_lon_deg,
+                                                         home_wp.z)
+
+        elif ref_lat_deg is not None and ref_lon_deg is not None and terrain_alt_wgs84 is not None:
+            pass
+        else:
+            raise RuntimeError('Invalid input combination: Must specify reference position.')
+
+        self._navData.home_lat_rad = ref_lat_deg * d2r
+        self._navData.home_lon_rad = ref_lon_deg * d2r
+        self._navData.home_alt_wgs84_m = terrain_alt_wgs84
+
+        super().set_initial_conditions(ned_pos, body_vel, eul_deg, body_rot_rate,
+                                       ref_lat_deg, ref_lon_deg, terrain_alt_wgs84,
+                                       ned_mag_field)
+
+    def update_sys_data(self, tt):
+        self._sysData.frame_time_us = int(tt * self._s2us)
+        self._sysData.sys_time_us = int(tt * self._s2us)
+
+    def emulate_accel(self):
+        accel = self.vehicle.state[self.state_map.body_accel].copy().reshape((3, 1))
+        accel += self.vehicle._get_dcm_earth2body() @ self.env.state[e_smap.gravity].reshape((3, 1))
+        # TODO: add noise
+        return accel.ravel()
+
+    def emulate_gnss(self):
+        self._sensorData.gnss.healthy = True
+        self._sensorData.gnss.fix = super_bind.GnssFix.GNSS_FIX_3D
+        self._sensorData.gnss.num_sats = 16
+        self._sensorData.gnss.horz_acc_m = 1.5
+        self._sensorData.gnss.vert_acc_m = 5.5
+        self._sensorData.gnss.vel_acc_mps = 0.05
+        self._sensorData.gnss.hdop = 0.7
+        self._sensorData.gnss.vdop = 0.7
+        self._sensorData.gnss.track_acc_rad = 2 * d2r
+
+        # TODO: add noise to lat/lon
+        self._sensorData.gnss.lat_rad = self.vehicle.state[self.state_map.lat].copy()
+        self._sensorData.gnss.lon_rad = self.vehicle.state[self.state_map.lon].copy()
+        self._sensorData.gnss.alt_wgs84_m = self.vehicle.state[self.state_map.alt_wgs84].copy()
+        self._sensorData.gnss.alt_msl_m = self.vehicle.state[self.state_map.alt_msl].copy()
+
+        # TODO: add noise to vel
+        self._sensorData.gnss.ned_vel_mps = self.vehicle.state[self.state_map.ned_vel].copy()
+        self._sensorData.gnss.track_rad = np.arctan2(self._sensorData.gnss.ned_vel_mps[1],
+                                                     self._sensorData.gnss.ned_vel_mps[0])
+        self._sensorData.gnss.spd_mps = np.linalg.norm(self._sensorData.gnss.ned_vel_mps[0:2])
+
+    def update_sensor_data(self, tt):
+        # update inceptor data
+        self._sensorData.inceptor.new_data = True
+        self._sensorData.inceptor.lost_frame = False
+        self._sensorData.inceptor.failsafe = False
+        self._sensorData.inceptor.ch17 = False
+        self._sensorData.inceptor.ch18 = False
+
+        self._sensorData.inceptor.ch = np.zeros(super_bind.NUM_SBUS_CH, dtype=int)
+        self._sensorData.inceptor.ch[0] = 991
+        self._sensorData.inceptor.ch[1] = 991
+        self._sensorData.inceptor.ch[2] = 991
+        self._sensorData.inceptor.ch[3] = 991
+        self._sensorData.inceptor.ch[4] = 1811  # waypoint follow mode
+        self._sensorData.inceptor.ch[6] = 1811
+
+        # update imu
+        self._sensorData.imu.accel_mps2 = self.emulate_accel()
+        self._sensorData.imu.gyro_radps = self.vehicle.state[self.state_map.body_rot_rate].copy()
+
+        # update GNSS data
+        self._sensorData.gnss.new_data = (tt - self._last_gps_upd_time) >= (1 / self._gps_update_rate_hz)
+        if self._sensorData.gnss.new_data:
+            # emulate gps reciever
+            self.emulate_gnss()
+            self._last_gps_upd_time = tt
+
+        # update Pressure data
+        self._sensorData.static_pres.new_data = True
+        self._sensorData.static_pres.healthy = True
+        self._sensorData.static_pres.pres_pa = self.env.state[e_smap.pressure].copy()
+        self._sensorData.static_pres.die_temp_c = 23
+
+        # update power module
+        self._sensorData.power_module.voltage_v = 12 * 4.2  # nCells * v/cell
+
+    def update_nav_data(self):
+        self._navData.nav_initialized = True
+
+        # TODO: do the init conds need to be subtracted here?
+        self._navData.pitch_rad = self.vehicle.state[self.state_map.pitch].copy()
+        self._navData.roll_rad = self.vehicle.state[self.state_map.roll].copy()
+
+        self._navData.heading_rad = self.vehicle.state[self.state_map.yaw].copy()
+        self._navData.alt_wgs84_m = self.vehicle.state[self.state_map.alt_wgs84].copy()
+        self._navData.alt_msl_m = self.vehicle.state[self.state_map.alt_msl].copy()
+        self._navData.alt_rel_m = self.vehicle.state[self.state_map.alt_agl].copy()
+        self._navData.flight_path_rad = self.vehicle.state[self.state_map.fp_ang].copy()
+        self._navData.ned_pos_m = self.vehicle.state[self.state_map.ned_pos].copy()
+        self._navData.ned_vel_mps = self.vehicle.state[self.state_map.ned_vel].copy()
+        self._navData.lat_rad = self.vehicle.state[self.state_map.lat].copy()
+        self._navData.lon_rad = self.vehicle.state[self.state_map.lon].copy()
+
+    @property
+    def desired_motor_cmds(self):
+        return self._vmsData.pwm.cmd[0:self.vehicle.params.motor.num_motors].copy()
+
+    @desired_motor_cmds.setter
+    def desired_motor_cmds(self, val):
+        raise RuntimeError('desired_motor_cmds is readonly')
+
+    def update_fmu_states(self, tt):
+        self.update_sys_data(tt)
+        self.update_sensor_data(tt)
+        self.update_nav_data()
+
+        # rising edge trigger
+        if self._vmsData.waypoint_reached and not self._reached_wp_on_prev:
+            self._telemData.current_waypoint += 1
+        self._reached_wp_on_prev = self._vmsData.waypoint_reached
+
+    def propagate_state(self, tt):
+        self.update_fmu_states(tt)
+
+        self._control_model.step(self._sysData, self._sensorData, self._navData,
+                                 self._telemData, self._vmsData)
+
+        return super().propagate_state(self._vmsData.pwm.cmd[0:self.vehicle.params.motor.num_motors], self.dt)
