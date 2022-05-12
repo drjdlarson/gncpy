@@ -5,11 +5,11 @@
 //
 // File: rtwtypes.h
 //
-// Code generated for Simulink model 'baseline_super_part2'.
+// Code generated for Simulink model 'baseline_super'.
 //
-// Model version                  : 2.15
+// Model version                  : 2.20
 // Simulink Coder version         : 9.5 (R2021a) 14-Nov-2020
-// C/C++ source code generated on : Fri May  6 09:02:09 2022
+// C/C++ source code generated on : Thu May 12 15:45:48 2022
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: Intel->x86-64 (Linux 64)

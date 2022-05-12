@@ -5,11 +5,11 @@
 //
 // File: autocode.cpp
 //
-// Code generated for Simulink model 'baseline_super_part2'.
+// Code generated for Simulink model 'baseline_super'.
 //
-// Model version                  : 2.15
+// Model version                  : 2.20
 // Simulink Coder version         : 9.5 (R2021a) 14-Nov-2020
-// C/C++ source code generated on : Fri May  6 09:02:09 2022
+// C/C++ source code generated on : Thu May 12 15:45:48 2022
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: Intel->x86-64 (Linux 64)
@@ -341,7 +341,7 @@ real32_T rt_remf_snf(real32_T u0, real32_T u1)
 
 namespace bfs
 {
-  // Function for MATLAB Function: '<S636>/determine_prev_tar_pos'
+  // Function for MATLAB Function: '<S635>/determine_prev_tar_pos'
   void Autocode::cosd(real32_T *x)
   {
     real32_T absx;
@@ -401,7 +401,7 @@ namespace bfs
     }
   }
 
-  // Function for MATLAB Function: '<S636>/determine_prev_tar_pos'
+  // Function for MATLAB Function: '<S635>/determine_prev_tar_pos'
   void Autocode::sind(real32_T *x)
   {
     real32_T absx;
@@ -461,7 +461,7 @@ namespace bfs
     }
   }
 
-  // Function for MATLAB Function: '<S636>/determine_prev_tar_pos'
+  // Function for MATLAB Function: '<S635>/determine_prev_tar_pos'
   void Autocode::lla_to_ECEF(const real32_T lla[3], real32_T ecef_pos[3])
   {
     real32_T b;
@@ -536,27 +536,23 @@ namespace bfs
     std::array<real32_T, 3> tmp_0;
     int32_T idx;
     int32_T rtb_Reshape_h_tmp;
-    real32_T absxk;
-    real32_T c_lat;
     real32_T c_lon;
-    real32_T rtb_DataTypeConversion6;
-    real32_T rtb_PProdOut_l;
-    real32_T rtb_Product1_i;
+    real32_T rtb_Cos_f;
+    real32_T rtb_DataTypeConversion_h;
+    real32_T rtb_Gain_h;
+    real32_T rtb_Reshape_h_0;
     real32_T rtb_Reshape_h_idx_0;
-    real32_T rtb_Reshape_h_idx_1;
     real32_T rtb_Subtract_f_idx_1;
+    real32_T rtb_Switch_i;
+    real32_T rtb_Tsamp_a;
     real32_T rtb_pitch_angle_cmd_rad;
+    real32_T rtb_roll;
     real32_T rtb_roll_angle_cmd_rad;
     real32_T rtb_stab_pitch_rate_saturation;
-    real32_T rtb_stab_roll_rate_saturation;
-    real32_T rtb_throttle_cc;
-    real32_T rtb_yaw_rate_cmd_radps_g;
+    real32_T rtb_yaw;
     real32_T s_lat;
     real32_T s_lon;
-    real32_T t;
-    real32_T y;
-    int8_T rtb_DataTypeConversion6_k;
-    int8_T rtb_sub_mode;
+    int8_T rtb_DataTypeConversion6;
     boolean_T rtb_AND;
     boolean_T rtb_AND_n;
     boolean_T rtb_Compare_lx;
@@ -565,111 +561,111 @@ namespace bfs
     UNUSED_PARAMETER(sys);
 
     // Logic: '<S19>/nav_init AND motor_enable' incorporates:
-    //   Constant: '<S667>/Constant'
-    //   DataTypeConversion: '<S646>/Data Type Conversion'
+    //   Constant: '<S666>/Constant'
+    //   DataTypeConversion: '<S645>/Data Type Conversion'
     //   Inport: '<Root>/Navigation Filter Data'
     //   Inport: '<Root>/Sensor Data'
-    //   Polyval: '<S646>/throttle_en_norm'
-    //   RelationalOperator: '<S667>/Compare'
+    //   Polyval: '<S645>/throttle_en_norm'
+    //   RelationalOperator: '<S666>/Compare'
     rtb_Switch_lt = ((0.00122026F * static_cast<real32_T>(sensor.inceptor.ch[6])
                       + -1.20988405F > 0.0F) && nav.nav_initialized);
 
-    // Outputs for Enabled SubSystem: '<S647>/disarm motor' incorporates:
-    //   EnablePort: '<S651>/Enable'
+    // Outputs for Enabled SubSystem: '<S646>/disarm motor' incorporates:
+    //   EnablePort: '<S650>/Enable'
 
-    // RelationalOperator: '<S650>/Compare' incorporates:
-    //   Constant: '<S650>/Constant'
+    // RelationalOperator: '<S649>/Compare' incorporates:
+    //   Constant: '<S649>/Constant'
     //   Inport: '<Root>/Sensor Data'
     if (sensor.power_module.voltage_v <= 46.8F) {
       if (!rtDW.disarmmotor_MODE_k) {
-        // InitializeConditions for UnitDelay: '<S651>/Unit Delay'
+        // InitializeConditions for UnitDelay: '<S650>/Unit Delay'
         rtDW.UnitDelay_DSTATE_m = 0.0;
         rtDW.disarmmotor_MODE_k = true;
       }
 
-      // RelationalOperator: '<S652>/Compare' incorporates:
+      // RelationalOperator: '<S651>/Compare' incorporates:
+      //   Constant: '<S650>/Constant'
       //   Constant: '<S651>/Constant'
-      //   Constant: '<S652>/Constant'
-      //   Sum: '<S651>/Sum'
-      //   UnitDelay: '<S651>/Unit Delay'
+      //   Sum: '<S650>/Sum'
+      //   UnitDelay: '<S650>/Unit Delay'
       rtDW.Compare_d = (rtDW.UnitDelay_DSTATE_m + 0.01 > 15.0);
 
-      // Update for UnitDelay: '<S651>/Unit Delay' incorporates:
-      //   Constant: '<S651>/Constant'
-      //   Sum: '<S651>/Sum'
+      // Update for UnitDelay: '<S650>/Unit Delay' incorporates:
+      //   Constant: '<S650>/Constant'
+      //   Sum: '<S650>/Sum'
       rtDW.UnitDelay_DSTATE_m += 0.01;
     } else {
       rtDW.disarmmotor_MODE_k = false;
     }
 
-    // End of RelationalOperator: '<S650>/Compare'
-    // End of Outputs for SubSystem: '<S647>/disarm motor'
+    // End of RelationalOperator: '<S649>/Compare'
+    // End of Outputs for SubSystem: '<S646>/disarm motor'
 
-    // Polyval: '<S645>/mode_norm' incorporates:
-    //   DataTypeConversion: '<S645>/Data Type Conversion1'
+    // Polyval: '<S644>/mode_norm' incorporates:
+    //   DataTypeConversion: '<S644>/Data Type Conversion1'
     //   Inport: '<Root>/Sensor Data'
     rtb_roll_angle_cmd_rad = 0.00122026F * static_cast<real32_T>
       (sensor.inceptor.ch[4]) + -0.209884077F;
 
-    // DataTypeConversion: '<S645>/Data Type Conversion6'
+    // DataTypeConversion: '<S644>/Data Type Conversion6'
     if (std::abs(rtb_roll_angle_cmd_rad) >= 0.5F) {
-      c_lat = std::floor(rtb_roll_angle_cmd_rad + 0.5F);
-      rtb_DataTypeConversion6_k = static_cast<int8_T>(c_lat);
+      s_lat = std::floor(rtb_roll_angle_cmd_rad + 0.5F);
+      rtb_DataTypeConversion6 = static_cast<int8_T>(s_lat);
     } else {
-      c_lat = rtb_roll_angle_cmd_rad * 0.0F;
-      rtb_DataTypeConversion6_k = static_cast<int8_T>(rtb_roll_angle_cmd_rad *
+      s_lat = rtb_roll_angle_cmd_rad * 0.0F;
+      rtb_DataTypeConversion6 = static_cast<int8_T>(rtb_roll_angle_cmd_rad *
         0.0F);
     }
 
-    // Logic: '<S647>/AND' incorporates:
-    //   Constant: '<S649>/Constant'
-    //   DataTypeConversion: '<S645>/Data Type Conversion6'
-    //   Logic: '<S647>/AND1'
-    //   RelationalOperator: '<S649>/Compare'
-    rtb_AND_n = (rtDW.Compare_d && ((static_cast<int8_T>(c_lat) != 5) &&
+    // Logic: '<S646>/AND' incorporates:
+    //   Constant: '<S648>/Constant'
+    //   DataTypeConversion: '<S644>/Data Type Conversion6'
+    //   Logic: '<S646>/AND1'
+    //   RelationalOperator: '<S648>/Compare'
+    rtb_AND_n = (rtDW.Compare_d && ((static_cast<int8_T>(s_lat) != 5) &&
       rtb_Switch_lt));
 
-    // Logic: '<S648>/AND' incorporates:
+    // Logic: '<S647>/AND' incorporates:
+    //   Constant: '<S652>/Constant'
     //   Constant: '<S653>/Constant'
     //   Constant: '<S654>/Constant'
-    //   Constant: '<S655>/Constant'
-    //   DataTypeConversion: '<S645>/Data Type Conversion6'
+    //   DataTypeConversion: '<S644>/Data Type Conversion6'
     //   Inport: '<Root>/Sensor Data'
-    //   Logic: '<S648>/NOR'
-    //   Logic: '<S648>/NOT'
+    //   Logic: '<S647>/NOR'
+    //   Logic: '<S647>/NOT'
+    //   RelationalOperator: '<S652>/Compare'
     //   RelationalOperator: '<S653>/Compare'
     //   RelationalOperator: '<S654>/Compare'
-    //   RelationalOperator: '<S655>/Compare'
-    rtb_AND = (sensor.inceptor.failsafe && ((static_cast<int8_T>(c_lat) == 3) &&
-                (static_cast<int8_T>(c_lat) == 4) && (static_cast<int8_T>(c_lat)
+    rtb_AND = (sensor.inceptor.failsafe && ((static_cast<int8_T>(s_lat) == 3) &&
+                (static_cast<int8_T>(s_lat) == 4) && (static_cast<int8_T>(s_lat)
       == 5) && rtb_Switch_lt));
 
     // Switch: '<S19>/Switch1' incorporates:
     //   Constant: '<S19>/land_mode'
     //   Switch: '<S19>/Switch2'
     if (rtb_AND_n) {
-      rtb_DataTypeConversion6_k = 5;
+      rtb_DataTypeConversion6 = 5;
     } else if (rtb_AND) {
       // Switch: '<S19>/Switch2' incorporates:
       //   Constant: '<S19>/rtl_mode'
-      rtb_DataTypeConversion6_k = 3;
+      rtb_DataTypeConversion6 = 3;
     }
 
     // End of Switch: '<S19>/Switch1'
 
-    // Outputs for Enabled SubSystem: '<S644>/waypoint submodes' incorporates:
-    //   EnablePort: '<S663>/Enable'
+    // Outputs for Enabled SubSystem: '<S643>/waypoint submodes' incorporates:
+    //   EnablePort: '<S662>/Enable'
 
-    // RelationalOperator: '<S661>/Compare' incorporates:
-    //   Constant: '<S661>/Constant'
-    if (rtb_DataTypeConversion6_k == 2) {
-      // MATLAB Function: '<S663>/determine_target_pos' incorporates:
+    // RelationalOperator: '<S660>/Compare' incorporates:
+    //   Constant: '<S660>/Constant'
+    if (rtb_DataTypeConversion6 == 2) {
+      // MATLAB Function: '<S662>/determine_target_pos' incorporates:
       //   Inport: '<Root>/Navigation Filter Data'
       diff[0] = static_cast<real32_T>(nav.home_lat_rad * 57.295779513082323);
       diff[1] = static_cast<real32_T>(nav.home_lon_rad * 57.295779513082323);
       diff[2] = nav.home_alt_wgs84_m;
-      c_lat = diff[0];
-      cosd(&c_lat);
+      rtb_roll_angle_cmd_rad = diff[0];
+      cosd(&rtb_roll_angle_cmd_rad);
       s_lat = diff[0];
       sind(&s_lat);
       c_lon = diff[1];
@@ -677,12 +673,12 @@ namespace bfs
       s_lon = diff[1];
       sind(&s_lon);
 
-      // MATLAB Function: '<S663>/determine_wp_submode' incorporates:
-      //   Constant: '<S663>/Constant'
+      // MATLAB Function: '<S662>/determine_wp_submode' incorporates:
+      //   Constant: '<S662>/Constant'
       //   Inport: '<Root>/Navigation Filter Data'
       //   Inport: '<Root>/Telemetry Data'
-      //   MATLAB Function: '<S663>/determine_target_pos'
-      //   Selector: '<S663>/Selector'
+      //   MATLAB Function: '<S662>/determine_target_pos'
+      //   Selector: '<S662>/Selector'
       rtDW.sub_mode = 2;
       switch (telem.flight_plan[telem.current_waypoint].cmd) {
        case 20:
@@ -690,7 +686,7 @@ namespace bfs
         break;
 
        case 16:
-        // MATLAB Function: '<S663>/determine_target_pos' incorporates:
+        // MATLAB Function: '<S662>/determine_target_pos' incorporates:
         //   Inport: '<Root>/Navigation Filter Data'
         tmp[0] = static_cast<real32_T>(telem.flight_plan[telem.current_waypoint]
           .x) * 1.0E-7F;
@@ -702,164 +698,165 @@ namespace bfs
         lla_to_ECEF(&diff[0], &tmp[0]);
         s_lat_0[0] = -s_lat * c_lon;
         s_lat_0[1] = -s_lon;
-        s_lat_0[2] = -c_lat * c_lon;
+        s_lat_0[2] = -rtb_roll_angle_cmd_rad * c_lon;
         s_lat_0[3] = -s_lat * s_lon;
         s_lat_0[4] = c_lon;
-        s_lat_0[5] = -c_lat * s_lon;
-        s_lat_0[6] = c_lat;
+        s_lat_0[5] = -rtb_roll_angle_cmd_rad * s_lon;
+        s_lat_0[6] = rtb_roll_angle_cmd_rad;
         s_lat_0[7] = 0.0F;
         s_lat_0[8] = -s_lat;
-        rtb_DataTypeConversion6 = tmp_0[0] - tmp[0];
-        s_lat = tmp_0[1] - tmp[1];
-        rtb_Reshape_h_idx_1 = tmp_0[2] - tmp[2];
-        y = 0.0F;
-        c_lat = 1.29246971E-26F;
+        rtb_DataTypeConversion_h = tmp_0[0] - tmp[0];
+        rtb_Reshape_h_idx_0 = tmp_0[1] - tmp[1];
+        rtb_Subtract_f_idx_1 = tmp_0[2] - tmp[2];
+        s_lon = 0.0F;
+        rtb_roll_angle_cmd_rad = 1.29246971E-26F;
         for (idx = 0; idx < 3; idx++) {
-          absxk = std::abs(((s_lat_0[idx + 3] * s_lat + s_lat_0[idx] *
-                             rtb_DataTypeConversion6) + s_lat_0[idx + 6] *
-                            rtb_Reshape_h_idx_1) - nav.ned_pos_m[idx]);
-          if (absxk > c_lat) {
-            t = c_lat / absxk;
-            y = y * t * t + 1.0F;
-            c_lat = absxk;
+          s_lat = std::abs(((s_lat_0[idx + 3] * rtb_Reshape_h_idx_0 +
+                             s_lat_0[idx] * rtb_DataTypeConversion_h) +
+                            s_lat_0[idx + 6] * rtb_Subtract_f_idx_1) -
+                           nav.ned_pos_m[idx]);
+          if (s_lat > rtb_roll_angle_cmd_rad) {
+            c_lon = rtb_roll_angle_cmd_rad / s_lat;
+            s_lon = s_lon * c_lon * c_lon + 1.0F;
+            rtb_roll_angle_cmd_rad = s_lat;
           } else {
-            t = absxk / c_lat;
-            y += t * t;
+            c_lon = s_lat / rtb_roll_angle_cmd_rad;
+            s_lon += c_lon * c_lon;
           }
         }
 
-        y = c_lat * std::sqrt(y);
-        if ((y <= 1.5F) && (!telem.flight_plan[telem.current_waypoint].
-                            autocontinue)) {
+        s_lon = rtb_roll_angle_cmd_rad * std::sqrt(s_lon);
+        if ((s_lon <= 1.5F) && (!telem.flight_plan[telem.current_waypoint].
+             autocontinue)) {
           rtDW.sub_mode = 1;
         }
         break;
       }
 
-      // End of MATLAB Function: '<S663>/determine_wp_submode'
-    }
-
-    // End of RelationalOperator: '<S661>/Compare'
-    // End of Outputs for SubSystem: '<S644>/waypoint submodes'
-
-    // Outputs for Enabled SubSystem: '<S644>/rtl submodes' incorporates:
-    //   EnablePort: '<S662>/Enable'
-
-    // RelationalOperator: '<S660>/Compare' incorporates:
-    //   Constant: '<S660>/Constant'
-    if (rtb_DataTypeConversion6_k == 3) {
-      // MATLAB Function: '<S662>/determine_rtl_submode' incorporates:
-      //   Constant: '<S662>/Constant'
-      //   Inport: '<Root>/Navigation Filter Data'
-      rtDW.sub_mode_m = 3;
-      c_lat = 1.29246971E-26F;
-      absxk = std::abs(0.0F - nav.ned_pos_m[0]);
-      if (absxk > 1.29246971E-26F) {
-        y = 1.0F;
-        c_lat = absxk;
-      } else {
-        t = absxk / 1.29246971E-26F;
-        y = t * t;
-      }
-
-      absxk = std::abs(0.0F - nav.ned_pos_m[1]);
-      if (absxk > c_lat) {
-        t = c_lat / absxk;
-        y = y * t * t + 1.0F;
-        c_lat = absxk;
-      } else {
-        t = absxk / c_lat;
-        y += t * t;
-      }
-
-      absxk = std::abs(0.0F - nav.ned_pos_m[2]);
-      if (absxk > c_lat) {
-        t = c_lat / absxk;
-        y = y * t * t + 1.0F;
-        c_lat = absxk;
-      } else {
-        t = absxk / c_lat;
-        y += t * t;
-      }
-
-      y = c_lat * std::sqrt(y);
-      if (y <= 1.5F) {
-        rtDW.sub_mode_m = 4;
-      }
-
-      // End of MATLAB Function: '<S662>/determine_rtl_submode'
+      // End of MATLAB Function: '<S662>/determine_wp_submode'
     }
 
     // End of RelationalOperator: '<S660>/Compare'
-    // End of Outputs for SubSystem: '<S644>/rtl submodes'
+    // End of Outputs for SubSystem: '<S643>/waypoint submodes'
+
+    // Outputs for Enabled SubSystem: '<S643>/rtl submodes' incorporates:
+    //   EnablePort: '<S661>/Enable'
+
+    // RelationalOperator: '<S659>/Compare' incorporates:
+    //   Constant: '<S659>/Constant'
+    if (rtb_DataTypeConversion6 == 3) {
+      // MATLAB Function: '<S661>/determine_rtl_submode' incorporates:
+      //   Constant: '<S661>/Constant'
+      //   Inport: '<Root>/Navigation Filter Data'
+      rtDW.sub_mode_m = 3;
+      rtb_roll_angle_cmd_rad = 1.29246971E-26F;
+      s_lat = std::abs(0.0F - nav.ned_pos_m[0]);
+      if (s_lat > 1.29246971E-26F) {
+        s_lon = 1.0F;
+        rtb_roll_angle_cmd_rad = s_lat;
+      } else {
+        c_lon = s_lat / 1.29246971E-26F;
+        s_lon = c_lon * c_lon;
+      }
+
+      s_lat = std::abs(0.0F - nav.ned_pos_m[1]);
+      if (s_lat > rtb_roll_angle_cmd_rad) {
+        c_lon = rtb_roll_angle_cmd_rad / s_lat;
+        s_lon = s_lon * c_lon * c_lon + 1.0F;
+        rtb_roll_angle_cmd_rad = s_lat;
+      } else {
+        c_lon = s_lat / rtb_roll_angle_cmd_rad;
+        s_lon += c_lon * c_lon;
+      }
+
+      s_lat = std::abs(0.0F - nav.ned_pos_m[2]);
+      if (s_lat > rtb_roll_angle_cmd_rad) {
+        c_lon = rtb_roll_angle_cmd_rad / s_lat;
+        s_lon = s_lon * c_lon * c_lon + 1.0F;
+        rtb_roll_angle_cmd_rad = s_lat;
+      } else {
+        c_lon = s_lat / rtb_roll_angle_cmd_rad;
+        s_lon += c_lon * c_lon;
+      }
+
+      s_lon = rtb_roll_angle_cmd_rad * std::sqrt(s_lon);
+      if (s_lon <= 1.5F) {
+        rtDW.sub_mode_m = 4;
+      }
+
+      // End of MATLAB Function: '<S661>/determine_rtl_submode'
+    }
+
+    // End of RelationalOperator: '<S659>/Compare'
+    // End of Outputs for SubSystem: '<S643>/rtl submodes'
 
     // Switch: '<S19>/Switch3' incorporates:
     //   Logic: '<S19>/OR'
     if ((!rtb_AND_n) && (!rtb_AND)) {
-      // MultiPortSwitch: '<S644>/Multiport Switch'
-      switch (rtb_DataTypeConversion6_k) {
+      // MultiPortSwitch: '<S643>/Multiport Switch'
+      switch (rtb_DataTypeConversion6) {
        case 2:
-        rtb_DataTypeConversion6_k = rtDW.sub_mode;
+        rtb_DataTypeConversion6 = rtDW.sub_mode;
         break;
 
        case 3:
-        rtb_DataTypeConversion6_k = rtDW.sub_mode_m;
+        rtb_DataTypeConversion6 = rtDW.sub_mode_m;
         break;
       }
 
-      // End of MultiPortSwitch: '<S644>/Multiport Switch'
+      // End of MultiPortSwitch: '<S643>/Multiport Switch'
     }
 
     // End of Switch: '<S19>/Switch3'
 
     // Outputs for Enabled SubSystem: '<S19>/auto_disarm' incorporates:
-    //   EnablePort: '<S642>/Enable'
+    //   EnablePort: '<S641>/Enable'
 
     // Logic: '<S19>/motor_armed AND mode_4' incorporates:
-    //   Abs: '<S642>/Abs'
-    //   Constant: '<S643>/Constant'
+    //   Abs: '<S641>/Abs'
+    //   Constant: '<S642>/Constant'
+    //   Constant: '<S655>/Constant'
     //   Constant: '<S656>/Constant'
-    //   Constant: '<S657>/Constant'
-    //   Gain: '<S642>/Gain'
+    //   Gain: '<S641>/Gain'
     //   Inport: '<Root>/Navigation Filter Data'
-    //   Logic: '<S642>/AND'
-    //   RelationalOperator: '<S643>/Compare'
+    //   Logic: '<S641>/AND'
+    //   RelationalOperator: '<S642>/Compare'
+    //   RelationalOperator: '<S655>/Compare'
     //   RelationalOperator: '<S656>/Compare'
-    //   RelationalOperator: '<S657>/Compare'
-    if (rtb_Switch_lt && (rtb_DataTypeConversion6_k == 4)) {
+    if (rtb_Switch_lt && (rtb_DataTypeConversion6 == 4)) {
       rtDW.auto_disarm_MODE = true;
 
-      // Outputs for Enabled SubSystem: '<S642>/disarm motor' incorporates:
-      //   EnablePort: '<S658>/Enable'
+      // Outputs for Enabled SubSystem: '<S641>/disarm motor' incorporates:
+      //   EnablePort: '<S657>/Enable'
       if ((-nav.ned_pos_m[2] <= 10.0F) && (std::abs(nav.ned_vel_mps[2]) <= 0.3F))
       {
         if (!rtDW.disarmmotor_MODE) {
-          // InitializeConditions for UnitDelay: '<S658>/Unit Delay'
+          // InitializeConditions for UnitDelay: '<S657>/Unit Delay'
           rtDW.UnitDelay_DSTATE = 0.0;
           rtDW.disarmmotor_MODE = true;
         }
 
-        // RelationalOperator: '<S659>/Compare' incorporates:
+        // RelationalOperator: '<S658>/Compare' incorporates:
+        //   Constant: '<S657>/Constant'
         //   Constant: '<S658>/Constant'
-        //   Constant: '<S659>/Constant'
-        //   Sum: '<S658>/Sum'
-        //   UnitDelay: '<S658>/Unit Delay'
+        //   Sum: '<S657>/Sum'
+        //   UnitDelay: '<S657>/Unit Delay'
         rtDW.Compare = (rtDW.UnitDelay_DSTATE + 0.01 > 10.0);
 
-        // Update for UnitDelay: '<S658>/Unit Delay' incorporates:
-        //   Constant: '<S658>/Constant'
-        //   Sum: '<S658>/Sum'
+        // Update for UnitDelay: '<S657>/Unit Delay' incorporates:
+        //   Constant: '<S657>/Constant'
+        //   Sum: '<S657>/Sum'
         rtDW.UnitDelay_DSTATE += 0.01;
       } else {
         rtDW.disarmmotor_MODE = false;
       }
 
-      // End of Outputs for SubSystem: '<S642>/disarm motor'
+      // End of Outputs for SubSystem: '<S641>/disarm motor'
     } else if (rtDW.auto_disarm_MODE) {
-      // Disable for Enabled SubSystem: '<S642>/disarm motor'
+      // Disable for Enabled SubSystem: '<S641>/disarm motor'
       rtDW.disarmmotor_MODE = false;
 
-      // End of Disable for SubSystem: '<S642>/disarm motor'
+      // End of Disable for SubSystem: '<S641>/disarm motor'
       rtDW.auto_disarm_MODE = false;
     }
 
@@ -874,51 +871,51 @@ namespace bfs
 
     // Logic: '<Root>/motor_armed AND mode_2' incorporates:
     //   Constant: '<S18>/Constant'
+    //   Inport: '<Root>/Telemetry Data'
+    //   Logic: '<S11>/OR'
     //   RelationalOperator: '<S18>/Compare'
-    //   RelationalOperator: '<S633>/FixPt Relational Operator'
-    //   UnitDelay: '<S633>/Delay Input1'
+    //   RelationalOperator: '<S632>/FixPt Relational Operator'
+    //   UnitDelay: '<S632>/Delay Input1'
     //
-    //  Block description for '<S633>/Delay Input1':
+    //  Block description for '<S632>/Delay Input1':
     //
     //   Store in Global RAM
-    if (rtb_Switch_lt && (rtb_DataTypeConversion6_k == 2)) {
-      // RelationalOperator: '<S634>/Compare' incorporates:
-      //   Constant: '<S634>/Constant'
+    if (rtb_Switch_lt && (rtb_DataTypeConversion6 == 2)) {
+      // RelationalOperator: '<S633>/Compare' incorporates:
+      //   Constant: '<S633>/Constant'
       //   Inport: '<Root>/Telemetry Data'
-      //   RelationalOperator: '<S632>/FixPt Relational Operator'
-      //   UnitDelay: '<S632>/Delay Input1'
+      //   RelationalOperator: '<S631>/FixPt Relational Operator'
+      //   UnitDelay: '<S631>/Delay Input1'
       //
-      //  Block description for '<S632>/Delay Input1':
+      //  Block description for '<S631>/Delay Input1':
       //
       //   Store in Global RAM
       rtb_Compare_lx = (telem.current_waypoint != rtDW.DelayInput1_DSTATE);
 
       // Outputs for Enabled SubSystem: '<S11>/determine target' incorporates:
-      //   EnablePort: '<S467>/Enable'
-      if (static_cast<int32_T>(rtb_Compare_lx) > static_cast<int32_T>
-          (rtDW.DelayInput1_DSTATE_n)) {
-        // RelationalOperator: '<S635>/Compare' incorporates:
-        //   Constant: '<S467>/Constant'
-        //   Constant: '<S635>/Constant'
-        //   Inport: '<Root>/Telemetry Data'
-        //   Sum: '<S467>/Sum'
+      //   EnablePort: '<S466>/Enable'
+      if (telem.waypoints_updated || (static_cast<int32_T>(rtb_Compare_lx) >
+           static_cast<int32_T>(rtDW.DelayInput1_DSTATE_n))) {
+        // RelationalOperator: '<S634>/Compare' incorporates:
+        //   Constant: '<S466>/Constant'
+        //   Constant: '<S634>/Constant'
+        //   Sum: '<S466>/Sum'
         rtb_Compare_n = (static_cast<real_T>(telem.current_waypoint) - 1.0 >=
                          0.0);
 
-        // Outputs for Enabled SubSystem: '<S467>/calc_prev_target_pos' incorporates:
-        //   EnablePort: '<S636>/Enable'
+        // Outputs for Enabled SubSystem: '<S466>/calc_prev_target_pos' incorporates:
+        //   EnablePort: '<S635>/Enable'
         if (rtb_Compare_n) {
-          // MATLAB Function: '<S636>/determine_prev_tar_pos' incorporates:
-          //   Constant: '<S467>/Constant'
+          // MATLAB Function: '<S635>/determine_prev_tar_pos' incorporates:
+          //   Constant: '<S466>/Constant'
           //   Inport: '<Root>/Navigation Filter Data'
-          //   Inport: '<Root>/Telemetry Data'
-          //   Selector: '<S636>/Selector1'
-          //   Sum: '<S467>/Sum'
+          //   Selector: '<S635>/Selector1'
+          //   Sum: '<S466>/Sum'
           diff[0] = static_cast<real32_T>(nav.home_lat_rad * 57.295779513082323);
           diff[1] = static_cast<real32_T>(nav.home_lon_rad * 57.295779513082323);
           diff[2] = nav.home_alt_wgs84_m;
-          c_lat = diff[0];
-          cosd(&c_lat);
+          rtb_roll_angle_cmd_rad = diff[0];
+          cosd(&rtb_roll_angle_cmd_rad);
           s_lat = diff[0];
           sind(&s_lat);
           c_lon = diff[1];
@@ -934,37 +931,36 @@ namespace bfs
           lla_to_ECEF(&diff[0], &tmp[0]);
           s_lat_0[0] = -s_lat * c_lon;
           s_lat_0[1] = -s_lon;
-          s_lat_0[2] = -c_lat * c_lon;
+          s_lat_0[2] = -rtb_roll_angle_cmd_rad * c_lon;
           s_lat_0[3] = -s_lat * s_lon;
           s_lat_0[4] = c_lon;
-          s_lat_0[5] = -c_lat * s_lon;
-          s_lat_0[6] = c_lat;
+          s_lat_0[5] = -rtb_roll_angle_cmd_rad * s_lon;
+          s_lat_0[6] = rtb_roll_angle_cmd_rad;
           s_lat_0[7] = 0.0F;
           s_lat_0[8] = -s_lat;
-          rtb_DataTypeConversion6 = tmp_0[0] - tmp[0];
-          s_lat = tmp_0[1] - tmp[1];
-          rtb_Reshape_h_idx_1 = tmp_0[2] - tmp[2];
+          rtb_DataTypeConversion_h = tmp_0[0] - tmp[0];
+          rtb_Reshape_h_idx_0 = tmp_0[1] - tmp[1];
+          rtb_Subtract_f_idx_1 = tmp_0[2] - tmp[2];
           for (idx = 0; idx < 3; idx++) {
             rtDW.pref_target_pos[idx] = 0.0F;
-            rtDW.pref_target_pos[idx] += s_lat_0[idx] * rtb_DataTypeConversion6;
-            rtDW.pref_target_pos[idx] += s_lat_0[idx + 3] * s_lat;
-            rtDW.pref_target_pos[idx] += s_lat_0[idx + 6] * rtb_Reshape_h_idx_1;
+            rtDW.pref_target_pos[idx] += s_lat_0[idx] * rtb_DataTypeConversion_h;
+            rtDW.pref_target_pos[idx] += s_lat_0[idx + 3] * rtb_Reshape_h_idx_0;
+            rtDW.pref_target_pos[idx] += s_lat_0[idx + 6] * rtb_Subtract_f_idx_1;
           }
 
-          // End of MATLAB Function: '<S636>/determine_prev_tar_pos'
+          // End of MATLAB Function: '<S635>/determine_prev_tar_pos'
         }
 
-        // End of Outputs for SubSystem: '<S467>/calc_prev_target_pos'
+        // End of Outputs for SubSystem: '<S466>/calc_prev_target_pos'
 
-        // MATLAB Function: '<S467>/determine_current_tar_pos' incorporates:
+        // MATLAB Function: '<S466>/determine_current_tar_pos' incorporates:
         //   Inport: '<Root>/Navigation Filter Data'
-        //   Inport: '<Root>/Telemetry Data'
-        //   Selector: '<S467>/Selector'
+        //   Selector: '<S466>/Selector'
         diff[0] = static_cast<real32_T>(nav.home_lat_rad * 57.295779513082323);
         diff[1] = static_cast<real32_T>(nav.home_lon_rad * 57.295779513082323);
         diff[2] = nav.home_alt_wgs84_m;
-        c_lat = diff[0];
-        cosd(&c_lat);
+        rtb_roll_angle_cmd_rad = diff[0];
+        cosd(&rtb_roll_angle_cmd_rad);
         s_lat = diff[0];
         sind(&s_lat);
         c_lon = diff[1];
@@ -981,356 +977,356 @@ namespace bfs
         lla_to_ECEF(&diff[0], &tmp[0]);
         s_lat_0[0] = -s_lat * c_lon;
         s_lat_0[1] = -s_lon;
-        s_lat_0[2] = -c_lat * c_lon;
+        s_lat_0[2] = -rtb_roll_angle_cmd_rad * c_lon;
         s_lat_0[3] = -s_lat * s_lon;
         s_lat_0[4] = c_lon;
-        s_lat_0[5] = -c_lat * s_lon;
-        s_lat_0[6] = c_lat;
+        s_lat_0[5] = -rtb_roll_angle_cmd_rad * s_lon;
+        s_lat_0[6] = rtb_roll_angle_cmd_rad;
         s_lat_0[7] = 0.0F;
         s_lat_0[8] = -s_lat;
-        rtb_DataTypeConversion6 = tmp_0[0] - tmp[0];
-        s_lat = tmp_0[1] - tmp[1];
-        rtb_Reshape_h_idx_1 = tmp_0[2] - tmp[2];
+        rtb_DataTypeConversion_h = tmp_0[0] - tmp[0];
+        rtb_Reshape_h_idx_0 = tmp_0[1] - tmp[1];
+        rtb_Subtract_f_idx_1 = tmp_0[2] - tmp[2];
         for (idx = 0; idx < 3; idx++) {
           rtDW.cur_target_pos_m_c[idx] = 0.0F;
-          rtDW.cur_target_pos_m_c[idx] += s_lat_0[idx] * rtb_DataTypeConversion6;
-          rtDW.cur_target_pos_m_c[idx] += s_lat_0[idx + 3] * s_lat;
-          rtDW.cur_target_pos_m_c[idx] += s_lat_0[idx + 6] * rtb_Reshape_h_idx_1;
+          rtDW.cur_target_pos_m_c[idx] += s_lat_0[idx] *
+            rtb_DataTypeConversion_h;
+          rtDW.cur_target_pos_m_c[idx] += s_lat_0[idx + 3] * rtb_Reshape_h_idx_0;
+          rtDW.cur_target_pos_m_c[idx] += s_lat_0[idx + 6] *
+            rtb_Subtract_f_idx_1;
 
-          // Switch: '<S467>/Switch'
+          // Switch: '<S466>/Switch'
           if (rtb_Compare_n) {
-            c_lat = rtDW.pref_target_pos[idx];
+            rtb_roll_angle_cmd_rad = rtDW.pref_target_pos[idx];
           } else {
-            c_lat = nav.ned_pos_m[idx];
+            rtb_roll_angle_cmd_rad = nav.ned_pos_m[idx];
           }
 
-          // End of Switch: '<S467>/Switch'
+          // End of Switch: '<S466>/Switch'
 
-          // MATLAB Function: '<S467>/determine_target'
-          diff[idx] = rtDW.cur_target_pos_m_c[idx] - c_lat;
+          // MATLAB Function: '<S466>/determine_target'
+          diff[idx] = rtDW.cur_target_pos_m_c[idx] - rtb_roll_angle_cmd_rad;
         }
 
-        // End of MATLAB Function: '<S467>/determine_current_tar_pos'
+        // End of MATLAB Function: '<S466>/determine_current_tar_pos'
 
-        // MATLAB Function: '<S467>/determine_target' incorporates:
-        //   Constant: '<S467>/Constant2'
-        //   Constant: '<S467>/Constant3'
-        c_lat = 1.29246971E-26F;
-        absxk = std::abs(diff[0]);
-        if (absxk > 1.29246971E-26F) {
-          s_lat = 1.0F;
-          c_lat = absxk;
+        // MATLAB Function: '<S466>/determine_target' incorporates:
+        //   Constant: '<S466>/Constant2'
+        //   Constant: '<S466>/Constant3'
+        rtb_roll_angle_cmd_rad = 1.29246971E-26F;
+        s_lat = std::abs(diff[0]);
+        if (s_lat > 1.29246971E-26F) {
+          s_lon = 1.0F;
+          rtb_roll_angle_cmd_rad = s_lat;
         } else {
-          t = absxk / 1.29246971E-26F;
-          s_lat = t * t;
+          c_lon = s_lat / 1.29246971E-26F;
+          s_lon = c_lon * c_lon;
         }
 
-        absxk = std::abs(diff[1]);
-        if (absxk > c_lat) {
-          t = c_lat / absxk;
-          s_lat = s_lat * t * t + 1.0F;
-          c_lat = absxk;
+        s_lat = std::abs(diff[1]);
+        if (s_lat > rtb_roll_angle_cmd_rad) {
+          c_lon = rtb_roll_angle_cmd_rad / s_lat;
+          s_lon = s_lon * c_lon * c_lon + 1.0F;
+          rtb_roll_angle_cmd_rad = s_lat;
         } else {
-          t = absxk / c_lat;
-          s_lat += t * t;
+          c_lon = s_lat / rtb_roll_angle_cmd_rad;
+          s_lon += c_lon * c_lon;
         }
 
-        s_lat = c_lat * std::sqrt(s_lat);
+        s_lon = rtb_roll_angle_cmd_rad * std::sqrt(s_lon);
         rtDW.cur_target_heading_rad = rt_atan2f_snf(diff[1], diff[0]);
-        rtDW.max_v_z_mps = std::abs(-diff[2] * 5.0F / s_lat);
-        rtDW.max_v_hor_mps = std::abs(s_lat * 2.0F / -diff[2]);
+        rtDW.max_v_z_mps = std::abs(-diff[2] * 5.0F / s_lon);
+        rtDW.max_v_hor_mps = std::abs(s_lon * 2.0F / -diff[2]);
       }
 
       // End of Outputs for SubSystem: '<S11>/determine target'
 
       // Outputs for Enabled SubSystem: '<S11>/WP_NAV' incorporates:
-      //   EnablePort: '<S465>/Enable'
+      //   EnablePort: '<S464>/Enable'
 
-      // Trigonometry: '<S526>/Sin' incorporates:
+      // Trigonometry: '<S525>/Sin' incorporates:
       //   Inport: '<Root>/Navigation Filter Data'
-      //   RelationalOperator: '<S633>/FixPt Relational Operator'
-      //   UnitDelay: '<S633>/Delay Input1'
+      //   Inport: '<Root>/Telemetry Data'
+      //   Logic: '<S11>/OR'
+      //   RelationalOperator: '<S632>/FixPt Relational Operator'
+      //   UnitDelay: '<S632>/Delay Input1'
       //
-      //  Block description for '<S633>/Delay Input1':
+      //  Block description for '<S632>/Delay Input1':
       //
       //   Store in Global RAM
-      rtb_DataTypeConversion6 = std::sin(nav.heading_rad);
+      rtb_DataTypeConversion_h = std::sin(nav.heading_rad);
 
-      // Reshape: '<S526>/Reshape' incorporates:
-      //   Gain: '<S526>/Gain'
+      // Reshape: '<S525>/Reshape' incorporates:
+      //   Gain: '<S525>/Gain'
       //   Inport: '<Root>/Navigation Filter Data'
-      //   Reshape: '<S187>/Reshape'
-      //   Trigonometry: '<S526>/Cos'
+      //   Reshape: '<S186>/Reshape'
+      //   Trigonometry: '<S525>/Cos'
       rtb_Reshape_h_idx_0 = std::cos(nav.heading_rad);
-      rtb_Reshape_h_idx_1 = -rtb_DataTypeConversion6;
-      absxk = rtb_DataTypeConversion6;
+      c_lon = -rtb_DataTypeConversion_h;
+      s_lon = rtb_DataTypeConversion_h;
 
-      // Sum: '<S473>/Subtract' incorporates:
+      // Sum: '<S472>/Subtract' incorporates:
       //   Inport: '<Root>/Navigation Filter Data'
-      //   SignalConversion generated from: '<S469>/Bus Selector2'
-      rtb_DataTypeConversion6 = rtDW.cur_target_pos_m_c[0] - nav.ned_pos_m[0];
+      //   SignalConversion generated from: '<S468>/Bus Selector2'
+      rtb_DataTypeConversion_h = rtDW.cur_target_pos_m_c[0] - nav.ned_pos_m[0];
       rtb_Subtract_f_idx_1 = rtDW.cur_target_pos_m_c[1] - nav.ned_pos_m[1];
 
-      // MinMax: '<S472>/Min'
+      // MinMax: '<S471>/Min'
       if (rtDW.max_v_hor_mps < 5.0F) {
-        c_lat = rtDW.max_v_hor_mps;
+        rtb_roll_angle_cmd_rad = rtDW.max_v_hor_mps;
       } else {
-        c_lat = 5.0F;
+        rtb_roll_angle_cmd_rad = 5.0F;
       }
 
-      if (!(c_lat < 3.0F)) {
-        c_lat = 3.0F;
+      if (!(rtb_roll_angle_cmd_rad < 3.0F)) {
+        rtb_roll_angle_cmd_rad = 3.0F;
       }
 
-      // End of MinMax: '<S472>/Min'
+      // End of MinMax: '<S471>/Min'
 
-      // Sqrt: '<S473>/Sqrt' incorporates:
-      //   Math: '<S473>/Transpose'
-      //   Product: '<S473>/MatrixMultiply'
-      s_lat = std::sqrt(rtb_DataTypeConversion6 * rtb_DataTypeConversion6 +
+      // Sqrt: '<S472>/Sqrt' incorporates:
+      //   Math: '<S472>/Transpose'
+      //   Product: '<S472>/MatrixMultiply'
+      s_lat = std::sqrt(rtb_DataTypeConversion_h * rtb_DataTypeConversion_h +
                         rtb_Subtract_f_idx_1 * rtb_Subtract_f_idx_1);
 
-      // Saturate: '<S472>/Saturation'
+      // Saturate: '<S471>/Saturation'
       if (s_lat > 20.0F) {
         s_lat = 20.0F;
       } else if (s_lat < 0.0F) {
         s_lat = 0.0F;
       }
 
-      // End of Saturate: '<S472>/Saturation'
+      // End of Saturate: '<S471>/Saturation'
 
-      // Product: '<S513>/PProd Out' incorporates:
-      //   Constant: '<S472>/Constant3'
+      // Product: '<S512>/PProd Out' incorporates:
+      //   Constant: '<S471>/Constant3'
       s_lat *= 3.0F;
 
-      // Switch: '<S516>/Switch2' incorporates:
-      //   RelationalOperator: '<S516>/LowerRelop1'
-      //   Switch: '<S516>/Switch'
-      if (!(s_lat > c_lat)) {
-        c_lat = s_lat;
+      // Switch: '<S515>/Switch2' incorporates:
+      //   RelationalOperator: '<S515>/LowerRelop1'
+      //   Switch: '<S515>/Switch'
+      if (!(s_lat > rtb_roll_angle_cmd_rad)) {
+        rtb_roll_angle_cmd_rad = s_lat;
       }
 
-      // End of Switch: '<S516>/Switch2'
+      // End of Switch: '<S515>/Switch2'
 
-      // Trigonometry: '<S473>/Atan2'
-      rtb_DataTypeConversion6 = rt_atan2f_snf(rtb_Subtract_f_idx_1,
-        rtb_DataTypeConversion6);
+      // Trigonometry: '<S472>/Atan2'
+      rtb_DataTypeConversion_h = rt_atan2f_snf(rtb_Subtract_f_idx_1,
+        rtb_DataTypeConversion_h);
 
-      // SignalConversion generated from: '<S476>/Product' incorporates:
-      //   Product: '<S475>/Product'
-      //   Product: '<S475>/Product1'
-      //   Trigonometry: '<S475>/Cos'
-      //   Trigonometry: '<S475>/Sin'
-      s_lat = c_lat * std::cos(rtb_DataTypeConversion6);
-      c_lat *= std::sin(rtb_DataTypeConversion6);
+      // SignalConversion generated from: '<S475>/Product' incorporates:
+      //   Product: '<S474>/Product'
+      //   Product: '<S474>/Product1'
+      //   Trigonometry: '<S474>/Cos'
+      //   Trigonometry: '<S474>/Sin'
+      s_lat = rtb_roll_angle_cmd_rad * std::cos(rtb_DataTypeConversion_h);
+      rtb_roll_angle_cmd_rad *= std::sin(rtb_DataTypeConversion_h);
 
-      // Product: '<S476>/Product' incorporates:
-      //   Reshape: '<S187>/Reshape'
+      // Product: '<S475>/Product' incorporates:
+      //   Reshape: '<S186>/Reshape'
       rtDW.vb_xy[0] = 0.0F;
       rtDW.vb_xy[0] += rtb_Reshape_h_idx_0 * s_lat;
-      rtDW.vb_xy[0] += absxk * c_lat;
+      rtDW.vb_xy[0] += s_lon * rtb_roll_angle_cmd_rad;
       rtDW.vb_xy[1] = 0.0F;
-      rtDW.vb_xy[1] += rtb_Reshape_h_idx_1 * s_lat;
-      rtDW.vb_xy[1] += rtb_Reshape_h_idx_0 * c_lat;
+      rtDW.vb_xy[1] += c_lon * s_lat;
+      rtDW.vb_xy[1] += rtb_Reshape_h_idx_0 * rtb_roll_angle_cmd_rad;
 
-      // Product: '<S565>/PProd Out' incorporates:
+      // Product: '<S564>/PProd Out' incorporates:
       //   Inport: '<Root>/Navigation Filter Data'
-      //   Sum: '<S527>/Sum3'
-      c_lat = rtDW.cur_target_pos_m_c[2] - nav.ned_pos_m[2];
+      //   Sum: '<S526>/Sum3'
+      rtb_roll_angle_cmd_rad = rtDW.cur_target_pos_m_c[2] - nav.ned_pos_m[2];
 
-      // Switch: '<S568>/Switch2' incorporates:
-      //   Constant: '<S527>/Constant1'
-      //   MinMax: '<S527>/Min'
-      //   RelationalOperator: '<S568>/LowerRelop1'
-      if (c_lat > 1.0F) {
-        // Switch: '<S568>/Switch2'
+      // Switch: '<S567>/Switch2' incorporates:
+      //   Constant: '<S526>/Constant1'
+      //   MinMax: '<S526>/Min'
+      //   RelationalOperator: '<S567>/LowerRelop1'
+      if (rtb_roll_angle_cmd_rad > 1.0F) {
+        // Switch: '<S567>/Switch2'
         rtDW.Switch2 = 1.0F;
       } else {
         if (rtDW.max_v_z_mps < 2.0F) {
-          // MinMax: '<S527>/Min'
-          y = rtDW.max_v_z_mps;
+          // MinMax: '<S526>/Min'
+          s_lat = rtDW.max_v_z_mps;
         } else {
-          // MinMax: '<S527>/Min'
-          y = 2.0F;
+          // MinMax: '<S526>/Min'
+          s_lat = 2.0F;
         }
 
-        // Switch: '<S568>/Switch' incorporates:
-        //   Gain: '<S527>/Gain'
-        //   RelationalOperator: '<S568>/UpperRelop'
-        if (c_lat < -y) {
-          // Switch: '<S568>/Switch2'
-          rtDW.Switch2 = -y;
+        // Switch: '<S567>/Switch' incorporates:
+        //   Gain: '<S526>/Gain'
+        //   RelationalOperator: '<S567>/UpperRelop'
+        if (rtb_roll_angle_cmd_rad < -s_lat) {
+          // Switch: '<S567>/Switch2'
+          rtDW.Switch2 = -s_lat;
         } else {
-          // Switch: '<S568>/Switch2'
-          rtDW.Switch2 = c_lat;
+          // Switch: '<S567>/Switch2'
+          rtDW.Switch2 = rtb_roll_angle_cmd_rad;
         }
 
-        // End of Switch: '<S568>/Switch'
+        // End of Switch: '<S567>/Switch'
       }
 
-      // End of Switch: '<S568>/Switch2'
+      // End of Switch: '<S567>/Switch2'
 
-      // Sum: '<S580>/Subtract' incorporates:
+      // Sum: '<S579>/Subtract' incorporates:
       //   Inport: '<Root>/Navigation Filter Data'
-      c_lat = rtDW.cur_target_heading_rad - nav.heading_rad;
+      rtb_roll_angle_cmd_rad = rtDW.cur_target_heading_rad - nav.heading_rad;
 
-      // Switch: '<S580>/Switch' incorporates:
-      //   Abs: '<S580>/Abs'
-      //   Constant: '<S580>/Constant'
-      //   Constant: '<S631>/Constant'
-      //   Product: '<S580>/Product'
-      //   RelationalOperator: '<S631>/Compare'
-      //   Sum: '<S580>/Subtract1'
-      if (std::abs(c_lat) > 3.14159274F) {
-        // Signum: '<S580>/Sign'
-        if (c_lat < 0.0F) {
-          y = -1.0F;
-        } else if (c_lat > 0.0F) {
-          y = 1.0F;
-        } else if (c_lat == 0.0F) {
-          y = 0.0F;
+      // Switch: '<S579>/Switch' incorporates:
+      //   Abs: '<S579>/Abs'
+      //   Constant: '<S579>/Constant'
+      //   Constant: '<S630>/Constant'
+      //   Product: '<S579>/Product'
+      //   RelationalOperator: '<S630>/Compare'
+      //   Sum: '<S579>/Subtract1'
+      if (std::abs(rtb_roll_angle_cmd_rad) > 3.14159274F) {
+        // Signum: '<S579>/Sign'
+        if (rtb_roll_angle_cmd_rad < 0.0F) {
+          rtb_Switch_i = -1.0F;
+        } else if (rtb_roll_angle_cmd_rad > 0.0F) {
+          rtb_Switch_i = 1.0F;
+        } else if (rtb_roll_angle_cmd_rad == 0.0F) {
+          rtb_Switch_i = 0.0F;
         } else {
-          y = (rtNaNF);
+          rtb_Switch_i = (rtNaNF);
         }
 
-        // End of Signum: '<S580>/Sign'
-        c_lat -= y * 6.28318548F;
+        // End of Signum: '<S579>/Sign'
+        rtb_roll_angle_cmd_rad -= rtb_Switch_i * 6.28318548F;
       }
 
-      // End of Switch: '<S580>/Switch'
+      // End of Switch: '<S579>/Switch'
 
-      // Product: '<S611>/IProd Out' incorporates:
-      //   Constant: '<S578>/I_heading'
-      rtb_DataTypeConversion6 = c_lat * 0.01F;
+      // Product: '<S610>/IProd Out' incorporates:
+      //   Constant: '<S577>/I_heading'
+      rtb_DataTypeConversion_h = rtb_roll_angle_cmd_rad * 0.01F;
 
-      // Sum: '<S623>/Sum' incorporates:
-      //   DiscreteIntegrator: '<S614>/Integrator'
-      //   Product: '<S619>/PProd Out'
-      rtb_Reshape_h_idx_1 = c_lat + rtDW.Integrator_DSTATE_bm;
+      // Sum: '<S622>/Sum' incorporates:
+      //   DiscreteIntegrator: '<S613>/Integrator'
+      //   Product: '<S618>/PProd Out'
+      c_lon = rtb_roll_angle_cmd_rad + rtDW.Integrator_DSTATE_bm;
 
-      // Saturate: '<S578>/Saturation'
-      if (rtb_Reshape_h_idx_1 > 0.524F) {
-        // Saturate: '<S578>/Saturation'
+      // Saturate: '<S577>/Saturation'
+      if (c_lon > 0.524F) {
+        // Saturate: '<S577>/Saturation'
         rtDW.Saturation = 0.524F;
-      } else if (rtb_Reshape_h_idx_1 < -0.524F) {
-        // Saturate: '<S578>/Saturation'
+      } else if (c_lon < -0.524F) {
+        // Saturate: '<S577>/Saturation'
         rtDW.Saturation = -0.524F;
       } else {
-        // Saturate: '<S578>/Saturation'
-        rtDW.Saturation = rtb_Reshape_h_idx_1;
+        // Saturate: '<S577>/Saturation'
+        rtDW.Saturation = c_lon;
       }
 
-      // End of Saturate: '<S578>/Saturation'
+      // End of Saturate: '<S577>/Saturation'
 
-      // DeadZone: '<S607>/DeadZone'
-      if (rtb_Reshape_h_idx_1 >= (rtMinusInfF)) {
+      // DeadZone: '<S606>/DeadZone'
+      if (c_lon >= (rtMinusInfF)) {
+        rtb_roll_angle_cmd_rad = 0.0F;
+      } else {
+        rtb_roll_angle_cmd_rad = (rtNaNF);
+      }
+
+      // End of DeadZone: '<S606>/DeadZone'
+
+      // Signum: '<S604>/SignPreIntegrator'
+      if (rtb_DataTypeConversion_h < 0.0F) {
+        s_lat = -1.0F;
+      } else if (rtb_DataTypeConversion_h > 0.0F) {
+        s_lat = 1.0F;
+      } else if (rtb_DataTypeConversion_h == 0.0F) {
         s_lat = 0.0F;
       } else {
         s_lat = (rtNaNF);
       }
 
-      // End of DeadZone: '<S607>/DeadZone'
+      // End of Signum: '<S604>/SignPreIntegrator'
 
-      // Signum: '<S605>/SignPreIntegrator'
-      if (rtb_DataTypeConversion6 < 0.0F) {
-        c_lat = -1.0F;
-      } else if (rtb_DataTypeConversion6 > 0.0F) {
-        c_lat = 1.0F;
-      } else if (rtb_DataTypeConversion6 == 0.0F) {
-        c_lat = 0.0F;
-      } else {
-        c_lat = (rtNaNF);
+      // Switch: '<S604>/Switch' incorporates:
+      //   Constant: '<S604>/Constant1'
+      //   DataTypeConversion: '<S604>/DataTypeConv2'
+      //   Gain: '<S604>/ZeroGain'
+      //   Logic: '<S604>/AND3'
+      //   RelationalOperator: '<S604>/Equal1'
+      //   RelationalOperator: '<S604>/NotEqual'
+      if ((0.0F * c_lon != rtb_roll_angle_cmd_rad) && (0 == static_cast<int8_T>
+           (s_lat))) {
+        rtb_DataTypeConversion_h = 0.0F;
       }
 
-      // End of Signum: '<S605>/SignPreIntegrator'
+      // End of Switch: '<S604>/Switch'
 
-      // Switch: '<S605>/Switch' incorporates:
-      //   Constant: '<S605>/Constant1'
-      //   DataTypeConversion: '<S605>/DataTypeConv2'
-      //   Gain: '<S605>/ZeroGain'
-      //   Logic: '<S605>/AND3'
-      //   RelationalOperator: '<S605>/Equal1'
-      //   RelationalOperator: '<S605>/NotEqual'
-      if ((0.0F * rtb_Reshape_h_idx_1 != s_lat) && (0 == static_cast<int8_T>
-           (c_lat))) {
-        rtb_DataTypeConversion6 = 0.0F;
-      }
-
-      // End of Switch: '<S605>/Switch'
-
-      // Update for DiscreteIntegrator: '<S614>/Integrator'
-      rtDW.Integrator_DSTATE_bm += 0.01F * rtb_DataTypeConversion6;
+      // Update for DiscreteIntegrator: '<S613>/Integrator'
+      rtDW.Integrator_DSTATE_bm += 0.01F * rtb_DataTypeConversion_h;
 
       // End of Outputs for SubSystem: '<S11>/WP_NAV'
 
-      // MATLAB Function: '<S468>/check_wp_reached'
-      c_lat = 1.29246971E-26F;
+      // MATLAB Function: '<S467>/check_wp_reached'
+      rtb_roll_angle_cmd_rad = 1.29246971E-26F;
 
       // SignalConversion generated from: '<S11>/dbg'
       rtDW.cur_target_pos_m[0] = rtDW.cur_target_pos_m_c[0];
 
-      // MATLAB Function: '<S468>/check_wp_reached' incorporates:
+      // MATLAB Function: '<S467>/check_wp_reached' incorporates:
       //   Inport: '<Root>/Navigation Filter Data'
-      absxk = std::abs(rtDW.cur_target_pos_m_c[0] - nav.ned_pos_m[0]);
-      if (absxk > 1.29246971E-26F) {
-        y = 1.0F;
-        c_lat = absxk;
+      s_lat = std::abs(rtDW.cur_target_pos_m_c[0] - nav.ned_pos_m[0]);
+      if (s_lat > 1.29246971E-26F) {
+        s_lon = 1.0F;
+        rtb_roll_angle_cmd_rad = s_lat;
       } else {
-        t = absxk / 1.29246971E-26F;
-        y = t * t;
+        c_lon = s_lat / 1.29246971E-26F;
+        s_lon = c_lon * c_lon;
       }
 
       // SignalConversion generated from: '<S11>/dbg'
       rtDW.cur_target_pos_m[1] = rtDW.cur_target_pos_m_c[1];
 
-      // MATLAB Function: '<S468>/check_wp_reached' incorporates:
+      // MATLAB Function: '<S467>/check_wp_reached' incorporates:
       //   Inport: '<Root>/Navigation Filter Data'
-      absxk = std::abs(rtDW.cur_target_pos_m_c[1] - nav.ned_pos_m[1]);
-      if (absxk > c_lat) {
-        t = c_lat / absxk;
-        y = y * t * t + 1.0F;
-        c_lat = absxk;
+      s_lat = std::abs(rtDW.cur_target_pos_m_c[1] - nav.ned_pos_m[1]);
+      if (s_lat > rtb_roll_angle_cmd_rad) {
+        c_lon = rtb_roll_angle_cmd_rad / s_lat;
+        s_lon = s_lon * c_lon * c_lon + 1.0F;
+        rtb_roll_angle_cmd_rad = s_lat;
       } else {
-        t = absxk / c_lat;
-        y += t * t;
+        c_lon = s_lat / rtb_roll_angle_cmd_rad;
+        s_lon += c_lon * c_lon;
       }
 
       // SignalConversion generated from: '<S11>/dbg'
       rtDW.cur_target_pos_m[2] = rtDW.cur_target_pos_m_c[2];
 
-      // MATLAB Function: '<S468>/check_wp_reached' incorporates:
-      //   Constant: '<S468>/Constant'
+      // MATLAB Function: '<S467>/check_wp_reached' incorporates:
+      //   Constant: '<S467>/Constant'
       //   Inport: '<Root>/Navigation Filter Data'
       //   Inport: '<Root>/Telemetry Data'
-      //   Selector: '<S468>/Selector'
-      absxk = std::abs(rtDW.cur_target_pos_m_c[2] - nav.ned_pos_m[2]);
-      if (absxk > c_lat) {
-        t = c_lat / absxk;
-        y = y * t * t + 1.0F;
-        c_lat = absxk;
+      //   Selector: '<S467>/Selector'
+      s_lat = std::abs(rtDW.cur_target_pos_m_c[2] - nav.ned_pos_m[2]);
+      if (s_lat > rtb_roll_angle_cmd_rad) {
+        c_lon = rtb_roll_angle_cmd_rad / s_lat;
+        s_lon = s_lon * c_lon * c_lon + 1.0F;
+        rtb_roll_angle_cmd_rad = s_lat;
       } else {
-        t = absxk / c_lat;
-        y += t * t;
+        c_lon = s_lat / rtb_roll_angle_cmd_rad;
+        s_lon += c_lon * c_lon;
       }
 
-      rtDW.reached = ((c_lat * std::sqrt(y) <= 1.5F) &&
+      rtDW.reached = ((rtb_roll_angle_cmd_rad * std::sqrt(s_lon) <= 1.5F) &&
                       telem.flight_plan[telem.current_waypoint].autocontinue);
 
-      // SignalConversion generated from: '<S11>/dbg' incorporates:
-      //   Inport: '<Root>/Telemetry Data'
-      rtDW.current_waypoint = telem.current_waypoint;
-
-      // Update for UnitDelay: '<S632>/Delay Input1' incorporates:
+      // Update for UnitDelay: '<S631>/Delay Input1' incorporates:
       //   Inport: '<Root>/Telemetry Data'
       //
-      //  Block description for '<S632>/Delay Input1':
+      //  Block description for '<S631>/Delay Input1':
       //
       //   Store in Global RAM
       rtDW.DelayInput1_DSTATE = telem.current_waypoint;
 
-      // Update for UnitDelay: '<S633>/Delay Input1'
+      // Update for UnitDelay: '<S632>/Delay Input1'
       //
-      //  Block description for '<S633>/Delay Input1':
+      //  Block description for '<S632>/Delay Input1':
       //
       //   Store in Global RAM
       rtDW.DelayInput1_DSTATE_n = rtb_Compare_lx;
@@ -1342,25 +1338,25 @@ namespace bfs
     // Polyval: '<S12>/pitch_norm' incorporates:
     //   DataTypeConversion: '<S12>/Data Type Conversion4'
     //   Inport: '<Root>/Sensor Data'
-    s_lat = 0.00122026F * static_cast<real32_T>(sensor.inceptor.ch[2]) +
+    s_lon = 0.00122026F * static_cast<real32_T>(sensor.inceptor.ch[2]) +
       -1.20988405F;
 
     // Polyval: '<S12>/roll_norm' incorporates:
     //   DataTypeConversion: '<S12>/Data Type Conversion3'
     //   Inport: '<Root>/Sensor Data'
-    c_lon = 0.00122026F * static_cast<real32_T>(sensor.inceptor.ch[1]) +
+    rtb_roll = 0.00122026F * static_cast<real32_T>(sensor.inceptor.ch[1]) +
       -1.20988405F;
 
     // Polyval: '<S12>/yaw_norm' incorporates:
     //   DataTypeConversion: '<S12>/Data Type Conversion2'
     //   Inport: '<Root>/Sensor Data'
-    s_lon = 0.00122026F * static_cast<real32_T>(sensor.inceptor.ch[3]) +
+    rtb_yaw = 0.00122026F * static_cast<real32_T>(sensor.inceptor.ch[3]) +
       -1.20988405F;
 
     // Logic: '<Root>/motor_armed AND mode_5' incorporates:
     //   Constant: '<S17>/Constant'
     //   RelationalOperator: '<S17>/Compare'
-    rtb_Compare_lx = (rtb_Switch_lt && (rtb_DataTypeConversion6_k == 1));
+    rtb_Compare_lx = (rtb_Switch_lt && (rtb_DataTypeConversion6 == 1));
 
     // Polyval: '<S12>/throttle_norm' incorporates:
     //   DataTypeConversion: '<S12>/Data Type Conversion5'
@@ -1372,31 +1368,32 @@ namespace bfs
     //   EnablePort: '<S6>/Enable'
     if (rtb_Compare_lx) {
       // Gain: '<S6>/Gain1'
-      rtDW.vb_x_cmd_mps_d = 5.0F * s_lat;
+      rtDW.vb_x_cmd_mps_d = 5.0F * s_lon;
 
-      // Product: '<S349>/v_z_cmd (-1 to 1)' incorporates:
-      //   Constant: '<S349>/Double'
-      //   Constant: '<S349>/Normalize at Zero'
-      //   Sum: '<S349>/Sum'
-      c_lat = (rtb_Subtract_f_idx_1 - 0.5F) * 2.0F;
+      // Product: '<S348>/v_z_cmd (-1 to 1)' incorporates:
+      //   Constant: '<S348>/Double'
+      //   Constant: '<S348>/Normalize at Zero'
+      //   Sum: '<S348>/Sum'
+      rtb_roll_angle_cmd_rad = (rtb_Subtract_f_idx_1 - 0.5F) * 2.0F;
 
-      // Gain: '<S349>/Gain' incorporates:
-      //   Constant: '<S349>/Constant1'
+      // Gain: '<S348>/Gain' incorporates:
+      //   Constant: '<S348>/Constant1'
+      //   Constant: '<S349>/Constant'
       //   Constant: '<S350>/Constant'
-      //   Constant: '<S351>/Constant'
-      //   Product: '<S349>/Product'
-      //   Product: '<S349>/Product1'
+      //   Product: '<S348>/Product'
+      //   Product: '<S348>/Product1'
+      //   RelationalOperator: '<S349>/Compare'
       //   RelationalOperator: '<S350>/Compare'
-      //   RelationalOperator: '<S351>/Compare'
-      //   Sum: '<S349>/Sum1'
-      rtDW.Gain = -(static_cast<real32_T>(c_lat >= 0.0F) * c_lat * 2.0F +
-                    static_cast<real32_T>(c_lat < 0.0F) * c_lat);
+      //   Sum: '<S348>/Sum1'
+      rtDW.Gain = -(static_cast<real32_T>(rtb_roll_angle_cmd_rad >= 0.0F) *
+                    rtb_roll_angle_cmd_rad * 2.0F + static_cast<real32_T>
+                    (rtb_roll_angle_cmd_rad < 0.0F) * rtb_roll_angle_cmd_rad);
 
       // Gain: '<S6>/Gain2'
-      rtDW.vb_y_cmd_mps_f = 5.0F * c_lon;
+      rtDW.vb_y_cmd_mps_f = 5.0F * rtb_roll;
 
       // Gain: '<S6>/Gain3'
-      rtDW.yaw_rate_cmd_radps_p = 0.524F * s_lon;
+      rtDW.yaw_rate_cmd_radps_p = 0.524F * rtb_yaw;
     }
 
     // End of Outputs for SubSystem: '<Root>/Pos_Hold_input_conversion'
@@ -1407,101 +1404,100 @@ namespace bfs
     // Logic: '<Root>/motor_armed AND mode_3' incorporates:
     //   Constant: '<S15>/Constant'
     //   RelationalOperator: '<S15>/Compare'
-    if (rtb_Switch_lt && (rtb_DataTypeConversion6_k == 3)) {
-      // Sqrt: '<S357>/Sqrt' incorporates:
+    if (rtb_Switch_lt && (rtb_DataTypeConversion6 == 3)) {
+      // Sqrt: '<S356>/Sqrt' incorporates:
       //   Inport: '<Root>/Navigation Filter Data'
-      //   Product: '<S357>/MatrixMultiply'
+      //   Product: '<S356>/MatrixMultiply'
       //   SignalConversion generated from: '<S8>/Bus Selector2'
-      //   Sum: '<S357>/Subtract'
-      c_lat = std::sqrt((0.0F - nav.ned_pos_m[0]) * (0.0F - nav.ned_pos_m[0]) +
-                        (0.0F - nav.ned_pos_m[1]) * (0.0F - nav.ned_pos_m[1]));
+      //   Sum: '<S356>/Subtract'
+      rtb_roll_angle_cmd_rad = std::sqrt((0.0F - nav.ned_pos_m[0]) * (0.0F -
+        nav.ned_pos_m[0]) + (0.0F - nav.ned_pos_m[1]) * (0.0F - nav.ned_pos_m[1]));
 
-      // Saturate: '<S356>/Saturation'
-      if (c_lat > 20.0F) {
-        y = 20.0F;
-      } else if (c_lat < 0.0F) {
-        y = 0.0F;
+      // Saturate: '<S355>/Saturation'
+      if (rtb_roll_angle_cmd_rad > 20.0F) {
+        rtb_Switch_i = 20.0F;
+      } else if (rtb_roll_angle_cmd_rad < 0.0F) {
+        rtb_Switch_i = 0.0F;
       } else {
-        y = c_lat;
+        rtb_Switch_i = rtb_roll_angle_cmd_rad;
       }
 
-      // End of Saturate: '<S356>/Saturation'
+      // End of Saturate: '<S355>/Saturation'
 
-      // Product: '<S398>/PProd Out' incorporates:
-      //   Constant: '<S356>/Constant3'
-      rtb_PProdOut_l = y * 0.5F;
+      // Product: '<S397>/PProd Out' incorporates:
+      //   Constant: '<S355>/Constant3'
+      s_lat = rtb_Switch_i * 0.5F;
 
       // Switch: '<S8>/Switch1' incorporates:
-      //   Constant: '<S355>/Constant'
+      //   Constant: '<S354>/Constant'
       //   Inport: '<Root>/Navigation Filter Data'
       //   MinMax: '<S8>/Min'
-      //   RelationalOperator: '<S355>/Compare'
-      if (c_lat <= 10.0F) {
-        c_lat = nav.ned_pos_m[2];
+      //   RelationalOperator: '<S354>/Compare'
+      if (rtb_roll_angle_cmd_rad <= 10.0F) {
+        rtb_roll_angle_cmd_rad = nav.ned_pos_m[2];
       } else if ((-100.0F < nav.ned_pos_m[2]) || rtIsNaNF(nav.ned_pos_m[2])) {
         // MinMax: '<S8>/Min'
-        c_lat = -100.0F;
+        rtb_roll_angle_cmd_rad = -100.0F;
       } else {
         // MinMax: '<S8>/Min' incorporates:
         //   Inport: '<Root>/Navigation Filter Data'
-        c_lat = nav.ned_pos_m[2];
+        rtb_roll_angle_cmd_rad = nav.ned_pos_m[2];
       }
 
       // End of Switch: '<S8>/Switch1'
 
-      // Sum: '<S358>/Sum3' incorporates:
+      // Sum: '<S357>/Sum3' incorporates:
       //   Inport: '<Root>/Navigation Filter Data'
-      c_lat -= nav.ned_pos_m[2];
+      rtb_roll_angle_cmd_rad -= nav.ned_pos_m[2];
 
       // Switch: '<S8>/Switch' incorporates:
-      //   Abs: '<S358>/Abs'
-      //   Constant: '<S412>/Constant'
-      //   RelationalOperator: '<S412>/Compare'
-      if (std::abs(c_lat) <= 1.5F) {
-        // Trigonometry: '<S357>/Atan2' incorporates:
+      //   Abs: '<S357>/Abs'
+      //   Constant: '<S411>/Constant'
+      //   RelationalOperator: '<S411>/Compare'
+      if (std::abs(rtb_roll_angle_cmd_rad) <= 1.5F) {
+        // Trigonometry: '<S356>/Atan2' incorporates:
         //   Inport: '<Root>/Navigation Filter Data'
         //   SignalConversion generated from: '<S8>/Bus Selector2'
-        //   Sum: '<S357>/Subtract'
-        rtb_DataTypeConversion6 = rt_atan2f_snf(0.0F - nav.ned_pos_m[1], 0.0F -
+        //   Sum: '<S356>/Subtract'
+        rtb_Gain_h = rt_atan2f_snf(0.0F - nav.ned_pos_m[1], 0.0F -
           nav.ned_pos_m[0]);
 
-        // Switch: '<S401>/Switch2' incorporates:
-        //   Constant: '<S356>/Constant1'
-        //   RelationalOperator: '<S401>/LowerRelop1'
-        if (rtb_PProdOut_l > 5.0F) {
-          rtb_PProdOut_l = 5.0F;
+        // Switch: '<S400>/Switch2' incorporates:
+        //   Constant: '<S355>/Constant1'
+        //   RelationalOperator: '<S400>/LowerRelop1'
+        if (s_lat > 5.0F) {
+          s_lat = 5.0F;
         }
 
-        // End of Switch: '<S401>/Switch2'
+        // End of Switch: '<S400>/Switch2'
 
-        // Product: '<S360>/Product1' incorporates:
-        //   Trigonometry: '<S360>/Sin'
-        rtb_Product1_i = rtb_PProdOut_l * std::sin(rtb_DataTypeConversion6);
+        // Product: '<S359>/Product1' incorporates:
+        //   Trigonometry: '<S359>/Sin'
+        c_lon = s_lat * std::sin(rtb_Gain_h);
 
-        // Product: '<S360>/Product' incorporates:
-        //   Trigonometry: '<S360>/Cos'
-        rtb_DataTypeConversion6 = rtb_PProdOut_l * std::cos
-          (rtb_DataTypeConversion6);
+        // Product: '<S359>/Product' incorporates:
+        //   Trigonometry: '<S359>/Cos'
+        rtb_Gain_h = s_lat * std::cos(rtb_Gain_h);
 
-        // Trigonometry: '<S411>/Sin' incorporates:
+        // Trigonometry: '<S410>/Sin' incorporates:
         //   Inport: '<Root>/Navigation Filter Data'
-        rtb_PProdOut_l = std::sin(nav.heading_rad);
+        s_lat = std::sin(nav.heading_rad);
 
-        // Trigonometry: '<S411>/Cos' incorporates:
+        // Trigonometry: '<S410>/Cos' incorporates:
         //   Inport: '<Root>/Navigation Filter Data'
-        rtb_Reshape_h_idx_1 = std::cos(nav.heading_rad);
+        rtb_Cos_f = std::cos(nav.heading_rad);
 
         // Switch: '<S8>/Switch' incorporates:
-        //   Gain: '<S411>/Gain'
-        //   Product: '<S361>/Product'
-        //   Reshape: '<S411>/Reshape'
-        //   SignalConversion generated from: '<S361>/Product'
+        //   Gain: '<S410>/Gain'
+        //   Product: '<S360>/Product'
+        //   Reshape: '<S410>/Reshape'
+        //   SignalConversion generated from: '<S360>/Product'
         rtDW.Switch[0] = 0.0F;
-        rtDW.Switch[0] += rtb_Reshape_h_idx_1 * rtb_DataTypeConversion6;
-        rtDW.Switch[0] += rtb_PProdOut_l * rtb_Product1_i;
+        rtDW.Switch[0] += rtb_Cos_f * rtb_Gain_h;
+        rtDW.Switch[0] += s_lat * c_lon;
         rtDW.Switch[1] = 0.0F;
-        rtDW.Switch[1] += -rtb_PProdOut_l * rtb_DataTypeConversion6;
-        rtDW.Switch[1] += rtb_Reshape_h_idx_1 * rtb_Product1_i;
+        rtDW.Switch[1] += -s_lat * rtb_Gain_h;
+        rtDW.Switch[1] += rtb_Cos_f * c_lon;
       } else {
         // Switch: '<S8>/Switch'
         rtDW.Switch[0] = 0.0F;
@@ -1510,25 +1506,25 @@ namespace bfs
 
       // End of Switch: '<S8>/Switch'
 
-      // Switch: '<S453>/Switch2' incorporates:
-      //   Constant: '<S358>/Constant1'
-      //   RelationalOperator: '<S453>/LowerRelop1'
-      //   RelationalOperator: '<S453>/UpperRelop'
-      //   Switch: '<S453>/Switch'
-      if (c_lat > 1.0F) {
-        // Switch: '<S453>/Switch2'
+      // Switch: '<S452>/Switch2' incorporates:
+      //   Constant: '<S357>/Constant1'
+      //   RelationalOperator: '<S452>/LowerRelop1'
+      //   RelationalOperator: '<S452>/UpperRelop'
+      //   Switch: '<S452>/Switch'
+      if (rtb_roll_angle_cmd_rad > 1.0F) {
+        // Switch: '<S452>/Switch2'
         rtDW.Switch2_h = 1.0F;
-      } else if (c_lat < -2.0F) {
-        // Switch: '<S453>/Switch' incorporates:
-        //   Switch: '<S453>/Switch2'
+      } else if (rtb_roll_angle_cmd_rad < -2.0F) {
+        // Switch: '<S452>/Switch' incorporates:
+        //   Switch: '<S452>/Switch2'
         rtDW.Switch2_h = -2.0F;
       } else {
-        // Switch: '<S453>/Switch2' incorporates:
-        //   Switch: '<S453>/Switch'
-        rtDW.Switch2_h = c_lat;
+        // Switch: '<S452>/Switch2' incorporates:
+        //   Switch: '<S452>/Switch'
+        rtDW.Switch2_h = rtb_roll_angle_cmd_rad;
       }
 
-      // End of Switch: '<S453>/Switch2'
+      // End of Switch: '<S452>/Switch2'
 
       // SignalConversion generated from: '<S8>/Constant3' incorporates:
       //   Constant: '<S8>/Constant3'
@@ -1547,34 +1543,34 @@ namespace bfs
     // Logic: '<Root>/motor_armed AND mode_4' incorporates:
     //   Constant: '<S13>/Constant'
     //   RelationalOperator: '<S13>/Compare'
-    if (rtb_Switch_lt && (rtb_DataTypeConversion6_k == 4)) {
+    if (rtb_Switch_lt && (rtb_DataTypeConversion6 == 4)) {
       // SignalConversion generated from: '<S3>/land_cmd' incorporates:
       //   Gain: '<S7>/Gain1'
-      rtDW.vb_x_cmd_mps_o = 5.0F * s_lat;
+      rtDW.vb_x_cmd_mps_o = 5.0F * s_lon;
 
-      // Switch: '<S183>/Switch' incorporates:
-      //   Constant: '<S184>/Constant'
+      // Switch: '<S182>/Switch' incorporates:
+      //   Constant: '<S183>/Constant'
       //   Inport: '<Root>/Navigation Filter Data'
-      //   RelationalOperator: '<S184>/Compare'
+      //   RelationalOperator: '<S183>/Compare'
       if (nav.ned_pos_m[2] <= 10.0F) {
-        // Switch: '<S183>/Switch' incorporates:
-        //   Constant: '<S183>/Constant1'
+        // Switch: '<S182>/Switch' incorporates:
+        //   Constant: '<S182>/Constant1'
         rtDW.Switch_h = 0.3F;
       } else {
-        // Switch: '<S183>/Switch' incorporates:
-        //   Constant: '<S183>/Constant'
+        // Switch: '<S182>/Switch' incorporates:
+        //   Constant: '<S182>/Constant'
         rtDW.Switch_h = 1.0F;
       }
 
-      // End of Switch: '<S183>/Switch'
+      // End of Switch: '<S182>/Switch'
 
       // SignalConversion generated from: '<S3>/land_cmd' incorporates:
       //   Gain: '<S7>/Gain2'
-      rtDW.vb_y_cmd_mps_l = 5.0F * c_lon;
+      rtDW.vb_y_cmd_mps_l = 5.0F * rtb_roll;
 
       // SignalConversion generated from: '<S3>/land_cmd' incorporates:
       //   Gain: '<S7>/Gain3'
-      rtDW.yaw_rate_cmd_radps_c53 = 0.524F * s_lon;
+      rtDW.yaw_rate_cmd_radps_c53 = 0.524F * rtb_yaw;
     }
 
     // End of Logic: '<Root>/motor_armed AND mode_4'
@@ -1585,35 +1581,35 @@ namespace bfs
     //   Logic: '<Root>/NOT1'
     if (!rtb_Compare_lx) {
       // MultiPortSwitch generated from: '<Root>/Multiport Switch'
-      switch (rtb_DataTypeConversion6_k) {
+      switch (rtb_DataTypeConversion6) {
        case 2:
-        rtb_PProdOut_l = rtDW.Switch2;
-        rtb_Reshape_h_idx_1 = rtDW.vb_xy[0];
-        rtb_Reshape_h_idx_0 = rtDW.vb_xy[1];
-        rtb_Product1_i = rtDW.Saturation;
+        rtb_Gain_h = rtDW.Switch2;
+        c_lon = rtDW.vb_xy[0];
+        s_lat = rtDW.vb_xy[1];
+        rtb_Cos_f = rtDW.Saturation;
         break;
 
        case 3:
-        rtb_PProdOut_l = rtDW.Switch2_h;
-        rtb_Reshape_h_idx_1 = rtDW.Switch[0];
-        rtb_Reshape_h_idx_0 = rtDW.Switch[1];
-        rtb_Product1_i = rtDW.yaw_rate_cmd_radps_c;
+        rtb_Gain_h = rtDW.Switch2_h;
+        c_lon = rtDW.Switch[0];
+        s_lat = rtDW.Switch[1];
+        rtb_Cos_f = rtDW.yaw_rate_cmd_radps_c;
         break;
 
        default:
-        rtb_PProdOut_l = rtDW.Switch_h;
-        rtb_Reshape_h_idx_1 = rtDW.vb_x_cmd_mps_o;
-        rtb_Reshape_h_idx_0 = rtDW.vb_y_cmd_mps_l;
-        rtb_Product1_i = rtDW.yaw_rate_cmd_radps_c53;
+        rtb_Gain_h = rtDW.Switch_h;
+        c_lon = rtDW.vb_x_cmd_mps_o;
+        s_lat = rtDW.vb_y_cmd_mps_l;
+        rtb_Cos_f = rtDW.yaw_rate_cmd_radps_c53;
         break;
       }
 
       // End of MultiPortSwitch generated from: '<Root>/Multiport Switch'
     } else {
-      rtb_PProdOut_l = rtDW.Gain;
-      rtb_Reshape_h_idx_1 = rtDW.vb_x_cmd_mps_d;
-      rtb_Reshape_h_idx_0 = rtDW.vb_y_cmd_mps_f;
-      rtb_Product1_i = rtDW.yaw_rate_cmd_radps_p;
+      rtb_Gain_h = rtDW.Gain;
+      c_lon = rtDW.vb_x_cmd_mps_d;
+      s_lat = rtDW.vb_y_cmd_mps_f;
+      rtb_Cos_f = rtDW.yaw_rate_cmd_radps_p;
     }
 
     // End of Switch generated from: '<Root>/Switch1'
@@ -1624,273 +1620,274 @@ namespace bfs
     // Logic: '<Root>/motor_armed AND mode_1' incorporates:
     //   Constant: '<S14>/Constant'
     //   RelationalOperator: '<S14>/Compare'
-    if (rtb_Switch_lt && (rtb_DataTypeConversion6_k > 0)) {
-      // Trigonometry: '<S187>/Cos' incorporates:
+    if (rtb_Switch_lt && (rtb_DataTypeConversion6 > 0)) {
+      // Trigonometry: '<S186>/Cos' incorporates:
       //   Inport: '<Root>/Navigation Filter Data'
-      c_lat = std::cos(nav.heading_rad);
+      rtb_roll_angle_cmd_rad = std::cos(nav.heading_rad);
 
-      // Trigonometry: '<S187>/Sin' incorporates:
+      // Trigonometry: '<S186>/Sin' incorporates:
       //   Inport: '<Root>/Navigation Filter Data'
-      rtb_DataTypeConversion6 = std::sin(nav.heading_rad);
+      rtb_DataTypeConversion_h = std::sin(nav.heading_rad);
 
-      // Product: '<S185>/Product' incorporates:
-      //   Gain: '<S187>/Gain'
+      // Product: '<S184>/Product' incorporates:
+      //   Gain: '<S186>/Gain'
       //   Inport: '<Root>/Navigation Filter Data'
-      //   Reshape: '<S187>/Reshape'
-      t = -rtb_DataTypeConversion6 * nav.ned_vel_mps[0] + c_lat *
-        nav.ned_vel_mps[1];
+      //   Reshape: '<S186>/Reshape'
+      rtb_Tsamp_a = -rtb_DataTypeConversion_h * nav.ned_vel_mps[0] +
+        rtb_roll_angle_cmd_rad * nav.ned_vel_mps[1];
 
-      // Sum: '<S188>/Sum' incorporates:
+      // Sum: '<S187>/Sum' incorporates:
       //   Inport: '<Root>/Navigation Filter Data'
-      //   Product: '<S185>/Product'
-      //   Reshape: '<S187>/Reshape'
-      c_lat = rtb_Reshape_h_idx_1 - (c_lat * nav.ned_vel_mps[0] +
-        rtb_DataTypeConversion6 * nav.ned_vel_mps[1]);
+      //   Product: '<S184>/Product'
+      //   Reshape: '<S186>/Reshape'
+      rtb_roll_angle_cmd_rad = c_lon - (rtb_roll_angle_cmd_rad *
+        nav.ned_vel_mps[0] + rtb_DataTypeConversion_h * nav.ned_vel_mps[1]);
 
-      // SampleTimeMath: '<S221>/Tsamp' incorporates:
-      //   Constant: '<S188>/Constant2'
-      //   Product: '<S218>/DProd Out'
+      // SampleTimeMath: '<S220>/Tsamp' incorporates:
+      //   Constant: '<S187>/Constant2'
+      //   Product: '<S217>/DProd Out'
       //
-      //  About '<S221>/Tsamp':
+      //  About '<S220>/Tsamp':
       //   y = u * K where K = 1 / ( w * Ts )
-      rtb_DataTypeConversion6 = c_lat * 0.1F * 100.0F;
+      rtb_DataTypeConversion_h = rtb_roll_angle_cmd_rad * 0.1F * 100.0F;
 
-      // Sum: '<S235>/Sum' incorporates:
-      //   Constant: '<S188>/Constant'
-      //   Delay: '<S219>/UD'
-      //   DiscreteIntegrator: '<S226>/Integrator'
-      //   Product: '<S231>/PProd Out'
-      //   Sum: '<S219>/Diff'
-      rtb_Reshape_h_idx_1 = (c_lat * 0.5F + rtDW.Integrator_DSTATE_c) +
-        (rtb_DataTypeConversion6 - rtDW.UD_DSTATE_k);
+      // Sum: '<S234>/Sum' incorporates:
+      //   Constant: '<S187>/Constant'
+      //   Delay: '<S218>/UD'
+      //   DiscreteIntegrator: '<S225>/Integrator'
+      //   Product: '<S230>/PProd Out'
+      //   Sum: '<S218>/Diff'
+      c_lon = (rtb_roll_angle_cmd_rad * 0.5F + rtDW.Integrator_DSTATE_c) +
+        (rtb_DataTypeConversion_h - rtDW.UD_DSTATE_k);
 
-      // Saturate: '<S188>/Saturation'
-      if (rtb_Reshape_h_idx_1 > 0.523F) {
-        // Gain: '<S188>/Gain'
+      // Saturate: '<S187>/Saturation'
+      if (c_lon > 0.523F) {
+        // Gain: '<S187>/Gain'
         rtDW.Gain_a = -0.523F;
-      } else if (rtb_Reshape_h_idx_1 < -0.523F) {
-        // Gain: '<S188>/Gain'
+      } else if (c_lon < -0.523F) {
+        // Gain: '<S187>/Gain'
         rtDW.Gain_a = 0.523F;
       } else {
-        // Gain: '<S188>/Gain'
-        rtDW.Gain_a = -rtb_Reshape_h_idx_1;
+        // Gain: '<S187>/Gain'
+        rtDW.Gain_a = -c_lon;
+      }
+
+      // End of Saturate: '<S187>/Saturation'
+
+      // Gain: '<S214>/ZeroGain'
+      rtb_Reshape_h_idx_0 = 0.0F * c_lon;
+
+      // DeadZone: '<S216>/DeadZone'
+      if (c_lon >= (rtMinusInfF)) {
+        c_lon = 0.0F;
+      }
+
+      // End of DeadZone: '<S216>/DeadZone'
+
+      // Product: '<S222>/IProd Out' incorporates:
+      //   Constant: '<S187>/Constant1'
+      rtb_roll_angle_cmd_rad *= 0.01F;
+
+      // Signum: '<S214>/SignPreIntegrator'
+      if (rtb_roll_angle_cmd_rad < 0.0F) {
+        rtb_Switch_i = -1.0F;
+      } else if (rtb_roll_angle_cmd_rad > 0.0F) {
+        rtb_Switch_i = 1.0F;
+      } else if (rtb_roll_angle_cmd_rad == 0.0F) {
+        rtb_Switch_i = 0.0F;
+      } else {
+        rtb_Switch_i = (rtNaNF);
+      }
+
+      // End of Signum: '<S214>/SignPreIntegrator'
+
+      // Switch: '<S214>/Switch' incorporates:
+      //   Constant: '<S214>/Constant1'
+      //   DataTypeConversion: '<S214>/DataTypeConv2'
+      //   Logic: '<S214>/AND3'
+      //   RelationalOperator: '<S214>/Equal1'
+      //   RelationalOperator: '<S214>/NotEqual'
+      if ((rtb_Reshape_h_idx_0 != c_lon) && (0 == static_cast<int8_T>
+           (rtb_Switch_i))) {
+        rtb_Reshape_h_idx_0 = 0.0F;
+      } else {
+        rtb_Reshape_h_idx_0 = rtb_roll_angle_cmd_rad;
+      }
+
+      // End of Switch: '<S214>/Switch'
+
+      // Sum: '<S188>/Sum'
+      rtb_roll_angle_cmd_rad = s_lat - rtb_Tsamp_a;
+
+      // SampleTimeMath: '<S273>/Tsamp' incorporates:
+      //   Constant: '<S188>/Constant2'
+      //   Product: '<S270>/DProd Out'
+      //
+      //  About '<S273>/Tsamp':
+      //   y = u * K where K = 1 / ( w * Ts )
+      rtb_Tsamp_a = rtb_roll_angle_cmd_rad * 0.1F * 100.0F;
+
+      // Sum: '<S287>/Sum' incorporates:
+      //   Constant: '<S188>/Constant'
+      //   Delay: '<S271>/UD'
+      //   DiscreteIntegrator: '<S278>/Integrator'
+      //   Product: '<S283>/PProd Out'
+      //   Sum: '<S271>/Diff'
+      s_lat = (rtb_roll_angle_cmd_rad * 0.5F + rtDW.Integrator_DSTATE_n) +
+        (rtb_Tsamp_a - rtDW.UD_DSTATE_a);
+
+      // Product: '<S275>/IProd Out' incorporates:
+      //   Constant: '<S188>/Constant1'
+      rtb_roll_angle_cmd_rad *= 0.01F;
+
+      // DeadZone: '<S269>/DeadZone'
+      if (s_lat >= (rtMinusInfF)) {
+        c_lon = 0.0F;
+      } else {
+        c_lon = (rtNaNF);
+      }
+
+      // End of DeadZone: '<S269>/DeadZone'
+
+      // Signum: '<S267>/SignPreIntegrator'
+      if (rtb_roll_angle_cmd_rad < 0.0F) {
+        rtb_Switch_i = -1.0F;
+      } else if (rtb_roll_angle_cmd_rad > 0.0F) {
+        rtb_Switch_i = 1.0F;
+      } else if (rtb_roll_angle_cmd_rad == 0.0F) {
+        rtb_Switch_i = 0.0F;
+      } else {
+        rtb_Switch_i = (rtNaNF);
+      }
+
+      // End of Signum: '<S267>/SignPreIntegrator'
+
+      // Switch: '<S267>/Switch' incorporates:
+      //   Constant: '<S267>/Constant1'
+      //   DataTypeConversion: '<S267>/DataTypeConv2'
+      //   Gain: '<S267>/ZeroGain'
+      //   Logic: '<S267>/AND3'
+      //   RelationalOperator: '<S267>/Equal1'
+      //   RelationalOperator: '<S267>/NotEqual'
+      if ((0.0F * s_lat != c_lon) && (0 == static_cast<int8_T>(rtb_Switch_i))) {
+        rtb_Switch_i = 0.0F;
+      } else {
+        rtb_Switch_i = rtb_roll_angle_cmd_rad;
+      }
+
+      // End of Switch: '<S267>/Switch'
+
+      // Saturate: '<S188>/Saturation'
+      if (s_lat > 0.523F) {
+        // Saturate: '<S188>/Saturation'
+        rtDW.Saturation_n = 0.523F;
+      } else if (s_lat < -0.523F) {
+        // Saturate: '<S188>/Saturation'
+        rtDW.Saturation_n = -0.523F;
+      } else {
+        // Saturate: '<S188>/Saturation'
+        rtDW.Saturation_n = s_lat;
       }
 
       // End of Saturate: '<S188>/Saturation'
 
-      // Gain: '<S215>/ZeroGain'
-      absxk = 0.0F * rtb_Reshape_h_idx_1;
-
-      // DeadZone: '<S217>/DeadZone'
-      if (rtb_Reshape_h_idx_1 >= (rtMinusInfF)) {
-        rtb_Reshape_h_idx_1 = 0.0F;
-      }
-
-      // End of DeadZone: '<S217>/DeadZone'
-
-      // Product: '<S223>/IProd Out' incorporates:
-      //   Constant: '<S188>/Constant1'
-      c_lat *= 0.01F;
-
-      // Signum: '<S215>/SignPreIntegrator'
-      if (c_lat < 0.0F) {
-        y = -1.0F;
-      } else if (c_lat > 0.0F) {
-        y = 1.0F;
-      } else if (c_lat == 0.0F) {
-        y = 0.0F;
-      } else {
-        y = (rtNaNF);
-      }
-
-      // End of Signum: '<S215>/SignPreIntegrator'
-
-      // Switch: '<S215>/Switch' incorporates:
-      //   Constant: '<S215>/Constant1'
-      //   DataTypeConversion: '<S215>/DataTypeConv2'
-      //   Logic: '<S215>/AND3'
-      //   RelationalOperator: '<S215>/Equal1'
-      //   RelationalOperator: '<S215>/NotEqual'
-      if ((absxk != rtb_Reshape_h_idx_1) && (0 == static_cast<int8_T>(y))) {
-        rtb_Reshape_h_idx_1 = 0.0F;
-      } else {
-        rtb_Reshape_h_idx_1 = c_lat;
-      }
-
-      // End of Switch: '<S215>/Switch'
-
-      // Sum: '<S189>/Sum'
-      c_lat = rtb_Reshape_h_idx_0 - t;
-
-      // SampleTimeMath: '<S274>/Tsamp' incorporates:
-      //   Constant: '<S189>/Constant2'
-      //   Product: '<S271>/DProd Out'
-      //
-      //  About '<S274>/Tsamp':
-      //   y = u * K where K = 1 / ( w * Ts )
-      absxk = c_lat * 0.1F * 100.0F;
-
-      // Sum: '<S288>/Sum' incorporates:
-      //   Constant: '<S189>/Constant'
-      //   Delay: '<S272>/UD'
-      //   DiscreteIntegrator: '<S279>/Integrator'
-      //   Product: '<S284>/PProd Out'
-      //   Sum: '<S272>/Diff'
-      rtb_Reshape_h_idx_0 = (c_lat * 0.5F + rtDW.Integrator_DSTATE_n) + (absxk -
-        rtDW.UD_DSTATE_a);
-
-      // Product: '<S276>/IProd Out' incorporates:
-      //   Constant: '<S189>/Constant1'
-      c_lat *= 0.01F;
-
-      // DeadZone: '<S270>/DeadZone'
-      if (rtb_Reshape_h_idx_0 >= (rtMinusInfF)) {
-        t = 0.0F;
-      } else {
-        t = (rtNaNF);
-      }
-
-      // End of DeadZone: '<S270>/DeadZone'
-
-      // Signum: '<S268>/SignPreIntegrator'
-      if (c_lat < 0.0F) {
-        y = -1.0F;
-      } else if (c_lat > 0.0F) {
-        y = 1.0F;
-      } else if (c_lat == 0.0F) {
-        y = 0.0F;
-      } else {
-        y = (rtNaNF);
-      }
-
-      // End of Signum: '<S268>/SignPreIntegrator'
-
-      // Switch: '<S268>/Switch' incorporates:
-      //   Constant: '<S268>/Constant1'
-      //   DataTypeConversion: '<S268>/DataTypeConv2'
-      //   Gain: '<S268>/ZeroGain'
-      //   Logic: '<S268>/AND3'
-      //   RelationalOperator: '<S268>/Equal1'
-      //   RelationalOperator: '<S268>/NotEqual'
-      if ((0.0F * rtb_Reshape_h_idx_0 != t) && (0 == static_cast<int8_T>(y))) {
-        rtb_roll_angle_cmd_rad = 0.0F;
-      } else {
-        rtb_roll_angle_cmd_rad = c_lat;
-      }
-
-      // End of Switch: '<S268>/Switch'
-
-      // Saturate: '<S189>/Saturation'
-      if (rtb_Reshape_h_idx_0 > 0.523F) {
-        // Saturate: '<S189>/Saturation'
-        rtDW.Saturation_n = 0.523F;
-      } else if (rtb_Reshape_h_idx_0 < -0.523F) {
-        // Saturate: '<S189>/Saturation'
-        rtDW.Saturation_n = -0.523F;
-      } else {
-        // Saturate: '<S189>/Saturation'
-        rtDW.Saturation_n = rtb_Reshape_h_idx_0;
-      }
-
-      // End of Saturate: '<S189>/Saturation'
-
       // SignalConversion generated from: '<S5>/Command out'
-      rtDW.yaw_rate_cmd_radps_c5 = rtb_Product1_i;
+      rtDW.yaw_rate_cmd_radps_c5 = rtb_Cos_f;
 
-      // Sum: '<S186>/Sum' incorporates:
+      // Sum: '<S185>/Sum' incorporates:
       //   Inport: '<Root>/Navigation Filter Data'
-      c_lat = rtb_PProdOut_l - nav.ned_vel_mps[2];
+      rtb_roll_angle_cmd_rad = rtb_Gain_h - nav.ned_vel_mps[2];
 
-      // SampleTimeMath: '<S327>/Tsamp' incorporates:
-      //   Constant: '<S186>/D_vz'
-      //   Product: '<S324>/DProd Out'
+      // SampleTimeMath: '<S326>/Tsamp' incorporates:
+      //   Constant: '<S185>/D_vz'
+      //   Product: '<S323>/DProd Out'
       //
-      //  About '<S327>/Tsamp':
+      //  About '<S326>/Tsamp':
       //   y = u * K where K = 1 / ( w * Ts )
-      rtb_PProdOut_l = c_lat * 0.005F * 100.0F;
+      s_lat = rtb_roll_angle_cmd_rad * 0.005F * 100.0F;
 
-      // Sum: '<S341>/Sum' incorporates:
-      //   Constant: '<S186>/P_vz'
-      //   Delay: '<S325>/UD'
-      //   DiscreteIntegrator: '<S332>/Integrator'
-      //   Product: '<S337>/PProd Out'
-      //   Sum: '<S325>/Diff'
-      t = (c_lat * 0.09F + rtDW.Integrator_DSTATE_a) + (rtb_PProdOut_l -
-        rtDW.UD_DSTATE_h);
+      // Sum: '<S340>/Sum' incorporates:
+      //   Constant: '<S185>/P_vz'
+      //   Delay: '<S324>/UD'
+      //   DiscreteIntegrator: '<S331>/Integrator'
+      //   Product: '<S336>/PProd Out'
+      //   Sum: '<S324>/Diff'
+      c_lon = (rtb_roll_angle_cmd_rad * 0.09F + rtDW.Integrator_DSTATE_a) +
+        (s_lat - rtDW.UD_DSTATE_h);
 
-      // Saturate: '<S186>/Saturation' incorporates:
-      //   Constant: '<S186>/Constant2'
-      //   Gain: '<S186>/Gain'
-      //   Sum: '<S186>/Sum1'
-      if (-t + 0.6724F > 1.0F) {
-        // Saturate: '<S186>/Saturation'
+      // Saturate: '<S185>/Saturation' incorporates:
+      //   Constant: '<S185>/Constant2'
+      //   Gain: '<S185>/Gain'
+      //   Sum: '<S185>/Sum1'
+      if (-c_lon + 0.6724F > 1.0F) {
+        // Saturate: '<S185>/Saturation'
         rtDW.Saturation_k = 1.0F;
-      } else if (-t + 0.6724F < 0.0F) {
-        // Saturate: '<S186>/Saturation'
+      } else if (-c_lon + 0.6724F < 0.0F) {
+        // Saturate: '<S185>/Saturation'
         rtDW.Saturation_k = 0.0F;
       } else {
-        // Saturate: '<S186>/Saturation'
-        rtDW.Saturation_k = -t + 0.6724F;
+        // Saturate: '<S185>/Saturation'
+        rtDW.Saturation_k = -c_lon + 0.6724F;
       }
 
-      // End of Saturate: '<S186>/Saturation'
+      // End of Saturate: '<S185>/Saturation'
 
-      // Gain: '<S321>/ZeroGain'
-      rtb_Product1_i = 0.0F * t;
+      // Gain: '<S320>/ZeroGain'
+      rtb_Gain_h = 0.0F * c_lon;
 
-      // DeadZone: '<S323>/DeadZone'
-      if (t >= (rtMinusInfF)) {
-        t = 0.0F;
+      // DeadZone: '<S322>/DeadZone'
+      if (c_lon >= (rtMinusInfF)) {
+        c_lon = 0.0F;
       }
 
-      // End of DeadZone: '<S323>/DeadZone'
+      // End of DeadZone: '<S322>/DeadZone'
 
-      // Product: '<S329>/IProd Out' incorporates:
-      //   Constant: '<S186>/I_vz'
-      c_lat *= 0.05F;
+      // Product: '<S328>/IProd Out' incorporates:
+      //   Constant: '<S185>/I_vz'
+      rtb_roll_angle_cmd_rad *= 0.05F;
 
-      // Update for DiscreteIntegrator: '<S226>/Integrator'
-      rtDW.Integrator_DSTATE_c += 0.01F * rtb_Reshape_h_idx_1;
+      // Update for DiscreteIntegrator: '<S225>/Integrator'
+      rtDW.Integrator_DSTATE_c += 0.01F * rtb_Reshape_h_idx_0;
 
-      // Update for Delay: '<S219>/UD'
-      rtDW.UD_DSTATE_k = rtb_DataTypeConversion6;
+      // Update for Delay: '<S218>/UD'
+      rtDW.UD_DSTATE_k = rtb_DataTypeConversion_h;
 
-      // Update for DiscreteIntegrator: '<S279>/Integrator'
-      rtDW.Integrator_DSTATE_n += 0.01F * rtb_roll_angle_cmd_rad;
+      // Update for DiscreteIntegrator: '<S278>/Integrator'
+      rtDW.Integrator_DSTATE_n += 0.01F * rtb_Switch_i;
 
-      // Update for Delay: '<S272>/UD'
-      rtDW.UD_DSTATE_a = absxk;
+      // Update for Delay: '<S271>/UD'
+      rtDW.UD_DSTATE_a = rtb_Tsamp_a;
 
-      // Signum: '<S321>/SignPreIntegrator'
-      if (c_lat < 0.0F) {
-        y = -1.0F;
-      } else if (c_lat > 0.0F) {
-        y = 1.0F;
-      } else if (c_lat == 0.0F) {
-        y = 0.0F;
+      // Signum: '<S320>/SignPreIntegrator'
+      if (rtb_roll_angle_cmd_rad < 0.0F) {
+        rtb_Switch_i = -1.0F;
+      } else if (rtb_roll_angle_cmd_rad > 0.0F) {
+        rtb_Switch_i = 1.0F;
+      } else if (rtb_roll_angle_cmd_rad == 0.0F) {
+        rtb_Switch_i = 0.0F;
       } else {
-        y = (rtNaNF);
+        rtb_Switch_i = (rtNaNF);
       }
 
-      // End of Signum: '<S321>/SignPreIntegrator'
+      // End of Signum: '<S320>/SignPreIntegrator'
 
-      // Switch: '<S321>/Switch' incorporates:
-      //   Constant: '<S321>/Constant1'
-      //   DataTypeConversion: '<S321>/DataTypeConv2'
-      //   Logic: '<S321>/AND3'
-      //   RelationalOperator: '<S321>/Equal1'
-      //   RelationalOperator: '<S321>/NotEqual'
-      if ((rtb_Product1_i != t) && (0 == static_cast<int8_T>(y))) {
-        c_lat = 0.0F;
+      // Switch: '<S320>/Switch' incorporates:
+      //   Constant: '<S320>/Constant1'
+      //   DataTypeConversion: '<S320>/DataTypeConv2'
+      //   Logic: '<S320>/AND3'
+      //   RelationalOperator: '<S320>/Equal1'
+      //   RelationalOperator: '<S320>/NotEqual'
+      if ((rtb_Gain_h != c_lon) && (0 == static_cast<int8_T>(rtb_Switch_i))) {
+        rtb_roll_angle_cmd_rad = 0.0F;
       }
 
-      // End of Switch: '<S321>/Switch'
+      // End of Switch: '<S320>/Switch'
 
-      // Update for DiscreteIntegrator: '<S332>/Integrator'
-      rtDW.Integrator_DSTATE_a += 0.01F * c_lat;
+      // Update for DiscreteIntegrator: '<S331>/Integrator'
+      rtDW.Integrator_DSTATE_a += 0.01F * rtb_roll_angle_cmd_rad;
 
-      // Update for Delay: '<S325>/UD'
-      rtDW.UD_DSTATE_h = rtb_PProdOut_l;
+      // Update for Delay: '<S324>/UD'
+      rtDW.UD_DSTATE_h = s_lat;
     }
 
     // End of Logic: '<Root>/motor_armed AND mode_1'
@@ -1899,7 +1896,7 @@ namespace bfs
     // Logic: '<Root>/motor_armed AND mode_0' incorporates:
     //   Constant: '<S16>/Constant'
     //   RelationalOperator: '<S16>/Compare'
-    rtb_Compare_lx = (rtb_Switch_lt && (rtb_DataTypeConversion6_k <= 0));
+    rtb_Compare_lx = (rtb_Switch_lt && (rtb_DataTypeConversion6 <= 0));
 
     // Outputs for Enabled SubSystem: '<Root>/Stab_input_conversion' incorporates:
     //   EnablePort: '<S9>/Enable'
@@ -1908,13 +1905,13 @@ namespace bfs
       rtDW.throttle_cc = rtb_Subtract_f_idx_1;
 
       // Gain: '<S9>/Gain1'
-      rtDW.pitch_angle_cmd_rad = -0.523F * s_lat;
+      rtDW.pitch_angle_cmd_rad = -0.523F * s_lon;
 
       // Gain: '<S9>/Gain2'
-      rtDW.roll_angle_cmd_rad = 0.52F * c_lon;
+      rtDW.roll_angle_cmd_rad = 0.52F * rtb_roll;
 
       // Gain: '<S9>/Gain3'
-      rtDW.yaw_rate_cmd_radps = 0.524F * s_lon;
+      rtDW.yaw_rate_cmd_radps = 0.524F * rtb_yaw;
     }
 
     // End of Outputs for SubSystem: '<Root>/Stab_input_conversion'
@@ -1924,43 +1921,44 @@ namespace bfs
 
     // Switch generated from: '<Root>/Switch'
     if (rtb_Compare_lx) {
-      rtb_throttle_cc = rtDW.Saturation_k;
+      rtb_Tsamp_a = rtDW.Saturation_k;
       rtb_roll_angle_cmd_rad = rtDW.Saturation_n;
     } else {
-      rtb_throttle_cc = rtDW.throttle_cc;
+      rtb_Tsamp_a = rtDW.throttle_cc;
       rtb_roll_angle_cmd_rad = rtDW.roll_angle_cmd_rad;
     }
 
-    // Sum: '<S22>/stab_roll_angle_error_calc' incorporates:
+    // Sum: '<S21>/stab_roll_angle_error_calc' incorporates:
     //   Inport: '<Root>/Navigation Filter Data'
-    s_lat = rtb_roll_angle_cmd_rad - nav.roll_rad;
+    s_lon = rtb_roll_angle_cmd_rad - nav.roll_rad;
 
-    // SampleTimeMath: '<S108>/Tsamp' incorporates:
-    //   Constant: '<S22>/Constant2'
-    //   Product: '<S105>/DProd Out'
+    // SampleTimeMath: '<S107>/Tsamp' incorporates:
+    //   Constant: '<S21>/Constant2'
+    //   Product: '<S104>/DProd Out'
     //
-    //  About '<S108>/Tsamp':
+    //  About '<S107>/Tsamp':
     //   y = u * K where K = 1 / ( w * Ts )
-    c_lon = s_lat * 0.02F * 100.0F;
+    rtb_roll = s_lon * 0.02F * 100.0F;
 
-    // Sum: '<S122>/Sum' incorporates:
-    //   Constant: '<S22>/Constant'
-    //   Delay: '<S106>/UD'
-    //   DiscreteIntegrator: '<S113>/Integrator'
-    //   Product: '<S118>/PProd Out'
-    //   Sum: '<S106>/Diff'
-    s_lon = (s_lat * 0.04F + rtDW.Integrator_DSTATE) + (c_lon - rtDW.UD_DSTATE);
+    // Sum: '<S121>/Sum' incorporates:
+    //   Constant: '<S21>/Constant'
+    //   Delay: '<S105>/UD'
+    //   DiscreteIntegrator: '<S112>/Integrator'
+    //   Product: '<S117>/PProd Out'
+    //   Sum: '<S105>/Diff'
+    rtb_yaw = (s_lon * 0.04F + rtDW.Integrator_DSTATE) + (rtb_roll -
+      rtDW.UD_DSTATE);
 
-    // Saturate: '<S22>/stab_roll_rate_saturation'
-    if (s_lon > 1.0F) {
-      rtb_stab_roll_rate_saturation = 1.0F;
-    } else if (s_lon < -1.0F) {
-      rtb_stab_roll_rate_saturation = -1.0F;
+    // Saturate: '<S21>/stab_roll_rate_saturation'
+    if (rtb_yaw > 1.0F) {
+      rtb_Switch_i = 1.0F;
+    } else if (rtb_yaw < -1.0F) {
+      rtb_Switch_i = -1.0F;
     } else {
-      rtb_stab_roll_rate_saturation = s_lon;
+      rtb_Switch_i = rtb_yaw;
     }
 
-    // End of Saturate: '<S22>/stab_roll_rate_saturation'
+    // End of Saturate: '<S21>/stab_roll_rate_saturation'
 
     // Switch generated from: '<Root>/Switch'
     if (rtb_Compare_lx) {
@@ -1969,118 +1967,65 @@ namespace bfs
       rtb_pitch_angle_cmd_rad = rtDW.pitch_angle_cmd_rad;
     }
 
-    // Sum: '<S21>/stab_pitch_angle_error_calc' incorporates:
+    // Sum: '<S20>/stab_pitch_angle_error_calc' incorporates:
     //   Inport: '<Root>/Navigation Filter Data'
     rtb_Subtract_f_idx_1 = rtb_pitch_angle_cmd_rad - nav.pitch_rad;
 
-    // SampleTimeMath: '<S55>/Tsamp' incorporates:
-    //   Constant: '<S21>/Constant2'
-    //   Product: '<S52>/DProd Out'
+    // SampleTimeMath: '<S54>/Tsamp' incorporates:
+    //   Constant: '<S20>/Constant2'
+    //   Product: '<S51>/DProd Out'
     //
-    //  About '<S55>/Tsamp':
+    //  About '<S54>/Tsamp':
     //   y = u * K where K = 1 / ( w * Ts )
-    rtb_PProdOut_l = rtb_Subtract_f_idx_1 * 0.02F * 100.0F;
+    rtb_Gain_h = rtb_Subtract_f_idx_1 * 0.02F * 100.0F;
 
-    // Sum: '<S69>/Sum' incorporates:
-    //   Constant: '<S21>/Constant'
-    //   Delay: '<S53>/UD'
-    //   DiscreteIntegrator: '<S60>/Integrator'
-    //   Product: '<S65>/PProd Out'
-    //   Sum: '<S53>/Diff'
-    rtb_Product1_i = (rtb_Subtract_f_idx_1 * 0.04F + rtDW.Integrator_DSTATE_l) +
-      (rtb_PProdOut_l - rtDW.UD_DSTATE_f);
+    // Sum: '<S68>/Sum' incorporates:
+    //   Constant: '<S20>/Constant'
+    //   Delay: '<S52>/UD'
+    //   DiscreteIntegrator: '<S59>/Integrator'
+    //   Product: '<S64>/PProd Out'
+    //   Sum: '<S52>/Diff'
+    rtb_Cos_f = (rtb_Subtract_f_idx_1 * 0.04F + rtDW.Integrator_DSTATE_l) +
+      (rtb_Gain_h - rtDW.UD_DSTATE_f);
 
-    // Saturate: '<S21>/stab_pitch_rate_saturation'
-    if (rtb_Product1_i > 1.0F) {
+    // Saturate: '<S20>/stab_pitch_rate_saturation'
+    if (rtb_Cos_f > 1.0F) {
       rtb_stab_pitch_rate_saturation = 1.0F;
-    } else if (rtb_Product1_i < -1.0F) {
+    } else if (rtb_Cos_f < -1.0F) {
       rtb_stab_pitch_rate_saturation = -1.0F;
     } else {
-      rtb_stab_pitch_rate_saturation = rtb_Product1_i;
+      rtb_stab_pitch_rate_saturation = rtb_Cos_f;
     }
 
-    // End of Saturate: '<S21>/stab_pitch_rate_saturation'
+    // End of Saturate: '<S20>/stab_pitch_rate_saturation'
 
     // Switch generated from: '<Root>/Switch'
     if (rtb_Compare_lx) {
-      rtb_yaw_rate_cmd_radps_g = rtDW.yaw_rate_cmd_radps_c5;
+      c_lon = rtDW.yaw_rate_cmd_radps_c5;
     } else {
-      rtb_yaw_rate_cmd_radps_g = rtDW.yaw_rate_cmd_radps;
+      c_lon = rtDW.yaw_rate_cmd_radps;
     }
 
-    // Sum: '<S23>/stab_yaw_rate_error_calc' incorporates:
+    // Sum: '<S22>/stab_yaw_rate_error_calc' incorporates:
     //   Inport: '<Root>/Navigation Filter Data'
-    rtb_DataTypeConversion6 = rtb_yaw_rate_cmd_radps_g - nav.gyro_radps[2];
+    s_lat = c_lon - nav.gyro_radps[2];
 
-    // SampleTimeMath: '<S161>/Tsamp' incorporates:
-    //   Constant: '<S23>/Constant2'
-    //   Product: '<S158>/DProd Out'
+    // SampleTimeMath: '<S160>/Tsamp' incorporates:
+    //   Constant: '<S22>/Constant2'
+    //   Product: '<S157>/DProd Out'
     //
-    //  About '<S161>/Tsamp':
+    //  About '<S160>/Tsamp':
     //   y = u * K where K = 1 / ( w * Ts )
-    rtb_Reshape_h_idx_1 = rtb_DataTypeConversion6 * 0.02F * 100.0F;
+    rtb_DataTypeConversion_h = s_lat * 0.02F * 100.0F;
 
-    // Sum: '<S175>/Sum' incorporates:
-    //   Constant: '<S23>/Constant'
-    //   Delay: '<S159>/UD'
-    //   DiscreteIntegrator: '<S166>/Integrator'
-    //   Product: '<S171>/PProd Out'
-    //   Sum: '<S159>/Diff'
-    rtb_Reshape_h_idx_0 = (rtb_DataTypeConversion6 * 0.5F +
-      rtDW.Integrator_DSTATE_b) + (rtb_Reshape_h_idx_1 - rtDW.UD_DSTATE_m);
-
-    // MATLAB Function: '<Root>/determine_wp_submode' incorporates:
-    //   Constant: '<Root>/Constant1'
-    //   Constant: '<Root>/Constant2'
-    //   Inport: '<Root>/Navigation Filter Data'
-    //   Inport: '<Root>/Telemetry Data'
-    //   Selector: '<Root>/Selector'
-    rtb_sub_mode = rtb_DataTypeConversion6_k;
-    switch (telem.flight_plan[0].cmd) {
-     case 20:
-      rtb_sub_mode = 3;
-      break;
-
-     case 16:
-      c_lat = 1.29246971E-26F;
-      absxk = std::abs(1.5F - nav.ned_pos_m[0]);
-      if (absxk > 1.29246971E-26F) {
-        y = 1.0F;
-        c_lat = absxk;
-      } else {
-        t = absxk / 1.29246971E-26F;
-        y = t * t;
-      }
-
-      absxk = std::abs(1.5F - nav.ned_pos_m[1]);
-      if (absxk > c_lat) {
-        t = c_lat / absxk;
-        y = y * t * t + 1.0F;
-        c_lat = absxk;
-      } else {
-        t = absxk / c_lat;
-        y += t * t;
-      }
-
-      absxk = std::abs(1.5F - nav.ned_pos_m[2]);
-      if (absxk > c_lat) {
-        t = c_lat / absxk;
-        y = y * t * t + 1.0F;
-        c_lat = absxk;
-      } else {
-        t = absxk / c_lat;
-        y += t * t;
-      }
-
-      y = c_lat * std::sqrt(y);
-      if ((rtb_DataTypeConversion6_k != 3) && (y <= 1.5F) &&
-          (!telem.flight_plan[0].autocontinue)) {
-        rtb_sub_mode = 1;
-      }
-      break;
-    }
-
-    // End of MATLAB Function: '<Root>/determine_wp_submode'
+    // Sum: '<S174>/Sum' incorporates:
+    //   Constant: '<S22>/Constant'
+    //   Delay: '<S158>/UD'
+    //   DiscreteIntegrator: '<S165>/Integrator'
+    //   Product: '<S170>/PProd Out'
+    //   Sum: '<S158>/Diff'
+    rtb_Reshape_h_idx_0 = (s_lat * 0.5F + rtDW.Integrator_DSTATE_b) +
+      (rtb_DataTypeConversion_h - rtDW.UD_DSTATE_m);
 
     // Switch: '<Root>/switch_motor_out'
     if (rtb_Switch_lt) {
@@ -2089,20 +2034,19 @@ namespace bfs
       //   Reshape: '<S4>/Reshape'
       for (idx = 0; idx < 8; idx++) {
         rtb_Reshape_h_tmp = idx << 2;
-        c_lat = rtConstB.Transpose[rtb_Reshape_h_tmp + 3] * rtb_Reshape_h_idx_0
-          + (rtConstB.Transpose[rtb_Reshape_h_tmp + 2] *
-             rtb_stab_pitch_rate_saturation +
-             (rtConstB.Transpose[rtb_Reshape_h_tmp + 1] *
-              rtb_stab_roll_rate_saturation +
-              rtConstB.Transpose[rtb_Reshape_h_tmp] * rtb_throttle_cc));
+        rtb_Reshape_h_0 = rtConstB.Transpose[rtb_Reshape_h_tmp + 3] *
+          rtb_Reshape_h_idx_0 + (rtConstB.Transpose[rtb_Reshape_h_tmp + 2] *
+          rtb_stab_pitch_rate_saturation + (rtConstB.Transpose[rtb_Reshape_h_tmp
+          + 1] * rtb_Switch_i + rtConstB.Transpose[rtb_Reshape_h_tmp] *
+          rtb_Tsamp_a));
 
         // Saturate: '<S4>/Saturation' incorporates:
         //   Math: '<S4>/Transpose'
         //   Reshape: '<S4>/Reshape'
-        if (c_lat <= 0.15F) {
+        if (rtb_Reshape_h_0 <= 0.15F) {
           rtb_switch_motor_out[idx] = 0.15F;
         } else {
-          rtb_switch_motor_out[idx] = c_lat;
+          rtb_switch_motor_out[idx] = rtb_Reshape_h_0;
         }
 
         // End of Saturate: '<S4>/Saturation'
@@ -2120,56 +2064,54 @@ namespace bfs
     // Outport: '<Root>/VMS Data' incorporates:
     //   BusCreator: '<S10>/Bus Creator'
     //   BusCreator: '<S2>/Bus Creator3'
-    //   BusCreator: '<S463>/Bus Creator'
+    //   BusCreator: '<S462>/Bus Creator'
     //   Constant: '<S2>/consumed_mah'
     //   Constant: '<S2>/current_ma'
     //   Constant: '<S2>/remaining_prcnt'
     //   Constant: '<S2>/remaining_time_s'
     //   Constant: '<S2>/voltage_v'
+    //   Constant: '<S462>/Constant'
+    //   Constant: '<S462>/Constant1'
     //   Constant: '<S463>/Constant'
-    //   Constant: '<S463>/Constant1'
-    //   Constant: '<S464>/Constant'
     //   DataTypeConversion: '<Root>/Cast To Single'
     //   DataTypeConversion: '<Root>/Data Type Conversion'
     //   DataTypeConversion: '<Root>/Data Type Conversion1'
-    //   DataTypeConversion: '<Root>/Data Type Conversion5'
-    //   DataTypeConversion: '<Root>/Data Type Conversion6'
-    //   DataTypeConversion: '<S464>/Data Type Conversion'
+    //   DataTypeConversion: '<S463>/Data Type Conversion'
     //   Gain: '<Root>/Gain'
-    //   Gain: '<S464>/Gain'
+    //   Gain: '<S463>/Gain'
     //   Inport: '<Root>/Navigation Filter Data'
     //   SignalConversion generated from: '<S10>/Bus Creator'
-    //   SignalConversion generated from: '<S463>/Bus Creator'
-    //   Sum: '<S464>/Sum'
+    //   SignalConversion generated from: '<S462>/Bus Creator'
+    //   Sum: '<S463>/Sum'
     //
     ctrl->motors_enabled = rtb_Switch_lt;
     ctrl->waypoint_reached = rtDW.reached;
-    ctrl->mode = rtb_DataTypeConversion6_k;
-    ctrl->throttle_cmd_prcnt = 100.0F * rtb_throttle_cc;
-    ctrl->aux[0] = rtb_throttle_cc;
-    ctrl->aux[1] = rtb_stab_roll_rate_saturation;
+    ctrl->mode = rtb_DataTypeConversion6;
+    ctrl->throttle_cmd_prcnt = 100.0F * rtb_Tsamp_a;
+    ctrl->aux[0] = rtb_Tsamp_a;
+    ctrl->aux[1] = rtb_Switch_i;
     ctrl->aux[2] = rtb_roll_angle_cmd_rad;
     ctrl->aux[3] = nav.roll_rad;
     ctrl->aux[4] = rtb_stab_pitch_rate_saturation;
     ctrl->aux[5] = rtb_pitch_angle_cmd_rad;
     ctrl->aux[6] = nav.pitch_rad;
     ctrl->aux[7] = rtb_Reshape_h_idx_0;
-    ctrl->aux[8] = rtb_yaw_rate_cmd_radps_g;
+    ctrl->aux[8] = c_lon;
     ctrl->aux[9] = nav.gyro_radps[2];
     ctrl->aux[10] = rtb_AND_n;
     ctrl->aux[11] = rtb_AND;
-    ctrl->aux[12] = 0.0F;
-    ctrl->aux[13] = 0.0F;
-    ctrl->aux[14] = 0.0F;
+    ctrl->aux[12] = rtDW.cur_target_pos_m[0];
+    ctrl->aux[13] = rtDW.cur_target_pos_m[1];
+    ctrl->aux[14] = rtDW.cur_target_pos_m[2];
     ctrl->aux[15] = 0.0F;
     ctrl->aux[16] = 0.0F;
-    ctrl->aux[17] = rtb_sub_mode;
+    ctrl->aux[17] = 0.0F;
     ctrl->aux[18] = 0.0F;
     ctrl->aux[19] = 0.0F;
-    ctrl->aux[20] = rtDW.current_waypoint;
-    ctrl->aux[21] = rtDW.cur_target_pos_m[0];
-    ctrl->aux[22] = rtDW.cur_target_pos_m[1];
-    ctrl->aux[23] = rtDW.cur_target_pos_m[2];
+    ctrl->aux[20] = 0.0F;
+    ctrl->aux[21] = 0.0F;
+    ctrl->aux[22] = 0.0F;
+    ctrl->aux[23] = 0.0F;
     ctrl->sbus.ch17 = false;
     ctrl->sbus.ch18 = false;
     std::memset(&ctrl->sbus.cmd[0], 0, sizeof(real32_T) << 4U);
@@ -2178,10 +2120,10 @@ namespace bfs
     }
 
     for (idx = 0; idx < 8; idx++) {
-      c_lat = rtb_switch_motor_out[idx];
-      ctrl->pwm.cnt[idx] = static_cast<int16_T>(std::floor(1000.0F * c_lat +
-        1000.0));
-      ctrl->pwm.cmd[idx] = c_lat;
+      rtb_roll_angle_cmd_rad = rtb_switch_motor_out[idx];
+      ctrl->pwm.cnt[idx] = static_cast<int16_T>(std::floor(1000.0F *
+        rtb_roll_angle_cmd_rad + 1000.0));
+      ctrl->pwm.cmd[idx] = rtb_roll_angle_cmd_rad;
       ctrl->analog.val[idx] = 0.0F;
     }
 
@@ -2193,141 +2135,143 @@ namespace bfs
 
     // End of Outport: '<Root>/VMS Data'
 
-    // Product: '<S163>/IProd Out' incorporates:
-    //   Constant: '<S23>/Constant1'
-    rtb_DataTypeConversion6 *= 0.05F;
+    // Product: '<S162>/IProd Out' incorporates:
+    //   Constant: '<S22>/Constant1'
+    s_lat *= 0.05F;
 
-    // Gain: '<S49>/ZeroGain'
-    absxk = 0.0F * rtb_Product1_i;
+    // Gain: '<S48>/ZeroGain'
+    c_lon = 0.0F * rtb_Cos_f;
 
-    // DeadZone: '<S51>/DeadZone'
-    if (rtb_Product1_i >= (rtMinusInfF)) {
-      rtb_Product1_i = 0.0F;
+    // DeadZone: '<S50>/DeadZone'
+    if (rtb_Cos_f >= (rtMinusInfF)) {
+      rtb_Cos_f = 0.0F;
     }
 
-    // End of DeadZone: '<S51>/DeadZone'
+    // End of DeadZone: '<S50>/DeadZone'
 
-    // Product: '<S57>/IProd Out' incorporates:
-    //   Constant: '<S21>/Constant1'
+    // Product: '<S56>/IProd Out' incorporates:
+    //   Constant: '<S20>/Constant1'
     rtb_Subtract_f_idx_1 *= 0.04F;
 
-    // Gain: '<S102>/ZeroGain'
-    t = 0.0F * s_lon;
+    // Gain: '<S101>/ZeroGain'
+    rtb_Tsamp_a = 0.0F * rtb_yaw;
 
-    // DeadZone: '<S104>/DeadZone'
-    if (s_lon >= (rtMinusInfF)) {
+    // DeadZone: '<S103>/DeadZone'
+    if (rtb_yaw >= (rtMinusInfF)) {
+      rtb_yaw = 0.0F;
+    }
+
+    // End of DeadZone: '<S103>/DeadZone'
+
+    // Product: '<S109>/IProd Out' incorporates:
+    //   Constant: '<S21>/Constant1'
+    s_lon *= 0.04F;
+
+    // Signum: '<S101>/SignPreIntegrator'
+    if (s_lon < 0.0F) {
+      rtb_roll_angle_cmd_rad = -1.0F;
+    } else if (s_lon > 0.0F) {
+      rtb_roll_angle_cmd_rad = 1.0F;
+    } else if (s_lon == 0.0F) {
+      rtb_roll_angle_cmd_rad = 0.0F;
+    } else {
+      rtb_roll_angle_cmd_rad = (rtNaNF);
+    }
+
+    // End of Signum: '<S101>/SignPreIntegrator'
+
+    // Switch: '<S101>/Switch' incorporates:
+    //   Constant: '<S101>/Constant1'
+    //   DataTypeConversion: '<S101>/DataTypeConv2'
+    //   Logic: '<S101>/AND3'
+    //   RelationalOperator: '<S101>/Equal1'
+    //   RelationalOperator: '<S101>/NotEqual'
+    if ((rtb_Tsamp_a != rtb_yaw) && (0 == static_cast<int8_T>
+         (rtb_roll_angle_cmd_rad))) {
       s_lon = 0.0F;
     }
 
-    // End of DeadZone: '<S104>/DeadZone'
+    // End of Switch: '<S101>/Switch'
 
-    // Product: '<S110>/IProd Out' incorporates:
-    //   Constant: '<S22>/Constant1'
-    s_lat *= 0.04F;
+    // Update for DiscreteIntegrator: '<S112>/Integrator'
+    rtDW.Integrator_DSTATE += 0.01F * s_lon;
 
-    // Signum: '<S102>/SignPreIntegrator'
-    if (s_lat < 0.0F) {
-      c_lat = -1.0F;
-    } else if (s_lat > 0.0F) {
-      c_lat = 1.0F;
-    } else if (s_lat == 0.0F) {
-      c_lat = 0.0F;
-    } else {
-      c_lat = (rtNaNF);
-    }
+    // Update for Delay: '<S105>/UD'
+    rtDW.UD_DSTATE = rtb_roll;
 
-    // End of Signum: '<S102>/SignPreIntegrator'
-
-    // Switch: '<S102>/Switch' incorporates:
-    //   Constant: '<S102>/Constant1'
-    //   DataTypeConversion: '<S102>/DataTypeConv2'
-    //   Logic: '<S102>/AND3'
-    //   RelationalOperator: '<S102>/Equal1'
-    //   RelationalOperator: '<S102>/NotEqual'
-    if ((t != s_lon) && (0 == static_cast<int8_T>(c_lat))) {
-      s_lat = 0.0F;
-    }
-
-    // End of Switch: '<S102>/Switch'
-
-    // Update for DiscreteIntegrator: '<S113>/Integrator'
-    rtDW.Integrator_DSTATE += 0.01F * s_lat;
-
-    // Update for Delay: '<S106>/UD'
-    rtDW.UD_DSTATE = c_lon;
-
-    // Signum: '<S49>/SignPreIntegrator'
+    // Signum: '<S48>/SignPreIntegrator'
     if (rtb_Subtract_f_idx_1 < 0.0F) {
-      c_lat = -1.0F;
+      rtb_roll_angle_cmd_rad = -1.0F;
     } else if (rtb_Subtract_f_idx_1 > 0.0F) {
-      c_lat = 1.0F;
+      rtb_roll_angle_cmd_rad = 1.0F;
     } else if (rtb_Subtract_f_idx_1 == 0.0F) {
-      c_lat = 0.0F;
+      rtb_roll_angle_cmd_rad = 0.0F;
     } else {
-      c_lat = (rtNaNF);
+      rtb_roll_angle_cmd_rad = (rtNaNF);
     }
 
-    // End of Signum: '<S49>/SignPreIntegrator'
+    // End of Signum: '<S48>/SignPreIntegrator'
 
-    // Switch: '<S49>/Switch' incorporates:
-    //   Constant: '<S49>/Constant1'
-    //   DataTypeConversion: '<S49>/DataTypeConv2'
-    //   Logic: '<S49>/AND3'
-    //   RelationalOperator: '<S49>/Equal1'
-    //   RelationalOperator: '<S49>/NotEqual'
-    if ((absxk != rtb_Product1_i) && (0 == static_cast<int8_T>(c_lat))) {
+    // Switch: '<S48>/Switch' incorporates:
+    //   Constant: '<S48>/Constant1'
+    //   DataTypeConversion: '<S48>/DataTypeConv2'
+    //   Logic: '<S48>/AND3'
+    //   RelationalOperator: '<S48>/Equal1'
+    //   RelationalOperator: '<S48>/NotEqual'
+    if ((c_lon != rtb_Cos_f) && (0 == static_cast<int8_T>(rtb_roll_angle_cmd_rad)))
+    {
       rtb_Subtract_f_idx_1 = 0.0F;
     }
 
-    // End of Switch: '<S49>/Switch'
+    // End of Switch: '<S48>/Switch'
 
-    // Update for DiscreteIntegrator: '<S60>/Integrator'
+    // Update for DiscreteIntegrator: '<S59>/Integrator'
     rtDW.Integrator_DSTATE_l += 0.01F * rtb_Subtract_f_idx_1;
 
-    // Update for Delay: '<S53>/UD'
-    rtDW.UD_DSTATE_f = rtb_PProdOut_l;
+    // Update for Delay: '<S52>/UD'
+    rtDW.UD_DSTATE_f = rtb_Gain_h;
 
-    // DeadZone: '<S157>/DeadZone'
+    // DeadZone: '<S156>/DeadZone'
     if (rtb_Reshape_h_idx_0 >= (rtMinusInfF)) {
-      t = 0.0F;
+      rtb_roll_angle_cmd_rad = 0.0F;
     } else {
-      t = (rtNaNF);
+      rtb_roll_angle_cmd_rad = (rtNaNF);
     }
 
-    // End of DeadZone: '<S157>/DeadZone'
+    // End of DeadZone: '<S156>/DeadZone'
 
-    // Signum: '<S155>/SignPreIntegrator'
-    if (rtb_DataTypeConversion6 < 0.0F) {
-      c_lat = -1.0F;
-    } else if (rtb_DataTypeConversion6 > 0.0F) {
-      c_lat = 1.0F;
-    } else if (rtb_DataTypeConversion6 == 0.0F) {
-      c_lat = 0.0F;
+    // Signum: '<S154>/SignPreIntegrator'
+    if (s_lat < 0.0F) {
+      c_lon = -1.0F;
+    } else if (s_lat > 0.0F) {
+      c_lon = 1.0F;
+    } else if (s_lat == 0.0F) {
+      c_lon = 0.0F;
     } else {
-      c_lat = (rtNaNF);
+      c_lon = (rtNaNF);
     }
 
-    // End of Signum: '<S155>/SignPreIntegrator'
+    // End of Signum: '<S154>/SignPreIntegrator'
 
-    // Switch: '<S155>/Switch' incorporates:
-    //   Constant: '<S155>/Constant1'
-    //   DataTypeConversion: '<S155>/DataTypeConv2'
-    //   Gain: '<S155>/ZeroGain'
-    //   Logic: '<S155>/AND3'
-    //   RelationalOperator: '<S155>/Equal1'
-    //   RelationalOperator: '<S155>/NotEqual'
-    if ((0.0F * rtb_Reshape_h_idx_0 != t) && (0 == static_cast<int8_T>(c_lat)))
-    {
-      rtb_DataTypeConversion6 = 0.0F;
+    // Switch: '<S154>/Switch' incorporates:
+    //   Constant: '<S154>/Constant1'
+    //   DataTypeConversion: '<S154>/DataTypeConv2'
+    //   Gain: '<S154>/ZeroGain'
+    //   Logic: '<S154>/AND3'
+    //   RelationalOperator: '<S154>/Equal1'
+    //   RelationalOperator: '<S154>/NotEqual'
+    if ((0.0F * rtb_Reshape_h_idx_0 != rtb_roll_angle_cmd_rad) && (0 ==
+         static_cast<int8_T>(c_lon))) {
+      s_lat = 0.0F;
     }
 
-    // End of Switch: '<S155>/Switch'
+    // End of Switch: '<S154>/Switch'
 
-    // Update for DiscreteIntegrator: '<S166>/Integrator'
-    rtDW.Integrator_DSTATE_b += 0.01F * rtb_DataTypeConversion6;
+    // Update for DiscreteIntegrator: '<S165>/Integrator'
+    rtDW.Integrator_DSTATE_b += 0.01F * s_lat;
 
-    // Update for Delay: '<S159>/UD'
-    rtDW.UD_DSTATE_m = rtb_Reshape_h_idx_1;
+    // Update for Delay: '<S158>/UD'
+    rtDW.UD_DSTATE_m = rtb_DataTypeConversion_h;
   }
 
   // Model initialize function
@@ -2339,9 +2283,9 @@ namespace bfs
     rt_InitInfAndNaN(sizeof(real_T));
 
     // SystemInitialize for Enabled SubSystem: '<Root>/WAYPOINT CONTROLLER'
-    // InitializeConditions for UnitDelay: '<S632>/Delay Input1'
+    // InitializeConditions for UnitDelay: '<S631>/Delay Input1'
     //
-    //  Block description for '<S632>/Delay Input1':
+    //  Block description for '<S631>/Delay Input1':
     //
     //   Store in Global RAM
     rtDW.DelayInput1_DSTATE = -1;

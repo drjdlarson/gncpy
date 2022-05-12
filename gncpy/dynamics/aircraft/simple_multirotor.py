@@ -369,7 +369,8 @@ class Vehicle:
 
         mach = airspeed / speed_of_sound
 
-        lla = ned_to_LLA(ned_pos, self.ref_lat, self.ref_lon, terrain_alt_wgs84)
+        lla = ned_to_LLA(ned_pos.reshape((3, 1)), self.ref_lat, self.ref_lon,
+                         terrain_alt_wgs84)
         lat = lla[0]
         lon = lla[1]
         alt_wgs84 = lla[2]
@@ -571,7 +572,7 @@ class SimpleMultirotor(DynamicsBase):
         self.vehicle.ref_lat = ref_lat_deg * d2r
         self.vehicle.ref_lon = ref_lon_deg * d2r
 
-        lla = ned_to_LLA(ned_pos, ref_lat_deg * d2r, ref_lon_deg * d2r,
+        lla = ned_to_LLA(ned_pos.reshape((3, 1)), ref_lat_deg * d2r, ref_lon_deg * d2r,
                          terrain_alt_wgs84)
         self.vehicle.state[v_smap.lat] = lla[0]
         self.vehicle.state[v_smap.lon] = lla[1]
@@ -627,6 +628,8 @@ class SimpleLAGERSuper(SimpleMultirotor):
         self._reached_wp_on_prev = False
         self._last_gps_upd_time = -np.inf
         self._gps_update_rate_hz = 5
+
+        self._sensorData.inceptor.ch[4] = 1811  # waypoint follow mode
 
         super().__init__(params_file, **kwargs)
 
@@ -731,16 +734,20 @@ class SimpleLAGERSuper(SimpleMultirotor):
         else:
             self.num_waypoints = num_waypoints
 
-        waypoint_lst = waypoints.copy()
+        waypoint_lst = waypoints
         if len(waypoint_lst) < super_bind.NUM_FLIGHT_PLAN_POINTS:
             rem = super_bind.NUM_FLIGHT_PLAN_POINTS - len(waypoint_lst)
-            waypoint_lst.extend([super_bind.MissionItem()] * rem)
+            waypoint_lst.extend([super_bind.MissionItem() for ii in range(rem)])
         elif len(waypoint_lst) > super_bind.NUM_FLIGHT_PLAN_POINTS:
             waypoint_lst = waypoint_lst[:super_bind.NUM_FLIGHT_PLAN_POINTS]
 
         self._telemData.waypoints_updated = True
         self._telemData.num_waypoints = self.num_waypoints
-        self._telemData.flight_plan = waypoint_lst  # NOTE: can only update full list at once
+        if self.num_waypoints > 0:
+            self._sensorData.inceptor.ch[4] = 1811  # waypoint follow mode
+            self._telemData.flight_plan = waypoint_lst  # NOTE: can only update full list at once
+        else:
+            self._sensorData.inceptor.ch[4] = 990  # pos hold
         self._telemData.current_waypoint = int(current_waypoint)
 
     def set_initial_conditions(self, ned_pos, body_vel, eul_deg, body_rot_rate,
@@ -810,12 +817,10 @@ class SimpleLAGERSuper(SimpleMultirotor):
         self._sensorData.inceptor.ch17 = False
         self._sensorData.inceptor.ch18 = False
 
-        self._sensorData.inceptor.ch = np.zeros(super_bind.NUM_SBUS_CH, dtype=int)
         self._sensorData.inceptor.ch[0] = 991
         self._sensorData.inceptor.ch[1] = 991
         self._sensorData.inceptor.ch[2] = 991
         self._sensorData.inceptor.ch[3] = 991
-        self._sensorData.inceptor.ch[4] = 1811  # waypoint follow mode
         self._sensorData.inceptor.ch[6] = 1811
 
         # update imu
@@ -878,5 +883,7 @@ class SimpleLAGERSuper(SimpleMultirotor):
 
         self._control_model.step(self._sysData, self._sensorData, self._navData,
                                  self._telemData, self._vmsData)
+
+        self._telemData.waypoints_updated = False
 
         return super().propagate_state(self._vmsData.pwm.cmd[0:self.vehicle.params.motor.num_motors], self.dt)
