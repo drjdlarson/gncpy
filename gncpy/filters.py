@@ -604,11 +604,15 @@ class ExtendedKalmanFilter(KalmanFilter):
             \dot{x} = f(t, x, u)
 
         or setting a :class:`gncpy.dynamics.NonlinearDynamicsBase` object. If
-        the object is specified then a local copy is created.
+        the object is specified then a local copy is created. A
+        :class:`gncpy.dynamics.LinearDynamicsBase` can also be used in which
+        case the dynamics follow the same form as the KF. If a linear dynamics
+        object is used then it is recommended to set the filters dt manually so
+        a continuous covariance model can be used in the prediction step.
 
         Parameters
         ----------
-        dyn_obj : :class:`gncpy.dynamics.NonlinearDynamicsBase`, optional
+        dyn_obj : :class:`gncpy.dynamics.NonlinearDynamicsBase` or :class:`gncpy.dynamics.LinearDynamicsBase`, optional
             Sets the dynamics according to the class. The default is None.
         ode_lst : list, optional
             callable functions, 1 per ode/state. The callabale must have the
@@ -625,7 +629,8 @@ class ExtendedKalmanFilter(KalmanFilter):
         None.
 
         """
-        if dyn_obj is not None:
+        if dyn_obj is not None and (isinstance(dyn_obj, gdyn.NonlinearDynamicsBase)
+                                    or isinstance(dyn_obj, gdyn.LinearDynamicsBase)):
             self._dyn_obj = deepcopy(dyn_obj)
         elif ode_lst is not None and len(ode_lst) > 0:
             self._ode_lst = ode_lst
@@ -646,9 +651,13 @@ class ExtendedKalmanFilter(KalmanFilter):
         if self._dyn_obj is not None:
             next_state = self._dyn_obj.propagate_state(timestep, cur_state,
                                                        state_args=dyn_fun_params)
-            state_mat = self._dyn_obj.get_state_mat(timestep, cur_state,
-                                                    dyn_fun_params)
-            dt = self._dyn_obj.dt
+            if isinstance(self._dyn_obj, gdyn.LinearDynamicsBase):
+                state_mat = self._dyn_obj.get_state_mat(timestep, *dyn_fun_params)
+                dt = self.dt
+            else:
+                state_mat = self._dyn_obj.get_state_mat(timestep, cur_state,
+                                                        dyn_fun_params)
+                dt = self._dyn_obj.dt
         elif self._ode_lst is not None:
             self._integrator = s_integrate.ode(self._cont_dyn)
             self._integrator.set_integrator(self.integrator_type,
