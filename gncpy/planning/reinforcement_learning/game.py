@@ -1001,7 +1001,7 @@ class SimpleUAV2d(Game2d):
         "Each element is a string of a supported reward type.
     """
 
-    __slots__ = ('_scoreCls', '_all_capabilities', '_reward_type')
+    __slots__ = ('_scoreCls', '_all_capabilities', '_reward_type', '_start_time')
 
     supported_reward_types = ('BasicReward', )
 
@@ -1025,6 +1025,7 @@ class SimpleUAV2d(Game2d):
         self._scoreCls = None
         self._all_capabilities = []
         self._reward_type = None
+        self._start_time = 0
 
         self.parse_config_file(self._config_file)
 
@@ -1080,7 +1081,11 @@ class SimpleUAV2d(Game2d):
         conf : dict
             Dictionary containnig values read from config file.
         """
-        conf = super().parse_config_file(config_file, extra_keys=('score'))
+        conf = super().parse_config_file(config_file, extra_keys=('score',
+                                                                  'start_time'))
+
+        if 'start_time' in conf.keys():
+            self._start_time = conf['start_time']
 
         if 'score' in conf.keys():
             self.setup_score(conf['score'])
@@ -1133,7 +1138,7 @@ class SimpleUAV2d(Game2d):
     @property
     def current_time(self):
         """Current time in real units."""
-        return self.dt * self._current_frame
+        return self.dt * self._current_frame + self._start_time
 
     def reset(self):
         """Resets to the base state."""

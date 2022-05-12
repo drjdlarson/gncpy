@@ -139,7 +139,7 @@ class SimpleUAV2d(BaseEnv):
                 if not os.path.isfile(cf):
                     raise RuntimeError('Failed to find config file {}'.format(config_file))
 
-        game = rl_games.SimpleUAV2d(cf, render_mode, render_fps=render_fps)
+        game = rl_games.SimpleUAV2d(render_mode, config_file=cf, render_fps=render_fps)
 
         super().__init__(game)
 
