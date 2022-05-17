@@ -7,9 +7,9 @@
 //
 // Code generated for Simulink model 'baseline_super'.
 //
-// Model version                  : 2.20
+// Model version                  : 2.29
 // Simulink Coder version         : 9.5 (R2021a) 14-Nov-2020
-// C/C++ source code generated on : Thu May 12 15:45:48 2022
+// C/C++ source code generated on : Sun May 15 14:35:12 2022
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: Intel->x86-64 (Linux 64)
@@ -120,11 +120,11 @@ extern "C" {
    public:
     // Block signals and states (default storage) for system '<Root>'
     struct DW {
-      real_T UnitDelay_DSTATE;         // '<S657>/Unit Delay'
-      real_T UnitDelay_DSTATE_m;       // '<S650>/Unit Delay'
+      real_T UnitDelay_DSTATE;         // '<S659>/Unit Delay'
+      real_T UnitDelay_DSTATE_m;       // '<S652>/Unit Delay'
       std::array<real32_T, 3> cur_target_pos_m;
       std::array<real32_T, 3> cur_target_pos_m_c;// '<S466>/determine_target'
-      std::array<real32_T, 3> pref_target_pos;// '<S635>/determine_prev_tar_pos' 
+      std::array<real32_T, 3> pref_target_pos;// '<S637>/determine_prev_tar_pos' 
       std::array<real32_T, 2> vb_xy;   // '<S475>/Product'
       std::array<real32_T, 2> Switch;  // '<S8>/Switch'
       real32_T cur_target_heading_rad; // '<S466>/determine_target'
@@ -160,23 +160,24 @@ extern "C" {
       real32_T UD_DSTATE_f;            // '<S52>/UD'
       real32_T Integrator_DSTATE_b;    // '<S165>/Integrator'
       real32_T UD_DSTATE_m;            // '<S158>/UD'
-      real32_T Integrator_DSTATE_bm;   // '<S613>/Integrator'
+      real32_T Integrator_DSTATE_bm;   // '<S615>/Integrator'
+      real32_T UD_DSTATE_b;            // '<S608>/UD'
       real32_T Integrator_DSTATE_c;    // '<S225>/Integrator'
       real32_T UD_DSTATE_k;            // '<S218>/UD'
       real32_T Integrator_DSTATE_n;    // '<S278>/Integrator'
       real32_T UD_DSTATE_a;            // '<S271>/UD'
       real32_T Integrator_DSTATE_a;    // '<S331>/Integrator'
       real32_T UD_DSTATE_h;            // '<S324>/UD'
-      int16_T DelayInput1_DSTATE;      // '<S631>/Delay Input1'
-      int8_T sub_mode;                 // '<S662>/determine_wp_submode'
-      int8_T sub_mode_m;               // '<S661>/determine_rtl_submode'
-      boolean_T Compare;               // '<S658>/Compare'
-      boolean_T Compare_d;             // '<S651>/Compare'
+      int16_T DelayInput1_DSTATE;      // '<S633>/Delay Input1'
+      int8_T sub_mode;                 // '<S664>/determine_wp_submode'
+      int8_T sub_mode_m;               // '<S663>/determine_rtl_submode'
+      boolean_T Compare;               // '<S660>/Compare'
+      boolean_T Compare_d;             // '<S653>/Compare'
       boolean_T reached;               // '<S467>/check_wp_reached'
-      boolean_T DelayInput1_DSTATE_n;  // '<S632>/Delay Input1'
+      boolean_T DelayInput1_DSTATE_n;  // '<S634>/Delay Input1'
       boolean_T auto_disarm_MODE;      // '<S19>/auto_disarm'
-      boolean_T disarmmotor_MODE;      // '<S641>/disarm motor'
-      boolean_T disarmmotor_MODE_k;    // '<S646>/disarm motor'
+      boolean_T disarmmotor_MODE;      // '<S643>/disarm motor'
+      boolean_T disarmmotor_MODE_k;    // '<S648>/disarm motor'
     };
 
     // Invariant block signals (default storage)
@@ -246,6 +247,7 @@ extern const bfs::Autocode::ConstB rtConstB;// constant block i/o
 //  Block '<S472>/y_pos_tracking' : Unused code path elimination
 //  Block '<S567>/Data Type Duplicate' : Unused code path elimination
 //  Block '<S567>/Data Type Propagation' : Unused code path elimination
+//  Block '<S608>/DTDup' : Unused code path elimination
 //  Block '<S66>/Saturation' : Eliminated Saturate block
 //  Block '<S119>/Saturation' : Eliminated Saturate block
 //  Block '<S172>/Saturation' : Eliminated Saturate block
@@ -261,7 +263,7 @@ extern const bfs::Autocode::ConstB rtConstB;// constant block i/o
 //  Block '<S462>/Cast To Boolean1' : Eliminate redundant data type conversion
 //  Block '<S462>/Cast To Single' : Eliminate redundant data type conversion
 //  Block '<S462>/Cast To Single1' : Eliminate redundant data type conversion
-//  Block '<S620>/Saturation' : Eliminated Saturate block
+//  Block '<S622>/Saturation' : Eliminated Saturate block
 
 
 //-
@@ -885,66 +887,68 @@ extern const bfs::Autocode::ConstB rtConstB;// constant block i/o
 //  '<S604>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/Anti-windup/Disc. Clamping Parallel'
 //  '<S605>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/Anti-windup/Disc. Clamping Parallel/Dead Zone'
 //  '<S606>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/Anti-windup/Disc. Clamping Parallel/Dead Zone/Enabled'
-//  '<S607>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/D Gain/Disabled'
-//  '<S608>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/Filter/Disabled'
-//  '<S609>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/Filter ICs/Disabled'
-//  '<S610>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/I Gain/External Parameters'
-//  '<S611>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/Ideal P Gain/Passthrough'
-//  '<S612>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/Ideal P Gain Fdbk/Disabled'
-//  '<S613>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/Integrator/Discrete'
-//  '<S614>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/Integrator ICs/Internal IC'
-//  '<S615>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/N Copy/Disabled wSignal Specification'
-//  '<S616>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/N Gain/Disabled'
-//  '<S617>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/P Copy/Disabled'
-//  '<S618>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/Parallel P Gain/External Parameters'
-//  '<S619>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/Reset Signal/Disabled'
-//  '<S620>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/Saturation/Enabled'
-//  '<S621>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/Saturation Fdbk/Disabled'
-//  '<S622>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/Sum/Sum_PI'
-//  '<S623>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/Sum Fdbk/Disabled'
-//  '<S624>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/Tracking Mode/Disabled'
-//  '<S625>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/Tracking Mode Sum/Passthrough'
-//  '<S626>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/Tsamp - Integral/Passthrough'
-//  '<S627>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/Tsamp - Ngain/Passthrough'
-//  '<S628>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/postSat Signal/Forward_Path'
-//  '<S629>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/preSat Signal/Forward_Path'
-//  '<S630>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/heading_error/Compare To Constant'
-//  '<S631>' : 'baseline_super/WAYPOINT CONTROLLER/capture rising edge/Detect Change1'
-//  '<S632>' : 'baseline_super/WAYPOINT CONTROLLER/capture rising edge/Detect Rise Positive'
-//  '<S633>' : 'baseline_super/WAYPOINT CONTROLLER/capture rising edge/Detect Rise Positive/Positive'
-//  '<S634>' : 'baseline_super/WAYPOINT CONTROLLER/determine target/Compare To Constant'
-//  '<S635>' : 'baseline_super/WAYPOINT CONTROLLER/determine target/calc_prev_target_pos'
-//  '<S636>' : 'baseline_super/WAYPOINT CONTROLLER/determine target/determine_current_tar_pos'
-//  '<S637>' : 'baseline_super/WAYPOINT CONTROLLER/determine target/determine_target'
-//  '<S638>' : 'baseline_super/WAYPOINT CONTROLLER/determine target/calc_prev_target_pos/determine_prev_tar_pos'
-//  '<S639>' : 'baseline_super/WAYPOINT CONTROLLER/wp_completion_check/check_wp_reached'
-//  '<S640>' : 'baseline_super/determine arm and mode selection/Failsafe_management'
-//  '<S641>' : 'baseline_super/determine arm and mode selection/auto_disarm'
-//  '<S642>' : 'baseline_super/determine arm and mode selection/compare_to_land'
-//  '<S643>' : 'baseline_super/determine arm and mode selection/determine submode'
-//  '<S644>' : 'baseline_super/determine arm and mode selection/manual mode selection'
-//  '<S645>' : 'baseline_super/determine arm and mode selection/throttle selection'
-//  '<S646>' : 'baseline_super/determine arm and mode selection/Failsafe_management/Battery failsafe'
-//  '<S647>' : 'baseline_super/determine arm and mode selection/Failsafe_management/Radio failsafe'
-//  '<S648>' : 'baseline_super/determine arm and mode selection/Failsafe_management/Battery failsafe/Compare To Constant'
-//  '<S649>' : 'baseline_super/determine arm and mode selection/Failsafe_management/Battery failsafe/Compare To Constant3'
-//  '<S650>' : 'baseline_super/determine arm and mode selection/Failsafe_management/Battery failsafe/disarm motor'
-//  '<S651>' : 'baseline_super/determine arm and mode selection/Failsafe_management/Battery failsafe/disarm motor/Compare To Constant2'
-//  '<S652>' : 'baseline_super/determine arm and mode selection/Failsafe_management/Radio failsafe/Compare To Constant'
-//  '<S653>' : 'baseline_super/determine arm and mode selection/Failsafe_management/Radio failsafe/Compare To Constant1'
-//  '<S654>' : 'baseline_super/determine arm and mode selection/Failsafe_management/Radio failsafe/Compare To Constant2'
-//  '<S655>' : 'baseline_super/determine arm and mode selection/auto_disarm/Compare To Constant'
-//  '<S656>' : 'baseline_super/determine arm and mode selection/auto_disarm/Compare To Constant1'
-//  '<S657>' : 'baseline_super/determine arm and mode selection/auto_disarm/disarm motor'
-//  '<S658>' : 'baseline_super/determine arm and mode selection/auto_disarm/disarm motor/Compare To Constant2'
-//  '<S659>' : 'baseline_super/determine arm and mode selection/determine submode/compare_to_rtl'
-//  '<S660>' : 'baseline_super/determine arm and mode selection/determine submode/compare_to_wp'
-//  '<S661>' : 'baseline_super/determine arm and mode selection/determine submode/rtl submodes'
-//  '<S662>' : 'baseline_super/determine arm and mode selection/determine submode/waypoint submodes'
-//  '<S663>' : 'baseline_super/determine arm and mode selection/determine submode/rtl submodes/determine_rtl_submode'
-//  '<S664>' : 'baseline_super/determine arm and mode selection/determine submode/waypoint submodes/determine_target_pos'
-//  '<S665>' : 'baseline_super/determine arm and mode selection/determine submode/waypoint submodes/determine_wp_submode'
-//  '<S666>' : 'baseline_super/determine arm and mode selection/throttle selection/Compare To Constant'
+//  '<S607>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/D Gain/External Parameters'
+//  '<S608>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/Filter/Differentiator'
+//  '<S609>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/Filter/Differentiator/Tsamp'
+//  '<S610>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/Filter/Differentiator/Tsamp/Internal Ts'
+//  '<S611>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/Filter ICs/Internal IC - Differentiator'
+//  '<S612>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/I Gain/External Parameters'
+//  '<S613>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/Ideal P Gain/Passthrough'
+//  '<S614>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/Ideal P Gain Fdbk/Disabled'
+//  '<S615>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/Integrator/Discrete'
+//  '<S616>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/Integrator ICs/Internal IC'
+//  '<S617>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/N Copy/Disabled wSignal Specification'
+//  '<S618>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/N Gain/Passthrough'
+//  '<S619>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/P Copy/Disabled'
+//  '<S620>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/Parallel P Gain/External Parameters'
+//  '<S621>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/Reset Signal/Disabled'
+//  '<S622>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/Saturation/Enabled'
+//  '<S623>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/Saturation Fdbk/Disabled'
+//  '<S624>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/Sum/Sum_PID'
+//  '<S625>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/Sum Fdbk/Disabled'
+//  '<S626>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/Tracking Mode/Disabled'
+//  '<S627>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/Tracking Mode Sum/Passthrough'
+//  '<S628>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/Tsamp - Integral/Passthrough'
+//  '<S629>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/Tsamp - Ngain/Passthrough'
+//  '<S630>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/postSat Signal/Forward_Path'
+//  '<S631>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/PID Controller2/preSat Signal/Forward_Path'
+//  '<S632>' : 'baseline_super/WAYPOINT CONTROLLER/WP_NAV/heading_controller/heading_controller/heading_error/Compare To Constant'
+//  '<S633>' : 'baseline_super/WAYPOINT CONTROLLER/capture rising edge/Detect Change1'
+//  '<S634>' : 'baseline_super/WAYPOINT CONTROLLER/capture rising edge/Detect Rise Positive'
+//  '<S635>' : 'baseline_super/WAYPOINT CONTROLLER/capture rising edge/Detect Rise Positive/Positive'
+//  '<S636>' : 'baseline_super/WAYPOINT CONTROLLER/determine target/Compare To Constant'
+//  '<S637>' : 'baseline_super/WAYPOINT CONTROLLER/determine target/calc_prev_target_pos'
+//  '<S638>' : 'baseline_super/WAYPOINT CONTROLLER/determine target/determine_current_tar_pos'
+//  '<S639>' : 'baseline_super/WAYPOINT CONTROLLER/determine target/determine_target'
+//  '<S640>' : 'baseline_super/WAYPOINT CONTROLLER/determine target/calc_prev_target_pos/determine_prev_tar_pos'
+//  '<S641>' : 'baseline_super/WAYPOINT CONTROLLER/wp_completion_check/check_wp_reached'
+//  '<S642>' : 'baseline_super/determine arm and mode selection/Failsafe_management'
+//  '<S643>' : 'baseline_super/determine arm and mode selection/auto_disarm'
+//  '<S644>' : 'baseline_super/determine arm and mode selection/compare_to_land'
+//  '<S645>' : 'baseline_super/determine arm and mode selection/determine submode'
+//  '<S646>' : 'baseline_super/determine arm and mode selection/manual mode selection'
+//  '<S647>' : 'baseline_super/determine arm and mode selection/throttle selection'
+//  '<S648>' : 'baseline_super/determine arm and mode selection/Failsafe_management/Battery failsafe'
+//  '<S649>' : 'baseline_super/determine arm and mode selection/Failsafe_management/Radio failsafe'
+//  '<S650>' : 'baseline_super/determine arm and mode selection/Failsafe_management/Battery failsafe/Compare To Constant'
+//  '<S651>' : 'baseline_super/determine arm and mode selection/Failsafe_management/Battery failsafe/Compare To Constant3'
+//  '<S652>' : 'baseline_super/determine arm and mode selection/Failsafe_management/Battery failsafe/disarm motor'
+//  '<S653>' : 'baseline_super/determine arm and mode selection/Failsafe_management/Battery failsafe/disarm motor/Compare To Constant2'
+//  '<S654>' : 'baseline_super/determine arm and mode selection/Failsafe_management/Radio failsafe/Compare To Constant'
+//  '<S655>' : 'baseline_super/determine arm and mode selection/Failsafe_management/Radio failsafe/Compare To Constant1'
+//  '<S656>' : 'baseline_super/determine arm and mode selection/Failsafe_management/Radio failsafe/Compare To Constant2'
+//  '<S657>' : 'baseline_super/determine arm and mode selection/auto_disarm/Compare To Constant'
+//  '<S658>' : 'baseline_super/determine arm and mode selection/auto_disarm/Compare To Constant1'
+//  '<S659>' : 'baseline_super/determine arm and mode selection/auto_disarm/disarm motor'
+//  '<S660>' : 'baseline_super/determine arm and mode selection/auto_disarm/disarm motor/Compare To Constant2'
+//  '<S661>' : 'baseline_super/determine arm and mode selection/determine submode/compare_to_rtl'
+//  '<S662>' : 'baseline_super/determine arm and mode selection/determine submode/compare_to_wp'
+//  '<S663>' : 'baseline_super/determine arm and mode selection/determine submode/rtl submodes'
+//  '<S664>' : 'baseline_super/determine arm and mode selection/determine submode/waypoint submodes'
+//  '<S665>' : 'baseline_super/determine arm and mode selection/determine submode/rtl submodes/determine_rtl_submode'
+//  '<S666>' : 'baseline_super/determine arm and mode selection/determine submode/waypoint submodes/determine_target_pos'
+//  '<S667>' : 'baseline_super/determine arm and mode selection/determine submode/waypoint submodes/determine_wp_submode'
+//  '<S668>' : 'baseline_super/determine arm and mode selection/throttle selection/Compare To Constant'
 
 #endif                                 // RTW_HEADER_autocode_h_
 

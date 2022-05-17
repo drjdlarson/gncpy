@@ -1,442 +1,23 @@
-"""Implements basic games for RL environments."""
 from abc import ABC, abstractmethod
-import numpy as np
 import pathlib
-
 import os
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame
-
+import numpy as np
 from ruamel.yaml import YAML
+from warnings import warn
 
-import gncpy.dynamics as gdyn
+from gncpy.planning.reinforcement_learning.entities import EntityManager
+import gncpy.planning.reinforcement_learning.components as gcomp
 import gncpy.planning.reinforcement_learning.rewards as grewards
+import gncpy.planning.reinforcement_learning.physics as gphysics
+import gncpy.dynamics as gdyn
 from gncpy.planning.reinforcement_learning.enums import EventType
-import serums.models as smodels
 
 
 yaml = YAML()
 
 
-# %% Entities
-class EntityManager:
-    """Handles creation and deletion of entities."""
-
-    def __init__(self):
-        self._entities = []
-        self._entities_to_add = []
-        self._entity_map = {}
-        self._total_entities = 0
-
-    def _remove_dead_entities(self, vec):
-        e_to_rm = []
-        for ii, e in enumerate(vec):
-            if not e.active:
-                e_to_rm.append(ii)
-
-        for ii in e_to_rm[::-1]:
-            del vec[ii]
-
-    def update(self):
-        """Updates the list of entities.
-
-        Should be called once per timestep. Adds new entities to the list and
-        and removes dead ones.
-
-        Returns
-        -------
-        None.
-        """
-        for e in self._entities_to_add:
-            self._entities.append(e)
-            if e.tag not in self._entity_map:
-                self._entity_map[e.tag] = []
-            self._entity_map[e.tag].append(e)
-        self._entities_to_add = []
-
-        self._remove_dead_entities(self._entities)
-
-        for tag, ev in self._entity_map.items():
-            self._remove_dead_entities(ev)
-
-    def add_entity(self, tag):
-        """Creates a new entity.
-
-        The entity is queued to be added. It is not part of the entity list
-        until after the update function has been called.
-
-        Parameters
-        ----------
-        tag : string
-            Tag to identify the type of entity.
-
-        Returns
-        -------
-        e : :class:`.Entity`
-            Reference to the created entity.
-        """
-        self._total_entities += 1
-        e = Entity(self._total_entities, tag)
-        self._entities_to_add.append(e)
-
-        return e
-
-    def get_entities(self, tag=None):
-        """Return a list of references to entities.
-
-        Can also get all entities with a given tag. Note that changing entities
-        returned by this function modifies the entities managed by this class.
-
-        Parameters
-        ----------
-        tag : string, optional
-            If provided only return entities with this tag. The default is None.
-
-        Returns
-        -------
-        list
-            Each element is an :class:`.Entity`.
-        """
-        if tag is None:
-            return self._entities
-        else:
-            if tag in self._entity_map:
-                return self._entity_map[tag]
-            else:
-                return []
-
-
-class Entity:
-    """Elements in a game.
-
-    Attributes
-    ----------
-    c_transform : :class:`.CTransform`
-        Transform component.
-    c_dynamics : :class:`.CDynamics`
-        Dynamics component.
-    c_shape : :class:`.CShape`
-        Shape component.
-    c_collision : :class:`.CCollision`
-        Collision component.
-    c_birth: :class:`.CBirth`
-        Birth component.
-    c_events: :class:`.CEvents`
-        Events component.
-    c_capabilities : :class:`.CCapabilities`
-        Capabilities component.
-    c_priority: :class:`.CPriority`
-        Priority component.
-    """
-
-    def __init__(self, e_id, tag):
-        """Initialize an object.
-
-        This should not be called outside of the :class:`.EntityManager` class.
-
-        Parameters
-        ----------
-        e_id : int
-            Unique ID number for the entity.
-        tag : string
-            Type of entity.
-        """
-        self._active = True
-        self._id = e_id
-        self._tag = tag
-
-        self.c_transform = None
-        self.c_dynamics = None
-        self.c_shape = None
-        self.c_collision = None
-        self.c_birth = None
-        self.c_events = None
-        self.c_capabilities = None
-        self.c_priority = None
-
-    @property
-    def active(self):
-        """Flag indicating if the entity is alive."""
-        return self._active
-
-    @property
-    def tag(self):
-        """Read only tag of for the entity."""
-        return self._tag
-
-    @property
-    def id(self):
-        """Read only unique id of the entity."""
-        return self._id
-
-    def destroy(self):
-        """Handles destruction of the entity."""
-        self._active = False
-
-
-# %% Components
-class CDynamics:
-    """Handles all the properties relaing to the dynamics.
-
-    Also implements the logic for propagating the state via a dynamics
-    object.
-
-    Attributes
-    ----------
-    dynObj : :class:`gncpy.dynamics.DynamicsBase`
-        Implements the dynamics equations, control, and state constraints.
-    pos_inds : list
-        Indices of the state vector containing the position info.
-    vel_inds : list
-        Indices of the state vector containing the velocity info.
-    state_args : tuple
-        Additional arguments for propagating the state.
-    ctrl_args : tuple
-        Additional arguments for propagating the state.
-    state_low : numpy array
-        Lower limit of each state.
-    state_high : numpy array
-        Upper limit of each state.
-    """
-
-    __slots__ = ('dynObj', 'last_state', 'state', 'pos_inds', 'vel_inds',
-                 'state_args', 'ctrl_args', 'state_low', 'state_high')
-
-    def __init__(self, dynObj, pos_inds, vel_inds, state_args, ctrl_args,
-                 state_low, state_high):
-        """Initialize an object.
-
-        Parameters
-        ----------
-        dynObj : :class:`gncpy.dynamics.DynamicsBase`
-            Implements the dynamics equations, control, and state constraints.
-        pos_inds : list
-            Indices of the state vector containing the position info.
-        vel_inds : list
-            Indices of the state vector containing the velocity info.
-        state_args : tuple
-            Additional arguments for propagating the state.
-        ctrl_args : tuple
-            Additional arguments for propagating the state.
-        state_low : numpy array
-            Lower limit of each state.
-        state_high : numpy array
-            Upper limit of each state.
-        """
-        self.dynObj = dynObj
-        n_states = len(self.dynObj.state_names)
-        self.last_state = np.nan * np.ones((n_states, 1))
-        self.state = np.zeros((n_states, 1))
-
-        self.pos_inds = pos_inds
-        self.vel_inds = vel_inds
-        self.state_args = state_args
-        self.ctrl_args = ctrl_args
-        self.state_low = state_low
-        self.state_high = state_high
-
-
-class CShape:
-    """Contains properties related to the drawn shape.
-
-    Attributes
-    ----------
-    shape : string
-        type of shape to create.
-    color : tuple
-        RGB triplet for the color in range [0, 255].
-    zorder : int
-        Determines draw order, lower numbers are drawn first.
-    """
-
-    __slots__ = 'shape', 'color', 'zorder'
-
-    def __init__(self, shape, w, h, color, zorder):
-        """Initialize an object.
-
-        Parameters
-        ----------
-        shape : string
-            type of shape to create.
-        w : int
-            width in pixels.
-        h : int
-            height in pixels.
-        color : tuple
-            RGB triplet for the color in range [0, 255].
-        zorder : int
-            Determines draw order, lower numbers are drawn first.
-
-        Todo
-        ----
-        Allow for other shape types.
-        """
-        if shape.lower() == 'rect':
-            self.shape = pygame.Rect((0, 0), (w, h))
-
-        self.color = color
-        self.zorder = zorder
-
-
-class CTransform:
-    """Contains properties relating to the spatial components.
-
-    Attributes
-    ----------
-    pos : 2 x 1 numpy array
-        position of the center in pixels
-    last_pos : 2 x 1 numpy array
-        last position of the center in pixels.
-    vel 2 x 1 numpy array
-        velocity of the center in pixels per timestep
-    """
-
-    __slots__ = 'pos', 'last_pos', 'vel'
-
-    def __init__(self):
-        self.pos = np.nan * np.ones((2, 1))
-        self.last_pos = np.nan * np.ones((2, 1))
-        self.vel = np.nan * np.ones((2, 1))
-
-
-class CCollision:
-    """Handles the bounding box used for collisions.
-
-    Attrbutes
-    ---------
-    aabb : pygame Rect
-        Rectangle representing the axis aligned bounding box.
-    """
-
-    __slots__ = 'aabb'
-
-    def __init__(self, w, h):
-        self.aabb = pygame.Rect((0, 0), (w, h))
-
-
-class CBirth:
-    """Handles the birth model properties.
-
-    Also handles the generation of the birth location through the use of
-    a distribution object from SERUMS.
-    """
-
-    __slots__ = '_model'
-
-    def __init__(self, b_type, loc, scale, params):
-        """Initializes an object.
-
-        Parameters
-        ----------
-        b_type : string
-            Model type.
-        loc : numpy array
-            location parameter of the model.
-        scale : N x N numpy array
-            scale parameter of the model.
-        params : dict
-            additional parameters for the model.
-        """
-        self._model = smodels.Gaussian(mean=loc,
-                                       covariance=scale**2)
-
-    @property
-    def loc(self):
-        """Read only location sample from the distribution."""
-        # TODO fix this hack by updating serums
-        return self._model.sample().reshape((2, 1))
-
-
-class CEvents:
-    """Holds the events properties.
-
-    Attributes
-    ----------
-    events : list
-        Each element is a tuple with the first being a
-        :class:`gncpy.planning.reinforcement_learning.enums.EventType` and
-        the second a dict with extra info.
-    """
-
-    __slots__ = 'events'
-
-    def __init__(self):
-        self.events = []
-
-
-class CHazard:
-    """Hold the properties for hazard info.
-
-    Attributes
-    ----------
-    prob_of_death : float
-        Probability of death at each timestep in the hazard. Must be in the
-        range (0, 1].
-    entrance_times : dict
-        mapping of player id to entrance time.
-    """
-
-    __slots__ = 'prob_of_death', 'entrance_times'
-
-    def __init__(self, prob_of_death):
-        """Initialize an object.
-
-        Parameters
-        ----------
-        prob_of_death : float
-            Probability of death at each timestep.
-        """
-        self.prob_of_death = prob_of_death
-        self.entrance_times = {}
-
-
-class CCapabilities:
-    """Hold properties about player/target capabilities.
-
-    Attributes
-    ----------
-    capabilities : list
-        Each element defines a capability. The :code:`in` keyword must work
-        for chcking if an item is in the list.
-    """
-
-    __slots__ = 'capabilities'
-
-    def __init__(self, capabilities):
-        """Initialize an object.
-
-        Parameters
-        ----------
-        capabilities : list
-            List of capabilities.
-        """
-        self.capabilities = capabilities
-
-
-class CPriority:
-    """Hold properties about the priority.
-
-    Attributes
-    ----------
-    priority : float
-        Priority value.
-    """
-
-    __slots__ = 'priority'
-
-    def __init__(self, priority):
-        """Initialize an object.
-
-        Parameters
-        ----------
-        priority : float
-            priority of the object.
-        """
-        self.priority = priority
-
-
-# %% Systems
-# %%% Base Classes
 class Game(ABC):
     """Base class for defining games.
 
@@ -503,15 +84,10 @@ class Game(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def step(self, action):
+    def step(self, *args):
         """Abstract method defining what to do each frame.
 
         This must be implemented by the child class.
-
-        Parameters
-        ----------
-        action : numpy array, int, bool, etc.
-            action to take in the game.
 
         Returns
         -------
@@ -521,7 +97,7 @@ class Game(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def render(self):
+    def s_render(self):
         """Implements the rendering system."""
         raise NotImplementedError
 
@@ -593,9 +169,9 @@ class Game2d(Game):
         Distance units per pixel on the scsreen.
     """
 
-    __slots__ = ('_window', '_clock', '_img', 'max_n_targets', 'dt', 'max_time',
-                 'min_pos', 'dist_height', 'dist_width', 'dist_per_pix',
-                 '_config_file')
+    __slots__ = ('_window', '_clock', '_img', 'max_n_targets', 'dt', '_start_time',
+                 '_max_time', 'min_pos', 'dist_height', 'dist_width', 'dist_per_pix',
+                 '_config_file', 'step_factor', '_current_update_count')
 
     def __init__(self, config_file, render_mode, render_fps=60):
         """Initalize an object.
@@ -624,16 +200,25 @@ class Game2d(Game):
 
         self.max_n_targets = None
         self.dt = None
-        self.max_time = None
+        self._start_time = 0
+        self._max_time = None
         self.min_pos = None
         self.dist_width = None
         self.dist_height = None
         self.dist_per_pix = None
+        self.step_factor = 1
+        self._current_update_count = -1
+
+    @property
+    def max_time(self):
+        # TODO: figure out if this works
+        return self._max_time  # + self._start_time
 
     def reset(self):
         """Resets to the base state."""
         super().reset()
         self._img = 255 * np.ones((*self.get_image_size(), 3), dtype=np.uint8)
+        self._current_update_count = -1
 
     def validate_config_file(self, config_file):
         if os.pathsep in config_file:
@@ -682,8 +267,16 @@ class Game2d(Game):
         else:
             raise RuntimeError('Must specify physics parameters in config')
 
+        if 'start_time' in conf.keys():
+            self._start_time = conf['start_time']
+
+        if 'step_factor' in conf.keys():
+            self.step_factor = conf['step_factor']
+
+        self.dt /= self.step_factor
+
         for key, params in conf.items():
-            if key in ('window', 'physics'):
+            if key in ('window', 'physics', 'start_time', 'step_factor'):
                 continue
 
             elif key == 'player':
@@ -782,7 +375,7 @@ class Game2d(Game):
             window config.
         """
         extra = {}
-        if self._render_mode !='human':
+        if self._render_mode != 'human':
             extra['flags'] = pygame.HIDDEN
 
         self._window = pygame.display.set_mode((int(params['width']),
@@ -884,7 +477,7 @@ class Game2d(Game):
             Config values.
         """
         self.dt = float(params['dt'])
-        self.max_time = float(params['max_time'])
+        self._max_time = float(params['max_time'])
         self.min_pos = np.array([[float(params['min_x'])],
                                  [float(params['min_y'])]])
 
@@ -900,7 +493,11 @@ class Game2d(Game):
             out[n_key] = val
         return out
 
-    def step(self, action):
+    @abstractmethod
+    def s_input(self, user_input):
+        raise NotImplementedError('Must be implemented by child class')
+
+    def step(self, user_input):
         """Perform one iteration of the game loop.
 
         Parameters
@@ -915,39 +512,51 @@ class Game2d(Game):
         """
         info = {}
         self._current_frame += 1
-        self._entity_manager.update()
 
-        # clear events for entities
-        for e in self._entity_manager.get_entities():
-            if e.c_events is not None:
-                e.c_events.events = []
+        self.score = 0
+        for ii in range(self.step_factor):
+            self._current_update_count += 1
+            self._entity_manager.update()
 
-        self.s_movement(action)
-        self.s_collision()
+            # clear events for entities
+            for e in self._entity_manager.get_entities():
+                if e.has_component(gcomp.CEvents):
+                    e.get_component(gcomp.CEvents).events = []
 
-        self.render()
+            action = self.s_input(user_input)
+            self.s_movement(action)
+            self.s_collision()
+            score, s_info = self.s_score()
+            self.score += score
+        self.score /= self.step_factor
+
+        self.s_render()
 
         self.s_game_over()
 
-        s_info = self.s_score()
         info.update(self._append_name_to_keys(s_info, 'Reward'))
 
         return info
 
-    def render(self):
+    def s_render(self):
         """Render a frame of the game."""
         surf = pygame.Surface(self._window.get_size())
         surf.fill((255, 255, 255))
 
-        drawable = list(filter(lambda _e: _e.c_shape and _e.c_transform,
+        drawable = list(filter(lambda _e: _e.has_component(gcomp.CShape) and _e.has_component(gcomp.CTransform),
                                self._entity_manager.get_entities()))
-        drawable.sort(key=lambda _e: _e.c_shape.zorder)
+        drawable.sort(key=lambda _e: _e.get_component(gcomp.CShape).zorder)
         for e in drawable:
-            if e.c_shape is not None and e.c_transform is not None:
-                e.c_shape.shape.centerx = e.c_transform.pos[0].item()
-                e.c_shape.shape.centery = e.c_transform.pos[1].item()
+            e_shape = e.get_component(gcomp.CShape)
+            e_trans = e.get_component(gcomp.CTransform)
 
-                pygame.draw.rect(surf, e.c_shape.color, e.c_shape.shape)
+            e_shape.shape.centerx = e_trans.pos[0].item()
+            e_shape.shape.centery = e_trans.pos[1].item()
+
+            if isinstance(e_shape.shape, pygame.Rect):
+                pygame.draw.rect(surf, e_shape.color, e_shape.shape)
+            else:
+                warn('No rendering method for this shape')
 
         flip_surf = pygame.transform.flip(surf, False, True)
 
@@ -991,7 +600,6 @@ class Game2d(Game):
             pygame.quit()
 
 
-# %%% Custom Games
 class SimpleUAV2d(Game2d):
     """Implements a simple 2d UAV scenario.
 
@@ -1001,11 +609,11 @@ class SimpleUAV2d(Game2d):
         "Each element is a string of a supported reward type.
     """
 
-    __slots__ = ('_scoreCls', '_all_capabilities', '_reward_type', '_start_time')
+    __slots__ = ('_scoreCls', '_all_capabilities', '_reward_type', '_rng', '_seed')
 
     supported_reward_types = ('BasicReward', )
 
-    def __init__(self, render_mode, render_fps=None, config_file=None):
+    def __init__(self, render_mode, render_fps=None, config_file=None, seed=None):
         """Initialize an object.
 
         Parameters
@@ -1021,11 +629,14 @@ class SimpleUAV2d(Game2d):
             config_file = 'simple_uav_2d_config.yaml'
         super().__init__(config_file, render_mode, render_fps=render_fps)
 
-        # self._config_file = config_file
         self._scoreCls = None
         self._all_capabilities = []
         self._reward_type = None
-        self._start_time = 0
+        if seed is None:
+            self._rng = np.random.default_rng()
+        else:
+            self._rng = np.random.default_rng(seed)
+        self._seed = seed
 
         self.parse_config_file(self._config_file)
 
@@ -1081,11 +692,7 @@ class SimpleUAV2d(Game2d):
         conf : dict
             Dictionary containnig values read from config file.
         """
-        conf = super().parse_config_file(config_file, extra_keys=('score',
-                                                                  'start_time'))
-
-        if 'start_time' in conf.keys():
-            self._start_time = conf['start_time']
+        conf = super().parse_config_file(config_file, extra_keys=('score',))
 
         if 'score' in conf.keys():
             self.setup_score(conf['score'])
@@ -1095,6 +702,9 @@ class SimpleUAV2d(Game2d):
         return conf
 
     def _add_capabilities(self, lst):
+        if lst is None:
+            return
+
         for c in lst:
             if c not in self._all_capabilities:
                 self._all_capabilities.append(c)
@@ -1120,8 +730,8 @@ class SimpleUAV2d(Game2d):
         """
         p_lst = self._entity_manager.get_entities('player')
         p = p_lst[0]
-        return np.vstack((p.c_dynamics.state_low.copy(),
-                          p.c_dynamics.state_high.copy()))
+        return np.vstack((p.get_component(gcomp.CDynamics).state_low.copy(),
+                          p.get_component(gcomp.CDynamics).state_high.copy()))
 
     def get_player_state(self):
         """Return the player state.
@@ -1133,17 +743,26 @@ class SimpleUAV2d(Game2d):
         """
         p_lst = self._entity_manager.get_entities('player')
         p = p_lst[0]
-        return p.c_dynamics.state.copy().ravel()
+        return p.get_component(gcomp.CDynamics).state.copy().ravel()
 
     @property
     def current_time(self):
         """Current time in real units."""
-        return self.dt * self._current_frame + self._start_time
+        return self.dt * self._current_update_count + self._start_time
 
-    def reset(self):
+    def reset(self, seed=None):
         """Resets to the base state."""
         super().reset()
         self._all_capabilities = []
+
+        if seed is None:
+            if self._seed is None:
+                self._rng = np.random.default_rng()
+            else:
+                self._rng = np.random.default_rng(self._seed)
+        else:
+            self._rng = np.random.default_rng(seed)
+            self._seed = seed
 
         self.parse_config_file(self._config_file)
 
@@ -1277,15 +896,18 @@ class SimpleUAV2d(Game2d):
         if 'params' in params:
             kwargs.update(params['params'])
 
-        c_dynamics = CDynamics(cls_type(**kwargs), pos_inds, vel_inds, state_args,
-                               ctrl_args, state_low, state_high)
-        c_dynamics.state[pos_inds] = c_birth.loc
+        dynObj = cls_type(**kwargs)
+        state0 = np.zeros((state_low.size, 1))
+        if c_birth.randomize:
+            state0[pos_inds] = c_birth.sample().reshape(state0[pos_inds].shape)
+        else:
+            state0[pos_inds] = c_birth.loc.copy().reshape(state0[pos_inds].shape)
 
-        rng = np.random.default_rng()
         if params['type'] == 'CoordinatedTurn':
-            c_dynamics.state[4] = rng.random() * 2 * np.pi
+            state0[4] = self._rng.random() * 2 * np.pi
 
-        return c_dynamics
+        return (dynObj, pos_inds, vel_inds, state_args, ctrl_args, state_low,
+                state_high, state0)
 
     def setup_player(self, params):
         """Setup the player based on the config file.
@@ -1328,35 +950,42 @@ class SimpleUAV2d(Game2d):
         """
         e = self._entity_manager.add_entity('player')
 
-        # TODO: allow for other birth types
         b_params = params['birth_model']
         b_loc = np.array(b_params['location']).reshape((len(b_params['location']), 1))
         b_scale = np.diag(b_params['scale'])
-        e.c_birth = CBirth(b_params['type'], b_loc, b_scale, b_params['params'])
+        randomize = 'randomize' not in b_params or b_params['randomize']
+        e.add_component(gcomp.CBirth, b_type=b_params['type'], loc=b_loc,
+                        scale=b_scale, params=b_params['params'], rng=self._rng,
+                        randomize=randomize)
 
-        # TODO: allow for other dyanmics models
-        e.c_dynamics = self._create_dynamics(params['dynamics_model'], e.c_birth)
+        e.add_component(gcomp.CDynamics)
+        c_dynamics = e.get_component(gcomp.CDynamics)
+        (c_dynamics.dynObj, c_dynamics.pos_inds, c_dynamics.vel_inds,
+         c_dynamics.state_args, c_dynamics.ctrl_args, c_dynamics.state_low,
+         c_dynamics.state_high, c_dynamics.state) = self._create_dynamics(params['dynamics_model'],
+                                                                          e.get_component(gcomp.CBirth))
 
-        e.c_transform = CTransform()
+        e.add_component(gcomp.CTransform)
 
-        # TODO: allow for other shape types
         s_params = params['shape_model']
-        e.c_shape = CShape(s_params['type'], self._dist_to_pixels(s_params['width'], 0, False),
-                           self._dist_to_pixels(s_params['height'], 1, False),
-                           tuple(s_params['color']), 100)
+        e.add_component(gcomp.CShape, shape=s_params['type'],
+                        w=self._dist_to_pixels(s_params['width'], 0, False),
+                        h=self._dist_to_pixels(s_params['height'], 1, False),
+                        color=tuple(s_params['color']), zorder=100)
 
         c_params = params['collision_model']
-        e.c_collision = CCollision(self._dist_to_pixels(c_params['width'], 0, False),
-                                   self._dist_to_pixels(c_params['height'], 1, False))
+        e.add_component(gcomp.CCollision,
+                        w=self._dist_to_pixels(c_params['width'], 0, False),
+                        h=self._dist_to_pixels(c_params['height'], 1, False))
 
-        e.c_events = CEvents()
+        e.add_component(gcomp.CEvents)
 
         key = 'capabilities'
         if key in params:
             capabilities = params[key]
         else:
-            capabilities = []
-        e.c_capabilities = CCapabilities(capabilities)
+            capabilities = None
+        e.add_component(gcomp.CCapabilities, capabilities=capabilities)
         self._add_capabilities(capabilities)
 
     def setup_obstacles(self, params):
@@ -1381,20 +1010,20 @@ class SimpleUAV2d(Game2d):
         for o_params in params:
             e = self._entity_manager.add_entity('obstacle')
 
-            e.c_transform = CTransform()
-            e.c_transform.pos[0] = self._dist_to_pixels(o_params['loc_x'], 0, True)
-            e.c_transform.pos[1] = self._dist_to_pixels(o_params['loc_y'], 1, True)
-            e.c_transform.last_pos[0] = e.c_transform.pos[0]
-            e.c_transform.last_pos[1] = e.c_transform.pos[1]
+            e.add_component(gcomp.CTransform)
+            c_transform = e.get_component(gcomp.CTransform)
+            c_transform.pos[0] = self._dist_to_pixels(o_params['loc_x'], 0, True)
+            c_transform.pos[1] = self._dist_to_pixels(o_params['loc_y'], 1, True)
+            c_transform.last_pos[0] = c_transform.pos[0]
+            c_transform.last_pos[1] = c_transform.pos[1]
 
-            e.c_shape = CShape(o_params['shape_type'],
-                               self._dist_to_pixels(o_params['width'], 0, False),
-                               self._dist_to_pixels(o_params['height'], 1, False),
-                               tuple(o_params['shape_color']), 1000)
-            e.c_collision = CCollision(self._dist_to_pixels(o_params['collision_width'],
-                                                            0, False),
-                                       self._dist_to_pixels(o_params['collision_height'],
-                                                            1, False))
+            e.add_component(gcomp.CShape, shape=o_params['shape_type'],
+                            w=self._dist_to_pixels(o_params['width'], 0, False),
+                            h=self._dist_to_pixels(o_params['height'], 1, False),
+                            color=tuple(o_params['shape_color']), zorder=1000)
+            e.add_component(gcomp.CCollision,
+                            w=self._dist_to_pixels(o_params['collision_width'], 0, False),
+                            h=self._dist_to_pixels(o_params['collision_height'], 1, False))
 
     def setup_targets(self, params):
         """Setup the targets  based on the config file.
@@ -1427,30 +1056,30 @@ class SimpleUAV2d(Game2d):
         for t_params in params:
             e = self._entity_manager.add_entity('target')
 
-            e.c_transform = CTransform()
-            e.c_transform.pos[0] = self._dist_to_pixels(t_params['loc_x'], 0, True)
-            e.c_transform.pos[1] = self._dist_to_pixels(t_params['loc_y'], 1, True)
-            e.c_transform.last_pos[0] = e.c_transform.pos[0]
-            e.c_transform.last_pos[1] = e.c_transform.pos[1]
+            e.add_component(gcomp.CTransform)
+            c_transform = e.get_component(gcomp.CTransform)
+            c_transform.pos[0] = self._dist_to_pixels(t_params['loc_x'], 0, True)
+            c_transform.pos[1] = self._dist_to_pixels(t_params['loc_y'], 1, True)
+            c_transform.last_pos[0] = c_transform.pos[0]
+            c_transform.last_pos[1] = c_transform.pos[1]
 
-            e.c_shape = CShape(t_params['shape_type'],
-                               self._dist_to_pixels(t_params['width'], 0, False),
-                               self._dist_to_pixels(t_params['height'], 1, False),
-                               tuple(t_params['shape_color']), 1)
-            e.c_collision = CCollision(self._dist_to_pixels(t_params['collision_width'],
-                                                            0, False),
-                                       self._dist_to_pixels(t_params['collision_height'],
-                                                            1, False))
+            e.add_component(gcomp.CShape, shape=t_params['shape_type'],
+                            w=self._dist_to_pixels(t_params['width'], 0, False),
+                            h=self._dist_to_pixels(t_params['height'], 1, False),
+                            color=tuple(t_params['shape_color']), zorder=1)
+            e.add_component(gcomp.CCollision,
+                            w=self._dist_to_pixels(t_params['collision_width'], 0, False),
+                            h=self._dist_to_pixels(t_params['collision_height'], 1, False))
 
             key = 'capabilities'
             if key in t_params:
                 capabilities = t_params[key]
             else:
-                capabilities = []
-            e.c_capabilities = CCapabilities(capabilities)
+                capabilities = None
+            e.add_component(gcomp.CCapabilities, capabilities=capabilities)
             self._add_capabilities(capabilities)
 
-            e.c_priority = CPriority(t_params['priority'])
+            e.add_component(gcomp.CPriority, priority=t_params['priority'])
 
     def setup_hazards(self, params):
         """Setup the hazards  based on the config file.
@@ -1475,24 +1104,36 @@ class SimpleUAV2d(Game2d):
         for h_params in params:
             e = self._entity_manager.add_entity('hazard')
 
-            e.c_transform = CTransform()
-            e.c_transform.pos[0] = self._dist_to_pixels(h_params['loc_x'], 0, True)
-            e.c_transform.pos[1] = self._dist_to_pixels(h_params['loc_y'], 1, True)
-            e.c_transform.last_pos[0] = e.c_transform.pos[0]
-            e.c_transform.last_pos[1] = e.c_transform.pos[1]
+            e.add_component(gcomp.CTransform)
+            c_transform = e.get_component(gcomp.CTransform)
+            c_transform.pos[0] = self._dist_to_pixels(h_params['loc_x'], 0, True)
+            c_transform.pos[1] = self._dist_to_pixels(h_params['loc_y'], 1, True)
+            c_transform.last_pos[0] = c_transform.pos[0]
+            c_transform.last_pos[1] = c_transform.pos[1]
 
-            e.c_shape = CShape(h_params['shape_type'],
-                               self._dist_to_pixels(h_params['width'], 0, False),
-                               self._dist_to_pixels(h_params['height'], 1, False),
-                               tuple(h_params['shape_color']), -100)
-            e.c_collision = CCollision(self._dist_to_pixels(h_params['collision_width'],
-                                                            0, False),
-                                       self._dist_to_pixels(h_params['collision_height'],
-                                                            1, False))
+            e.add_component(gcomp.CShape, shape=h_params['shape_type'],
+                            w=self._dist_to_pixels(h_params['width'], 0, False),
+                            h=self._dist_to_pixels(h_params['height'], 1, False),
+                            color=tuple(h_params['shape_color']), zorder=-100)
+
+            e.add_component(gcomp.CCollision,
+                            w=self._dist_to_pixels(h_params['collision_width'], 0, False),
+                            h=self._dist_to_pixels(h_params['collision_height'], 1, False))
+
             pd = float(h_params['prob_of_death'])
             if pd > 1:
                 pd = pd / 100.
-            e.c_hazard = CHazard(pd)
+            e.add_component(gcomp.CHazard, prob_of_death=pd)
+
+    def _propagate_dynamics(self, e_dyn, action):
+        e_dyn.state = e_dyn.dynObj.propagate_state(self.current_time,
+                                                   e_dyn.last_state,
+                                                   u=action,
+                                                   state_args=e_dyn.state_args,
+                                                   ctrl_args=e_dyn.ctrl_args)
+
+    def s_input(self, user_input):
+        return user_input.reshape((-1, 1))
 
     def s_movement(self, action):
         """Move entities according to their dynamics.
@@ -1507,36 +1148,23 @@ class SimpleUAV2d(Game2d):
         None.
         """
         for e in self._entity_manager.get_entities():
-            if e.c_transform is not None:
-                e.c_transform.last_pos[0] = e.c_transform.pos[0]
-                e.c_transform.last_pos[1] = e.c_transform.pos[1]
+            if e.has_component(gcomp.CTransform):
+                e_transform = e.get_component(gcomp.CTransform)
+                e_transform.last_pos[0] = e_transform.pos[0]
+                e_transform.last_pos[1] = e_transform.pos[1]
 
-            if e.c_dynamics is not None and e.c_transform is not None:
-                e.c_dynamics.last_state = e.c_dynamics.state.copy()
-                e.c_dynamics.state = e.c_dynamics.dynObj.propagate_state(self.current_time,
-                                                                         e.c_dynamics.last_state,
-                                                                         u=action.reshape((action.size, 1)),
-                                                                         state_args=e.c_dynamics.state_args,
-                                                                         ctrl_args=e.c_dynamics.ctrl_args)
+                if e.has_component(gcomp.CDynamics):
+                    e_dyn = e.get_component(gcomp.CDynamics)
+                    e_dyn.last_state = e_dyn.state.copy()
+                    self._propagate_dynamics(e_dyn, action)
 
-                p_ii = e.c_dynamics.pos_inds
-                v_ii = e.c_dynamics.vel_inds
-                e.c_transform.pos = self._dist_to_pixels(e.c_dynamics.state[p_ii],
-                                                         [0, 1], True)
-                e.c_transform.vel = self._dist_to_pixels(e.c_dynamics.state[v_ii],
-                                                         [0, 1], False)
-
-    def _get_overlap(self, bb1, bb2):
-        delta = (abs(bb1.centerx - bb2.centerx), abs(bb1.centery - bb2.centery))
-        ox = bb1.width / 2 + bb2.width / 2 - delta[0]
-        oy = bb1.height / 2 + bb2.height / 2 - delta[1]
-        return ox, oy
-
-    def _get_last_overlap(self, pt1, pt2, bb1, bb2):
-        delta = np.abs(pt1 - pt2)
-        ox = bb1.width / 2 + bb2.width / 2 - delta[0].item()
-        oy = bb1.height / 2 + bb2.height / 2 - delta[1].item()
-        return ox, oy
+                    p_ii = e_dyn.pos_inds
+                    v_ii = e_dyn.vel_inds
+                    e_transform.pos = self._dist_to_pixels(e_dyn.state[p_ii],
+                                                           [0, 1], True)
+                    if v_ii is not None:
+                        e_transform.vel = self._dist_to_pixels(e_dyn.state[v_ii],
+                                                               [0, 1], False)
 
     def s_collision(self):
         """Check for collisions between entities.
@@ -1548,119 +1176,82 @@ class SimpleUAV2d(Game2d):
         -------
         None.
         """
-        rng = np.random.default_rng()
-
         # update all bounding boxes
         for e in self._entity_manager.get_entities():
-            if e.c_transform is not None and e.c_collision is not None:
-                e.c_collision.aabb.centerx = e.c_transform.pos[0].item()
-                e.c_collision.aabb.centery = e.c_transform.pos[1].item()
+            if e.has_component(gcomp.CTransform) and e.has_component(gcomp.CCollision):
+                c_collision = e.get_component(gcomp.CCollision)
+                c_transform = e.get_component(gcomp.CTransform)
+                c_collision.aabb.centerx = c_transform.pos[0].item()
+                c_collision.aabb.centery = c_transform.pos[1].item()
 
         # check for collision of player
         for e in self._entity_manager.get_entities('player'):
-            if e.c_transform is not None and e.c_collision is not None:
-                p_aabb = e.c_collision.aabb
-                p_trans = e.c_transform
+            p_aabb = e.get_component(gcomp.CCollision).aabb
+            p_trans = e.get_component(gcomp.CTransform)
+            p_events = e.get_component(gcomp.CEvents)
 
-                # check for out of bounds, stop at out of bounds
-                went_oob = False
-                if p_aabb.left < 0:
-                    p_aabb.left = 0
-                    p_trans.vel[0] = 0
-                    went_oob = True
-                elif p_aabb.right > self._window.get_width():
-                    p_aabb.right = self._window.get_width()
-                    p_trans.vel[0] = 0
-                    went_oob = True
+            # check for out of bounds, stop at out of bounds
+            out_side, out_top = gphysics.clamp_window_bounds2d(p_aabb, p_trans,
+                                                               self._window.get_width(),
+                                                               self._window.get_height())
+            if out_side:
+                p_events.events.append((EventType.WALL, None))
+            if out_top:
+                p_events.events.append((EventType.WALL, None))
 
-                if went_oob and e.c_events is not None:
-                    e.c_events.events.append((EventType.WALL, None))
-                went_oob = False
+            # check for collision with wall
+            for w in self._entity_manager.get_entities('obstacle'):
+                w_aabb = w.get_component(gcomp.CCollision).aabb
+                if gphysics.check_collision2d(p_aabb, w_aabb):
+                    gphysics.resolve_collision2d(p_aabb, w_aabb, p_trans,
+                                                 w.get_component(gcomp.CTransform))
+                    p_events.events.append((EventType.WALL, None))
 
-                if p_aabb.top < 0:
-                    p_aabb.top = 0
-                    p_trans.vel[1] = 0
-                    went_oob = True
-                elif p_aabb.bottom > self._window.get_height():
-                    p_aabb.bottom = self._window.get_height()
-                    p_trans.vel[1] = 0
-                    went_oob = True
+            # check for collision with hazard
+            for h in self._entity_manager.get_entities('hazard'):
+                h_aabb = h.get_component(gcomp.CCollision).aabb
+                c_hazard = h.get_component(gcomp.CHazard)
+                if gphysics.check_collision2d(p_aabb, h_aabb):
+                    if self._rng.uniform(0., 1.) < c_hazard.prob_of_death:
+                        e.destroy()
+                        p_events.events.append((EventType.DEATH, None))
+                        if e.id in c_hazard.entrance_times:
+                            del c_hazard.entrance_times[e.id]
 
-                if went_oob and e.c_events is not None:
-                    e.c_events.events.append((EventType.WALL, None))
-
-                # check for collision with wall
-                for w in self._entity_manager.get_entities('obstacle'):
-                    w_aabb = w.c_collision.aabb
-                    ox, oy = self._get_overlap(p_aabb, w_aabb)
-
-                    if ox > 0 and oy > 0:
-                        opx, opy = self._get_last_overlap(p_trans.last_pos,
-                                                          w.c_transform.last_pos,
-                                                          p_aabb, w_aabb)
-                        if opy > 0:
-                            p_trans.vel[0] = 0
-                            if p_trans.last_pos[0] < p_trans.pos[0]:
-                                p_aabb.centerx -= ox
-                            else:
-                                p_aabb.centerx += ox
-                        elif opx > 0:
-                            p_trans.vel[1] = 0
-                            if p_trans.last_pos[1] < p_trans.pos[1]:
-                                p_aabb.centery -= oy
-                            else:
-                                p_aabb.centery += oy
-
-                        if e.c_events is not None:
-                            e.c_events.events.append((EventType.WALL, None))
-
-                # check for collision with hazard
-                for h in self._entity_manager.get_entities('hazard'):
-                    h_aabb = h.c_collision.aabb
-                    if not pygame.Rect.colliderect(p_aabb, h_aabb):
-                        if e.id in h.c_hazard.entrance_times:
-                            del h.c_hazard.entrance_times[e.id]
                     else:
-                        if rng.uniform(0., 1.) < h.c_hazard.prob_of_death:
-                            e.destroy()
-                            e.c_events.events.append((EventType.DEATH, None))
-                            if e.id in h.c_hazard.entrance_times:
-                                del h.c_hazard.entrance_times[e.id]
-                            break
+                        if e.id not in c_hazard.entrance_times:
+                            c_hazard.entrance_times[e.id] = self.current_time
+                        e.c_events.events.append((EventType.HAZARD,
+                                                  {'prob': c_hazard.prob_of_death,
+                                                   't_ent': c_hazard.entrance_times[e.id]}))
+                else:
+                    if e.id in c_hazard.entrance_times:
+                        del c_hazard.entrance_times[e.id]
 
-                        else:
-                            if e.id not in h.c_hazard.entrance_times:
-                                h.c_hazard.entrance_times[e.id] = self.current_time
-                            e.c_events.events.append((EventType.HAZARD,
-                                                      {'prob': h.c_hazard.prob_of_death,
-                                                       't_ent': h.c_hazard.entrance_times[e.id]}))
+            if not e.active:
+                continue
 
-                if not e.active:
+            # check for collision with target
+            for t in self._entity_manager.get_entities('target'):
+                if not t.active:
                     continue
 
-                # check for collision with target
-                for ii, t in enumerate(self._entity_manager.get_entities('target')):
-                    if not t.active:
-                        continue
+                if gphysics.check_collision2d(p_aabb,
+                                              t.get_component(gcomp.CCollision).aabb):
+                    p_events.events.append((EventType.TARGET, {'target': t}))
+                    t.destroy()
+                    break
 
-                    if pygame.Rect.colliderect(p_aabb, t.c_collision.aabb):
-                        e.c_events.events.append((EventType.TARGET, {'target': t}))
-                        t.destroy()
-                        break
+            # update state
+            p_dynamics = e.get_component(gcomp.CDynamics)
+            p_ii = p_dynamics.pos_inds
+            v_ii = p_dynamics.vel_inds
 
-                # update position
-                p_trans.pos[0] = p_aabb.centerx
-                p_trans.pos[1] = p_aabb.centery
-
-                # update state
-                if e.c_dynamics is not None:
-                    p_ii = e.c_dynamics.pos_inds
-                    v_ii = e.c_dynamics.vel_inds
-
-                    e.c_dynamics.state[p_ii] = self._pixels_to_dist(p_trans.pos,
-                                                                    [0, 1], True)
-                    e.c_dynamics.state[v_ii] = self._pixels_to_dist(p_trans.vel,
-                                                                    [0, 1], False)
+            p_dynamics.state[p_ii] = self._pixels_to_dist(p_trans.pos,
+                                                          [0, 1], True)
+            if v_ii is not None:
+                p_dynamics.state[v_ii] = self._pixels_to_dist(p_trans.vel,
+                                                              [0, 1], False)
 
     def s_game_over(self):
         """Determines if the game ends.
@@ -1692,12 +1283,37 @@ class SimpleUAV2d(Game2d):
             extra info for debugging.
         """
         if self._reward_type == 'BasicReward':
-            self.score, info = self._scoreCls.calc_reward(self.current_time,
-                                                          self._entity_manager.get_entities('player'),
-                                                          self._entity_manager.get_entities('target'),
-                                                          self._all_capabilities, self.game_over)
+            score, info = self._scoreCls.calc_reward(self.current_time,
+                                                     self._entity_manager.get_entities('player'),
+                                                     self._entity_manager.get_entities('target'),
+                                                     self._all_capabilities, self.game_over)
         else:
             msg = 'Score system has no implementation for reward type {}'.format(self._reward_type)
             raise NotImplementedError(msg)
 
-        return info
+        return score, info
+
+    def valid_start(self):
+        valid = True
+        for e in self._entity_manager.get_entities('player'):
+            p_aabb = e.get_component(gcomp.CCollision).aabb
+
+            for w in self._entity_manager.get_entities('obstacle'):
+                if gphysics.check_collision2d(p_aabb,
+                                              w.get_component(gcomp.CCollision).aabb):
+                    valid = False
+                    break
+            if not valid:
+                break
+        return valid
+
+
+class SimpleLagerSUPER(SimpleUAV2d):
+    def _create_dynamics(self, params, c_birth):
+        pass
+
+    def _propagate_dynamics(self, e_dyn, action):
+        pass
+
+    def s_input(self, user_input):
+        pass

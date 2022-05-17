@@ -629,7 +629,7 @@ class SimpleLAGERSuper(SimpleMultirotor):
         self._last_gps_upd_time = -np.inf
         self._gps_update_rate_hz = 5
 
-        self._sensorData.inceptor.ch[4] = 1811  # waypoint follow mode
+        self._sensorData.inceptor.ch[4] = 990  # pos hold mode
 
         super().__init__(params_file, **kwargs)
 
@@ -695,6 +695,14 @@ class SimpleLAGERSuper(SimpleMultirotor):
     @property
     def current_waypoint(self):
         return self._telemData.current_waypoint
+
+    @property
+    def waypoint_radius(self):
+        return self._telemData.param[10]
+
+    @waypoint_radius.setter
+    def waypoint_radius(self, val):
+        self._telemData.param[10] = float(val)
 
     def parse_waypoint_file(self, file):
         waypoints = [super_bind.MissionItem()] * super_bind.NUM_FLIGHT_PLAN_POINTS

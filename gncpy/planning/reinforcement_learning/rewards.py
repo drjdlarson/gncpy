@@ -3,6 +3,7 @@ import numpy as np
 from abc import abstractmethod
 
 from gncpy.planning.reinforcement_learning.enums import EventType
+import gncpy.planning.reinforcement_learning.components as gcomp
 
 
 class Reward:
@@ -159,22 +160,27 @@ class BasicReward(Reward):
             r_death = 0
             r_wall = 0
 
-            max_vel = np.linalg.norm(player.c_dynamics.state_high[player.c_dynamics.vel_inds])
-            min_vel = np.linalg.norm(player.c_dynamics.state_low[player.c_dynamics.vel_inds])
-            vel = np.linalg.norm(player.c_dynamics.state[player.c_dynamics.vel_inds])
+            p_dynamics = player.get_component(gcomp.CDynamics)
+            p_events = player.get_component(gcomp.CEvents)
+            p_capabilities = player.get_component(gcomp.CCapabilities)
 
-            vel_per = vel / np.max((max_vel, min_vel))
-            if vel_per < self.min_vel_per:
-                r_vel += -self.vel_penalty
+            if p_dynamics.vel_inds is not None and len(p_dynamics.vel_inds) > 0:
+                max_vel = np.linalg.norm(p_dynamics.state_high[p_dynamics.vel_inds])
+                min_vel = np.linalg.norm(p_dynamics.state_low[p_dynamics.vel_inds])
+                vel = np.linalg.norm(p_dynamics.state[p_dynamics.vel_inds])
 
-            for e_type, info in player.c_events.events:
+                vel_per = vel / np.max((max_vel, min_vel))
+                if vel_per < self.min_vel_per:
+                    r_vel += -self.vel_penalty
+
+            for e_type, info in p_events.events:
                 if e_type == EventType.HAZARD:
                     r_hazard += -(self.hazard_multiplier * (info['prob'] * 100)
                                   * (t - info['t_ent']))
 
                 elif e_type == EventType.DEATH:
                     time_decay = self.death_scale * np.exp(-self.death_decay * t)
-                    r_death = -(time_decay * self._match_function(player.c_capabilities.capabilities,
+                    r_death = -(time_decay * self._match_function(p_capabilities.capabilities,
                                                                   all_capabilities)
                                 + self.death_penalty)
                     r_hazard = 0
@@ -185,9 +191,11 @@ class BasicReward(Reward):
 
                 elif e_type == EventType.TARGET:
                     target = info['target']
-                    match_per = self._match_function(player.c_capabilities.capabilities,
-                                                     target.c_capabilities.capabilities)
-                    r_target = (self.target_multiplier * target.c_priority.priority
+                    t_capabilities = target.get_component(gcomp.CCapabilities)
+                    t_priority = target.get_component(gcomp.CPriority)
+                    match_per = self._match_function(p_capabilities.capabilities,
+                                                     t_capabilities.capabilities)
+                    r_target = (self.target_multiplier * t_priority.priority
                                 * match_per)
 
                 elif e_type == EventType.WALL:
@@ -205,7 +213,7 @@ class BasicReward(Reward):
         if game_over:
             for target in target_lst:
                 if target.active:
-                    r_missed += -target.c_priority.priority
+                    r_missed += -target.get_component(gcomp.CPriority).priority
             r_missed *= self.missed_multiplier
 
         reward += -self.time_penalty + r_missed + r_vel

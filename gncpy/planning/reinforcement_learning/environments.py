@@ -81,7 +81,7 @@ class BaseEnv(gym.Env):
         raise NotImplementedError
 
     @abstractmethod
-    def reset(self):
+    def reset(self, seed=None):
         """Abstract method for implementing the reset function.
 
         Returns
@@ -266,7 +266,7 @@ class SimpleUAV2d(BaseEnv):
             else:
                 return main_state
 
-    def reset(self):
+    def reset(self, seed=None):
         """Resets the environment.
 
         Returns
@@ -274,14 +274,17 @@ class SimpleUAV2d(BaseEnv):
         numpy array, dict
             observation
         """
-        self._game.reset()
+        self._game.reset(seed=seed)
         self._game.step(np.zeros_like(self.action_space.low))
 
         # make sure the agent didn't die on first step
         while self._game.game_over:
-            self._game.reset()
+            self._game.reset(seed=seed)
             self._game.step(np.zeros_like(self.action_space.low))
         return self.generate_observation()
+
+    def valid_start(self):
+        return self._game.valid_start()
 
 
 class SimpleUAVHazards2d(SimpleUAV2d):

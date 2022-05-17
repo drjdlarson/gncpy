@@ -7,9 +7,9 @@
 //
 // Code generated for Simulink model 'baseline_super'.
 //
-// Model version                  : 2.20
+// Model version                  : 2.29
 // Simulink Coder version         : 9.5 (R2021a) 14-Nov-2020
-// C/C++ source code generated on : Thu May 12 15:45:48 2022
+// C/C++ source code generated on : Sun May 15 14:35:12 2022
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: Intel->x86-64 (Linux 64)
@@ -341,7 +341,7 @@ real32_T rt_remf_snf(real32_T u0, real32_T u1)
 
 namespace bfs
 {
-  // Function for MATLAB Function: '<S635>/determine_prev_tar_pos'
+  // Function for MATLAB Function: '<S637>/determine_prev_tar_pos'
   void Autocode::cosd(real32_T *x)
   {
     real32_T absx;
@@ -401,7 +401,7 @@ namespace bfs
     }
   }
 
-  // Function for MATLAB Function: '<S635>/determine_prev_tar_pos'
+  // Function for MATLAB Function: '<S637>/determine_prev_tar_pos'
   void Autocode::sind(real32_T *x)
   {
     real32_T absx;
@@ -461,7 +461,7 @@ namespace bfs
     }
   }
 
-  // Function for MATLAB Function: '<S635>/determine_prev_tar_pos'
+  // Function for MATLAB Function: '<S637>/determine_prev_tar_pos'
   void Autocode::lla_to_ECEF(const real32_T lla[3], real32_T ecef_pos[3])
   {
     real32_T b;
@@ -538,10 +538,10 @@ namespace bfs
     int32_T rtb_Reshape_h_tmp;
     real32_T c_lon;
     real32_T rtb_Cos_f;
-    real32_T rtb_DataTypeConversion_h;
     real32_T rtb_Gain_h;
     real32_T rtb_Reshape_h_0;
     real32_T rtb_Reshape_h_idx_0;
+    real32_T rtb_Reshape_h_idx_2;
     real32_T rtb_Subtract_f_idx_1;
     real32_T rtb_Switch_i;
     real32_T rtb_Tsamp_a;
@@ -561,53 +561,53 @@ namespace bfs
     UNUSED_PARAMETER(sys);
 
     // Logic: '<S19>/nav_init AND motor_enable' incorporates:
-    //   Constant: '<S666>/Constant'
-    //   DataTypeConversion: '<S645>/Data Type Conversion'
+    //   Constant: '<S668>/Constant'
+    //   DataTypeConversion: '<S647>/Data Type Conversion'
     //   Inport: '<Root>/Navigation Filter Data'
     //   Inport: '<Root>/Sensor Data'
-    //   Polyval: '<S645>/throttle_en_norm'
-    //   RelationalOperator: '<S666>/Compare'
+    //   Polyval: '<S647>/throttle_en_norm'
+    //   RelationalOperator: '<S668>/Compare'
     rtb_Switch_lt = ((0.00122026F * static_cast<real32_T>(sensor.inceptor.ch[6])
                       + -1.20988405F > 0.0F) && nav.nav_initialized);
 
-    // Outputs for Enabled SubSystem: '<S646>/disarm motor' incorporates:
-    //   EnablePort: '<S650>/Enable'
+    // Outputs for Enabled SubSystem: '<S648>/disarm motor' incorporates:
+    //   EnablePort: '<S652>/Enable'
 
-    // RelationalOperator: '<S649>/Compare' incorporates:
-    //   Constant: '<S649>/Constant'
+    // RelationalOperator: '<S651>/Compare' incorporates:
+    //   Constant: '<S651>/Constant'
     //   Inport: '<Root>/Sensor Data'
     if (sensor.power_module.voltage_v <= 46.8F) {
       if (!rtDW.disarmmotor_MODE_k) {
-        // InitializeConditions for UnitDelay: '<S650>/Unit Delay'
+        // InitializeConditions for UnitDelay: '<S652>/Unit Delay'
         rtDW.UnitDelay_DSTATE_m = 0.0;
         rtDW.disarmmotor_MODE_k = true;
       }
 
-      // RelationalOperator: '<S651>/Compare' incorporates:
-      //   Constant: '<S650>/Constant'
-      //   Constant: '<S651>/Constant'
-      //   Sum: '<S650>/Sum'
-      //   UnitDelay: '<S650>/Unit Delay'
+      // RelationalOperator: '<S653>/Compare' incorporates:
+      //   Constant: '<S652>/Constant'
+      //   Constant: '<S653>/Constant'
+      //   Sum: '<S652>/Sum'
+      //   UnitDelay: '<S652>/Unit Delay'
       rtDW.Compare_d = (rtDW.UnitDelay_DSTATE_m + 0.01 > 15.0);
 
-      // Update for UnitDelay: '<S650>/Unit Delay' incorporates:
-      //   Constant: '<S650>/Constant'
-      //   Sum: '<S650>/Sum'
+      // Update for UnitDelay: '<S652>/Unit Delay' incorporates:
+      //   Constant: '<S652>/Constant'
+      //   Sum: '<S652>/Sum'
       rtDW.UnitDelay_DSTATE_m += 0.01;
     } else {
       rtDW.disarmmotor_MODE_k = false;
     }
 
-    // End of RelationalOperator: '<S649>/Compare'
-    // End of Outputs for SubSystem: '<S646>/disarm motor'
+    // End of RelationalOperator: '<S651>/Compare'
+    // End of Outputs for SubSystem: '<S648>/disarm motor'
 
-    // Polyval: '<S644>/mode_norm' incorporates:
-    //   DataTypeConversion: '<S644>/Data Type Conversion1'
+    // Polyval: '<S646>/mode_norm' incorporates:
+    //   DataTypeConversion: '<S646>/Data Type Conversion1'
     //   Inport: '<Root>/Sensor Data'
     rtb_roll_angle_cmd_rad = 0.00122026F * static_cast<real32_T>
       (sensor.inceptor.ch[4]) + -0.209884077F;
 
-    // DataTypeConversion: '<S644>/Data Type Conversion6'
+    // DataTypeConversion: '<S646>/Data Type Conversion6'
     if (std::abs(rtb_roll_angle_cmd_rad) >= 0.5F) {
       s_lat = std::floor(rtb_roll_angle_cmd_rad + 0.5F);
       rtb_DataTypeConversion6 = static_cast<int8_T>(s_lat);
@@ -617,25 +617,25 @@ namespace bfs
         0.0F);
     }
 
-    // Logic: '<S646>/AND' incorporates:
-    //   Constant: '<S648>/Constant'
-    //   DataTypeConversion: '<S644>/Data Type Conversion6'
-    //   Logic: '<S646>/AND1'
-    //   RelationalOperator: '<S648>/Compare'
+    // Logic: '<S648>/AND' incorporates:
+    //   Constant: '<S650>/Constant'
+    //   DataTypeConversion: '<S646>/Data Type Conversion6'
+    //   Logic: '<S648>/AND1'
+    //   RelationalOperator: '<S650>/Compare'
     rtb_AND_n = (rtDW.Compare_d && ((static_cast<int8_T>(s_lat) != 5) &&
       rtb_Switch_lt));
 
-    // Logic: '<S647>/AND' incorporates:
-    //   Constant: '<S652>/Constant'
-    //   Constant: '<S653>/Constant'
+    // Logic: '<S649>/AND' incorporates:
     //   Constant: '<S654>/Constant'
-    //   DataTypeConversion: '<S644>/Data Type Conversion6'
+    //   Constant: '<S655>/Constant'
+    //   Constant: '<S656>/Constant'
+    //   DataTypeConversion: '<S646>/Data Type Conversion6'
     //   Inport: '<Root>/Sensor Data'
-    //   Logic: '<S647>/NOR'
-    //   Logic: '<S647>/NOT'
-    //   RelationalOperator: '<S652>/Compare'
-    //   RelationalOperator: '<S653>/Compare'
+    //   Logic: '<S649>/NOR'
+    //   Logic: '<S649>/NOT'
     //   RelationalOperator: '<S654>/Compare'
+    //   RelationalOperator: '<S655>/Compare'
+    //   RelationalOperator: '<S656>/Compare'
     rtb_AND = (sensor.inceptor.failsafe && ((static_cast<int8_T>(s_lat) == 3) &&
                 (static_cast<int8_T>(s_lat) == 4) && (static_cast<int8_T>(s_lat)
       == 5) && rtb_Switch_lt));
@@ -653,13 +653,13 @@ namespace bfs
 
     // End of Switch: '<S19>/Switch1'
 
-    // Outputs for Enabled SubSystem: '<S643>/waypoint submodes' incorporates:
-    //   EnablePort: '<S662>/Enable'
+    // Outputs for Enabled SubSystem: '<S645>/waypoint submodes' incorporates:
+    //   EnablePort: '<S664>/Enable'
 
-    // RelationalOperator: '<S660>/Compare' incorporates:
-    //   Constant: '<S660>/Constant'
+    // RelationalOperator: '<S662>/Compare' incorporates:
+    //   Constant: '<S662>/Constant'
     if (rtb_DataTypeConversion6 == 2) {
-      // MATLAB Function: '<S662>/determine_target_pos' incorporates:
+      // MATLAB Function: '<S664>/determine_target_pos' incorporates:
       //   Inport: '<Root>/Navigation Filter Data'
       diff[0] = static_cast<real32_T>(nav.home_lat_rad * 57.295779513082323);
       diff[1] = static_cast<real32_T>(nav.home_lon_rad * 57.295779513082323);
@@ -673,12 +673,13 @@ namespace bfs
       s_lon = diff[1];
       sind(&s_lon);
 
-      // MATLAB Function: '<S662>/determine_wp_submode' incorporates:
-      //   Constant: '<S662>/Constant'
+      // MATLAB Function: '<S664>/determine_wp_submode' incorporates:
+      //   Constant: '<S664>/Constant'
       //   Inport: '<Root>/Navigation Filter Data'
       //   Inport: '<Root>/Telemetry Data'
-      //   MATLAB Function: '<S662>/determine_target_pos'
-      //   Selector: '<S662>/Selector'
+      //   MATLAB Function: '<S664>/determine_target_pos'
+      //   Selector: '<S664>/Selector'
+      //   Selector: '<S664>/Selector1'
       rtDW.sub_mode = 2;
       switch (telem.flight_plan[telem.current_waypoint].cmd) {
        case 20:
@@ -686,7 +687,7 @@ namespace bfs
         break;
 
        case 16:
-        // MATLAB Function: '<S662>/determine_target_pos' incorporates:
+        // MATLAB Function: '<S664>/determine_target_pos' incorporates:
         //   Inport: '<Root>/Navigation Filter Data'
         tmp[0] = static_cast<real32_T>(telem.flight_plan[telem.current_waypoint]
           .x) * 1.0E-7F;
@@ -705,16 +706,15 @@ namespace bfs
         s_lat_0[6] = rtb_roll_angle_cmd_rad;
         s_lat_0[7] = 0.0F;
         s_lat_0[8] = -s_lat;
-        rtb_DataTypeConversion_h = tmp_0[0] - tmp[0];
+        rtb_Reshape_h_idx_2 = tmp_0[0] - tmp[0];
         rtb_Reshape_h_idx_0 = tmp_0[1] - tmp[1];
         rtb_Subtract_f_idx_1 = tmp_0[2] - tmp[2];
         s_lon = 0.0F;
         rtb_roll_angle_cmd_rad = 1.29246971E-26F;
         for (idx = 0; idx < 3; idx++) {
           s_lat = std::abs(((s_lat_0[idx + 3] * rtb_Reshape_h_idx_0 +
-                             s_lat_0[idx] * rtb_DataTypeConversion_h) +
-                            s_lat_0[idx + 6] * rtb_Subtract_f_idx_1) -
-                           nav.ned_pos_m[idx]);
+                             s_lat_0[idx] * rtb_Reshape_h_idx_2) + s_lat_0[idx +
+                            6] * rtb_Subtract_f_idx_1) - nav.ned_pos_m[idx]);
           if (s_lat > rtb_roll_angle_cmd_rad) {
             c_lon = rtb_roll_angle_cmd_rad / s_lat;
             s_lon = s_lon * c_lon * c_lon + 1.0F;
@@ -726,27 +726,27 @@ namespace bfs
         }
 
         s_lon = rtb_roll_angle_cmd_rad * std::sqrt(s_lon);
-        if ((s_lon <= 1.5F) && (!telem.flight_plan[telem.current_waypoint].
-             autocontinue)) {
+        if ((s_lon <= telem.param[10]) &&
+            (!telem.flight_plan[telem.current_waypoint].autocontinue)) {
           rtDW.sub_mode = 1;
         }
         break;
       }
 
-      // End of MATLAB Function: '<S662>/determine_wp_submode'
+      // End of MATLAB Function: '<S664>/determine_wp_submode'
     }
 
-    // End of RelationalOperator: '<S660>/Compare'
-    // End of Outputs for SubSystem: '<S643>/waypoint submodes'
+    // End of RelationalOperator: '<S662>/Compare'
+    // End of Outputs for SubSystem: '<S645>/waypoint submodes'
 
-    // Outputs for Enabled SubSystem: '<S643>/rtl submodes' incorporates:
-    //   EnablePort: '<S661>/Enable'
+    // Outputs for Enabled SubSystem: '<S645>/rtl submodes' incorporates:
+    //   EnablePort: '<S663>/Enable'
 
-    // RelationalOperator: '<S659>/Compare' incorporates:
-    //   Constant: '<S659>/Constant'
+    // RelationalOperator: '<S661>/Compare' incorporates:
+    //   Constant: '<S661>/Constant'
     if (rtb_DataTypeConversion6 == 3) {
-      // MATLAB Function: '<S661>/determine_rtl_submode' incorporates:
-      //   Constant: '<S661>/Constant'
+      // MATLAB Function: '<S663>/determine_rtl_submode' incorporates:
+      //   Constant: '<S663>/Constant'
       //   Inport: '<Root>/Navigation Filter Data'
       rtDW.sub_mode_m = 3;
       rtb_roll_angle_cmd_rad = 1.29246971E-26F;
@@ -784,16 +784,16 @@ namespace bfs
         rtDW.sub_mode_m = 4;
       }
 
-      // End of MATLAB Function: '<S661>/determine_rtl_submode'
+      // End of MATLAB Function: '<S663>/determine_rtl_submode'
     }
 
-    // End of RelationalOperator: '<S659>/Compare'
-    // End of Outputs for SubSystem: '<S643>/rtl submodes'
+    // End of RelationalOperator: '<S661>/Compare'
+    // End of Outputs for SubSystem: '<S645>/rtl submodes'
 
     // Switch: '<S19>/Switch3' incorporates:
     //   Logic: '<S19>/OR'
     if ((!rtb_AND_n) && (!rtb_AND)) {
-      // MultiPortSwitch: '<S643>/Multiport Switch'
+      // MultiPortSwitch: '<S645>/Multiport Switch'
       switch (rtb_DataTypeConversion6) {
        case 2:
         rtb_DataTypeConversion6 = rtDW.sub_mode;
@@ -804,59 +804,59 @@ namespace bfs
         break;
       }
 
-      // End of MultiPortSwitch: '<S643>/Multiport Switch'
+      // End of MultiPortSwitch: '<S645>/Multiport Switch'
     }
 
     // End of Switch: '<S19>/Switch3'
 
     // Outputs for Enabled SubSystem: '<S19>/auto_disarm' incorporates:
-    //   EnablePort: '<S641>/Enable'
+    //   EnablePort: '<S643>/Enable'
 
     // Logic: '<S19>/motor_armed AND mode_4' incorporates:
-    //   Abs: '<S641>/Abs'
-    //   Constant: '<S642>/Constant'
-    //   Constant: '<S655>/Constant'
-    //   Constant: '<S656>/Constant'
-    //   Gain: '<S641>/Gain'
+    //   Abs: '<S643>/Abs'
+    //   Constant: '<S644>/Constant'
+    //   Constant: '<S657>/Constant'
+    //   Constant: '<S658>/Constant'
+    //   Gain: '<S643>/Gain'
     //   Inport: '<Root>/Navigation Filter Data'
-    //   Logic: '<S641>/AND'
-    //   RelationalOperator: '<S642>/Compare'
-    //   RelationalOperator: '<S655>/Compare'
-    //   RelationalOperator: '<S656>/Compare'
+    //   Logic: '<S643>/AND'
+    //   RelationalOperator: '<S644>/Compare'
+    //   RelationalOperator: '<S657>/Compare'
+    //   RelationalOperator: '<S658>/Compare'
     if (rtb_Switch_lt && (rtb_DataTypeConversion6 == 4)) {
       rtDW.auto_disarm_MODE = true;
 
-      // Outputs for Enabled SubSystem: '<S641>/disarm motor' incorporates:
-      //   EnablePort: '<S657>/Enable'
+      // Outputs for Enabled SubSystem: '<S643>/disarm motor' incorporates:
+      //   EnablePort: '<S659>/Enable'
       if ((-nav.ned_pos_m[2] <= 10.0F) && (std::abs(nav.ned_vel_mps[2]) <= 0.3F))
       {
         if (!rtDW.disarmmotor_MODE) {
-          // InitializeConditions for UnitDelay: '<S657>/Unit Delay'
+          // InitializeConditions for UnitDelay: '<S659>/Unit Delay'
           rtDW.UnitDelay_DSTATE = 0.0;
           rtDW.disarmmotor_MODE = true;
         }
 
-        // RelationalOperator: '<S658>/Compare' incorporates:
-        //   Constant: '<S657>/Constant'
-        //   Constant: '<S658>/Constant'
-        //   Sum: '<S657>/Sum'
-        //   UnitDelay: '<S657>/Unit Delay'
+        // RelationalOperator: '<S660>/Compare' incorporates:
+        //   Constant: '<S659>/Constant'
+        //   Constant: '<S660>/Constant'
+        //   Sum: '<S659>/Sum'
+        //   UnitDelay: '<S659>/Unit Delay'
         rtDW.Compare = (rtDW.UnitDelay_DSTATE + 0.01 > 10.0);
 
-        // Update for UnitDelay: '<S657>/Unit Delay' incorporates:
-        //   Constant: '<S657>/Constant'
-        //   Sum: '<S657>/Sum'
+        // Update for UnitDelay: '<S659>/Unit Delay' incorporates:
+        //   Constant: '<S659>/Constant'
+        //   Sum: '<S659>/Sum'
         rtDW.UnitDelay_DSTATE += 0.01;
       } else {
         rtDW.disarmmotor_MODE = false;
       }
 
-      // End of Outputs for SubSystem: '<S641>/disarm motor'
+      // End of Outputs for SubSystem: '<S643>/disarm motor'
     } else if (rtDW.auto_disarm_MODE) {
-      // Disable for Enabled SubSystem: '<S641>/disarm motor'
+      // Disable for Enabled SubSystem: '<S643>/disarm motor'
       rtDW.disarmmotor_MODE = false;
 
-      // End of Disable for SubSystem: '<S641>/disarm motor'
+      // End of Disable for SubSystem: '<S643>/disarm motor'
       rtDW.auto_disarm_MODE = false;
     }
 
@@ -874,20 +874,20 @@ namespace bfs
     //   Inport: '<Root>/Telemetry Data'
     //   Logic: '<S11>/OR'
     //   RelationalOperator: '<S18>/Compare'
-    //   RelationalOperator: '<S632>/FixPt Relational Operator'
-    //   UnitDelay: '<S632>/Delay Input1'
+    //   RelationalOperator: '<S634>/FixPt Relational Operator'
+    //   UnitDelay: '<S634>/Delay Input1'
     //
-    //  Block description for '<S632>/Delay Input1':
+    //  Block description for '<S634>/Delay Input1':
     //
     //   Store in Global RAM
     if (rtb_Switch_lt && (rtb_DataTypeConversion6 == 2)) {
-      // RelationalOperator: '<S633>/Compare' incorporates:
-      //   Constant: '<S633>/Constant'
+      // RelationalOperator: '<S635>/Compare' incorporates:
+      //   Constant: '<S635>/Constant'
       //   Inport: '<Root>/Telemetry Data'
-      //   RelationalOperator: '<S631>/FixPt Relational Operator'
-      //   UnitDelay: '<S631>/Delay Input1'
+      //   RelationalOperator: '<S633>/FixPt Relational Operator'
+      //   UnitDelay: '<S633>/Delay Input1'
       //
-      //  Block description for '<S631>/Delay Input1':
+      //  Block description for '<S633>/Delay Input1':
       //
       //   Store in Global RAM
       rtb_Compare_lx = (telem.current_waypoint != rtDW.DelayInput1_DSTATE);
@@ -896,20 +896,20 @@ namespace bfs
       //   EnablePort: '<S466>/Enable'
       if (telem.waypoints_updated || (static_cast<int32_T>(rtb_Compare_lx) >
            static_cast<int32_T>(rtDW.DelayInput1_DSTATE_n))) {
-        // RelationalOperator: '<S634>/Compare' incorporates:
+        // RelationalOperator: '<S636>/Compare' incorporates:
         //   Constant: '<S466>/Constant'
-        //   Constant: '<S634>/Constant'
+        //   Constant: '<S636>/Constant'
         //   Sum: '<S466>/Sum'
         rtb_Compare_n = (static_cast<real_T>(telem.current_waypoint) - 1.0 >=
                          0.0);
 
         // Outputs for Enabled SubSystem: '<S466>/calc_prev_target_pos' incorporates:
-        //   EnablePort: '<S635>/Enable'
+        //   EnablePort: '<S637>/Enable'
         if (rtb_Compare_n) {
-          // MATLAB Function: '<S635>/determine_prev_tar_pos' incorporates:
+          // MATLAB Function: '<S637>/determine_prev_tar_pos' incorporates:
           //   Constant: '<S466>/Constant'
           //   Inport: '<Root>/Navigation Filter Data'
-          //   Selector: '<S635>/Selector1'
+          //   Selector: '<S637>/Selector1'
           //   Sum: '<S466>/Sum'
           diff[0] = static_cast<real32_T>(nav.home_lat_rad * 57.295779513082323);
           diff[1] = static_cast<real32_T>(nav.home_lon_rad * 57.295779513082323);
@@ -938,17 +938,17 @@ namespace bfs
           s_lat_0[6] = rtb_roll_angle_cmd_rad;
           s_lat_0[7] = 0.0F;
           s_lat_0[8] = -s_lat;
-          rtb_DataTypeConversion_h = tmp_0[0] - tmp[0];
+          rtb_Reshape_h_idx_2 = tmp_0[0] - tmp[0];
           rtb_Reshape_h_idx_0 = tmp_0[1] - tmp[1];
           rtb_Subtract_f_idx_1 = tmp_0[2] - tmp[2];
           for (idx = 0; idx < 3; idx++) {
             rtDW.pref_target_pos[idx] = 0.0F;
-            rtDW.pref_target_pos[idx] += s_lat_0[idx] * rtb_DataTypeConversion_h;
+            rtDW.pref_target_pos[idx] += s_lat_0[idx] * rtb_Reshape_h_idx_2;
             rtDW.pref_target_pos[idx] += s_lat_0[idx + 3] * rtb_Reshape_h_idx_0;
             rtDW.pref_target_pos[idx] += s_lat_0[idx + 6] * rtb_Subtract_f_idx_1;
           }
 
-          // End of MATLAB Function: '<S635>/determine_prev_tar_pos'
+          // End of MATLAB Function: '<S637>/determine_prev_tar_pos'
         }
 
         // End of Outputs for SubSystem: '<S466>/calc_prev_target_pos'
@@ -984,13 +984,12 @@ namespace bfs
         s_lat_0[6] = rtb_roll_angle_cmd_rad;
         s_lat_0[7] = 0.0F;
         s_lat_0[8] = -s_lat;
-        rtb_DataTypeConversion_h = tmp_0[0] - tmp[0];
+        rtb_Reshape_h_idx_2 = tmp_0[0] - tmp[0];
         rtb_Reshape_h_idx_0 = tmp_0[1] - tmp[1];
         rtb_Subtract_f_idx_1 = tmp_0[2] - tmp[2];
         for (idx = 0; idx < 3; idx++) {
           rtDW.cur_target_pos_m_c[idx] = 0.0F;
-          rtDW.cur_target_pos_m_c[idx] += s_lat_0[idx] *
-            rtb_DataTypeConversion_h;
+          rtDW.cur_target_pos_m_c[idx] += s_lat_0[idx] * rtb_Reshape_h_idx_2;
           rtDW.cur_target_pos_m_c[idx] += s_lat_0[idx + 3] * rtb_Reshape_h_idx_0;
           rtDW.cur_target_pos_m_c[idx] += s_lat_0[idx + 6] *
             rtb_Subtract_f_idx_1;
@@ -1048,13 +1047,13 @@ namespace bfs
       //   Inport: '<Root>/Navigation Filter Data'
       //   Inport: '<Root>/Telemetry Data'
       //   Logic: '<S11>/OR'
-      //   RelationalOperator: '<S632>/FixPt Relational Operator'
-      //   UnitDelay: '<S632>/Delay Input1'
+      //   RelationalOperator: '<S634>/FixPt Relational Operator'
+      //   UnitDelay: '<S634>/Delay Input1'
       //
-      //  Block description for '<S632>/Delay Input1':
+      //  Block description for '<S634>/Delay Input1':
       //
       //   Store in Global RAM
-      rtb_DataTypeConversion_h = std::sin(nav.heading_rad);
+      c_lon = std::sin(nav.heading_rad);
 
       // Reshape: '<S525>/Reshape' incorporates:
       //   Gain: '<S525>/Gain'
@@ -1062,13 +1061,13 @@ namespace bfs
       //   Reshape: '<S186>/Reshape'
       //   Trigonometry: '<S525>/Cos'
       rtb_Reshape_h_idx_0 = std::cos(nav.heading_rad);
-      c_lon = -rtb_DataTypeConversion_h;
-      s_lon = rtb_DataTypeConversion_h;
+      s_lon = -c_lon;
+      rtb_Reshape_h_idx_2 = c_lon;
 
       // Sum: '<S472>/Subtract' incorporates:
       //   Inport: '<Root>/Navigation Filter Data'
       //   SignalConversion generated from: '<S468>/Bus Selector2'
-      rtb_DataTypeConversion_h = rtDW.cur_target_pos_m_c[0] - nav.ned_pos_m[0];
+      c_lon = rtDW.cur_target_pos_m_c[0] - nav.ned_pos_m[0];
       rtb_Subtract_f_idx_1 = rtDW.cur_target_pos_m_c[1] - nav.ned_pos_m[1];
 
       // MinMax: '<S471>/Min'
@@ -1078,8 +1077,8 @@ namespace bfs
         rtb_roll_angle_cmd_rad = 5.0F;
       }
 
-      if (!(rtb_roll_angle_cmd_rad < 3.0F)) {
-        rtb_roll_angle_cmd_rad = 3.0F;
+      if (!(rtb_roll_angle_cmd_rad < 5.0F)) {
+        rtb_roll_angle_cmd_rad = 5.0F;
       }
 
       // End of MinMax: '<S471>/Min'
@@ -1087,8 +1086,8 @@ namespace bfs
       // Sqrt: '<S472>/Sqrt' incorporates:
       //   Math: '<S472>/Transpose'
       //   Product: '<S472>/MatrixMultiply'
-      s_lat = std::sqrt(rtb_DataTypeConversion_h * rtb_DataTypeConversion_h +
-                        rtb_Subtract_f_idx_1 * rtb_Subtract_f_idx_1);
+      s_lat = std::sqrt(c_lon * c_lon + rtb_Subtract_f_idx_1 *
+                        rtb_Subtract_f_idx_1);
 
       // Saturate: '<S471>/Saturation'
       if (s_lat > 20.0F) {
@@ -1113,24 +1112,23 @@ namespace bfs
       // End of Switch: '<S515>/Switch2'
 
       // Trigonometry: '<S472>/Atan2'
-      rtb_DataTypeConversion_h = rt_atan2f_snf(rtb_Subtract_f_idx_1,
-        rtb_DataTypeConversion_h);
+      c_lon = rt_atan2f_snf(rtb_Subtract_f_idx_1, c_lon);
 
       // SignalConversion generated from: '<S475>/Product' incorporates:
       //   Product: '<S474>/Product'
       //   Product: '<S474>/Product1'
       //   Trigonometry: '<S474>/Cos'
       //   Trigonometry: '<S474>/Sin'
-      s_lat = rtb_roll_angle_cmd_rad * std::cos(rtb_DataTypeConversion_h);
-      rtb_roll_angle_cmd_rad *= std::sin(rtb_DataTypeConversion_h);
+      s_lat = rtb_roll_angle_cmd_rad * std::cos(c_lon);
+      rtb_roll_angle_cmd_rad *= std::sin(c_lon);
 
       // Product: '<S475>/Product' incorporates:
       //   Reshape: '<S186>/Reshape'
       rtDW.vb_xy[0] = 0.0F;
       rtDW.vb_xy[0] += rtb_Reshape_h_idx_0 * s_lat;
-      rtDW.vb_xy[0] += s_lon * rtb_roll_angle_cmd_rad;
+      rtDW.vb_xy[0] += rtb_Reshape_h_idx_2 * rtb_roll_angle_cmd_rad;
       rtDW.vb_xy[1] = 0.0F;
-      rtDW.vb_xy[1] += c_lon * s_lat;
+      rtDW.vb_xy[1] += s_lon * s_lat;
       rtDW.vb_xy[1] += rtb_Reshape_h_idx_0 * rtb_roll_angle_cmd_rad;
 
       // Product: '<S564>/PProd Out' incorporates:
@@ -1177,9 +1175,9 @@ namespace bfs
       // Switch: '<S579>/Switch' incorporates:
       //   Abs: '<S579>/Abs'
       //   Constant: '<S579>/Constant'
-      //   Constant: '<S630>/Constant'
+      //   Constant: '<S632>/Constant'
       //   Product: '<S579>/Product'
-      //   RelationalOperator: '<S630>/Compare'
+      //   RelationalOperator: '<S632>/Compare'
       //   Sum: '<S579>/Subtract1'
       if (std::abs(rtb_roll_angle_cmd_rad) > 3.14159274F) {
         // Signum: '<S579>/Sign'
@@ -1199,44 +1197,56 @@ namespace bfs
 
       // End of Switch: '<S579>/Switch'
 
-      // Product: '<S610>/IProd Out' incorporates:
+      // Product: '<S612>/IProd Out' incorporates:
       //   Constant: '<S577>/I_heading'
-      rtb_DataTypeConversion_h = rtb_roll_angle_cmd_rad * 0.01F;
+      c_lon = rtb_roll_angle_cmd_rad * 0.01F;
 
-      // Sum: '<S622>/Sum' incorporates:
-      //   DiscreteIntegrator: '<S613>/Integrator'
-      //   Product: '<S618>/PProd Out'
-      c_lon = rtb_roll_angle_cmd_rad + rtDW.Integrator_DSTATE_bm;
+      // SampleTimeMath: '<S610>/Tsamp' incorporates:
+      //   Constant: '<S577>/I_heading1'
+      //   Product: '<S607>/DProd Out'
+      //
+      //  About '<S610>/Tsamp':
+      //   y = u * K where K = 1 / ( w * Ts )
+      s_lon = rtb_roll_angle_cmd_rad * 1.5F * 100.0F;
+
+      // Sum: '<S624>/Sum' incorporates:
+      //   Constant: '<S577>/P_heading'
+      //   Delay: '<S608>/UD'
+      //   DiscreteIntegrator: '<S615>/Integrator'
+      //   Product: '<S620>/PProd Out'
+      //   Sum: '<S608>/Diff'
+      rtb_roll_angle_cmd_rad = (rtb_roll_angle_cmd_rad * 5.0F +
+        rtDW.Integrator_DSTATE_bm) + (s_lon - rtDW.UD_DSTATE_b);
 
       // Saturate: '<S577>/Saturation'
-      if (c_lon > 0.524F) {
+      if (rtb_roll_angle_cmd_rad > 0.524F) {
         // Saturate: '<S577>/Saturation'
         rtDW.Saturation = 0.524F;
-      } else if (c_lon < -0.524F) {
+      } else if (rtb_roll_angle_cmd_rad < -0.524F) {
         // Saturate: '<S577>/Saturation'
         rtDW.Saturation = -0.524F;
       } else {
         // Saturate: '<S577>/Saturation'
-        rtDW.Saturation = c_lon;
+        rtDW.Saturation = rtb_roll_angle_cmd_rad;
       }
 
       // End of Saturate: '<S577>/Saturation'
 
       // DeadZone: '<S606>/DeadZone'
-      if (c_lon >= (rtMinusInfF)) {
-        rtb_roll_angle_cmd_rad = 0.0F;
+      if (rtb_roll_angle_cmd_rad >= (rtMinusInfF)) {
+        rtb_Switch_i = 0.0F;
       } else {
-        rtb_roll_angle_cmd_rad = (rtNaNF);
+        rtb_Switch_i = (rtNaNF);
       }
 
       // End of DeadZone: '<S606>/DeadZone'
 
       // Signum: '<S604>/SignPreIntegrator'
-      if (rtb_DataTypeConversion_h < 0.0F) {
+      if (c_lon < 0.0F) {
         s_lat = -1.0F;
-      } else if (rtb_DataTypeConversion_h > 0.0F) {
+      } else if (c_lon > 0.0F) {
         s_lat = 1.0F;
-      } else if (rtb_DataTypeConversion_h == 0.0F) {
+      } else if (c_lon == 0.0F) {
         s_lat = 0.0F;
       } else {
         s_lat = (rtNaNF);
@@ -1251,15 +1261,18 @@ namespace bfs
       //   Logic: '<S604>/AND3'
       //   RelationalOperator: '<S604>/Equal1'
       //   RelationalOperator: '<S604>/NotEqual'
-      if ((0.0F * c_lon != rtb_roll_angle_cmd_rad) && (0 == static_cast<int8_T>
-           (s_lat))) {
-        rtb_DataTypeConversion_h = 0.0F;
+      if ((0.0F * rtb_roll_angle_cmd_rad != rtb_Switch_i) && (0 ==
+           static_cast<int8_T>(s_lat))) {
+        c_lon = 0.0F;
       }
 
       // End of Switch: '<S604>/Switch'
 
-      // Update for DiscreteIntegrator: '<S613>/Integrator'
-      rtDW.Integrator_DSTATE_bm += 0.01F * rtb_DataTypeConversion_h;
+      // Update for DiscreteIntegrator: '<S615>/Integrator'
+      rtDW.Integrator_DSTATE_bm += 0.01F * c_lon;
+
+      // Update for Delay: '<S608>/UD'
+      rtDW.UD_DSTATE_b = s_lon;
 
       // End of Outputs for SubSystem: '<S11>/WP_NAV'
 
@@ -1303,6 +1316,7 @@ namespace bfs
       //   Inport: '<Root>/Navigation Filter Data'
       //   Inport: '<Root>/Telemetry Data'
       //   Selector: '<S467>/Selector'
+      //   Selector: '<S467>/Selector1'
       s_lat = std::abs(rtDW.cur_target_pos_m_c[2] - nav.ned_pos_m[2]);
       if (s_lat > rtb_roll_angle_cmd_rad) {
         c_lon = rtb_roll_angle_cmd_rad / s_lat;
@@ -1313,20 +1327,21 @@ namespace bfs
         s_lon += c_lon * c_lon;
       }
 
-      rtDW.reached = ((rtb_roll_angle_cmd_rad * std::sqrt(s_lon) <= 1.5F) &&
-                      telem.flight_plan[telem.current_waypoint].autocontinue);
+      rtDW.reached = ((rtb_roll_angle_cmd_rad * std::sqrt(s_lon) <= telem.param
+                       [10]) && telem.flight_plan[telem.current_waypoint].
+                      autocontinue);
 
-      // Update for UnitDelay: '<S631>/Delay Input1' incorporates:
+      // Update for UnitDelay: '<S633>/Delay Input1' incorporates:
       //   Inport: '<Root>/Telemetry Data'
       //
-      //  Block description for '<S631>/Delay Input1':
+      //  Block description for '<S633>/Delay Input1':
       //
       //   Store in Global RAM
       rtDW.DelayInput1_DSTATE = telem.current_waypoint;
 
-      // Update for UnitDelay: '<S632>/Delay Input1'
+      // Update for UnitDelay: '<S634>/Delay Input1'
       //
-      //  Block description for '<S632>/Delay Input1':
+      //  Block description for '<S634>/Delay Input1':
       //
       //   Store in Global RAM
       rtDW.DelayInput1_DSTATE_n = rtb_Compare_lx;
@@ -1584,21 +1599,21 @@ namespace bfs
       switch (rtb_DataTypeConversion6) {
        case 2:
         rtb_Gain_h = rtDW.Switch2;
-        c_lon = rtDW.vb_xy[0];
+        rtb_Reshape_h_idx_2 = rtDW.vb_xy[0];
         s_lat = rtDW.vb_xy[1];
         rtb_Cos_f = rtDW.Saturation;
         break;
 
        case 3:
         rtb_Gain_h = rtDW.Switch2_h;
-        c_lon = rtDW.Switch[0];
+        rtb_Reshape_h_idx_2 = rtDW.Switch[0];
         s_lat = rtDW.Switch[1];
         rtb_Cos_f = rtDW.yaw_rate_cmd_radps_c;
         break;
 
        default:
         rtb_Gain_h = rtDW.Switch_h;
-        c_lon = rtDW.vb_x_cmd_mps_o;
+        rtb_Reshape_h_idx_2 = rtDW.vb_x_cmd_mps_o;
         s_lat = rtDW.vb_y_cmd_mps_l;
         rtb_Cos_f = rtDW.yaw_rate_cmd_radps_c53;
         break;
@@ -1607,7 +1622,7 @@ namespace bfs
       // End of MultiPortSwitch generated from: '<Root>/Multiport Switch'
     } else {
       rtb_Gain_h = rtDW.Gain;
-      c_lon = rtDW.vb_x_cmd_mps_d;
+      rtb_Reshape_h_idx_2 = rtDW.vb_x_cmd_mps_d;
       s_lat = rtDW.vb_y_cmd_mps_f;
       rtb_Cos_f = rtDW.yaw_rate_cmd_radps_p;
     }
@@ -1627,21 +1642,21 @@ namespace bfs
 
       // Trigonometry: '<S186>/Sin' incorporates:
       //   Inport: '<Root>/Navigation Filter Data'
-      rtb_DataTypeConversion_h = std::sin(nav.heading_rad);
+      c_lon = std::sin(nav.heading_rad);
 
       // Product: '<S184>/Product' incorporates:
       //   Gain: '<S186>/Gain'
       //   Inport: '<Root>/Navigation Filter Data'
       //   Reshape: '<S186>/Reshape'
-      rtb_Tsamp_a = -rtb_DataTypeConversion_h * nav.ned_vel_mps[0] +
-        rtb_roll_angle_cmd_rad * nav.ned_vel_mps[1];
+      rtb_Tsamp_a = -c_lon * nav.ned_vel_mps[0] + rtb_roll_angle_cmd_rad *
+        nav.ned_vel_mps[1];
 
       // Sum: '<S187>/Sum' incorporates:
       //   Inport: '<Root>/Navigation Filter Data'
       //   Product: '<S184>/Product'
       //   Reshape: '<S186>/Reshape'
-      rtb_roll_angle_cmd_rad = c_lon - (rtb_roll_angle_cmd_rad *
-        nav.ned_vel_mps[0] + rtb_DataTypeConversion_h * nav.ned_vel_mps[1]);
+      rtb_roll_angle_cmd_rad = rtb_Reshape_h_idx_2 - (rtb_roll_angle_cmd_rad *
+        nav.ned_vel_mps[0] + c_lon * nav.ned_vel_mps[1]);
 
       // SampleTimeMath: '<S220>/Tsamp' incorporates:
       //   Constant: '<S187>/Constant2'
@@ -1649,7 +1664,7 @@ namespace bfs
       //
       //  About '<S220>/Tsamp':
       //   y = u * K where K = 1 / ( w * Ts )
-      rtb_DataTypeConversion_h = rtb_roll_angle_cmd_rad * 0.1F * 100.0F;
+      rtb_Reshape_h_idx_2 = rtb_roll_angle_cmd_rad * 0.1F * 100.0F;
 
       // Sum: '<S234>/Sum' incorporates:
       //   Constant: '<S187>/Constant'
@@ -1658,7 +1673,7 @@ namespace bfs
       //   Product: '<S230>/PProd Out'
       //   Sum: '<S218>/Diff'
       c_lon = (rtb_roll_angle_cmd_rad * 0.5F + rtDW.Integrator_DSTATE_c) +
-        (rtb_DataTypeConversion_h - rtDW.UD_DSTATE_k);
+        (rtb_Reshape_h_idx_2 - rtDW.UD_DSTATE_k);
 
       // Saturate: '<S187>/Saturation'
       if (c_lon > 0.523F) {
@@ -1850,7 +1865,7 @@ namespace bfs
       rtDW.Integrator_DSTATE_c += 0.01F * rtb_Reshape_h_idx_0;
 
       // Update for Delay: '<S218>/UD'
-      rtDW.UD_DSTATE_k = rtb_DataTypeConversion_h;
+      rtDW.UD_DSTATE_k = rtb_Reshape_h_idx_2;
 
       // Update for DiscreteIntegrator: '<S278>/Integrator'
       rtDW.Integrator_DSTATE_n += 0.01F * rtb_Switch_i;
@@ -2016,7 +2031,7 @@ namespace bfs
     //
     //  About '<S160>/Tsamp':
     //   y = u * K where K = 1 / ( w * Ts )
-    rtb_DataTypeConversion_h = s_lat * 0.02F * 100.0F;
+    rtb_Reshape_h_idx_2 = s_lat * 0.02F * 100.0F;
 
     // Sum: '<S174>/Sum' incorporates:
     //   Constant: '<S22>/Constant'
@@ -2025,7 +2040,7 @@ namespace bfs
     //   Product: '<S170>/PProd Out'
     //   Sum: '<S158>/Diff'
     rtb_Reshape_h_idx_0 = (s_lat * 0.5F + rtDW.Integrator_DSTATE_b) +
-      (rtb_DataTypeConversion_h - rtDW.UD_DSTATE_m);
+      (rtb_Reshape_h_idx_2 - rtDW.UD_DSTATE_m);
 
     // Switch: '<Root>/switch_motor_out'
     if (rtb_Switch_lt) {
@@ -2271,7 +2286,7 @@ namespace bfs
     rtDW.Integrator_DSTATE_b += 0.01F * s_lat;
 
     // Update for Delay: '<S158>/UD'
-    rtDW.UD_DSTATE_m = rtb_DataTypeConversion_h;
+    rtDW.UD_DSTATE_m = rtb_Reshape_h_idx_2;
   }
 
   // Model initialize function
@@ -2283,9 +2298,9 @@ namespace bfs
     rt_InitInfAndNaN(sizeof(real_T));
 
     // SystemInitialize for Enabled SubSystem: '<Root>/WAYPOINT CONTROLLER'
-    // InitializeConditions for UnitDelay: '<S631>/Delay Input1'
+    // InitializeConditions for UnitDelay: '<S633>/Delay Input1'
     //
-    //  Block description for '<S631>/Delay Input1':
+    //  Block description for '<S633>/Delay Input1':
     //
     //   Store in Global RAM
     rtDW.DelayInput1_DSTATE = -1;
