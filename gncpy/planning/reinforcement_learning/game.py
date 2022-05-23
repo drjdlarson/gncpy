@@ -7,12 +7,13 @@ import numpy as np
 from ruamel.yaml import YAML
 from warnings import warn
 
-from gncpy.planning.reinforcement_learning.entities import EntityManager
 import gncpy.planning.reinforcement_learning.components as gcomp
 import gncpy.planning.reinforcement_learning.rewards as grewards
 import gncpy.planning.reinforcement_learning.physics as gphysics
-import gncpy.dynamics as gdyn
 from gncpy.planning.reinforcement_learning.enums import EventType
+from gncpy.planning.reinforcement_learning.entities import EntityManager
+import gncpy.dynamics as gdyn
+import gncpy.dynamics.aircraft as gaircraft
 
 
 yaml = YAML()
@@ -169,9 +170,9 @@ class Game2d(Game):
         Distance units per pixel on the scsreen.
     """
 
-    __slots__ = ('_window', '_clock', '_img', 'max_n_targets', 'dt', '_start_time',
+    __slots__ = ('_window', '_clock', '_img', 'max_n_targets', '_start_time',
                  '_max_time', 'min_pos', 'dist_height', 'dist_width', 'dist_per_pix',
-                 '_config_file', 'step_factor', '_current_update_count')
+                 '_config_file', 'step_factor', '_current_update_count', '_update_dt')
 
     def __init__(self, config_file, render_mode, render_fps=60):
         """Initalize an object.
@@ -199,7 +200,6 @@ class Game2d(Game):
         self._img = None
 
         self.max_n_targets = None
-        self.dt = None
         self._start_time = 0
         self._max_time = None
         self.min_pos = None
@@ -208,11 +208,11 @@ class Game2d(Game):
         self.dist_per_pix = None
         self.step_factor = 1
         self._current_update_count = -1
+        self._update_dt = None
 
     @property
     def max_time(self):
-        # TODO: figure out if this works
-        return self._max_time  # + self._start_time
+        return self._max_time
 
     def reset(self):
         """Resets to the base state."""
@@ -272,8 +272,8 @@ class Game2d(Game):
 
         if 'step_factor' in conf.keys():
             self.step_factor = conf['step_factor']
-
-        self.dt /= self.step_factor
+        else:
+            self.step_factor = 1
 
         for key, params in conf.items():
             if key in ('window', 'physics', 'start_time', 'step_factor'):
@@ -296,6 +296,8 @@ class Game2d(Game):
 
         # ensure all things are properly added to the manager so wrappers can use values before calling step
         self._entity_manager.update()
+
+        self._update_dt = self.dt / self.step_factor
 
         return conf
 
@@ -476,7 +478,6 @@ class Game2d(Game):
         params : dict
             Config values.
         """
-        self.dt = float(params['dt'])
         self._max_time = float(params['max_time'])
         self.min_pos = np.array([[float(params['min_x'])],
                                  [float(params['min_y'])]])
@@ -514,6 +515,7 @@ class Game2d(Game):
         self._current_frame += 1
 
         self.score = 0
+        reached_target = False
         for ii in range(self.step_factor):
             self._current_update_count += 1
             self._entity_manager.update()
@@ -525,14 +527,16 @@ class Game2d(Game):
 
             action = self.s_input(user_input)
             self.s_movement(action)
-            self.s_collision()
+            hit_tar = self.s_collision()
+            reached_target = reached_target or hit_tar
+            self.s_game_over()
             score, s_info = self.s_score()
             self.score += score
         self.score /= self.step_factor
 
-        self.s_render()
+        info['reached_target'] = reached_target
 
-        self.s_game_over()
+        self.s_render()
 
         info.update(self._append_name_to_keys(s_info, 'Reward'))
 
@@ -571,6 +575,22 @@ class Game2d(Game):
                                           dtype=np.uint8),
                                  axes=(1, 0, 2))
 
+    @abstractmethod
+    def s_movement(self, action):
+        pass
+
+    @abstractmethod
+    def s_collision(self):
+        pass
+
+    @abstractmethod
+    def s_game_over(self):
+        pass
+
+    @abstractmethod
+    def s_score(self):
+        pass
+
     def get_screen_rgb(self):
         """Gets a maxtrix representing the screen.
 
@@ -600,20 +620,12 @@ class Game2d(Game):
             pygame.quit()
 
 
-class SimpleUAV2d(Game2d):
-    """Implements a simple 2d UAV scenario.
-
-    Attributes
-    ----------
-    suppored_reward_types : tuple
-        "Each element is a string of a supported reward type.
-    """
-
+class Simple2d(Game2d):
     __slots__ = ('_scoreCls', '_all_capabilities', '_reward_type', '_rng', '_seed')
 
     supported_reward_types = ('BasicReward', )
 
-    def __init__(self, render_mode, render_fps=None, config_file=None, seed=None):
+    def __init__(self, config_file, render_mode, render_fps=None, seed=None):
         """Initialize an object.
 
         Parameters
@@ -625,8 +637,6 @@ class SimpleUAV2d(Game2d):
         config_file : string, optional
             Ful path to the configuration YAML file. The default is simple_uav_2d_config.yaml
         """
-        if config_file is None:
-            config_file = 'simple_uav_2d_config.yaml'
         super().__init__(config_file, render_mode, render_fps=render_fps)
 
         self._scoreCls = None
@@ -637,11 +647,6 @@ class SimpleUAV2d(Game2d):
         else:
             self._rng = np.random.default_rng(seed)
         self._seed = seed
-
-        self.parse_config_file(self._config_file)
-
-        if self.render_fps is None:
-            self.render_fps = 1 / self.dt
 
     def setup_score(self, params):
         """Setup the score based on the config file.
@@ -748,7 +753,7 @@ class SimpleUAV2d(Game2d):
     @property
     def current_time(self):
         """Current time in real units."""
-        return self.dt * self._current_update_count + self._start_time
+        return self._update_dt * self._current_update_count + self._start_time
 
     def reset(self, seed=None):
         """Resets to the base state."""
@@ -766,148 +771,9 @@ class SimpleUAV2d(Game2d):
 
         self.parse_config_file(self._config_file)
 
+    @abstractmethod
     def _create_dynamics(self, params, c_birth):
-        if not hasattr(gdyn, params['type']):
-            msg = 'Failed to find dynamics model {}'.format(params['type'])
-            raise RuntimeError(msg)
-        cls_type = getattr(gdyn, params['type'])
-
-        kwargs = {}
-        if params['type'] == 'DoubleIntegrator':
-            pos_inds = [0, 1]
-            vel_inds = [2, 3]
-            state_args = (self.dt, )
-
-            c_params = params['control_model']
-            if c_params['type'] == 'velocity':
-                ctrl_args = ()
-
-                def _ctrl_mod(t, x, *args):
-                    if 'max_vel_x' in c_params and 'max_vel_y' in c_params:
-                        mat = np.diag((float(c_params['max_vel_x']),
-                                       float(c_params['max_vel_y'])))
-                    else:
-                        mat = c_params['max_vel'] * np.eye(2)
-                    return np.vstack((np.zeros((2, 2)), mat))
-
-            else:
-                msg = 'Control model type {} not implemented for dynamics {}'.format(c_params['type'],
-                                                                                     params['type'])
-                raise NotImplementedError(msg)
-            kwargs['control_model'] = _ctrl_mod
-
-            state_low = np.hstack((self.min_pos.ravel(),
-                                   np.array([-np.inf, -np.inf])))
-            state_high = np.hstack((self.min_pos.ravel() + np.array([self.dist_width, self.dist_height]),
-                                    np.array([np.inf, np.inf])))
-            if 'state_constraint' in params:
-                s_params = params['state_constraint']
-                if s_params['type'] == 'velocity':
-                    state_low = np.hstack((self.min_pos.ravel(),
-                                           np.array(s_params['min_vels'])))
-                    state_high = np.hstack((self.min_pos.ravel() + np.array([self.dist_width, self.dist_height]),
-                                            np.array(s_params['max_vels'])))
-
-                    def _state_constraint(t, x):
-                        x[vel_inds] = np.min(np.vstack((x[vel_inds].ravel(),
-                                                        np.array(s_params['max_vels']))),
-                                             axis=0).reshape((len(vel_inds), 1))
-                        x[vel_inds] = np.max(np.vstack((x[vel_inds].ravel(),
-                                                        np.array(s_params['min_vels']))),
-                                             axis=0).reshape((len(vel_inds), 1))
-                        return x
-                else:
-                    msg = 'State constraint type {} not implemented for dynamics {}'.format(s_params['type'],
-                                                                                            params['type'])
-                    raise NotImplementedError(msg)
-                kwargs['state_constraint'] = _state_constraint
-
-        elif params['type'] == 'CoordinatedTurn':
-            pos_inds = [0, 2]
-            vel_inds = [1, 3]
-            state_args = ()
-
-            c_params = params['control_model']
-            if c_params['type'] == 'velocity_turn':
-                ctrl_args = ()
-
-                def _g1(t, x, u, *args):
-                    return c_params['max_vel'] * np.cos(x[4].item()) * u[0].item()
-
-                def _g0(t, x, u, *args):
-                    return 0
-
-                def _g3(t, x, u, *args):
-                    return c_params['max_vel'] * np.sin(x[4].item()) * u[0].item()
-
-                def _g2(t, x, u, *args):
-                    return 0
-
-                def _g4(t, x, u, *args):
-                    return c_params['max_turn_rate'] * np.pi / 180 * u[1].item()
-
-            else:
-                msg = 'Control model type {} not implemented for dynamics {}'.format(c_params['type'],
-                                                                                     params['type'])
-                raise NotImplementedError(msg)
-            kwargs['control_model'] = [_g0, _g1, _g2, _g3, _g4]
-
-            state_low = np.hstack((self.min_pos[0],
-                                   np.array([-np.inf]),
-                                   self.min_pos[1],
-                                   np.array([-np.inf, -2 * np.pi])))
-            state_high = np.hstack((self.min_pos[0] + self.dist_width,
-                                    np.array([np.inf]),
-                                    self.min_pos[1] + self.dist_height,
-                                    np.array([np.inf, 2 * np.pi])))
-            if 'state_constraint' in params:
-                s_params = params['state_constraint']
-                if s_params['type'] == 'velocity':
-                    state_low = np.hstack((self.min_pos[0],
-                                           np.array([s_params['min_vels'][0]]),
-                                           self.min_pos[1],
-                                           np.array([s_params['min_vels'][1],
-                                                     -2 * np.pi])))
-                    state_high = np.hstack((self.min_pos[0] + self.dist_width,
-                                            np.array([s_params['max_vels'][0]]),
-                                            self.min_pos[1] + self.dist_height,
-                                            np.array([s_params['max_vels'][1],
-                                                      2 * np.pi])))
-
-                    def _state_constraint(t, x):
-                        x[vel_inds] = np.min(np.vstack((x[vel_inds].ravel(),
-                                                        np.array(s_params['max_vels']))),
-                                             axis=0).reshape((len(vel_inds), 1))
-                        x[vel_inds] = np.max(np.vstack((x[vel_inds].ravel(),
-                                                        np.array(s_params['min_vels']))),
-                                             axis=0).reshape((len(vel_inds), 1))
-                        if x[4] < 0:
-                            x[4] = np.mod(x[4], -2 * np.pi)
-                        else:
-                            x[4] = np.mod(x[4], 2 * np.pi)
-
-                        return x
-                else:
-                    msg = 'State constraint type {} not implemented for dynamics {}'.format(s_params['type'],
-                                                                                            params['type'])
-                    raise NotImplementedError(msg)
-                kwargs['state_constraint'] = _state_constraint
-
-        if 'params' in params:
-            kwargs.update(params['params'])
-
-        dynObj = cls_type(**kwargs)
-        state0 = np.zeros((state_low.size, 1))
-        if c_birth.randomize:
-            state0[pos_inds] = c_birth.sample().reshape(state0[pos_inds].shape)
-        else:
-            state0[pos_inds] = c_birth.loc.copy().reshape(state0[pos_inds].shape)
-
-        if params['type'] == 'CoordinatedTurn':
-            state0[4] = self._rng.random() * 2 * np.pi
-
-        return (dynObj, pos_inds, vel_inds, state_args, ctrl_args, state_low,
-                state_high, state0)
+        pass
 
     def setup_player(self, params):
         """Setup the player based on the config file.
@@ -1125,15 +991,9 @@ class SimpleUAV2d(Game2d):
                 pd = pd / 100.
             e.add_component(gcomp.CHazard, prob_of_death=pd)
 
+    @abstractmethod
     def _propagate_dynamics(self, e_dyn, action):
-        e_dyn.state = e_dyn.dynObj.propagate_state(self.current_time,
-                                                   e_dyn.last_state,
-                                                   u=action,
-                                                   state_args=e_dyn.state_args,
-                                                   ctrl_args=e_dyn.ctrl_args)
-
-    def s_input(self, user_input):
-        return user_input.reshape((-1, 1))
+        pass
 
     def s_movement(self, action):
         """Move entities according to their dynamics.
@@ -1176,6 +1036,8 @@ class SimpleUAV2d(Game2d):
         -------
         None.
         """
+        hit_target = False
+
         # update all bounding boxes
         for e in self._entity_manager.get_entities():
             if e.has_component(gcomp.CTransform) and e.has_component(gcomp.CCollision):
@@ -1238,6 +1100,7 @@ class SimpleUAV2d(Game2d):
 
                 if gphysics.check_collision2d(p_aabb,
                                               t.get_component(gcomp.CCollision).aabb):
+                    hit_target = True
                     p_events.events.append((EventType.TARGET, {'target': t}))
                     t.destroy()
                     break
@@ -1252,6 +1115,8 @@ class SimpleUAV2d(Game2d):
             if v_ii is not None:
                 p_dynamics.state[v_ii] = self._pixels_to_dist(p_trans.vel,
                                                               [0, 1], False)
+
+            return hit_target
 
     def s_game_over(self):
         """Determines if the game ends.
@@ -1308,12 +1173,393 @@ class SimpleUAV2d(Game2d):
         return valid
 
 
-class SimpleLagerSUPER(SimpleUAV2d):
+class SimpleUAV2d(Simple2d):
+    """Implements a simple 2d UAV scenario.
+
+    Attributes
+    ----------
+    suppored_reward_types : tuple
+        "Each element is a string of a supported reward type.
+    """
+
+    __slots__ = ('dt')
+
+    def __init__(self, render_mode, render_fps=None, config_file=None, seed=None):
+        """Initialize an object.
+
+        Parameters
+        ----------
+        render_mode : string
+            Render mode.
+        render_fps : int, optional
+            Render fps, if set to None then the game dt is used. The default is None.
+        config_file : string, optional
+            Ful path to the configuration YAML file. The default is simple_uav_2d_config.yaml
+        """
+        if config_file is None:
+            config_file = 'simple_uav_2d_config.yaml'
+        super().__init__(config_file, render_mode, render_fps=render_fps, seed=seed)
+        self.dt = None
+
+        self.parse_config_file(self._config_file)
+
+        if self.render_fps is None:
+            self.render_fps = 1 / self.dt
+
+    def setup_physics(self, params):
+        """Setup the physics based on the config file.
+
+        Must have parameters:
+
+            - dt
+            - max_time
+            - min_x
+            - min_y
+            - dist_width
+            - dist_height
+
+        Parameters
+        ----------
+        params : dict
+            Config values.
+        """
+        super().setup_physics(params)
+        self.dt = float(params['dt'])
+
     def _create_dynamics(self, params, c_birth):
-        pass
+        if not hasattr(gdyn, params['type']):
+            msg = 'Failed to find dynamics model {}'.format(params['type'])
+            raise RuntimeError(msg)
+        cls_type = getattr(gdyn, params['type'])
+
+        kwargs = {}
+        if params['type'] == 'DoubleIntegrator':
+            pos_inds = [0, 1]
+            vel_inds = [2, 3]
+            state_args = (self._update_dt, )
+
+            c_params = params['control_model']
+            if c_params['type'] == 'velocity':
+                ctrl_args = ()
+
+                def _ctrl_mod(t, x, *args):
+                    if 'max_vel_x' in c_params and 'max_vel_y' in c_params:
+                        mat = np.diag((float(c_params['max_vel_x']),
+                                        float(c_params['max_vel_y'])))
+                    else:
+                        mat = c_params['max_vel'] * np.eye(2)
+                    return np.vstack((np.zeros((2, 2)), mat))
+
+            else:
+                msg = 'Control model type {} not implemented for dynamics {}'.format(c_params['type'],
+                                                                                      params['type'])
+                raise NotImplementedError(msg)
+            kwargs['control_model'] = _ctrl_mod
+
+            state_low = np.hstack((self.min_pos.ravel(),
+                                    np.array([-np.inf, -np.inf])))
+            state_high = np.hstack((self.min_pos.ravel() + np.array([self.dist_width, self.dist_height]),
+                                    np.array([np.inf, np.inf])))
+            if 'state_constraint' in params:
+                s_params = params['state_constraint']
+                if s_params['type'] == 'velocity':
+                    state_low = np.hstack((self.min_pos.ravel(),
+                                            np.array(s_params['min_vels'])))
+                    state_high = np.hstack((self.min_pos.ravel() + np.array([self.dist_width, self.dist_height]),
+                                            np.array(s_params['max_vels'])))
+
+                    def _state_constraint(t, x):
+                        x[vel_inds] = np.min(np.vstack((x[vel_inds].ravel(),
+                                                        np.array(s_params['max_vels']))),
+                                              axis=0).reshape((len(vel_inds), 1))
+                        x[vel_inds] = np.max(np.vstack((x[vel_inds].ravel(),
+                                                        np.array(s_params['min_vels']))),
+                                              axis=0).reshape((len(vel_inds), 1))
+                        return x
+                else:
+                    msg = 'State constraint type {} not implemented for dynamics {}'.format(s_params['type'],
+                                                                                            params['type'])
+                    raise NotImplementedError(msg)
+                kwargs['state_constraint'] = _state_constraint
+
+        elif params['type'] == 'CoordinatedTurn':
+            pos_inds = [0, 2]
+            vel_inds = [1, 3]
+            state_args = ()
+
+            c_params = params['control_model']
+            if c_params['type'] == 'velocity_turn':
+                ctrl_args = ()
+
+                def _g1(t, x, u, *args):
+                    return c_params['max_vel'] * np.cos(x[4].item()) * u[0].item()
+
+                def _g0(t, x, u, *args):
+                    return 0
+
+                def _g3(t, x, u, *args):
+                    return c_params['max_vel'] * np.sin(x[4].item()) * u[0].item()
+
+                def _g2(t, x, u, *args):
+                    return 0
+
+                def _g4(t, x, u, *args):
+                    return c_params['max_turn_rate'] * np.pi / 180 * u[1].item()
+
+            else:
+                msg = 'Control model type {} not implemented for dynamics {}'.format(c_params['type'],
+                                                                                      params['type'])
+                raise NotImplementedError(msg)
+            kwargs['control_model'] = [_g0, _g1, _g2, _g3, _g4]
+
+            state_low = np.hstack((self.min_pos[0],
+                                    np.array([-np.inf]),
+                                    self.min_pos[1],
+                                    np.array([-np.inf, -2 * np.pi])))
+            state_high = np.hstack((self.min_pos[0] + self.dist_width,
+                                    np.array([np.inf]),
+                                    self.min_pos[1] + self.dist_height,
+                                    np.array([np.inf, 2 * np.pi])))
+            if 'state_constraint' in params:
+                s_params = params['state_constraint']
+                if s_params['type'] == 'velocity':
+                    state_low = np.hstack((self.min_pos[0],
+                                            np.array([s_params['min_vels'][0]]),
+                                            self.min_pos[1],
+                                            np.array([s_params['min_vels'][1],
+                                                      -2 * np.pi])))
+                    state_high = np.hstack((self.min_pos[0] + self.dist_width,
+                                            np.array([s_params['max_vels'][0]]),
+                                            self.min_pos[1] + self.dist_height,
+                                            np.array([s_params['max_vels'][1],
+                                                      2 * np.pi])))
+
+                    def _state_constraint(t, x):
+                        x[vel_inds] = np.min(np.vstack((x[vel_inds].ravel(),
+                                                        np.array(s_params['max_vels']))),
+                                              axis=0).reshape((len(vel_inds), 1))
+                        x[vel_inds] = np.max(np.vstack((x[vel_inds].ravel(),
+                                                        np.array(s_params['min_vels']))),
+                                              axis=0).reshape((len(vel_inds), 1))
+                        if x[4] < 0:
+                            x[4] = np.mod(x[4], -2 * np.pi)
+                        else:
+                            x[4] = np.mod(x[4], 2 * np.pi)
+
+                        return x
+                else:
+                    msg = 'State constraint type {} not implemented for dynamics {}'.format(s_params['type'],
+                                                                                            params['type'])
+                    raise NotImplementedError(msg)
+                kwargs['state_constraint'] = _state_constraint
+
+        if 'params' in params:
+            kwargs.update(params['params'])
+
+        dynObj = cls_type(**kwargs)
+        state0 = np.zeros((state_low.size, 1))
+        if c_birth.randomize:
+            state0[pos_inds] = c_birth.sample().reshape(state0[pos_inds].shape)
+        else:
+            state0[pos_inds] = c_birth.loc.copy().reshape(state0[pos_inds].shape)
+
+        if params['type'] == 'CoordinatedTurn':
+            state0[4] = self._rng.random() * 2 * np.pi
+
+        return (dynObj, pos_inds, vel_inds, state_args, ctrl_args, state_low,
+                state_high, state0)
 
     def _propagate_dynamics(self, e_dyn, action):
-        pass
+        e_dyn.state = e_dyn.dynObj.propagate_state(self.current_time,
+                                                    e_dyn.last_state,
+                                                    u=action,
+                                                    state_args=e_dyn.state_args,
+                                                    ctrl_args=e_dyn.ctrl_args)
 
     def s_input(self, user_input):
-        pass
+        return user_input.reshape((-1, 1))
+
+
+class SimpleLagerSUPER2d(Simple2d):
+    __slots__ = ()
+
+    def __init__(self, render_mode, render_fps=None, config_file=None, seed=None):
+        """Initialize an object.
+
+        Parameters
+        ----------
+        render_mode : string
+            Render mode.
+        render_fps : int, optional
+            Render fps, if set to None then the game dt is used. The default is None.
+        config_file : string, optional
+            Ful path to the configuration YAML file. The default is simple_uav_2d_config.yaml
+        """
+        if config_file is None:
+            config_file = 'simple_uav_2d_config.yaml'
+        super().__init__(config_file, render_mode, render_fps=render_fps, seed=seed)
+
+        self.parse_config_file(self._config_file)
+
+        if self.render_fps is None:
+            self.render_fps = 1 / self.dt
+
+    def _create_dynamics(self, params, c_birth):
+        dynObj = gaircraft.SimpleLAGERSuper()
+        body_vel = np.zeros(3)
+        body_rot_rate = np.zeros(3)
+        init_eul_deg = np.array([self._rng.uniform(low=-180, high=180),
+                                 self._rng.uniform(low=-90,
+                                                   high=90),
+                                 self._rng.uniform(low=-180, high=180)])
+        if c_birth.randomize:
+            init_xy = c_birth.sample().reshape(-1)
+        else:
+            init_xy = c_birth.loc.copy().reshape(-1)
+
+        init_ned_pos = np.concatenate((init_xy[1::-1],
+                                       np.array([-params['fly_height']])))
+        dynObj.set_initial_conditions(init_ned_pos, body_vel,
+                                      init_eul_deg, body_rot_rate,
+                                      np.array(params['ned_mag_field']),
+                                      ref_lat_deg=params['ref_lat_deg'],
+                                      ref_lon_deg=params['ref_lon_deg'],
+                                      terrain_alt_wgs84=params['terrain_alt_wgs84'])
+        dynObj.waypoint_radius = params['wp_radius']
+
+        pos_inds = dynObj.state_map.ned_pos[1::-1]
+        vel_inds = dynObj.state_map.body_vel[1::-1]
+        state_args = ()
+        ctrl_args = ()
+        state0 = dynObj.state.copy().reshape((-1, 1))
+        state_low = -np.inf * np.ones(state0.size)
+        state_high = np.inf * np.ones(state0.size)
+
+        return (dynObj, pos_inds, vel_inds, state_args, ctrl_args, state_low,
+                state_high, state0)
+
+    def _propagate_dynamics(self, e_dyn, action):
+        e_dyn.state = e_dyn.dynObj.propagate_state(self.current_time)
+
+    def s_input(self, user_input):
+        if user_input is not None:
+            for p in self._entity_manager.get_entities('player'):
+                if str(p.id) in user_input:
+                    p_dyn = p.get_component(gcomp.CDynamics)
+                    p_dyn.dynObj.upload_waypoints(user_input[str(p.id)])
+
+    @property
+    def dt(self):
+        p_lst = self._entity_manager.get_entities('player')
+        if len(p_lst) == 0:
+            dt = 0.01
+            warn('no player found, assuming dt of {}'.format(dt))
+            return dt
+
+        return p_lst[0].get_component(gcomp.CDynamics).dynObj.dt
+
+    def s_collision(self):
+        """Check for collisions between entities.
+
+        This also handles player death if a hazard destroys a player, and
+        updates the events.
+
+        Returns
+        -------
+        None.
+        """
+        # update all bounding boxes
+        for e in self._entity_manager.get_entities():
+            if e.has_component(gcomp.CTransform) and e.has_component(gcomp.CCollision):
+                c_collision = e.get_component(gcomp.CCollision)
+                c_transform = e.get_component(gcomp.CTransform)
+                c_collision.aabb.centerx = c_transform.pos[0].item()
+                c_collision.aabb.centery = c_transform.pos[1].item()
+
+        # check for collision of player
+        for e in self._entity_manager.get_entities('player'):
+            p_aabb = e.get_component(gcomp.CCollision).aabb
+            p_trans = e.get_component(gcomp.CTransform)
+            p_events = e.get_component(gcomp.CEvents)
+
+            # check for collision with wall
+            for w in self._entity_manager.get_entities('obstacle'):
+                w_aabb = w.get_component(gcomp.CCollision).aabb
+                if gphysics.check_collision2d(p_aabb, w_aabb):
+                    e.destroy()
+                    p_events.events.append((EventType.WALL, None))
+                    break
+
+            if not e.active:
+                continue
+
+            # check for collision with hazard
+            for h in self._entity_manager.get_entities('hazard'):
+                h_aabb = h.get_component(gcomp.CCollision).aabb
+                c_hazard = h.get_component(gcomp.CHazard)
+                if gphysics.check_collision2d(p_aabb, h_aabb):
+                    if self._rng.uniform(0., 1.) < c_hazard.prob_of_death:
+                        e.destroy()
+                        p_events.events.append((EventType.DEATH, None))
+                        if e.id in c_hazard.entrance_times:
+                            del c_hazard.entrance_times[e.id]
+                            break
+
+                    else:
+                        if e.id not in c_hazard.entrance_times:
+                            c_hazard.entrance_times[e.id] = self.current_time
+                        e.c_events.events.append((EventType.HAZARD,
+                                                  {'prob': c_hazard.prob_of_death,
+                                                   't_ent': c_hazard.entrance_times[e.id]}))
+                else:
+                    if e.id in c_hazard.entrance_times:
+                        del c_hazard.entrance_times[e.id]
+
+            if not e.active:
+                continue
+
+            # check for collision with target
+            for t in self._entity_manager.get_entities('target'):
+                if not t.active:
+                    continue
+
+                if gphysics.check_collision2d(p_aabb,
+                                              t.get_component(gcomp.CCollision).aabb):
+                    p_events.events.append((EventType.TARGET, {'target': t}))
+                    t.destroy()
+                    break
+
+            # update state
+            p_dynamics = e.get_component(gcomp.CDynamics)
+            p_ii = p_dynamics.pos_inds
+            v_ii = p_dynamics.vel_inds
+
+            p_dynamics.state[p_ii] = self._pixels_to_dist(p_trans.pos,
+                                                          [0, 1], True)
+            if v_ii is not None:
+                p_dynamics.state[v_ii] = self._pixels_to_dist(p_trans.vel,
+                                                              [0, 1], False)
+
+    def get_player_positions(self):
+        pos_lst = []
+        for p in self._entity_manager.get_entities('player'):
+            p_dyn = p.get_component(gcomp.CDynamics)
+            pos_lst.append(p_dyn.dynObj.state[p_dyn.pos_inds].flatten())
+
+        return pos_lst
+
+    def get_player_pos_vels(self):
+        posvel_lst = []
+        for p in self._entity_manager.get_entities('player'):
+            p_dyn = p.get_component(gcomp.CDynamics)
+            pos = p_dyn.dynObj.state[p_dyn.pos_inds].flatten()
+            vel = p_dyn.dynObj.state[p_dyn.vel_inds].flatten()
+            posvel_lst.append(np.hstack((pos, vel)))
+        return posvel_lst
+
+    def get_player_ids(self):
+        return [p.id for p in self._entity_manager.get_entities('player')]
+
+    def get_player_modes(self):
+        return [p.get_component(gcomp.CDynamics).dynObj.current_mode
+                for p in self._entity_manager.get_entities('player')]

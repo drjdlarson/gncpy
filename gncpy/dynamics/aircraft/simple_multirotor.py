@@ -544,7 +544,7 @@ class SimpleMultirotor(DynamicsBase):
                           self.env.state[e_smap.gravity], self.env.state[e_smap.density],
                           self.env.state[e_smap.speed_of_sound], motor_cmds)
 
-        return self.vehicle.state.copy()
+        return self.vehicle.state.copy().reshape((-1, 1))
 
     def set_initial_conditions(self, ned_pos, body_vel, eul_deg, body_rot_rate,
                                ref_lat_deg, ref_lon_deg, terrain_alt_wgs84,
@@ -635,6 +635,10 @@ class SimpleLAGERSuper(SimpleMultirotor):
 
         if self.control_model is None:
             self.control_model = super_bind.Autocode()
+
+    @property
+    def current_mode(self):
+        return self._vmsData.mode
 
     @property
     def control_model(self):

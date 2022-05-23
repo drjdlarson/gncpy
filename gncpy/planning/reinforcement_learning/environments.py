@@ -174,11 +174,11 @@ class SimpleUAV2d(BaseEnv):
 
         if self._aux_use_n_targets:
             aux_state_low = np.append(aux_state_low, 0)
-            aux_state_high = np.append(aux_state_high, self._game.max_n_targets)
+            aux_state_high = np.append(aux_state_high, np.inf)
 
         if self._aux_use_time:
             aux_state_low = np.append(aux_state_low, 0)
-            aux_state_high = np.append(aux_state_high, self._game.max_time)
+            aux_state_high = np.append(aux_state_high, np.inf)
 
         # combine into final space
         if self._obs_type == 'image':
