@@ -141,3 +141,29 @@ obstacles:
         collision: !Collision2dParams
             width: 5
             height: 1
+
+hazards:
+    - !HazardParams
+        loc_x: 7.5
+        loc_y: 8.5
+        shape: !Shape2dParams
+            type: 'rect'
+            width: 10
+            height: 2.5
+            color: [255, 215, 0]
+        collision: !Collision2dParams
+            width: 10
+            height: 2.5
+        prob_of_death:0.05
+    - !HazardParams
+        loc_x: 5
+        loc_y: 19
+        shape: !Shape2dParams
+            type: 'rect'
+            width: 1.5
+            height: 3
+            color: [255, 215, 0]
+        collision: !Collision2dParams
+            width: 1.5
+            height: 3
+        prob_of_death: 0.1

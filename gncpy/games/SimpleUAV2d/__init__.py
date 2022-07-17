@@ -1,4 +1,11 @@
-"""Implements the SimpleUAV2d game."""
+"""Implements the SimpleUAV2d game.
+
+Included configuration files for this game are:
+
+    * SimpleUAV2d.yaml
+    * SimpleUAVHazards2d.yaml
+
+"""
 import numpy as np
 import enum
 
@@ -13,13 +20,35 @@ from gncpy.game_engine.base_game import (
 )
 
 
-class ScoreParams:
-    def __init__(self):
-        self.type = ""
-        self.extra_params = {}
-
-
 class BirthModelParams:
+    """Parameters for the birth model to be parsed by the yaml parser.
+
+    The types defined in this class determine what type the parser uses.
+
+    Attributes
+    ----------
+    type : string
+        type of score system to use. Options are defined by
+        :class:`gncpy.game_engine.components.CBirth`.
+    extra_params : dict
+        Extra parameters for the birth model. Varies depending on the type.
+    location : numpy array
+        Either just x/y position or full state length. Location parameter for
+        the birth distribution.
+    scale : numpy array
+        Must be of appropriate dimension for the location. Scale parameter for
+        the birth distrbution.
+    randomize : bool
+        Flag indicating if a random sample should be drawn from the birth
+        distribution. This does not affect birth time.
+    times : numpy array
+        Birth times for object, these do not need to align with a game step time.
+        If no value is provided then a probability must be given.
+    prob : float
+        Probability of birth at every time step. Only used if no times are given.
+        Must be in the range (0, 1].
+    """
+
     def __init__(self):
         self.type = ""
         self.extra_params = {}
@@ -33,6 +62,30 @@ class BirthModelParams:
 
 
 class ControlModelParams:
+    """Parameters for the birth model to be parsed by the yaml parser.
+
+    The types defined in this class determine what type the parser uses.
+
+    Attributes
+    ----------
+    type : string
+        type of control model to use. Options are dependent on the dynamics type.
+        For :code:`'DoubleIntegrator'` dynamics, options are :code:`'velocity'`.
+        For :code:`'CoordinatedTurn'` dynamics, options are :code:`'velocity_turn'`.
+    max_vel : float
+        Maximum velocity for x/y components. Must be set for coordinated turn
+        :code:`'velocity_turn'` type. Only used by double integrator
+        :code:`'velocity'` type if max_vel_x and max_vel_y not set.
+    max_vel_x : float
+        Maximum velocity in the x direction. Used by double integrator
+        :code:`'velocity'`.
+    max_vel_y : float
+        Maximum velocity in the y direction. Used by double integrator
+        :code:`'velocity'`.
+    max_turn_rate : float
+        Maximum turn rate. Used by coordinated turn :code:`'velocity_turn'`.
+    """
+
     def __init__(self):
         self.type = ""
         self.max_vel = None
@@ -42,13 +95,46 @@ class ControlModelParams:
 
 
 class StateConstraintParams:
+    """Parameters for the state constraints to be parsed by the yaml parser.
+
+    The types defined in this class determine what type the parser uses.
+
+    Attributes
+    ----------
+    type : string
+        Type of control model to use. Options are :code:`'none'` or
+        :code:`'velocity'`.
+    min_vels : numpy array
+        Minimum x/y velocity.
+    max_vels : numpy array
+        Maximum x/y velocity.
+    """
+
     def __init__(self):
         self.type = ""
-        self.min_vels = []
-        self.max_vels = []
+        self.min_vels = np.array([])
+        self.max_vels = np.array([])
 
 
 class DynamicsParams:
+    """Parameters for the state constraints to be parsed by the yaml parser.
+
+    The types defined in this class determine what type the parser uses.
+
+    Attributes
+    ----------
+    type : string
+        Type of control model to use. Options are :code:`'DoubleIntegrator'` or
+        :code:`'CoordinatedTurn'`. See :mod:`gncpy.dynamics.basic` for details
+        on the dynamics.
+    extra_params : dict
+        Extra parameters for the dynamics object. Varies depending on the type.
+    controlModel : :class:`.ControlModelParams`
+        Parameters for the control model.
+    stateConstraint : :class:`.StateConstraintParams`
+        Parameters for the state constraints.
+    """
+
     def __init__(self):
         self.type = ""
         self.extra_params = {}
@@ -57,6 +143,26 @@ class DynamicsParams:
 
 
 class PlayerParams:
+    """Parameters for a player object to be parsed by the yaml parser.
+
+    The types defined in this class determine what type the parser uses.
+
+    Attributes
+    ----------
+    birth : :class:`.BirthModelParams`
+        Parametrs for the birth model
+    dynamics : :class:`.DynamicsParams`
+        Parameters for the dynamics model.
+    shape : :class:`gncpy.game_engine.rendering2d.Shape2dParams`
+        Parameters for the shape.
+    collision : :class`gncpy.game_engine.physics2d.Collision2dParams`
+        Parameters for the collision bounding box.
+    capabilities : list
+        Each element is a string representing some capability of the player.
+        Allows for modeling additional hardware some targets may require to
+        get successful "hit".
+    """
+
     def __init__(self):
         self.birth = BirthModelParams()
         self.dynamics = DynamicsParams()
@@ -66,6 +172,22 @@ class PlayerParams:
 
 
 class ObstacleParams:
+    """Parameters for an obstacle object to be parsed by the yaml parser.
+
+    The types defined in this class determine what type the parser uses.
+
+    Attributes
+    ----------
+    loc_x : float
+        X location of the center in real units.
+    loc_y : float
+        Y location of the center in real units.
+    shape : :class:`gncpy.game_engine.rendering2d.Shape2dParams`
+        Parameters for the shape.
+    collision : :class`gncpy.game_engine.physics2d.Collision2dParams`
+        Parameters for the collision bounding box.
+    """
+
     def __init__(self):
         self.loc_x = 0
         self.loc_y = 0
@@ -74,6 +196,31 @@ class ObstacleParams:
 
 
 class TargetParams:
+    """Parameters for a target object to be parsed by the yaml parser.
+
+    The types defined in this class determine what type the parser uses.
+
+    Attributes
+    ----------
+    loc_x : float
+        X location of the center in real units.
+    loc_y : float
+        Y location of the center in real units.
+    shape : :class:`gncpy.game_engine.rendering2d.Shape2dParams`
+        Parameters for the shape.
+    collision : :class`gncpy.game_engine.physics2d.Collision2dParams`
+        Parameters for the collision bounding box.
+    capabilities : list
+        Each element is a string representing some capability required by the
+        target. When a player collides with a target, the more capabilities that
+        match the better the score.
+    priority : float
+        Relative importance of reaching this target.
+    order : int
+        Order to reach this target reltive to other targets. Must be >= 0. All
+        targets with the same order will be available at the same time.
+    """
+
     def __init__(self):
         self.loc_x = 0
         self.loc_y = 0
@@ -85,6 +232,25 @@ class TargetParams:
 
 
 class HazardParams:
+    """Parameters for a hazard object to be parsed by the yaml parser.
+
+    The types defined in this class determine what type the parser uses.
+
+    Attributes
+    ----------
+    loc_x : float
+        X location of the center in real units.
+    loc_y : float
+        Y location of the center in real units.
+    shape : :class:`gncpy.game_engine.rendering2d.Shape2dParams`
+        Parameters for the shape.
+    collision : :class`gncpy.game_engine.physics2d.Collision2dParams`
+        Parameters for the collision bounding box.
+    prob_of_death : float
+        Probability of dying for each timestep in the hazard. Must be in the
+        range [0, 1].
+    """
+
     def __init__(self):
         self.loc_x = 0
         self.loc_y = 0
@@ -94,6 +260,37 @@ class HazardParams:
 
 
 class ScoreParams:
+    """Parameters for the score system to be parsed by the yaml parser.
+
+    The types defined in this class determine what type the parser uses.
+    See :meth:`.SimpleUAV2d.s_score` for details on what these terms mean for
+    specific score systems.
+
+    Attributes
+    ----------
+    type : string
+        Type of control model to use. Options are :code:`'basic'`.
+    hazard_multiplier : float
+        Multiplier for the base hazard term.
+    death_scale : float
+        Scaling factor fo the death term.
+    death_decay : float
+        Decay factor for the death term.
+    death_penalty : float
+        Additional penalty for death.
+    time_penalty : float
+        Time penalty.
+    missed_multiplier : float
+        Multiplier for missing targets
+    wall_penalty : float
+        Penalty for hitting obstacles
+    vel_penalty : float
+        Penalty for having extreme velocity
+    min_vel_per : float
+        Minimum velocity as a percentage of the magnitude. Must be in range
+        [0, 1].
+    """
+
     def __init__(self):
         self.type = "basic"
         self.hazard_multiplier = 2
@@ -109,6 +306,24 @@ class ScoreParams:
 
 
 class Params(Base2dParams):
+    """Main set of parameters to be parsed by the yaml parser.
+
+    The types defined in this class determine what type the parser uses.
+
+    Attributes
+    ----------
+    players : list
+        Each element is a :class:`.PlayerParams` object.
+    targets : list
+        Each element is a :class:`.TargetParams` object.
+    obstacles : list
+        Each element is a :class:`.ObstacleParams` object.
+    hazards : list
+        Each element is a :class:`.HazardsParams` object.
+    score : :class:`.ScoreParams`
+        Parameters for the score system.
+    """
+
     def __init__(self):
         super().__init__()
 
@@ -135,10 +350,41 @@ class EventType(enum.Enum):
 
 
 class SimpleUAV2d(BaseGame2d):
+    """Simple 2D UAV game.
+
+    Assumes obstacles and hazards are static, and all players have the same
+    state and action spaces.
+
+    Attributes
+    ----------
+    cur_target_seq : int
+        Current index into the target_seq list.
+    target_seq : list
+        Each element is an order value from the target parameters, only has
+        unique values and is sorted in ascending order.
+    all_capabilities : list
+        Each element is a string, holds all (unique) possible values from target
+        and player capabilities.
+    has_random_player_birth_times : bool
+        Flag indicating if any player can have random birth times.
+    max_player_birth_time : float
+        Maximum time a new player can be born.
+    """
+
     def __init__(self, config_file, render_mode, **kwargs):
+        """Initialize an object.
+
+        Parameters
+        ----------
+        config_file : string
+            Full path of the configuratin file.
+        render_mode : string
+            Mode to render the game.
+        **kwargs : dict
+            Additional arguments for the parent classes.
+        """
         super().__init__(config_file, render_mode, **kwargs)
 
-        self.max_target_seq = -np.inf
         self.cur_target_seq = None
         self.target_seq = []
         self.all_capabilities = []
@@ -147,6 +393,13 @@ class SimpleUAV2d(BaseGame2d):
         self.max_player_birth_time = -np.inf
 
     def register_params(self, yaml):
+        """Register custom classes for this game with the yaml parser.
+
+        Parameters
+        ----------
+        yaml : ruamel.yaml YAML object
+            yaml parser to use.
+        """
         super().register_params(yaml)
         yaml.register_class(ScoreParams)
         yaml.register_class(BirthModelParams)
@@ -161,6 +414,7 @@ class SimpleUAV2d(BaseGame2d):
         yaml.register_class(Params)
 
     def create_obstacles(self):
+        """Creates all obstacles based on config values."""
         for params in self.params.obstacles:
             e = self.entityManager.add_entity("obstacle")
 
@@ -197,6 +451,7 @@ class SimpleUAV2d(BaseGame2d):
             )
 
     def create_hazards(self):
+        """Creates all hazards based on config values."""
         for params in self.params.hazards:
             e = self.entityManager.add_entity("hazard")
 
@@ -238,6 +493,13 @@ class SimpleUAV2d(BaseGame2d):
             e.add_component(gcomp.CHazard, prob_of_death=pd)
 
     def create_targets(self):
+        """Creates current targets based on config values.
+
+        Returns
+        -------
+        bool
+            Flag indicating if targets were generated
+        """
         if len(self.entityManager.get_entities("target")) > 0:
             return False
 
@@ -295,13 +557,163 @@ class SimpleUAV2d(BaseGame2d):
 
         return True
 
-    def create_dynamics(self, params, cBirth):
-        cls_type = getattr(gdyn, params.type)
+    def get_player_pos_vel_inds(self, params=None):
+        """Determines the position and velocity indices in the state vector.
 
-        kwargs = {}
+        Note, this assumes all players have the same state bounds when params is
+        not specified.
+
+        Parameters
+        ----------
+        params : :class:`.DynamicsParams`, optional
+            Player parameter structure. The default is None which uses the first
+            player in the player's list.
+
+        Returns
+        -------
+        pos_inds : list
+            indices for the position components (x, y).
+        vel_inds : list
+            indices for the velocity components (x, y).
+        """
+        if params is None:
+            params = self.params.players[0].dynamics
         if params.type == "DoubleIntegrator":
             pos_inds = [0, 1]
             vel_inds = [2, 3]
+        elif params.type == "CoordinatedTurn":
+            pos_inds = [0, 2]
+            vel_inds = [1, 3]
+
+        return pos_inds, vel_inds
+
+    def get_player_state_bounds(self, params=None):
+        """Calculate the bounds on the player state.
+
+        Note, this assumes all players have the same state bounds when params is
+        not specified.
+
+        Parameters
+        ----------
+        params : :class:`.DynamicsParams`, optional
+            Player parameter structure. The default is None which uses the first
+            player in the player's list.
+
+        Returns
+        -------
+        2 x N numpy array
+            minimum and maximum values of the player state.
+        """
+        if params is None:
+            params = self.params.players[0].dynamics
+
+        pos_inds, vel_inds = self.get_player_pos_vel_inds(params=params)
+
+        if params.type == "DoubleIntegrator":
+            state_low = np.hstack(
+                (self.params.physics.min_pos, np.array([-np.inf, -np.inf]))
+            )
+            state_high = np.hstack(
+                (
+                    self.params.physics.min_pos
+                    + np.array(
+                        [
+                            self.params.physics.dist_width,
+                            self.params.physics.dist_height,
+                        ]
+                    ),
+                    np.array([np.inf, np.inf]),
+                )
+            )
+            sParams = params.stateConstraint
+            if sParams.type.lower() != "none":
+                if sParams.type.lower() == "velocity":
+                    state_low[vel_inds] = sParams.min_vels
+                    state_high[vel_inds] = sParams.max_vels
+
+        elif params.type == "CoordinatedTurn":
+            state_low = np.hstack(
+                (
+                    self.params.physics.min_pos[0],
+                    np.array([-np.inf]),
+                    self.params.physics.min_pos[1],
+                    np.array([-np.inf, -2 * np.pi]),
+                )
+            )
+            state_high = np.hstack(
+                (
+                    self.params.physics.min_pos[0] + self.params.physics.dist_width,
+                    np.array([np.inf]),
+                    self.params.physics.min_pos[1] + self.params.physics.dist_height,
+                    np.array([np.inf, 2 * np.pi]),
+                )
+            )
+            if sParams.type.lower() != "none":
+                if sParams.type.lower() == "velocity":
+                    state_low[vel_inds] = sParams.min_vel * np.ones(len(vel_inds))
+                    state_high[vel_inds] = sParams.min_vel * np.ones(len(vel_inds))
+
+        else:
+            raise RuntimeError("Invalid dynamics type: {}".format(sParams.type))
+
+        return state_low, state_high
+
+    def get_players_state(self):
+        """Returns current dynamic state of all players.
+
+        Returns
+        -------
+        states : dict
+            Each key is the entity id and each value is a numpy array.
+        """
+        states = {}
+        for p in self.entityManager.get_entities("player"):
+            pTrans = p.get_component(gcomp.CDynamics)
+            states[p.id] = pTrans.state.copy().ravel()
+
+        return states
+
+    def create_dynamics(self, params, cBirth):
+        """Create the dynamics system for a player.
+
+        Parameters
+        ----------
+        params : :class:`.DynamicsParams`
+            Parameters to use when making the dynamics.
+        cBirth : :class:`gncpy.game_engine.components.CBirth`
+            Birth component associated with this player.
+
+        Raises
+        ------
+        RuntimeError
+            Incorrect parameters are set.
+        NotImplementedError
+            Wrong dynamics, control model and/or state constraint combo specified.
+
+        Returns
+        -------
+        dynObj : :class:`gncpy.dynamics.basic.DynamicsBase`
+            Dynamic object created
+        pos_inds : list
+            indices of the position variables in the state
+        vel_inds : list
+            indices of the velocity variables in the state
+        state_args : tuple
+            additional arguments for the dynObj propagate function
+        ctrl_args
+            additional arguments for the dynObj propagate function
+        state_low : numpy array
+            lower state bounds
+        state_high : numpy array
+            upper state bounds
+        state0 : numpy array
+            initial state of the dynObj
+        """
+        cls_type = getattr(gdyn, params.type)
+
+        pos_inds, vel_inds = self.get_player_pos_vel_inds(params=params)
+        kwargs = {}
+        if params.type == "DoubleIntegrator":
             state_args = (self.params.physics.update_dt,)
 
             cParams = params.controlModel
@@ -328,40 +740,16 @@ class SimpleUAV2d(BaseGame2d):
                 raise NotImplementedError(msg)
             kwargs["control_model"] = _ctrl_mod
 
-            state_low = np.hstack(
-                (self.params.physics.min_pos, np.array([-np.inf, -np.inf]))
-            )
-            state_high = np.hstack(
-                (
-                    self.params.physics.min_pos
-                    + np.array(
-                        [
-                            self.params.physics.dist_width,
-                            self.params.physics.dist_height,
-                        ]
-                    ),
-                    np.array([np.inf, np.inf]),
-                )
-            )
-
             sParams = params.stateConstraint
             if sParams.type.lower() != "none":
                 if sParams.type.lower() == "velocity":
-                    state_low[vel_inds] = np.array(sParams.min_vels)
-                    state_high[vel_inds] = np.array(sParams.max_vels)
 
                     def _state_constraint(t, x):
                         x[vel_inds] = np.min(
-                            np.vstack(
-                                (x[vel_inds].ravel(), np.array(sParams.max_vels))
-                            ),
-                            axis=0,
+                            np.vstack((x[vel_inds].ravel(), sParams.max_vels)), axis=0,
                         ).reshape((len(vel_inds), 1))
                         x[vel_inds] = np.max(
-                            np.vstack(
-                                (x[vel_inds].ravel(), np.array(sParams.min_vels))
-                            ),
-                            axis=0,
+                            np.vstack((x[vel_inds].ravel(), sParams.min_vels)), axis=0,
                         ).reshape((len(vel_inds), 1))
                         return x
 
@@ -373,8 +761,6 @@ class SimpleUAV2d(BaseGame2d):
                 kwargs["state_constraint"] = _state_constraint
 
         elif params.type == "CoordinatedTurn":
-            pos_inds = [0, 2]
-            vel_inds = [1, 3]
             state_args = ()
 
             cParams = params.controlModel
@@ -403,41 +789,16 @@ class SimpleUAV2d(BaseGame2d):
                 raise NotImplementedError(msg)
             kwargs["control_model"] = [_g0, _g1, _g2, _g3, _g4]
 
-            state_low = np.hstack(
-                (
-                    self.params.physics.min_pos[0],
-                    np.array([-np.inf]),
-                    self.params.physics.min_pos[1],
-                    np.array([-np.inf, -2 * np.pi]),
-                )
-            )
-            state_high = np.hstack(
-                (
-                    self.params.physics.min_pos[0] + self.params.physics.dist_width,
-                    np.array([np.inf]),
-                    self.params.physics.min_pos[1] + self.params.physics.dist_height,
-                    np.array([np.inf, 2 * np.pi]),
-                )
-            )
-
             sParams = params.stateConstraint
             if sParams.type.lower() != "none":
                 if sParams.type.lower() == "velocity":
-                    state_low[vel_inds] = sParams.min_vel * np.ones(len(vel_inds))
-                    state_high[vel_inds] = sParams.min_vel * np.ones(len(vel_inds))
 
                     def _state_constraint(t, x):
                         x[vel_inds] = np.min(
-                            np.vstack(
-                                (x[vel_inds].ravel(), np.array(sParams.max_vels))
-                            ),
-                            axis=0,
+                            np.vstack((x[vel_inds].ravel(), sParams.max_vels)), axis=0,
                         ).reshape((-1, 1))
                         x[vel_inds] = np.max(
-                            np.vstack(
-                                (x[vel_inds].ravel(), np.array(sParams.min_vels))
-                            ),
-                            axis=0,
+                            np.vstack((x[vel_inds].ravel(), sParams.min_vels)), axis=0,
                         ).reshape((-1, 1))
                         if x[4] < 0:
                             x[4] = np.mod(x[4], -2 * np.pi)
@@ -455,6 +816,8 @@ class SimpleUAV2d(BaseGame2d):
 
         kwargs.update(params.extra_params)
 
+        state_low, state_high = self.get_player_state_bounds(params=params)
+
         dynObj = cls_type(**kwargs)
         state0 = np.zeros((state_low.size, 1))
         val = cBirth.sample()
@@ -462,7 +825,7 @@ class SimpleUAV2d(BaseGame2d):
             state0[pos_inds] = val.reshape(state0[pos_inds].shape)
 
             if cBirth.randomize and params.type == "CoordinatedTurn":
-                state0[4] = self._rng.random() * 2 * np.pi
+                state0[4] = self.rng.random() * 2 * np.pi
 
         elif val.size == state0.size:
             state0 = val.reshape(state0.shape)
@@ -481,6 +844,7 @@ class SimpleUAV2d(BaseGame2d):
         )
 
     def spawn_players(self):
+        """Spawns a new player if needed."""
         for params in self.params.players:
             # check if using random birth time
             if params.birth.times.size == 0:
@@ -491,7 +855,7 @@ class SimpleUAV2d(BaseGame2d):
                 if inds.size == 0:
                     continue
                 min_diff = diff[inds[-1]]
-                # birth times don't have to align with
+                # birth times don't have to align with updates
                 req_spawn = min_diff < self.params.physics.update_dt - 1e-8
 
             if not req_spawn:
@@ -556,30 +920,50 @@ class SimpleUAV2d(BaseGame2d):
             e.add_component(gcomp.CCapabilities, capabilities=params.capabilities)
 
     def propagate_dynamics(self, eDyn, action):
+        """Propagates the dynamics with the given action.
+
+        Parameters
+        ----------
+        eDyn : :class:`gncpy.game_engine.components.CDynamics`
+            dynamics component to propagate.
+        action : numpy array
+            Control input for the dynamics object.
+        """
         eDyn.state = eDyn.dynObj.propagate_state(
             self.current_time,
-            eDyn.last_state,
-            u=action,
+            eDyn.last_state.reshape((-1, 1)),
+            u=action.reshape((-1, 1)),
             state_args=eDyn.state_args,
             ctrl_args=eDyn.ctrl_args,
-        )
+        ).reshape((-1, 1))
 
     def get_player_ids(self):
+        """Get the entity ids of all players.
+
+        Returns
+        -------
+        list
+            all entity ids of the players.
+        """
         return self.entityManager.get_entity_ids(tag="player")
 
     def reset(self, **kwargs):
+        """Resets the game to the base state.
+
+        Parameters
+        ----------
+        kwargs : dict
+            Additional arguments for the parent classes.
+        """
         super().reset(**kwargs)
 
-        # find max target sequence, list of all possible order values, and all capabilities
-        self.max_target_seq = -np.inf
+        # find list of all possible order values, and all capabilities
         self.cur_target_seq = None
         self.target_seq = []
         self.all_capabilities = []
         for t in self.params.targets:
             if t.order not in self.target_seq:
                 self.target_seq.append(t.order)
-            if t.order > self.max_target_seq:
-                self.max_target_seq = t.order
 
             for c in t.capabilities:
                 if c not in self.all_capabilities:
@@ -617,7 +1001,8 @@ class SimpleUAV2d(BaseGame2d):
 
         Returns
         -------
-        None.
+        bool
+            Flag indicating if a target was hit.
         """
         hit_target = False
 
@@ -675,7 +1060,7 @@ class SimpleUAV2d(BaseGame2d):
                 h_aabb = h.get_component(gcomp.CCollision).aabb
                 c_hazard = h.get_component(gcomp.CHazard)
                 if gphysics.check_collision2d(p_aabb, h_aabb):
-                    if self._rng.uniform(0.0, 1.0) < c_hazard.prob_of_death:
+                    if self.rng.uniform(0.0, 1.0) < c_hazard.prob_of_death:
                         e.destroy()
                         p_events.events.append((EventType.DEATH, None))
                         if e.id in c_hazard.entrance_times:
@@ -729,15 +1114,34 @@ class SimpleUAV2d(BaseGame2d):
         return hit_target
 
     def s_input(self, user_input):
-        """Validate user input."""
+        """Validate user input.
+
+        Only allows actions that correspond to a current entity.
+
+        Parameters
+        ----------
+        user_input : dict
+            Each key is an entity id. Each value is a numpy array representing
+            the action for that entity.
+
+        Returns
+        -------
+        out : dict
+            Each key is an entity id. Each value is a numpy array for the action.
+        """
         ids = self.entityManager.get_entity_ids()
         out = {}
         for key, val in user_input.items():
             if key in ids:
-                out[key] = val
+                out[key] = val.reshape((-1, 1))
         return out
 
     def s_game_over(self):
+        """Determines if the game has met the end conditions.
+
+        End conditions are if all players are dead and no random births, or
+        all targets have been reached, or it has past the maximum time.
+        """
         n_players = len(self.entityManager.get_entities("player"))
         all_players_dead = (
             not self.has_random_player_birth_times
@@ -755,12 +1159,10 @@ class SimpleUAV2d(BaseGame2d):
 
         Parameters
         ----------
-        action : 2 x 1 numpy array
-            Control inputs for the given dynamics model.
-
-        Returns
-        -------
-        None.
+        action : dict
+            Each key is an entity id and its value is a 2 x 1 numpy array
+            corresponding to control inputs for the given dynamics model. This
+            comes from the input system.
         """
         for e in self.entityManager.get_entities():
             if e.has_component(gcomp.CTransform):
@@ -911,6 +1313,20 @@ class SimpleUAV2d(BaseGame2d):
         return reward, info
 
     def s_score(self):
+        """Determines the total score for the timestep.
+
+        Raises
+        ------
+        NotImplementedError
+            An incorrect type is specified.
+
+        Returns
+        -------
+        score : flaot
+            total score for this timestep.
+        info : dict
+            extra info from the score system
+        """
         if self.params.score.type.lower() == "basic":
             return self.basic_reward()
         else:
@@ -918,9 +1334,25 @@ class SimpleUAV2d(BaseGame2d):
                 self.params.score.type
             )
             raise NotImplementedError(msg)
-        return 0, {}
 
     def step(self, user_input):
+        """Perform one iteration of the game loop.
+
+        Multiple physics updates can be made between rendering calls. Also
+        spwans players if needed and updates the targets based on what has been
+        reached.
+
+        Parameters
+        ----------
+        user_input : dict
+            Each key is an integer representing the entity id that the action
+            applies to. Each value is a numpy array for the action to take.
+
+        Returns
+        -------
+        info : dict
+            Extra infomation for debugging.
+        """
         self.spawn_players()
         self.create_targets()
         return super().step(user_input)

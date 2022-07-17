@@ -2,7 +2,11 @@
 
 
 class Entity:
-    """Elements in a game."""
+    """Elements in a game.
+
+    These should not be created or deleted directly, the manager class should
+    be used instead.
+    """
 
     __slots__ = ("_active", "_id", "_tag", "_components")
 
@@ -180,4 +184,17 @@ class EntityManager:
                 return []
 
     def get_entity_ids(self, tag=None):
+        """Return a list of the entity ids.
+
+        Parameters
+        ----------
+        tag : string, optional
+            If provided only return ids for entities with this tag. The default
+            is None.
+
+        Returns
+        -------
+        list
+            Each element is an entity id.
+        """
         return [e.id for e in self.get_entities(tag=tag)]

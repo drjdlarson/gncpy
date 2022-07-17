@@ -75,17 +75,21 @@ class CMakeBuild(build_ext):
 
 # environment specific requirements
 extras = {
-    "reinforcement-learning": ["pygame>=2.1.2", "gym>=0.19", "opencv-python"],
+    "games": ["pygame>=2.1.2", "ruamel.yaml>=0.17.21"],
+    "reinforcement-learning": ["gym>=0.25", "opencv-python"],
     "simple-multirotor": ["ruamel.yaml>=0.17.21"],
 }  # NOQA
 
+extras["reinforcement-learning"].extend(
+    [r for r in extras["games"] if r not in extras["reinforcement-learning"]]
+)
 extras["all"] = list(
     itertools.chain.from_iterable(map(lambda group: extras[group], extras.keys()))
 )
 
 
 def readme():
-    with open("README.md") as f:
+    with open("README.rst") as f:
         return f.read()
 
 
@@ -93,18 +97,30 @@ setup(
     name="gncpy",
     version="0.0.0",
     description="A package for Guidance, Navigation, and Control (GNC) algorithms.",
-    # long_description=readme(),
+    long_description_content_type="text/x-rst",
+    long_description=readme(),
     url="https://github.com/drjdlarson/gncpy",
     author="Laboratory for Autonomy GNC and Estimation Research (LAGER)",
     author_email="",
     license="MIT",
-    packages=find_packages(),
+    packages=find_packages(exclude=["test", "test.*"]),
     install_requires=["numpy", "scipy", "matplotlib"],
     extras_require=extras,
     tests_require=["pytest", "numpy"],
-    package_data={"": ["*.yaml"],},  # include yaml files in all packages
-    zip_safe=False,
+    include_package_data=True,
     ext_modules=[CMakeExtension("gncpy/dynamics/aircraft/lager_super_bindings")],
-    python_requires=">=3.6",
+    python_requires=">=3.7",
     cmdclass=dict(build_ext=CMakeBuild),
+    classifiers=[
+        "Development Status :: 3 - Alpha",
+        "Intended Audience :: Developers",
+        "Intended Audience :: Education",
+        "Intended Audience :: Science/Research",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Topic :: Scientific/Engineering",
+        "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    ]
 )

@@ -7,8 +7,6 @@ start_time: 0
 max_time: 10
 
 physics: !Physics2dParams
-    dt: 0.1
-    step_factor: 1
     min_pos: [0, 0]
     dist_width: 20
     dist_height: 20
@@ -36,15 +34,12 @@ players:
             times: 0
             prob: -1
         dynamics: !DynamicsParams
-            type: 'DoubleIntegrator'
-            controlModel: !ControlModelParams
-                type: 'velocity'
-                max_vel_x: 5
-                max_vel_y: 5
-            stateConstraint: !StateConstraintParams
-                type: 'velocity'
-                min_vels: [-5, -5]
-                max_vels: [5, 5]
+            ref_lat_deg: 33.209955
+            ref_lon_deg: -87.534240
+            terrain_alt_wgs84: 67.117600
+            wp_radius: .75       # m
+            fly_height: 50      # m
+            ned_mag_field: [22.9383, -0.0337, -0.1326]
         shape: !Shape2dParams
             type: 'rect'
             width: 1
@@ -141,3 +136,29 @@ obstacles:
         collision: !Collision2dParams
             width: 5
             height: 1
+
+hazards:
+    - !HazardParams
+        loc_x: 7.5
+        loc_y: 8.5
+        shape: !Shape2dParams
+            type: 'rect'
+            width: 10
+            height: 2.5
+            color: [255, 215, 0]
+        collision: !Collision2dParams
+            width: 10
+            height: 2.5
+        prob_of_death: 0.05
+    - !HazardParams
+        loc_x: 5
+        loc_y: 19
+        shape: !Shape2dParams
+            type: 'rect'
+            width: 1.5
+            height: 3
+            color: [255, 215, 0]
+        collision: !Collision2dParams
+            width: 1.5
+            height: 3
+        prob_of_death: 0.1

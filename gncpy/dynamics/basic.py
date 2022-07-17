@@ -224,7 +224,7 @@ class NonlinearDynamicsBase(DynamicsBase):
         -------
         list
             Each element is a function that take the timestep, the state, and
-            *f_args. They must return the new state for the given index in the
+            f_args. They must return the new state for the given index in the
             list/state vector.
         """
         raise NotImplementedError
@@ -415,6 +415,13 @@ class CoordinatedTurn(NonlinearDynamicsBase):
 
     @property
     def cont_fnc_lst(self):
+        """Continuous time dynamics.
+
+        Returns
+        -------
+        list
+            functions of the form :code:`(t, x, *args)`.
+        """
         # returns x_dot
         def f0(t, x, *args):
             return x[1]
@@ -569,6 +576,13 @@ class TschaunerHempelOrbit(NonlinearDynamicsBase):
 
     @property
     def cont_fnc_lst(self):
+        """Continuous time dynamics.
+
+        Returns
+        -------
+        list
+            functions of the form :code:`(t, x, *args)`.
+        """
         # returns x velocity
         def f0(t, x, *args):
             return x[3]
@@ -658,6 +672,13 @@ class KarlgaardOrbit(NonlinearDynamicsBase):
 
     @property
     def cont_fnc_lst(self):
+        """Continuous time dynamics.
+
+        Returns
+        -------
+        list
+            functions of the form :code:`(t, x, *args)`.
+        """
         # returns non-dim radius ROC
         def f0(t, x, *args):
             return x[3]

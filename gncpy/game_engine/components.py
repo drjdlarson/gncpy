@@ -73,7 +73,7 @@ class CTransform:
 class CCollision:
     """Handles the bounding box used for collisions.
 
-    Attrbutes
+    Attributes
     ---------
     aabb : pygame Rect
         Rectangle representing the axis aligned bounding box.
@@ -93,6 +93,13 @@ class CBirth:
 
     Also handles the generation of the birth location through the use of
     a distribution object from SERUMS.
+
+    Attributes
+    ----------
+    loc : numpy array
+        Location parameter for distribution
+    randomize : bool
+        Flag indicating if the state should be randomly sampled.
     """
 
     __slots__ = "_model", "loc", "_rng", "randomize"
@@ -105,7 +112,7 @@ class CBirth:
         Parameters
         ----------
         b_type : string
-            Model type.
+            Model type. Options are :code:`'gaussian'`.
         loc : numpy array
             location parameter of the model.
         scale : N x N numpy array
@@ -126,7 +133,14 @@ class CBirth:
         self.randomize = randomize
 
     def sample(self):
-        """Draw a sample from the distribution."""
+        """Draw a sample from the distribution.
+
+        Will provide the location parameter if not randomizing.
+
+        Returns
+        -------
+        N x 1 numpy array
+        """
         if self.randomize:
             return self._model.sample(rng=self._rng).reshape((-1, 1))
         else:
@@ -232,6 +246,8 @@ class CDynamics:
     ----------
     dynObj : :class:`gncpy.dynamics.DynamicsBase`
         Implements the dynamics equations, control, and state constraints.
+    last_state : numpy array
+        Last state for the dynamics.
     pos_inds : list
         Indices of the state vector containing the position info.
     vel_inds : list

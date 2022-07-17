@@ -10,7 +10,39 @@ import pygame  # noqa
 import gncpy.game_engine.components as gcomp  # noqa
 
 
+class Shape2dParams:
+    """Parameters of a 2d shape object.
+
+    The types defined in this class determine what type the parser uses.
+
+    Attributes
+    ----------
+    type : string
+        Pygame object type to create, see :class:`.components.CShape` for options.
+    width : int
+        Width in real units of the shape.
+    height : int
+        Height in real units of the shape.
+    color : tuple
+        RGB triplet of the shape, in range [0, 255].
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.type = ""
+        self.width = 0
+        self.height = 0
+        self.color = ()
+
+
 def init_rendering_system():
+    """Initialize the rendering system.
+
+    Returns
+    -------
+    pygame clock
+        pygame clock instance
+    """
     pygame.init()
     clock = pygame.time.Clock()
 
@@ -18,6 +50,23 @@ def init_rendering_system():
 
 
 def init_window(render_mode, width, height):
+    """Initialize the main window.
+
+    Parameters
+    ----------
+    render_mode : string
+        Render mode to use, if :code:`'human'` is given then the window will be
+        shown. All other values are ignored.
+    width : int
+        Window width in pixels.
+    height : int
+        Window height in pixels.
+
+    Returns
+    -------
+    window : pygame window
+        Main window object for drawing.
+    """
     extra = {}
     if render_mode != "human":
         extra["flags"] = pygame.HIDDEN
@@ -26,8 +75,20 @@ def init_window(render_mode, width, height):
     return window
 
 
-
 def get_drawable_entities(entities):
+    """Get all the drawable entities.
+
+    Parameters
+    ----------
+    entities : list
+        List of all entities from the :class:`.entities.EntityManager` class.
+
+    Returns
+    -------
+    list
+        list of all entities that can be drawn.
+    """
+
     def _can_draw(_e):
         return _e.has_component(gcomp.CShape) and _e.has_component(gcomp.CTransform)
 
@@ -38,6 +99,27 @@ def get_drawable_entities(entities):
 
 
 def render(drawable, window, clock, mode, fps):
+    """Draw all entities to the window.
+
+    Parameters
+    ----------
+    drawable : list
+        List of drawable entities.
+    window : pygame window
+        Window to draw to.
+    clock : pygame clock
+        main clock for the game.
+    mode : string
+        Rendering mode, if :code:`'human'` then the screen is updated and events
+        are checked for the close button.
+    fps : int
+        Frame rate to render at.
+
+    Returns
+    -------
+    numpy array
+        pixel values of the window in HxWx3 order.
+    """
     window.fill((255, 255, 255))
     offset = window.get_size()[1]
     for e in drawable:
@@ -70,5 +152,12 @@ def render(drawable, window, clock, mode, fps):
 
 
 def shutdown(window):
+    """Nicely close pygame if window was initialized.
+
+    Parameters
+    ----------
+    window : pygame window
+        Main window object.
+    """
     if window is not None:
         pygame.quit()

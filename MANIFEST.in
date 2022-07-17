@@ -1,0 +1,6 @@
+recursive-include gncpy *.yaml
+recursive-include gncpy *.cpp
+graft lib
+include CMakeLists.txt
+include README.rst
+include LICENSE

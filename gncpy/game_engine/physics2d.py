@@ -7,23 +7,81 @@ import pygame  # noqa
 
 
 class Physics2dParams:
+    """Parameters for the 2d physics system to be parsed by the config parser.
+
+    The types defined in this class determine what type the parser uses.
+
+    Attributes
+    ----------
+    dt : float
+        Main dt of the game, this is the rendering dt and may be the same as
+        the update dt.
+    step_factor : int
+        Factor to divide the base dt by to get the update dt. Must be positive.
+        Allows multiple incremental physics steps inbetween the main rendering
+        calls. Helps ensure objects don't pass through each other from moving too
+        far in a given frame.
+    min_pos : numpy array
+        Minimium position in real units in the order x, y.
+    dist_width : float
+        Distance in real units for the width of the game world.
+    dist_height : float
+        Distance in real units for the height of the game world.
+    """
+
     def __init__(self):
+        super().__init__()
         self.dt = 0
         self.step_factor = 1
         self.min_pos = np.array([])
-        self.dist_width = 0
-        self.dist_height = 0
+        self.dist_width = 0.0
+        self.dist_height = 0.0
 
     @property
     def update_dt(self):
+        """Timestep for physics updates."""
         return self.dt / self.step_factor
 
 
+class Collision2dParams:
+    """Parameters of an axis aligned bounding box for 2d objects.
+
+    The types defined in this class determine what type the parser uses.
+
+    Attributes
+    ----------
+    width : int
+        Width in pixels of the bounding box.
+    height : int
+        Height in pixels of the bounding box.
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.width = 0
+        self.height = 0
+
+
 def check_collision2d(bb1, bb2):
+    """Check for a collision between 2 bounding boxes.
+
+    Parameters
+    ----------
+    bb1 : pygame rect
+        First axis aligned bounding box.
+    bb2 : pygame rect
+        Second axis aligned bounding box.
+
+    Returns
+    -------
+    bool
+        Flag indicating if there was a collision.
+    """
     return pygame.Rect.colliderect(bb1, bb2)
 
 
 def _get_overlap2d(pt1, pt2, bb1, bb2):
+    """Find the overlap between 2 bounding boxes with some previous position."""
     delta = (abs(pt1[0] - pt2[0]), abs(pt1[1] - pt2[1]))
     ox = bb1.width / 2 + bb2.width / 2 - delta[0]
     oy = bb1.height / 2 + bb2.height / 2 - delta[1]
@@ -31,6 +89,22 @@ def _get_overlap2d(pt1, pt2, bb1, bb2):
 
 
 def resolve_collision2d(bb1, bb2, trans1, trans2):
+    """Resolve a collision between 2 bounding boxes by moving one.
+
+    This assumes that the two bounding boxes are colliding. This should first be
+    checked.
+
+    Parameters
+    ----------
+    bb1 : pygame rect
+        Bounding box to move to resolve collision.
+    bb2 : pygame rect
+        Colliding bounding box.
+    trans1 : :class:`.components.CTransform`
+        Transform component associated with the first bounding box.
+    trans2 : :class:`.components.CTransform`
+        Transform component associated with the second bounding box.
+    """
     ox, oy = _get_overlap2d(
         (bb1.centerx, bb1.centery), (bb2.centerx, bb2.centery), bb1, bb2
     )
@@ -56,6 +130,26 @@ def resolve_collision2d(bb1, bb2, trans1, trans2):
 
 
 def clamp_window_bounds2d(bb, trans, width, height):
+    """Checks for the bounding box leaving the window and halts it.
+
+    Parameters
+    ----------
+    bb : pygame rect
+        Axis aligned bounding box.
+    trans : :class:`.components.CTransform`
+        Transform component associated with the bounding box.
+    width : int
+        Width of the window in pixels.
+    height : int
+        Height of the window in pixels.
+
+    Returns
+    -------
+    out_side : bool
+        Flag for if there was a collision with the side.
+    out_top : bool
+        Flag for if there was a collision with the top or bottom.
+    """
     out_side = False
     if bb.left < 0:
         bb.left = 0
@@ -87,6 +181,13 @@ def pixels_to_dist(pt, dist_per_pix, min_pos=None):
 
     Parameters
     ----------
+    pt : numpy array, float
+        Point to convert to real distance.
+    dist_per_pix : numpy array, float
+        real distance per pixel.
+    min_pos : numpy array or float, optional
+        Minimum position to use for translation. The default is None meaning no
+        translation is applied (i.e. velocity transform).
 
     Returns
     -------
@@ -118,6 +219,13 @@ def dist_to_pixels(pt, dist_per_pix, min_pos=None):
 
     Parameters
     ----------
+    pt : numpy array, float
+        Point to convert to pixels.
+    dist_per_pix : numpy array, float
+        real distance per pixel.
+    min_pos : numpy array or float, optional
+        Minimum position to use for translation (real units). The default is
+        None meaning no translation is applied (i.e. velocity transform).
 
     Returns
     -------
