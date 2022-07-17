@@ -204,7 +204,7 @@ class BaseGame(ABC):
 
         Raises
         ------
-        RuntimeError
+        FileNotFoundError
             If the file cannot be found.
 
         Returns
@@ -220,7 +220,7 @@ class BaseGame(ABC):
             cf = config_file
 
         if not succ:
-            raise RuntimeError("Failed to find config file {}".format(config_file))
+            raise FileNotFoundError("Failed to find config file {}".format(config_file))
 
         return cf
 

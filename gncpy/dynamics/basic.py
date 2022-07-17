@@ -32,7 +32,7 @@ class DynamicsBase(ABC):
         any constraints applied to it.
     """
 
-    __slots__ = 'control_model', 'state_constraint'
+    __slots__ = "control_model", "state_constraint"
 
     state_names = ()
     """Tuple of strings for the name of each state. The order should match
@@ -123,7 +123,7 @@ class LinearDynamicsBase(DynamicsBase):
             discrete time process noise matrix.
 
         """
-        msg = 'get_dis_process_noise_mat function is undefined'
+        msg = "get_dis_process_noise_mat function is undefined"
         warn(msg, RuntimeWarning)
         return np.array([[]])
 
@@ -195,10 +195,11 @@ class NonlinearDynamicsBase(DynamicsBase):
         additional parameters for the integrator. The default is {}.
     """
 
-    __slots__ = ('dt', 'integrator_type', 'integrator_params', '_integrator')
+    __slots__ = ("dt", "integrator_type", "integrator_params", "_integrator")
 
-    def __init__(self, integrator_type='dopri5', integrator_params={},
-                 dt=np.nan, **kwargs):
+    def __init__(
+        self, integrator_type="dopri5", integrator_params={}, dt=np.nan, **kwargs
+    ):
         super().__init__(**kwargs)
 
         self.dt = dt
@@ -288,11 +289,9 @@ class NonlinearDynamicsBase(DynamicsBase):
         N x N numpy array
             state transition matrix.
         """
-        return gmath.get_state_jacobian(timestep, state, self.cont_fnc_lst,
-                                        f_args)
+        return gmath.get_state_jacobian(timestep, state, self.cont_fnc_lst, f_args)
 
-    def propagate_state(self, timestep, state, u=None, state_args=None,
-                        ctrl_args=None):
+    def propagate_state(self, timestep, state, u=None, state_args=None, ctrl_args=None):
         """Propagates the continuous time dynamics.
 
         Automatically integrates the defined ode list and adds control inputs
@@ -328,22 +327,21 @@ class NonlinearDynamicsBase(DynamicsBase):
         if ctrl_args is None:
             ctrl_args = ()
 
-        self._integrator = s_integrate.ode(lambda t, y, *f_args:
-                                           self._cont_dyn(t, y, u, f_args,
-                                                          ctrl_args).flatten())
-        self._integrator.set_integrator(self.integrator_type,
-                                        **self.integrator_params)
+        self._integrator = s_integrate.ode(
+            lambda t, y, *f_args: self._cont_dyn(t, y, u, f_args, ctrl_args).flatten()
+        )
+        self._integrator.set_integrator(self.integrator_type, **self.integrator_params)
         self._integrator.set_initial_value(state, timestep)
         self._integrator.set_f_params(*state_args)
 
         if np.isnan(self.dt) or np.isinf(self.dt):
-            raise RuntimeError('Invalid value for dt ({}).'.format(self.dt))
+            raise RuntimeError("Invalid value for dt ({}).".format(self.dt))
 
         next_time = timestep + self.dt
         next_state = self._integrator.integrate(next_time)
         next_state = next_state.reshape((next_state.size, 1))
         if not self._integrator.successful():
-            msg = 'Integration failed at time {}'.format(timestep)
+            msg = "Integration failed at time {}".format(timestep)
             raise RuntimeError(msg)
 
         if self.state_constraint is not None:
@@ -357,7 +355,7 @@ class DoubleIntegrator(LinearDynamicsBase):
 
     __slots__ = ()
 
-    state_names = ('x pos', 'y pos', 'x vel', 'y vel')
+    state_names = ("x pos", "y pos", "x vel", "y vel")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -397,10 +395,9 @@ class DoubleIntegrator(LinearDynamicsBase):
             state matrix.
 
         """
-        return np.array([[1., 0, dt, 0],
-                         [0., 1., 0, dt],
-                         [0, 0, 1., 0],
-                         [0, 0, 0, 1]])
+        return np.array(
+            [[1.0, 0, dt, 0], [0.0, 1.0, 0, dt], [0, 0, 1.0, 0], [0, 0, 0, 1]]
+        )
 
 
 class CoordinatedTurn(NonlinearDynamicsBase):
@@ -408,7 +405,7 @@ class CoordinatedTurn(NonlinearDynamicsBase):
 
     __slots__ = ()
 
-    state_names = ('x pos', 'x vel', 'y pos', 'y vel', 'turn angle')
+    state_names = ("x pos", "x vel", "y pos", "y vel", "turn angle")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -464,12 +461,16 @@ class CoordinatedTurn(NonlinearDynamicsBase):
             Process noise matrix.
 
         """
-        gamma = np.array([[dt**2 / 2, 0, 0],
-                          [dt, 0, 0],
-                          [0, dt**2 / 2, 0],
-                          [0, dt, 0],
-                          [0, 0, 1]])
-        Q = np.diag([posx_std**2, posy_std**2, turn_std**2])
+        gamma = np.array(
+            [
+                [dt ** 2 / 2, 0, 0],
+                [dt, 0, 0],
+                [0, dt ** 2 / 2, 0],
+                [0, dt, 0],
+                [0, 0, 1],
+            ]
+        )
+        Q = np.diag([posx_std ** 2, posy_std ** 2, turn_std ** 2])
         return gamma @ Q @ gamma.T
 
 
@@ -486,8 +487,7 @@ class ClohessyWiltshireOrbit(LinearDynamicsBase):
         mean motion of reference spacecraft
     """
 
-    state_names = ('x pos', 'y pos', 'z pos',
-                   'x vel', 'y vel', 'z vel')
+    state_names = ("x pos", "y pos", "z pos", "x vel", "y vel", "z vel")
 
     def __init__(self, mean_motion=None, **kwargs):
         self.mean_motion = mean_motion
@@ -528,13 +528,23 @@ class ClohessyWiltshireOrbit(LinearDynamicsBase):
         n = self.mean_motion
         c_dtn = np.cos(dt * n)
         s_dtn = np.sin(dt * n)
-        F = np.array([[4 - 3 * c_dtn, 0, 0, s_dtn / n, -(2 * c_dtn - 2) / n, 0],
-                      [6 * s_dtn - 6 * dt * n, 1, 0, (2 * c_dtn - 2) / n,
-                       (4 * s_dtn - 3 * dt * n) / n, 0],
-                      [0, 0, c_dtn, 0, 0, s_dtn / n],
-                      [3 * n * s_dtn, 0, 0, c_dtn, 2 * s_dtn, 0],
-                      [6 * n * (c_dtn - 1), 0, 0, -2 * s_dtn, 4 * c_dtn - 3, 0],
-                      [0, 0, -n * s_dtn, 0, 0, c_dtn]])
+        F = np.array(
+            [
+                [4 - 3 * c_dtn, 0, 0, s_dtn / n, -(2 * c_dtn - 2) / n, 0],
+                [
+                    6 * s_dtn - 6 * dt * n,
+                    1,
+                    0,
+                    (2 * c_dtn - 2) / n,
+                    (4 * s_dtn - 3 * dt * n) / n,
+                    0,
+                ],
+                [0, 0, c_dtn, 0, 0, s_dtn / n],
+                [3 * n * s_dtn, 0, 0, c_dtn, 2 * s_dtn, 0],
+                [6 * n * (c_dtn - 1), 0, 0, -2 * s_dtn, 4 * c_dtn - 3, 0],
+                [0, 0, -n * s_dtn, 0, 0, c_dtn],
+            ]
+        )
         return F
 
 
@@ -562,12 +572,19 @@ class TschaunerHempelOrbit(NonlinearDynamicsBase):
         eccentricity. The default is 1.
     """
 
-    state_names = ('x pos', 'y pos', 'z pos',
-                   'x vel', 'y vel', 'z vel',
-                   'targets true anomaly')
+    state_names = (
+        "x pos",
+        "y pos",
+        "z pos",
+        "x vel",
+        "y vel",
+        "z vel",
+        "targets true anomaly",
+    )
 
-    def __init__(self, mu=3.986004418 * 10**14, semi_major=None, eccentricity=1,
-                 **kwargs):
+    def __init__(
+        self, mu=3.986004418 * 10 ** 14, semi_major=None, eccentricity=1, **kwargs
+    ):
         self.mu = mu
         self.semi_major = semi_major
         self.eccentricity = eccentricity
@@ -601,15 +618,15 @@ class TschaunerHempelOrbit(NonlinearDynamicsBase):
             a = self.semi_major
             mu = self.mu
 
-            e2 = e**2
-            R3 = ((a * (1 - e2)) / (1 + e * np.cos(x[6])))**3
-            n = np.sqrt(mu / a**3)
+            e2 = e ** 2
+            R3 = ((a * (1 - e2)) / (1 + e * np.cos(x[6]))) ** 3
+            n = np.sqrt(mu / a ** 3)
 
             C1 = mu / R3
-            wz = n * (1 + e * np.cos(x[6]))**2 / (1 - e2)**(3. / 2.)
+            wz = n * (1 + e * np.cos(x[6])) ** 2 / (1 - e2) ** (3.0 / 2.0)
             wz_dot = -2 * mu * e * np.sin(x[6]) / R3
 
-            return (wz**2 + 2 * C1) * x[0] + wz_dot * x[1] + 2 * wz * x[4]
+            return (wz ** 2 + 2 * C1) * x[0] + wz_dot * x[1] + 2 * wz * x[4]
 
         # returns y acceleration
         def f4(t, x, *args):
@@ -617,15 +634,15 @@ class TschaunerHempelOrbit(NonlinearDynamicsBase):
             a = self.semi_major
             mu = self.mu
 
-            e2 = e**2
-            R3 = ((a * (1 - e2)) / (1 + e * np.cos(x[6])))**3
-            n = np.sqrt(mu / a**3)
+            e2 = e ** 2
+            R3 = ((a * (1 - e2)) / (1 + e * np.cos(x[6]))) ** 3
+            n = np.sqrt(mu / a ** 3)
 
             C1 = mu / R3
-            wz = n * (1 + e * np.cos(x[6]))**2 / (1 - e2)**(3. / 2.)
+            wz = n * (1 + e * np.cos(x[6])) ** 2 / (1 - e2) ** (3.0 / 2.0)
             wz_dot = -2 * mu * e * np.sin(x[6]) / R3
 
-            return (wz**2 - C1) * x[1] - wz_dot * x[0] - 2 * wz * x[3]
+            return (wz ** 2 - C1) * x[1] - wz_dot * x[0] - 2 * wz * x[3]
 
         # returns z acceleration
         def f5(t, x, *args):
@@ -633,8 +650,8 @@ class TschaunerHempelOrbit(NonlinearDynamicsBase):
             a = self.semi_major
             mu = self.mu
 
-            e2 = e**2
-            R3 = ((a * (1 - e2)) / (1 + e * np.cos(x[6])))**3
+            e2 = e ** 2
+            R3 = ((a * (1 - e2)) / (1 + e * np.cos(x[6]))) ** 3
 
             C1 = mu / R3
 
@@ -644,11 +661,11 @@ class TschaunerHempelOrbit(NonlinearDynamicsBase):
         def f6(t, x, *args):
             e = self.eccentricity
             a = self.semi_major
-            p = a * (1 - e**2)
+            p = a * (1 - e ** 2)
 
             H = np.sqrt(self.mu * p)
             R = p / (1 + e * np.cos(x[6]))
-            return H / R**2
+            return H / R ** 2
 
         return [f0, f1, f2, f3, f4, f5, f6]
 
@@ -663,9 +680,14 @@ class KarlgaardOrbit(NonlinearDynamicsBase):
     :cite:`Karlgaard2003_SecondOrderRelativeMotionEquations` for details.
     """
 
-    state_names = ('non-dim radius', 'non-dim az angle', 'non-dim elv angle',
-                   'non-dim radius ROC', 'non-dim az angle ROC',
-                   'non-dim elv angle ROC')
+    state_names = (
+        "non-dim radius",
+        "non-dim az angle",
+        "non-dim elv angle",
+        "non-dim radius ROC",
+        "non-dim az angle ROC",
+        "non-dim elv angle ROC",
+    )
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -697,8 +719,11 @@ class KarlgaardOrbit(NonlinearDynamicsBase):
             phi = x[2]
             theta_d = x[4]
             phi_d = x[5]
-            return ((-3 * r**2 + 2 * r * theta_d - phi**2 + theta_d**2
-                    + phi_d**2) + 3 * r + 2 * theta_d)
+            return (
+                (-3 * r ** 2 + 2 * r * theta_d - phi ** 2 + theta_d ** 2 + phi_d ** 2)
+                + 3 * r
+                + 2 * theta_d
+            )
 
         # returns non-dim az angle ROC ROC
         def f4(t, x, *args):
@@ -706,8 +731,7 @@ class KarlgaardOrbit(NonlinearDynamicsBase):
             theta = x[1]
             r_d = x[3]
             theta_d = x[4]
-            return ((2 * r * r_d + 2 * theta * theta_d - 2 * theta_d * r_d)
-                    - 2 * r_d)
+            return (2 * r * r_d + 2 * theta * theta_d - 2 * theta_d * r_d) - 2 * r_d
 
         # returns non-dim elv angle ROC ROC
         def f5(t, x, *args):
@@ -715,6 +739,6 @@ class KarlgaardOrbit(NonlinearDynamicsBase):
             r_d = x[3]
             theta_d = x[4]
             phi_d = x[5]
-            return ((-2 * theta_d * phi - 2 * phi_d * r_d) - phi)
+            return (-2 * theta_d * phi - 2 * phi_d * r_d) - phi
 
         return [f0, f1, f2, f3, f4, f5]
