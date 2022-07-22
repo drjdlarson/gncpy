@@ -1,0 +1,290 @@
+!Params
+window: !WindowParams
+    width: 640
+    height: 640
+
+start_time: 0
+max_time: 10
+
+physics: !Physics2dParams
+    min_pos: [0, 0]
+    dist_width: 20
+    dist_height: 20
+
+score: !ScoreParams
+    type: 'basic'
+    hazard_multiplier: 2
+    death_scale: 0
+    death_decay: 0.05
+    death_penalty: 100
+    time_penalty: 1
+    missed_multiplier: 5
+    target_multiplier: 50
+    wall_penalty: 2
+    vel_penalty: 1
+    min_vel_per: 0.2
+
+players:
+    - !PlayerParams
+        birth: !BirthModelParams
+            type: 'Gaussian'
+            location: [10, 5]
+            scale: [1.5, 1.5]
+            randomize: true
+            times: 0
+            prob: -1
+        dynamics: !DynamicsParams
+            ref_lat_deg: 33.209955
+            ref_lon_deg: -87.534240
+            terrain_alt_wgs84: 67.117600
+            wp_radius: 0.75       # m
+            fly_height: 50      # m
+            ned_mag_field: [22.9383, -0.0337, -0.1326]
+        shape: !Shape2dParams
+            type: 'sprite'
+            width: 1
+            height: 1
+            file: "drone.png"
+        collision: !Collision2dParams
+            width: 1
+            height: 1
+        capabilities: ['radar', 'lidar']
+
+targets:
+    - !TargetParams
+        loc_x: 2.5
+        loc_y: 15
+        shape: !Shape2dParams
+            type: 'sprite'
+            width: 1.5
+            height: 1.5
+            color: [0, 255, 0]
+            file: 'star.png'
+        collision: !Collision2dParams
+            width: 1.5
+            height: 1.5
+        capabilities: ['radar']
+        priority: 2
+        order: 0
+    - !TargetParams
+        loc_x: 10
+        loc_y: 15
+        shape: !Shape2dParams
+            type: 'sprite'
+            width: 1
+            height: 1
+            color: [0, 255, 0]
+            file: 'star.png'
+        collision: !Collision2dParams
+            width: 1
+            height: 1
+        capabilities: ['radar', 'lidar']
+        priority: 1
+        order: 0
+
+obstacles:
+    - !ObstacleParams
+        loc_x: 15
+        loc_y: 16
+        shape: !Shape2dParams
+            type: 'sprite'
+            width: 3
+            height: 3
+            color: [0, 0, 0]
+            file: "tree_outline.png"
+        collision: !Collision2dParams
+            width: 3
+            height: 3
+    - !ObstacleParams
+        loc_x: 17.5
+        loc_y: 7.5
+        shape: !Shape2dParams
+            type: 'sprite'
+            width: 1
+            height: 0.5
+            color: [0, 0, 0]
+            file: "brick_wall2.png"
+        collision: !Collision2dParams
+            width: 5
+            height: 0.5
+    - !ObstacleParams
+        loc_x: 16.5
+        loc_y: 7.5
+        shape: !Shape2dParams
+            type: 'sprite'
+            width: 1
+            height: 0.5
+            color: [0, 0, 0]
+            file: "brick_wall2.png"
+    - !ObstacleParams
+        loc_x: 15.5
+        loc_y: 7.5
+        shape: !Shape2dParams
+            type: 'sprite'
+            width: 1
+            height: 0.5
+            color: [0, 0, 0]
+            file: "brick_wall2.png"
+    - !ObstacleParams
+        loc_x: 18.5
+        loc_y: 7.5
+        shape: !Shape2dParams
+            type: 'sprite'
+            width: 1
+            height: 0.5
+            color: [0, 0, 0]
+            file: "brick_wall2.png"
+    - !ObstacleParams
+        loc_x: 19.5
+        loc_y: 7.5
+        shape: !Shape2dParams
+            type: 'sprite'
+            width: 1
+            height: 0.5
+            color: [0, 0, 0]
+            file: "brick_wall2.png"
+    - !ObstacleParams
+        loc_x: 5
+        loc_y: 15
+        shape: !Shape2dParams
+            type: 'sprite'
+            width: 1.5
+            height: 5
+            color: [0, 0, 0]
+            file: "tree_outline.png"
+        collision: !Collision2dParams
+            width: 1.5
+            height: 5
+    - !ObstacleParams
+        loc_x: 5
+        loc_y: 2.5
+        shape: !Shape2dParams
+            type: 'sprite'
+            width: 1.5
+            height: 5
+            color: [0, 0, 0]
+            file: "brick_wall2.png"
+        collision: !Collision2dParams
+            width: 1.5
+            height: 5
+    - !ObstacleParams
+        loc_x: 10
+        loc_y: 12.5
+        shape: !Shape2dParams
+            type: 'sprite'
+            width: 1
+            height: 1
+            color: [0, 0, 0]
+            file: "brick_wall2.png"
+        collision: !Collision2dParams
+            width: 5
+            height: 1
+    - !ObstacleParams
+        loc_x: 9
+        loc_y: 12.5
+        shape: !Shape2dParams
+            type: 'sprite'
+            width: 1
+            height: 1
+            color: [0, 0, 0]
+            file: "brick_wall2.png"
+    - !ObstacleParams
+        loc_x: 8
+        loc_y: 12.5
+        shape: !Shape2dParams
+            type: 'sprite'
+            width: 1
+            height: 1
+            color: [0, 0, 0]
+            file: "brick_wall2.png"
+    - !ObstacleParams
+        loc_x: 11
+        loc_y: 12.5
+        shape: !Shape2dParams
+            type: 'sprite'
+            width: 1
+            height: 1
+            color: [0, 0, 0]
+            file: "brick_wall2.png"
+    - !ObstacleParams
+        loc_x: 12
+        loc_y: 12.5
+        shape: !Shape2dParams
+            type: 'sprite'
+            width: 1
+            height: 1
+            color: [0, 0, 0]
+            file: "brick_wall2.png"
+
+hazards:
+    - !HazardParams
+        loc_x: 7.5
+        loc_y: 8.5
+        shape: !Shape2dParams
+            type: 'sprite'
+            width: 2
+            height: 2
+            color: [255, 215, 0]
+            file: 'fire.png'
+        collision: !Collision2dParams
+            width: 10
+            height: 2.5
+        prob_of_death: 0.01
+    - !HazardParams
+        loc_x: 5.5
+        loc_y: 8.5
+        shape: !Shape2dParams
+            type: 'sprite'
+            width: 2
+            height: 2
+            color: [255, 215, 0]
+            file: 'fire.png'
+    - !HazardParams
+        loc_x: 3.5
+        loc_y: 8.5
+        shape: !Shape2dParams
+            type: 'sprite'
+            width: 2
+            height: 2
+            color: [255, 215, 0]
+            file: 'fire.png'
+    - !HazardParams
+        loc_x: 9.5
+        loc_y: 8.5
+        shape: !Shape2dParams
+            type: 'sprite'
+            width: 2
+            height: 2
+            color: [255, 215, 0]
+            file: 'fire.png'
+    - !HazardParams
+        loc_x: 11.5
+        loc_y: 8.5
+        shape: !Shape2dParams
+            type: 'sprite'
+            width: 2
+            height: 2
+            color: [255, 215, 0]
+            file: 'fire.png'
+    - !HazardParams
+        loc_x: 7.5
+        loc_y: 8.5
+        shape: !Shape2dParams
+            type: 'sprite'
+            width: 2
+            height: 2
+            color: [255, 215, 0]
+            file: 'fire.png'
+    - !HazardParams
+        loc_x: 5
+        loc_y: 19
+        shape: !Shape2dParams
+            type: 'sprite'
+            width: 1.5
+            height: 2
+            color: [255, 215, 0]
+            file: 'fire.png'
+        collision: !Collision2dParams
+            width: 1.5
+            height: 3
+        prob_of_death: 0.03

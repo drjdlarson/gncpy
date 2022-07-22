@@ -17,7 +17,7 @@
 namespace py = pybind11;
 using namespace bfs;
 
-PYBIND11_MODULE(lager_super_bindings, m) {
+PYBIND11_MODULE(_lager_super_bindings, m) {
     m.doc() = "Wrapper for simulink autocode of LAGER's SUPER UAV control system.";
 
     m.attr("NUM_SBUS_CH") = NUM_SBUS_CH;

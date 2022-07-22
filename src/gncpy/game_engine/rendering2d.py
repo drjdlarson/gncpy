@@ -25,6 +25,8 @@ class Shape2dParams:
         Height in real units of the shape.
     color : tuple
         RGB triplet of the shape, in range [0, 255].
+    file : string
+        Full file path to image if needed.
     """
 
     def __init__(self):
@@ -33,6 +35,7 @@ class Shape2dParams:
         self.width = 0
         self.height = 0
         self.color = ()
+        self.file = ""
 
 
 def init_rendering_system():
@@ -90,7 +93,11 @@ def get_drawable_entities(entities):
     """
 
     def _can_draw(_e):
-        return _e.has_component(gcomp.CShape) and _e.has_component(gcomp.CTransform)
+        return (
+            _e.active
+            and _e.has_component(gcomp.CShape)
+            and _e.has_component(gcomp.CTransform)
+        )
 
     drawable = list(filter(_can_draw, entities))
     drawable.sort(key=lambda _e: _e.get_component(gcomp.CShape).zorder)
@@ -129,12 +136,20 @@ def render(drawable, window, clock, mode, fps):
         if np.any(np.isnan(e_trans.pos)) or np.any(np.isinf(e_trans.pos)):
             continue
 
-        e_shape.shape.centerx = e_trans.pos[0].item()
         # flip in the vertical direction
-        e_shape.shape.centery = offset - e_trans.pos[1].item()
+        c_pos = (e_trans.pos[0].item(), offset - e_trans.pos[1].item())
+        # e_shape.shape.centerx = e_trans.pos[0].item()
+        # # flip in the vertical direction
+        # e_shape.shape.centery = offset - e_trans.pos[1].item()
 
-        if isinstance(e_shape.shape, pygame.Rect):
+        if e_shape.type == "rect":
+            e_shape.shape.centerx = c_pos[0]
+            e_shape.shape.centery = c_pos[1]
             pygame.draw.rect(window, e_shape.color, e_shape.shape)
+
+        elif e_shape.type == "sprite":
+            window.blit(e_shape.shape, e_shape.shape.get_rect(center=c_pos))
+
         else:
             warn("No rendering method for this shape")
 

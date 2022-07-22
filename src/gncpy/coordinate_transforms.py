@@ -166,6 +166,8 @@ def ned_to_LLA(ned, ref_lat, ref_lon, ref_alt):
         Lat/lon/alt in rad/rad/m.
     """
     alt = ref_alt + -ned[2]
+    if isinstance(alt, np.ndarray):
+        alt = alt.item()
     f_fact = 2 * wgs84.FLATTENING - wgs84.FLATTENING ** 2
     s_lat2 = np.sin(ref_lat) ** 2
     Rn = wgs84.EQ_RAD / np.sqrt(1 - f_fact * s_lat2)
@@ -174,4 +176,8 @@ def ned_to_LLA(ned, ref_lat, ref_lon, ref_alt):
     dlon = ned[1] * np.arctan2(1, Rn * np.cos(ref_lat))
     lat = ref_lat + dlat
     lon = ref_lon + dlon
-    return np.array([lat.item(), lon.item(), alt.item()]).reshape((3, 1))
+    if isinstance(lat, np.ndarray):
+        lat = lat.item()
+    if isinstance(lon, np.ndarray):
+        lon = lon.item()
+    return np.array([lat, lon, alt]).reshape((3, 1))

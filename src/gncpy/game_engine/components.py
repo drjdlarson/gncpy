@@ -1,8 +1,17 @@
 """Defines components for use by game entities."""
+import os
+import pathlib
 import numpy as np
 import pygame
 
-import serums.models as smodels
+os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
+import serums.models as smodels  # noqa
+
+
+library_asset_dir = os.path.join(
+    pathlib.Path(__file__).parent.parent.resolve(), "games", "assets"
+)
+"""Directory containing common game assets."""
 
 
 class CShape:
@@ -10,40 +19,72 @@ class CShape:
 
     Attributes
     ----------
+    type : string
+        Type of shape to create.
     shape : pygame object
-        type of shape to create.
+        Shape to render.
     color : tuple
         RGB triplet for the color in range [0, 255].
     zorder : int
         Determines draw order, lower numbers are drawn first.
     """
 
-    __slots__ = "shape", "color", "zorder"
+    __slots__ = "type", "shape", "color", "zorder"
 
-    def __init__(self, shape=None, w=None, h=None, color=None, zorder=None):
+    def __init__(
+        self, s_type=None, w=None, h=None, color=None, zorder=None, fpath=None
+    ):
         """Initialize an object.
 
         Parameters
         ----------
-        shape : string
-            type of shape to create.
+        s_type : string
+            Type of shape to create. Options are :code:`'rect'`, or
+            :code:`'sprite'`.
         w : int
-            width in pixels.
+            Width in pixels. Must be specified if type :code:`'rect'`, optional
+            for sprites (will scale image to this width).
         h : int
-            height in pixels.
+            Height in pixels. Must be specified if type :code:`'rect'`, optional
+            for sprites (will sacle image to this height).
         color : tuple
-            RGB triplet for the color in range [0, 255].
+            RGB triplet for the color in range [0, 255]. Only used by type
+            :code:`'rect'`.
         zorder : int
             Determines draw order, lower numbers are drawn first.
-
-        Todo
-        ----
-        Allow for other shape types.
         """
-        if shape.lower() == "rect":
+        self.type = s_type.lower()
+        if self.type == "rect":
             self.shape = pygame.Rect((0, 0), (w, h))
+
+        elif self.type == "sprite":
+            if fpath is None:
+                raise RuntimeError(
+                    "File path cannot be None for type {}".format(s_type)
+                )
+            succ = os.path.isfile(fpath)
+            if not succ:
+                fp = os.path.join(library_asset_dir, fpath)
+                succ = os.path.isfile(fp)
+            else:
+                fp = fpath
+
+            if not succ:
+                raise FileNotFoundError("Failed to find file {}".format(fpath))
+
+            img = pygame.image.load(fp)
+            if fp[-3:] == "png":
+                img = img.convert_alpha()
+            else:
+                img = img.convert()
+
+            if w is not None and h is not None:
+                self.shape = pygame.transform.scale(img, (w, h))
+            else:
+                self.shape = img
+
         else:
-            self.shape = shape
+            raise NotImplementedError("Shape type {} not implemented".format(s_type))
 
         self.color = color
         self.zorder = zorder

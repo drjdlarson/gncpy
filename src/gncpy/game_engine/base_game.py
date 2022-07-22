@@ -115,7 +115,7 @@ class BaseGame(ABC):
         render_mode,
         render_fps=None,
         use_library_config=False,
-        seed=0,
+        seed=None,
         rng=None,
     ):
         """Initialize the object.

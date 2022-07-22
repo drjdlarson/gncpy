@@ -392,6 +392,8 @@ class SimpleUAV2d(BaseGame2d):
         self.has_random_player_birth_times = False
         self.max_player_birth_time = -np.inf
 
+        self._performed_reset_spawn = False
+
     def register_params(self, yaml):
         """Register custom classes for this game with the yaml parser.
 
@@ -435,20 +437,22 @@ class SimpleUAV2d(BaseGame2d):
 
             e.add_component(
                 gcomp.CShape,
-                shape=params.shape.type,
+                s_type=params.shape.type,
                 w=gphysics.dist_to_pixels(params.shape.width, self.dist_per_pix[0]),
                 h=gphysics.dist_to_pixels(params.shape.height, self.dist_per_pix[1]),
                 color=params.shape.color,
                 zorder=1000,
+                fpath=params.shape.file,
             )
 
-            e.add_component(
-                gcomp.CCollision,
-                w=gphysics.dist_to_pixels(params.collision.width, self.dist_per_pix[0]),
-                h=gphysics.dist_to_pixels(
-                    params.collision.height, self.dist_per_pix[1]
-                ),
-            )
+            if params.collision.height > 0 and params.collision.width > 0:
+                e.add_component(
+                    gcomp.CCollision,
+                    w=gphysics.dist_to_pixels(params.collision.width, self.dist_per_pix[0]),
+                    h=gphysics.dist_to_pixels(
+                        params.collision.height, self.dist_per_pix[1]
+                    ),
+                )
 
     def create_hazards(self):
         """Creates all hazards based on config values."""
@@ -472,20 +476,22 @@ class SimpleUAV2d(BaseGame2d):
 
             e.add_component(
                 gcomp.CShape,
-                shape=params.shape.type,
+                s_type=params.shape.type,
                 w=gphysics.dist_to_pixels(params.shape.width, self.dist_per_pix[0]),
                 h=gphysics.dist_to_pixels(params.shape.height, self.dist_per_pix[1]),
                 color=params.shape.color,
                 zorder=-100,
+                fpath=params.shape.file,
             )
 
-            e.add_component(
-                gcomp.CCollision,
-                w=gphysics.dist_to_pixels(params.collision.width, self.dist_per_pix[0]),
-                h=gphysics.dist_to_pixels(
-                    params.collision.height, self.dist_per_pix[1]
-                ),
-            )
+            if params.collision.height > 0 and params.collision.width > 0:
+                e.add_component(
+                    gcomp.CCollision,
+                    w=gphysics.dist_to_pixels(params.collision.width, self.dist_per_pix[0]),
+                    h=gphysics.dist_to_pixels(
+                        params.collision.height, self.dist_per_pix[1]
+                    ),
+                )
 
             pd = float(params.prob_of_death)
             if pd > 1:
@@ -536,20 +542,22 @@ class SimpleUAV2d(BaseGame2d):
 
             e.add_component(
                 gcomp.CShape,
-                shape=params.shape.type,
+                s_type=params.shape.type,
                 w=gphysics.dist_to_pixels(params.shape.width, self.dist_per_pix[0]),
                 h=gphysics.dist_to_pixels(params.shape.height, self.dist_per_pix[1]),
                 color=params.shape.color,
                 zorder=1,
+                fpath=params.shape.file,
             )
 
-            e.add_component(
-                gcomp.CCollision,
-                w=gphysics.dist_to_pixels(params.collision.width, self.dist_per_pix[0]),
-                h=gphysics.dist_to_pixels(
-                    params.collision.height, self.dist_per_pix[1]
-                ),
-            )
+            if params.collision.height > 0 and params.collision.width > 0:
+                e.add_component(
+                    gcomp.CCollision,
+                    w=gphysics.dist_to_pixels(params.collision.width, self.dist_per_pix[0]),
+                    h=gphysics.dist_to_pixels(
+                        params.collision.height, self.dist_per_pix[1]
+                    ),
+                )
 
             e.add_component(gcomp.CCapabilities, capabilities=params.capabilities)
 
@@ -902,11 +910,12 @@ class SimpleUAV2d(BaseGame2d):
 
             e.add_component(
                 gcomp.CShape,
-                shape=params.shape.type,
+                s_type=params.shape.type,
                 w=gphysics.dist_to_pixels(params.shape.width, self.dist_per_pix[0]),
                 h=gphysics.dist_to_pixels(params.shape.height, self.dist_per_pix[1]),
                 color=tuple(params.shape.color),
                 zorder=100,
+                fpath=params.shape.file,
             )
 
             e.add_component(
@@ -990,6 +999,8 @@ class SimpleUAV2d(BaseGame2d):
         self.create_obstacles()
         self.create_hazards()
         self.create_targets()
+        self.spawn_players()
+        self._performed_reset_spawn = True
 
         self.entityManager.update()
 
@@ -1031,6 +1042,8 @@ class SimpleUAV2d(BaseGame2d):
 
             # check for collision with obstacle
             for w in self.entityManager.get_entities("obstacle"):
+                if not w.has_component(gcomp.CCollision):
+                    continue
                 w_aabb = w.get_component(gcomp.CCollision).aabb
                 if gphysics.check_collision2d(p_aabb, w_aabb):
                     gphysics.resolve_collision2d(
@@ -1057,6 +1070,8 @@ class SimpleUAV2d(BaseGame2d):
 
             # check for collision with hazard
             for h in self.entityManager.get_entities("hazard"):
+                if not h.has_component(gcomp.CCollision):
+                    continue
                 h_aabb = h.get_component(gcomp.CCollision).aabb
                 c_hazard = h.get_component(gcomp.CHazard)
                 if gphysics.check_collision2d(p_aabb, h_aabb):
@@ -1088,6 +1103,8 @@ class SimpleUAV2d(BaseGame2d):
             # check for collision with target
             for t in self.entityManager.get_entities("target"):
                 if not t.active:
+                    continue
+                if not t.has_component(gcomp.CCollision):
                     continue
 
                 if gphysics.check_collision2d(
@@ -1353,6 +1370,10 @@ class SimpleUAV2d(BaseGame2d):
         info : dict
             Extra infomation for debugging.
         """
-        self.spawn_players()
+        # reset handles spawn so don't call it on first step after reset
+        if not self._performed_reset_spawn:
+            self.spawn_players()
+        self._performed_reset_spawn = False
+
         self.create_targets()
         return super().step(user_input)

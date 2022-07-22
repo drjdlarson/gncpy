@@ -1275,7 +1275,7 @@ class SimpleLAGERSuper(SimpleMultirotor):
         else:
             self.num_waypoints = num_waypoints
 
-        waypoint_lst = waypoints
+        waypoint_lst = [wp for wp in waypoints]
         if len(waypoint_lst) < super_bind.NUM_FLIGHT_PLAN_POINTS:
             rem = super_bind.NUM_FLIGHT_PLAN_POINTS - len(waypoint_lst)
             waypoint_lst.extend([super_bind.MissionItem() for ii in range(rem)])
@@ -1520,6 +1520,11 @@ class SimpleLAGERSuper(SimpleMultirotor):
     def desired_motor_cmds(self, val):
         raise RuntimeError("desired_motor_cmds is readonly")
 
+    @property
+    def waypoint_reached_rising_edge(self):
+        """Rising edge of waypoint reached signal."""
+        return self._vmsData.waypoint_reached and not self._reached_wp_on_prev
+
     def update_fmu_states(self, tt):
         """Update the flight management unit for the control system.
 
@@ -1533,7 +1538,7 @@ class SimpleLAGERSuper(SimpleMultirotor):
         self.update_nav_data()
 
         # rising edge trigger
-        if self._vmsData.waypoint_reached and not self._reached_wp_on_prev:
+        if self.waypoint_reached_rising_edge:
             self._telemData.current_waypoint += 1
         self._reached_wp_on_prev = self._vmsData.waypoint_reached
 

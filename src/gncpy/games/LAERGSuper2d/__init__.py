@@ -12,6 +12,7 @@ from gncpy.games.SimpleUAV2d import SimpleUAV2d, EventType
 import gncpy.game_engine.components as gcomp
 import gncpy.game_engine.physics2d as gphysics
 from gncpy.game_engine.physics2d import Physics2dParams as BasePhysicsParams
+from gncpy.coordinate_transforms import lla_to_NED
 
 
 class DynamicsParams:
@@ -109,6 +110,7 @@ class SimpleLagerSUPER2d(SimpleUAV2d):
             Additional arguments for the parent classes.
         """
         super().__init__(config_file, render_mode, **kwargs)
+        self.waypoints = {}
 
     def parse_config_file(self):
         """Parses the config file and saves the parameters."""
@@ -199,6 +201,24 @@ class SimpleLagerSUPER2d(SimpleUAV2d):
         """
         eDyn.state = eDyn.dynObj.propagate_state(self.current_time).reshape((-1, 1))
 
+    def _super_wp_to_xy(self, wp, obj):
+        lat = wp.x / obj.wp_xy_scale * np.pi / 180
+        lon = wp.y / obj.wp_xy_scale * np.pi / 180
+        alt = wp.z + obj.home_alt_wgs84_m
+
+        ned = lla_to_NED(
+            obj.home_lat_rad, obj.home_lon_rad, obj.home_alt_wgs84_m, lat, lon, alt
+        )
+
+        x = gphysics.dist_to_pixels(
+            ned[1], self.dist_per_pix[0], min_pos=self.params.physics.min_pos[0]
+        )
+        y = gphysics.dist_to_pixels(
+            ned[0], self.dist_per_pix[1], min_pos=self.params.physics.min_pos[1]
+        )
+
+        return np.vstack((x, y))
+
     def s_input(self, user_input):
         """Validate user input.
 
@@ -220,7 +240,35 @@ class SimpleLagerSUPER2d(SimpleUAV2d):
                 if p.id in user_input:
                     p_dyn = p.get_component(gcomp.CDynamics)
                     p_dyn.dynObj.upload_waypoints(user_input[p.id])
-        return {}  # return value not needed
+
+                    # if waypoints already exist then destroy them
+                    if self.waypoints.get(p.id, None) is not None:
+                        for wp in self.waypoints[p.id]:
+                            wp.destroy()
+
+                    # clear all waypoints
+                    self.waypoints[p.id] = []
+
+                    # add new waypoints
+                    for wp in user_input[p.id]:
+                        e = self.entityManager.add_entity("waypoint")
+
+                        eTrans = e.add_component(gcomp.CTransform)
+                        eTrans.pos = self._super_wp_to_xy(wp, p_dyn.dynObj)
+
+                        e.add_component(
+                            gcomp.CShape,
+                            s_type="sprite",
+                            fpath="flag.png",
+                            w=gphysics.dist_to_pixels(0.5, self.dist_per_pix[0]),
+                            h=gphysics.dist_to_pixels(1, self.dist_per_pix[1]),
+                            zorder=100000,
+                        )
+
+                        self.waypoints[p.id].append(e)
+
+        # value not needed, only need valid player keys
+        return {p.id: "" for p in self.entityManager.get_entities("player")}
 
     def s_collision(self):
         """Check for collisions between entities.
@@ -252,6 +300,8 @@ class SimpleLagerSUPER2d(SimpleUAV2d):
 
             # check for collision with obstacle
             for w in self.entityManager.get_entities("obstacle"):
+                if not w.has_component(gcomp.CCollision):
+                    continue
                 w_aabb = w.get_component(gcomp.CCollision).aabb
                 if gphysics.check_collision2d(p_aabb, w_aabb):
                     e.destroy()
@@ -276,6 +326,8 @@ class SimpleLagerSUPER2d(SimpleUAV2d):
 
             # check for collision with hazard
             for h in self.entityManager.get_entities("hazard"):
+                if not h.has_component(gcomp.CCollision):
+                    continue
                 h_aabb = h.get_component(gcomp.CCollision).aabb
                 c_hazard = h.get_component(gcomp.CHazard)
                 if gphysics.check_collision2d(p_aabb, h_aabb):
@@ -289,7 +341,7 @@ class SimpleLagerSUPER2d(SimpleUAV2d):
                     else:
                         if e.id not in c_hazard.entrance_times:
                             c_hazard.entrance_times[e.id] = self.current_time
-                        e.c_events.events.append(
+                        p_events.events.append(
                             (
                                 EventType.HAZARD,
                                 {
@@ -305,6 +357,8 @@ class SimpleLagerSUPER2d(SimpleUAV2d):
             # check for collision with target
             for t in self.entityManager.get_entities("target"):
                 if not t.active:
+                    continue
+                if not t.has_component(gcomp.CCollision):
                     continue
 
                 if gphysics.check_collision2d(
@@ -394,3 +448,32 @@ class SimpleLagerSUPER2d(SimpleUAV2d):
             p.id: p.get_component(gcomp.CDynamics).dynObj.current_mode
             for p in self.entityManager.get_entities("player")
         }
+
+    def step(self, user_input):
+        ret_vals = super().step(user_input)
+
+        # update waypoints based on players
+        for p in self.entityManager.get_entities("player"):
+            if (
+                p.id not in self.waypoints
+                or self.waypoints[p.id] is None
+                or len(self.waypoints[p.id]) == 0
+            ):
+                continue
+
+            # if player died or not in waypoint follow mode then remove their waypoints
+            pDyn = p.get_component(gcomp.CDynamics)
+            if not p.active or pDyn.dynObj.current_mode != 2:
+                for wp in self.waypoints[p.id]:
+                    wp.destroy()
+                del self.waypoints[p.id]
+                continue
+
+            # check if they reached the waypoint this step
+            if pDyn.dynObj.waypoint_reached_rising_edge:
+                self.waypoints[p.id][0].destroy()
+                del self.waypoints[p.id][0]
+                if len(self.waypoints) == 0:
+                    del self.waypoints[p.id]
+
+        return ret_vals

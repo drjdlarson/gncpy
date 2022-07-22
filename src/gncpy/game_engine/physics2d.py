@@ -58,8 +58,8 @@ class Collision2dParams:
 
     def __init__(self):
         super().__init__()
-        self.width = 0
-        self.height = 0
+        self.width = -1
+        self.height = -1
 
 
 def check_collision2d(bb1, bb2):
