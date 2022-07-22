@@ -1,0 +1,104 @@
+window:
+    width: 640
+    height: 640
+
+physics:
+    dt: 0.1
+    max_time: 100
+    origin_x: 0
+    origin_y: 0
+    dist_width: 40
+    dist_height: 40
+
+player:
+    birth_model:
+        type: Gaussian
+        location:
+            - 20
+            - 10
+        scale:
+            - 2
+            - 2
+        params: None
+
+    dynamics_model: TODO implement this
+
+    shape_model:
+        type: 'rect'
+        width: 2
+        height: 2
+        color:
+            - 0
+            - 0
+            - 255
+
+    collision_model:
+        width: 2
+        height: 2
+
+obstacles:
+    -
+      loc_x: 30
+      loc_y: 30
+      width: 6
+      height: 6
+      shape_type: 'rect'
+      shape_color:
+          - 0
+          - 0
+          - 0
+      collision_width: 6
+      collision_height: 6
+    -
+      loc_x: 10
+      loc_y: 30
+      width: 3
+      height: 3
+      shape_type: 'rect'
+      shape_color:
+          - 0
+          - 0
+          - 0
+      collision_width: 3
+      collision_height: 3
+    -
+      loc_x: 10
+      loc_y: 5
+      width: 3
+      height: 10
+      shape_type: 'rect'
+      shape_color:
+          - 0
+          - 0
+          - 0
+      collision_width: 3
+      collision_height: 10
+
+targets:
+    -
+      loc_x: 5
+      loc_y: 30
+      width: 3
+      height: 3
+      shape_type: 'rect'
+      shape_color:
+          - 0
+          - 255
+          - 0
+      collision_width: 3
+      collision_height: 3
+
+hazards:
+    -
+      loc_x: 20
+      loc_y: 20
+      width: 10
+      height: 5
+      shape_type: 'rect'
+      shape_color:
+          - 255
+          - 215
+          - 0
+      collision_width: 10
+      collision_height: 5
+      prob_of_death: 0.05

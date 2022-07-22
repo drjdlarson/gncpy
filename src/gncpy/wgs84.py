@@ -1,5 +1,6 @@
 """Constants and utility functions relating to the WGS-84 model."""
 import numpy as np
+from warnings import warn
 
 
 MU = 3.986005 * 10**14  # m^3/s^2
@@ -11,6 +12,9 @@ ECCENTRICITY = np.sqrt(FLATTENING * (2 - FLATTENING))
 EQ_RAD = 6378137  # m
 POL_RAD = EQ_RAD * (1 - FLATTENING)
 GRAVITY = 9.7803253359
+
+
+_egm_lut = np.array([])
 
 
 def calc_earth_rate(lat):
@@ -79,4 +83,35 @@ def calc_gravity(lat, alt):
                                                 * np.sin(lat)**2)
     ch = 1 - 2 * (1 + FLATTENING + (EQ_RAD**3 * (1 - FLATTENING)
                   * EARTH_ROT_RATE**2) / MU) * frac + 3 * frac**2
-    return np.array([[0], [0], [ch * g0]])
+    g = ch * g0
+    if isinstance(g, np.ndarray):
+        g = g.item()
+    return np.array([[0], [0], [g]])
+
+
+def init_egm_lookup_table(bin_file):
+    global _egm_lut
+    warn('Lookup table has not been implemented yet')
+    _egm_lut = np.array([])
+
+
+def convert_wgs_to_msl(lat, lon, alt):
+    global _egm_lut
+    if _egm_lut.size == 0:
+        warn('EGM table was not loaded. Can not convert to height above geoid')
+        return alt
+    else:
+        raise NotImplemented
+        # row, col = (None, None)
+        # return alt - _egm_lut[row, col]
+
+
+def convert_msl_to_wgs(lat, lon, alt):
+    global _egm_lut
+    if _egm_lut.size == 0:
+        warn('EGM table was not loaded. Can not convert to wgs84 altitude')
+        return alt
+    else:
+        raise NotImplemented
+        # row, col = (None, None)
+        # return alt + _egm_lut[row, col]

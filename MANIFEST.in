@@ -1,0 +1,5 @@
+include README.rst LICENSE lib/pybind11/LICENSE CMakeLists.txt
+graft lib/lager_super
+graft lib/pybind11/include
+graft lib/pybind11/tools
+recursive-include src/gncpy *.yaml *.png

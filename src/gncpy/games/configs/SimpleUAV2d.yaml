@@ -1,0 +1,143 @@
+!Params
+window: !WindowParams
+    width: 640
+    height: 640
+
+start_time: 0
+max_time: 10
+
+physics: !Physics2dParams
+    dt: 0.1
+    step_factor: 1
+    min_pos: [0, 0]
+    dist_width: 20
+    dist_height: 20
+
+score: !ScoreParams
+    type: 'basic'
+    hazard_multiplier: 2
+    death_scale: 0
+    death_decay: 0.05
+    death_penalty: 100
+    time_penalty: 1
+    missed_multiplier: 5
+    target_multiplier: 50
+    wall_penalty: 2
+    vel_penalty: 1
+    min_vel_per: 0.2
+
+players:
+    - !PlayerParams
+        birth: !BirthModelParams
+            type: 'Gaussian'
+            location: [10, 5]
+            scale: [1.5, 1.5]
+            randomize: true
+            times: 0
+            prob: -1
+        dynamics: !DynamicsParams
+            type: 'DoubleIntegrator'
+            controlModel: !ControlModelParams
+                type: 'velocity'
+                max_vel_x: 5
+                max_vel_y: 5
+            stateConstraint: !StateConstraintParams
+                type: 'velocity'
+                min_vels: [-5, -5]
+                max_vels: [5, 5]
+        shape: !Shape2dParams
+            type: 'rect'
+            width: 1
+            height: 1
+            color: [0, 0, 255]
+        collision: !Collision2dParams
+            width: 1
+            height: 1
+        capabilities: ['radar', 'lidar']
+
+targets:
+    - !TargetParams
+        loc_x: 2.5
+        loc_y: 15
+        shape: !Shape2dParams
+            type: 'rect'
+            width: 1.5
+            height: 1.5
+            color: [0, 255, 0]
+        collision: !Collision2dParams
+            width: 1.5
+            height: 1.5
+        capabilities: ['radar']
+        priority: 2
+        order: 0
+    - !TargetParams
+        loc_x: 10
+        loc_y: 15
+        shape: !Shape2dParams
+            type: 'rect'
+            width: 1
+            height: 1
+            color: [0, 255, 0]
+        collision: !Collision2dParams
+            width: 1
+            height: 1
+        capabilities: ['radar', 'lidar']
+        priority: 1
+        order: 0
+
+obstacles:
+    - !ObstacleParams
+        loc_x: 15
+        loc_y: 16
+        shape: !Shape2dParams
+            type: 'rect'
+            width: 3
+            height: 3
+            color: [0, 0, 0]
+        collision: !Collision2dParams
+            width: 3
+            height: 3
+    - !ObstacleParams
+        loc_x: 17.5
+        loc_y: 7.5
+        shape: !Shape2dParams
+            type: 'rect'
+            width: 5
+            height: 0.5
+            color: [0, 0, 0]
+        collision: !Collision2dParams
+            width: 5
+            height: 0.5
+    - !ObstacleParams
+        loc_x: 5
+        loc_y: 15
+        shape: !Shape2dParams
+            type: 'rect'
+            width: 1.5
+            height: 5
+            color: [0, 0, 0]
+        collision: !Collision2dParams
+            width: 1.5
+            height: 5
+    - !ObstacleParams
+        loc_x: 5
+        loc_y: 2.5
+        shape: !Shape2dParams
+            type: 'rect'
+            width: 1.5
+            height: 5
+            color: [0, 0, 0]
+        collision: !Collision2dParams
+            width: 1.5
+            height: 5
+    - !ObstacleParams
+        loc_x: 10
+        loc_y: 12.5
+        shape: !Shape2dParams
+            type: 'rect'
+            width: 5
+            height: 1
+            color: [0, 0, 0]
+        collision: !Collision2dParams
+            width: 5
+            height: 1
