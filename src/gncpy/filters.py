@@ -87,7 +87,7 @@ class BayesFilter(metaclass=abc.ABCMeta):
         as the current instance when this function was called.
         """
         filt_state = {}
-        filt_state['use_cholesky_inverse'] = self.use_cholesky_inverse
+        filt_state["use_cholesky_inverse"] = self.use_cholesky_inverse
 
         return filt_state
 
@@ -101,7 +101,7 @@ class BayesFilter(metaclass=abc.ABCMeta):
         filter save function such that a new instance would generate the same
         output as the original instance that called the save function.
         """
-        self.use_cholesky_inverse = filt_state['use_cholesky_inverse']
+        self.use_cholesky_inverse = filt_state["use_cholesky_inverse"]
 
 
 class KalmanFilter(BayesFilter):
@@ -125,8 +125,9 @@ class KalmanFilter(BayesFilter):
 
     """
 
-    def __init__(self, cov=np.array([[]]), meas_noise=np.array([[]]), dt=None,
-                 **kwargs):
+    def __init__(
+        self, cov=np.array([[]]), meas_noise=np.array([[]]), dt=None, **kwargs
+    ):
         self.cov = cov
         self.meas_noise = meas_noise
         self.proc_noise = np.array([[]])
@@ -148,40 +149,40 @@ class KalmanFilter(BayesFilter):
         """Saves filter variables so they can be restored later."""
         filt_state = super().save_filter_state()
 
-        filt_state['cov'] = self.cov.copy()
+        filt_state["cov"] = self.cov.copy()
         if self.meas_noise is not None:
-            filt_state['meas_noise'] = self.meas_noise.copy()
+            filt_state["meas_noise"] = self.meas_noise.copy()
         else:
-            filt_state['meas_noise'] = self.meas_noise
+            filt_state["meas_noise"] = self.meas_noise
 
         if self.proc_noise is not None:
-            filt_state['proc_noise'] = self.proc_noise.copy()
+            filt_state["proc_noise"] = self.proc_noise.copy()
         else:
-            filt_state['proc_noise'] = self.proc_noise
+            filt_state["proc_noise"] = self.proc_noise
 
-        filt_state['dt'] = self.dt
-        filt_state['_dyn_obj'] = deepcopy(self._dyn_obj)
+        filt_state["dt"] = self.dt
+        filt_state["_dyn_obj"] = deepcopy(self._dyn_obj)
 
         if self._state_mat is not None:
-            filt_state['_state_mat'] = self._state_mat.copy()
+            filt_state["_state_mat"] = self._state_mat.copy()
         else:
-            filt_state['_state_mat'] = self._state_mat
+            filt_state["_state_mat"] = self._state_mat
 
         if self._input_mat is not None:
-            filt_state['_input_mat'] = self._input_mat.copy()
+            filt_state["_input_mat"] = self._input_mat.copy()
         else:
-            filt_state['_input_mat'] = self._input_mat
+            filt_state["_input_mat"] = self._input_mat
 
-        filt_state['_get_state_mat'] = self._get_state_mat
-        filt_state['_get_input_mat'] = self._get_input_mat
+        filt_state["_get_state_mat"] = self._get_state_mat
+        filt_state["_get_input_mat"] = self._get_input_mat
 
         if self._meas_mat is not None:
-            filt_state['_meas_mat'] = self._meas_mat.copy()
+            filt_state["_meas_mat"] = self._meas_mat.copy()
         else:
-            filt_state['_meas_mat'] = self._meas_mat
+            filt_state["_meas_mat"] = self._meas_mat
 
-        filt_state['_meas_fnc'] = self._meas_fnc
-        filt_state['_est_meas_noise_fnc'] = self._est_meas_noise_fnc
+        filt_state["_meas_fnc"] = self._meas_fnc
+        filt_state["_est_meas_noise_fnc"] = self._est_meas_noise_fnc
 
         return filt_state
 
@@ -195,22 +196,29 @@ class KalmanFilter(BayesFilter):
         """
         super().load_filter_state(filt_state)
 
-        self.cov = filt_state['cov']
-        self.meas_noise = filt_state['meas_noise']
-        self.proc_noise = filt_state['proc_noise']
-        self.dt = filt_state['dt']
+        self.cov = filt_state["cov"]
+        self.meas_noise = filt_state["meas_noise"]
+        self.proc_noise = filt_state["proc_noise"]
+        self.dt = filt_state["dt"]
 
-        self._dyn_obj = filt_state['_dyn_obj']
-        self._state_mat = filt_state['_state_mat']
-        self._input_mat = filt_state['_input_mat']
-        self._get_state_mat = filt_state['_get_state_mat']
-        self._get_input_mat = filt_state['_get_input_mat']
-        self._meas_mat = filt_state['_meas_mat']
-        self._meas_fnc = filt_state['_meas_fnc']
-        self._est_meas_noise_fnc = filt_state['_est_meas_noise_fnc']
+        self._dyn_obj = filt_state["_dyn_obj"]
+        self._state_mat = filt_state["_state_mat"]
+        self._input_mat = filt_state["_input_mat"]
+        self._get_state_mat = filt_state["_get_state_mat"]
+        self._get_input_mat = filt_state["_get_input_mat"]
+        self._meas_mat = filt_state["_meas_mat"]
+        self._meas_fnc = filt_state["_meas_fnc"]
+        self._est_meas_noise_fnc = filt_state["_est_meas_noise_fnc"]
 
-    def set_state_model(self, state_mat=None, input_mat=None, cont_time=False,
-                        state_mat_fun=None, input_mat_fun=None, dyn_obj=None):
+    def set_state_model(
+        self,
+        state_mat=None,
+        input_mat=None,
+        cont_time=False,
+        state_mat_fun=None,
+        input_mat_fun=None,
+        dyn_obj=None,
+    ):
         r"""Sets the state model equation for the filter.
 
         If the continuous time model is used then a `dt` must be provided, see
@@ -282,11 +290,15 @@ class KalmanFilter(BayesFilter):
             self._input_mat = input_mat
         elif have_mats:
             if self.dt is None:
-                msg = 'dt must be specified when using continuous time model'
+                msg = "dt must be specified when using continuous time model"
                 raise RuntimeError(msg)
             n_cols = state_mat.shape[1] + input_mat.shape[1]
-            big_mat = np.vstack((np.hstack((state_mat, input_mat)),
-                                 np.zeros((input_mat.shape[1], n_cols))))
+            big_mat = np.vstack(
+                (
+                    np.hstack((state_mat, input_mat)),
+                    np.zeros((input_mat.shape[1], n_cols)),
+                )
+            )
             res = sla.expm(big_mat * self.dt)
             r_s = 0
             r_e = state_mat.shape[0]
@@ -300,7 +312,7 @@ class KalmanFilter(BayesFilter):
             self._get_state_mat = state_mat_fun
             self._get_input_mat = input_mat_fun
         else:
-            raise RuntimeError('Invalid combination of inputs')
+            raise RuntimeError("Invalid combination of inputs")
 
     def set_measurement_model(self, meas_mat=None, meas_fun=None):
         r"""Sets the measurement model for the filter.
@@ -342,7 +354,7 @@ class KalmanFilter(BayesFilter):
         elif meas_fun is not None:
             self._meas_fnc = meas_fun
         else:
-            raise RuntimeError('Invalid combination of inputs')
+            raise RuntimeError("Invalid combination of inputs")
 
     def set_measurement_noise_estimator(self, function):
         """Sets the model used for estimating the measurement noise parameters.
@@ -367,13 +379,17 @@ class KalmanFilter(BayesFilter):
         """
         self._est_meas_noise_fnc = function
 
-    def _predict_next_state(self, timestep, cur_state, cur_input, state_mat_args,
-                            input_mat_args):
+    def _predict_next_state(
+        self, timestep, cur_state, cur_input, state_mat_args, input_mat_args
+    ):
         if self._dyn_obj is not None:
-            next_state = self._dyn_obj.propagate_state(timestep, cur_state,
-                                                       u=cur_input,
-                                                       state_args=state_mat_args,
-                                                       ctrl_args=input_mat_args)
+            next_state = self._dyn_obj.propagate_state(
+                timestep,
+                cur_state,
+                u=cur_input,
+                state_args=state_mat_args,
+                ctrl_args=input_mat_args,
+            )
             state_mat = self._dyn_obj.get_state_mat(timestep, *state_mat_args)
         else:
             if self._get_state_mat is not None:
@@ -381,7 +397,7 @@ class KalmanFilter(BayesFilter):
             elif self._state_mat is not None:
                 state_mat = self._state_mat
             else:
-                raise RuntimeError('State model not set')
+                raise RuntimeError("State model not set")
 
             if self._get_input_mat is not None:
                 input_mat = self._get_input_mat(timestep, *input_mat_args)
@@ -397,8 +413,9 @@ class KalmanFilter(BayesFilter):
 
         return next_state, state_mat
 
-    def predict(self, timestep, cur_state, cur_input=None, state_mat_args=(),
-                input_mat_args=()):
+    def predict(
+        self, timestep, cur_state, cur_input=None, state_mat_args=(), input_mat_args=()
+    ):
         """Implements a discrete time prediction step for a Kalman Filter.
 
         Parameters
@@ -429,9 +446,9 @@ class KalmanFilter(BayesFilter):
             Next state.
 
         """
-        next_state, state_mat = self._predict_next_state(timestep, cur_state,
-                                                         cur_input, state_mat_args,
-                                                         input_mat_args)
+        next_state, state_mat = self._predict_next_state(
+            timestep, cur_state, cur_input, state_mat_args, input_mat_args
+        )
 
         self.cov = state_mat @ self.cov @ state_mat.T + self.proc_noise
         self.cov = (self.cov + self.cov.T) * 0.5
@@ -448,17 +465,16 @@ class KalmanFilter(BayesFilter):
         return meas_mat
 
     def _est_meas(self, timestep, cur_state, n_meas, meas_fun_args):
-        meas_mat = self._get_meas_mat(timestep, cur_state, n_meas,
-                                      meas_fun_args)
+        meas_mat = self._get_meas_mat(timestep, cur_state, n_meas, meas_fun_args)
 
         est_meas = meas_mat @ cur_state
 
         return est_meas, meas_mat
 
     def _meas_fit_pdf(self, meas, est_meas, meas_cov):
-        return stats.multivariate_normal.pdf(meas.ravel(),
-                                             mean=est_meas.ravel(),
-                                             cov=meas_cov)
+        return stats.multivariate_normal.pdf(
+            meas.ravel(), mean=est_meas.ravel(), cov=meas_cov
+        )
 
     def _calc_meas_fit(self, meas, est_meas, meas_cov):
         try:
@@ -467,8 +483,10 @@ class KalmanFilter(BayesFilter):
             # if self._est_meas_noise_fnc is None:
             #     raise
 
-            msg = 'Inovation matrix is singular, likely from bad ' \
-                + 'measurement-state pairing for measurement noise estimation.'
+            msg = (
+                "Inovation matrix is singular, likely from bad "
+                + "measurement-state pairing for measurement noise estimation."
+            )
             raise gerr.ExtremeMeasurementNoiseError(msg) from None
         return meas_fit_prob
 
@@ -501,8 +519,9 @@ class KalmanFilter(BayesFilter):
             covariance assuming Gaussian noise.
 
         """
-        est_meas, meas_mat = self._est_meas(timestep, cur_state, meas.size,
-                                            meas_fun_args)
+        est_meas, meas_mat = self._est_meas(
+            timestep, cur_state, meas.size, meas_fun_args
+        )
 
         # get the Kalman gain
         cov_meas_T = self.cov @ meas_mat.T
@@ -557,7 +576,7 @@ class ExtendedKalmanFilter(KalmanFilter):
         super().__init__(**kwargs)
 
         self.cont_cov = cont_cov
-        self.integrator_type = 'dopri5'
+        self.integrator_type = "dopri5"
         self.integrator_params = {}
 
         self._ode_lst = None
@@ -571,11 +590,11 @@ class ExtendedKalmanFilter(KalmanFilter):
         """Saves filter variables so they can be restored later."""
         filt_state = super().save_filter_state()
 
-        filt_state['cont_cov'] = self.cont_cov
-        filt_state['integrator_type'] = self.integrator_type
-        filt_state['integrator_params'] = deepcopy(self.integrator_params)
-        filt_state['_ode_lst'] = self._ode_lst
-        filt_state['_integrator'] = self._integrator
+        filt_state["cont_cov"] = self.cont_cov
+        filt_state["integrator_type"] = self.integrator_type
+        filt_state["integrator_params"] = deepcopy(self.integrator_params)
+        filt_state["_ode_lst"] = self._ode_lst
+        filt_state["_integrator"] = self._integrator
 
         return filt_state
 
@@ -589,11 +608,11 @@ class ExtendedKalmanFilter(KalmanFilter):
         """
         super().load_filter_state(filt_state)
 
-        self.cont_cov = filt_state['cont_cov']
-        self.integrator_type = filt_state['integrator_type']
-        self.integrator_params = filt_state['integrator_params']
-        self._ode_lst = filt_state['_ode_lst']
-        self._integrator = filt_state['_integrator']
+        self.cont_cov = filt_state["cont_cov"]
+        self.integrator_type = filt_state["integrator_type"]
+        self.integrator_params = filt_state["integrator_params"]
+        self._ode_lst = filt_state["_ode_lst"]
+        self._integrator = filt_state["_integrator"]
 
     def set_state_model(self, dyn_obj=None, ode_lst=None):
         r"""Sets the state model equations.
@@ -629,13 +648,15 @@ class ExtendedKalmanFilter(KalmanFilter):
         None.
 
         """
-        if dyn_obj is not None and (isinstance(dyn_obj, gdyn.NonlinearDynamicsBase)
-                                    or isinstance(dyn_obj, gdyn.LinearDynamicsBase)):
+        if dyn_obj is not None and (
+            isinstance(dyn_obj, gdyn.NonlinearDynamicsBase)
+            or isinstance(dyn_obj, gdyn.LinearDynamicsBase)
+        ):
             self._dyn_obj = deepcopy(dyn_obj)
         elif ode_lst is not None and len(ode_lst) > 0:
             self._ode_lst = ode_lst
         else:
-            msg = 'Invalid state model specified. Check arguments'
+            msg = "Invalid state model specified. Check arguments"
             raise RuntimeError(msg)
 
     def _cont_dyn(self, t, x, *args):
@@ -649,37 +670,41 @@ class ExtendedKalmanFilter(KalmanFilter):
 
     def _predict_next_state(self, timestep, cur_state, dyn_fun_params):
         if self._dyn_obj is not None:
-            next_state = self._dyn_obj.propagate_state(timestep, cur_state,
-                                                       state_args=dyn_fun_params)
+            next_state = self._dyn_obj.propagate_state(
+                timestep, cur_state, state_args=dyn_fun_params
+            )
             if isinstance(self._dyn_obj, gdyn.LinearDynamicsBase):
                 state_mat = self._dyn_obj.get_state_mat(timestep, *dyn_fun_params)
                 dt = self.dt
             else:
-                state_mat = self._dyn_obj.get_state_mat(timestep, cur_state,
-                                                        dyn_fun_params)
+                state_mat = self._dyn_obj.get_state_mat(
+                    timestep, cur_state, dyn_fun_params
+                )
                 dt = self._dyn_obj.dt
         elif self._ode_lst is not None:
             self._integrator = s_integrate.ode(self._cont_dyn)
-            self._integrator.set_integrator(self.integrator_type,
-                                            **self.integrator_params)
+            self._integrator.set_integrator(
+                self.integrator_type, **self.integrator_params
+            )
             self._integrator.set_initial_value(cur_state, timestep)
             self._integrator.set_f_params(*dyn_fun_params)
 
             if self.dt is None:
-                raise RuntimeError('dt must be set when using an ODE list')
+                raise RuntimeError("dt must be set when using an ODE list")
 
             next_time = timestep + self.dt
             next_state = self._integrator.integrate(next_time).reshape(cur_state.shape)
             if not self._integrator.successful():
-                msg = 'Integration failed at time {}'.format(timestep)
+                msg = "Integration failed at time {}".format(timestep)
                 raise RuntimeError(msg)
 
-            state_mat = gmath.get_state_jacobian(timestep, cur_state,
-                                                 self._ode_lst, dyn_fun_params)
+            state_mat = gmath.get_state_jacobian(
+                timestep, cur_state, self._ode_lst, dyn_fun_params
+            )
 
             dt = self.dt
         else:
-            raise RuntimeError('State model not set')
+            raise RuntimeError("State model not set")
 
         return next_state, state_mat, dt
 
@@ -718,24 +743,24 @@ class ExtendedKalmanFilter(KalmanFilter):
         """
         if dyn_fun_params is None:
             dyn_fun_params = ()
-        next_state, state_mat, dt = self._predict_next_state(timestep,
-                                                             cur_state,
-                                                             dyn_fun_params)
+        next_state, state_mat, dt = self._predict_next_state(
+            timestep, cur_state, dyn_fun_params
+        )
 
         if self.cont_cov:
+
             def ode(t, x, n_states, F, proc_noise):
                 P = x.reshape((n_states, n_states))
                 P_dot = F @ P + P @ F.T + proc_noise
                 return P_dot.ravel()
 
             integrator = s_integrate.ode(ode)
-            integrator.set_integrator(self.integrator_type,
-                                      **self.integrator_params)
+            integrator.set_integrator(self.integrator_type, **self.integrator_params)
             integrator.set_initial_value(self.cov.flatten(), timestep)
             integrator.set_f_params(cur_state.size, state_mat, self.proc_noise)
             tmp = integrator.integrate(timestep + dt)
             if not integrator.successful():
-                msg = 'Failed to integrate covariance at {}'.format(timestep)
+                msg = "Failed to integrate covariance at {}".format(timestep)
                 raise RuntimeError(msg)
 
             self.cov = tmp.reshape(self.cov.shape)
@@ -751,9 +776,11 @@ class ExtendedKalmanFilter(KalmanFilter):
             # calculate partial derivatives
             meas_mat = np.zeros((n_meas, state.size))
             for ii, h in enumerate(self._meas_fnc):
-                res = gmath.get_jacobian(state.copy(),
-                                         lambda _x, *_f_args: h(t, _x, *_f_args),
-                                         f_args=meas_fun_args)
+                res = gmath.get_jacobian(
+                    state.copy(),
+                    lambda _x, *_f_args: h(t, _x, *_f_args),
+                    f_args=meas_fun_args,
+                )
                 meas_mat[[ii], :] = res.T
         else:
             # constant matrix
@@ -852,8 +879,15 @@ class StudentsTFilter(KalmanFilter):
         property as the filter propagates over time. The default is True.
     """
 
-    def __init__(self, scale=np.array([[]]), dof=3, proc_noise_dof=3,
-                 meas_noise_dof=3, use_moment_matching=True, **kwargs):
+    def __init__(
+        self,
+        scale=np.array([[]]),
+        dof=3,
+        proc_noise_dof=3,
+        meas_noise_dof=3,
+        use_moment_matching=True,
+        **kwargs
+    ):
         self.scale = scale
         self.dof = dof
         self.proc_noise_dof = proc_noise_dof
@@ -866,11 +900,11 @@ class StudentsTFilter(KalmanFilter):
         """Saves filter variables so they can be restored later."""
         filt_state = super().save_filter_state()
 
-        filt_state['scale'] = self.scale
-        filt_state['dof'] = self.dof
-        filt_state['proc_noise_dof'] = self.proc_noise_dof
-        filt_state['meas_noise_dof'] = self.meas_noise_dof
-        filt_state['use_moment_matching'] = self.use_moment_matching
+        filt_state["scale"] = self.scale
+        filt_state["dof"] = self.dof
+        filt_state["proc_noise_dof"] = self.proc_noise_dof
+        filt_state["meas_noise_dof"] = self.meas_noise_dof
+        filt_state["use_moment_matching"] = self.use_moment_matching
 
         return filt_state
 
@@ -884,11 +918,11 @@ class StudentsTFilter(KalmanFilter):
         """
         super().load_filter_state(filt_state)
 
-        self.scale = filt_state['scale']
-        self.dof = filt_state['dof']
-        self.proc_noise_dof = filt_state['proc_noise_dof']
-        self.meas_noise_dof = filt_state['meas_noise_dof']
-        self.use_moment_matching = filt_state['use_moment_matching']
+        self.scale = filt_state["scale"]
+        self.dof = filt_state["dof"]
+        self.proc_noise_dof = filt_state["proc_noise_dof"]
+        self.meas_noise_dof = filt_state["meas_noise_dof"]
+        self.use_moment_matching = filt_state["use_moment_matching"]
 
     @property
     def cov(self):
@@ -917,8 +951,9 @@ class StudentsTFilter(KalmanFilter):
         # msg = 'Covariance is read only. Set the scale matrix instead'
         # raise RuntimeError(msg)
 
-    def predict(self, timestep, cur_state, cur_input=None, state_mat_args=(),
-                input_mat_args=()):
+    def predict(
+        self, timestep, cur_state, cur_input=None, state_mat_args=(), input_mat_args=()
+    ):
         """Implements the prediction step of the Students T filter.
 
         Parameters
@@ -943,21 +978,24 @@ class StudentsTFilter(KalmanFilter):
         next_state : N x 1 numpy array
             Next state.
         """
-        next_state, state_mat = self._predict_next_state(timestep, cur_state,
-                                                         cur_input, state_mat_args,
-                                                         input_mat_args)
+        next_state, state_mat = self._predict_next_state(
+            timestep, cur_state, cur_input, state_mat_args, input_mat_args
+        )
 
-        factor = self.proc_noise_dof * (self.dof - 2) \
+        factor = (
+            self.proc_noise_dof
+            * (self.dof - 2)
             / (self.dof * (self.proc_noise_dof - 2))
-        self.scale = state_mat @ self.scale @ state_mat.T \
-            + factor * self.proc_noise
+        )
+        self.scale = state_mat @ self.scale @ state_mat.T + factor * self.proc_noise
         self.scale = (self.scale + self.scale.T) * 0.5
 
         return next_state
 
     def _meas_fit_pdf(self, meas, est_meas, meas_cov):
-        return stats.multivariate_t.pdf(meas.ravel(), loc=est_meas.ravel(),
-                                        shape=meas_cov, df=self.meas_noise_dof)
+        return stats.multivariate_t.pdf(
+            meas.ravel(), loc=est_meas.ravel(), shape=meas_cov, df=self.meas_noise_dof
+        )
 
     def correct(self, timestep, meas, cur_state, meas_fun_args=()):
         """Implements the correction step of the students T filter.
@@ -984,13 +1022,17 @@ class StudentsTFilter(KalmanFilter):
             Goodness of fit of the measurement based on the state and
             scale assuming Student's t noise.
         """
-        est_meas, meas_mat = self._est_meas(timestep, cur_state, meas.size,
-                                            meas_fun_args)
+        est_meas, meas_mat = self._est_meas(
+            timestep, cur_state, meas.size, meas_fun_args
+        )
 
         # get gain
         scale_meas_T = self.scale @ meas_mat.T
-        factor = self.meas_noise_dof * (self.dof - 2) \
+        factor = (
+            self.meas_noise_dof
+            * (self.dof - 2)
             / (self.dof * (self.meas_noise_dof - 2))
+        )
         inov_cov = meas_mat @ scale_meas_T + factor * self.meas_noise
         inov_cov = (inov_cov + inov_cov.T) * 0.5
         if self.use_cholesky_inverse:
@@ -1002,7 +1044,7 @@ class StudentsTFilter(KalmanFilter):
         P_kk = (np.eye(cur_state.shape[0]) - gain @ meas_mat) @ self.scale
 
         # update state
-        innov = (meas - est_meas)
+        innov = meas - est_meas
         delta_2 = innov.T @ inv_inov_cov @ innov
         next_state = cur_state + gain @ innov
 
@@ -1087,14 +1129,14 @@ class UnscentedKalmanFilter(ExtendedKalmanFilter):
         """Saves filter variables so they can be restored later."""
         filt_state = super().save_filter_state()
 
-        filt_state['alpha'] = self.alpha
-        filt_state['kappa'] = self.kappa
-        filt_state['beta'] = self.beta
+        filt_state["alpha"] = self.alpha
+        filt_state["kappa"] = self.kappa
+        filt_state["beta"] = self.beta
 
-        filt_state['_stateSigmaPoints'] = deepcopy(self._stateSigmaPoints)
-        filt_state['_use_lin_dyn'] = self._use_lin_dyn
-        filt_state['_use_non_lin_dyn'] = self._use_non_lin_dyn
-        filt_state['_est_meas_noise_fnc'] = self._est_meas_noise_fnc
+        filt_state["_stateSigmaPoints"] = deepcopy(self._stateSigmaPoints)
+        filt_state["_use_lin_dyn"] = self._use_lin_dyn
+        filt_state["_use_non_lin_dyn"] = self._use_non_lin_dyn
+        filt_state["_est_meas_noise_fnc"] = self._est_meas_noise_fnc
 
         return filt_state
 
@@ -1108,14 +1150,14 @@ class UnscentedKalmanFilter(ExtendedKalmanFilter):
         """
         super().load_filter_state(filt_state)
 
-        self.alpha = filt_state['alpha']
-        self.kappa = filt_state['kappa']
-        self.beta = filt_state['beta']
+        self.alpha = filt_state["alpha"]
+        self.kappa = filt_state["kappa"]
+        self.beta = filt_state["beta"]
 
-        self._stateSigmaPoints = deepcopy(filt_state['_stateSigmaPoints'])
-        self._use_lin_dyn = filt_state['_use_lin_dyn']
-        self._use_non_lin_dyn = filt_state['_use_non_lin_dyn']
-        self._est_meas_noise_fnc = filt_state['_est_meas_noise_fnc']
+        self._stateSigmaPoints = deepcopy(filt_state["_stateSigmaPoints"])
+        self._use_lin_dyn = filt_state["_use_lin_dyn"]
+        self._use_non_lin_dyn = filt_state["_use_non_lin_dyn"]
+        self._est_meas_noise_fnc = filt_state["_est_meas_noise_fnc"]
 
     def init_sigma_points(self, state0, alpha=None, kappa=None, beta=None):
         """Initializes the sigma points used by the filter.
@@ -1152,16 +1194,22 @@ class UnscentedKalmanFilter(ExtendedKalmanFilter):
         else:
             self.beta = beta
 
-        self._stateSigmaPoints = gdistrib.SigmaPoints(alpha=alpha,
-                                                      kappa=kappa,
-                                                      beta=beta,
-                                                      num_axes=num_axes)
+        self._stateSigmaPoints = gdistrib.SigmaPoints(
+            alpha=alpha, kappa=kappa, beta=beta, num_axes=num_axes
+        )
         self._stateSigmaPoints.init_weights()
         self._stateSigmaPoints.update_points(state0, self.cov)
 
-    def set_state_model(self, state_mat=None, input_mat=None, cont_time=False,
-                        state_mat_fun=None, input_mat_fun=None,
-                        dyn_obj=None, ode_lst=None):
+    def set_state_model(
+        self,
+        state_mat=None,
+        input_mat=None,
+        cont_time=False,
+        state_mat_fun=None,
+        input_mat_fun=None,
+        dyn_obj=None,
+        ode_lst=None,
+    ):
         """Sets the state model for the filter.
 
         This can use either linear dynamics (by calling the kalman filters
@@ -1200,23 +1248,30 @@ class UnscentedKalmanFilter(ExtendedKalmanFilter):
         -------
         None.
         """
-        self._use_lin_dyn = (state_mat is not None or state_mat_fun is not None
-                             or isinstance(dyn_obj, gdyn.LinearDynamicsBase))
-        self._use_non_lin_dyn = ((isinstance(dyn_obj, gdyn.NonlinearDynamicsBase)
-                                  or ode_lst is not None) and not self._use_lin_dyn)
+        self._use_lin_dyn = (
+            state_mat is not None
+            or state_mat_fun is not None
+            or isinstance(dyn_obj, gdyn.LinearDynamicsBase)
+        )
+        self._use_non_lin_dyn = (
+            isinstance(dyn_obj, gdyn.NonlinearDynamicsBase) or ode_lst is not None
+        ) and not self._use_lin_dyn
 
         # allow for linear or non linear dynamics by calling the appropriate parent
         if self._use_lin_dyn:
-            KalmanFilter.set_state_model(self, state_mat=state_mat,
-                                         input_mat=input_mat, cont_time=cont_time,
-                                         state_mat_fun=state_mat_fun,
-                                         input_mat_fun=input_mat_fun,
-                                         dyn_obj=dyn_obj)
+            KalmanFilter.set_state_model(
+                self,
+                state_mat=state_mat,
+                input_mat=input_mat,
+                cont_time=cont_time,
+                state_mat_fun=state_mat_fun,
+                input_mat_fun=input_mat_fun,
+                dyn_obj=dyn_obj,
+            )
         elif self._use_non_lin_dyn:
-            ExtendedKalmanFilter.set_state_model(self, dyn_obj=dyn_obj,
-                                                 ode_lst=ode_lst)
+            ExtendedKalmanFilter.set_state_model(self, dyn_obj=dyn_obj, ode_lst=ode_lst)
         else:
-            raise RuntimeError('Invalid state model.')
+            raise RuntimeError("Invalid state model.")
 
     def set_measurement_noise_estimator(self, function):
         """Sets the model used for estimating the measurement noise parameters.
@@ -1241,8 +1296,15 @@ class UnscentedKalmanFilter(ExtendedKalmanFilter):
         """
         self._est_meas_noise_fnc = function
 
-    def predict(self, timestep, cur_state, cur_input=None, state_mat_args=(),
-                input_mat_args=(), dyn_fun_params=()):
+    def predict(
+        self,
+        timestep,
+        cur_state,
+        cur_input=None,
+        state_mat_args=(),
+        input_mat_args=(),
+        dyn_fun_params=(),
+    ):
         """Prediction step of the UKF.
 
         Automatically calls the state propagation method from either
@@ -1288,20 +1350,30 @@ class UnscentedKalmanFilter(ExtendedKalmanFilter):
 
         # propagate points
         if self._use_lin_dyn:
-            new_points = np.array([KalmanFilter._predict_next_state(self, timestep,
-                                                                    x.reshape((x.size, 1)),
-                                                                    cur_input,
-                                                                    state_mat_args,
-                                                                    input_mat_args)[0].ravel()
-                                   for x in self._stateSigmaPoints.points])
+            new_points = np.array(
+                [
+                    KalmanFilter._predict_next_state(
+                        self,
+                        timestep,
+                        x.reshape((x.size, 1)),
+                        cur_input,
+                        state_mat_args,
+                        input_mat_args,
+                    )[0].ravel()
+                    for x in self._stateSigmaPoints.points
+                ]
+            )
         elif self._use_non_lin_dyn:
-            new_points = np.array([ExtendedKalmanFilter._predict_next_state(self,
-                                                                            timestep,
-                                                                            x.reshape((x.size, 1)),
-                                                                            dyn_fun_params)[0].ravel()
-                                   for x in self._stateSigmaPoints.points])
+            new_points = np.array(
+                [
+                    ExtendedKalmanFilter._predict_next_state(
+                        self, timestep, x.reshape((x.size, 1)), dyn_fun_params
+                    )[0].ravel()
+                    for x in self._stateSigmaPoints.points
+                ]
+            )
         else:
-            raise RuntimeError('State model not specified')
+            raise RuntimeError("State model not specified")
 
         self._stateSigmaPoints.points = new_points
 
@@ -1315,16 +1387,23 @@ class UnscentedKalmanFilter(ExtendedKalmanFilter):
         return next_state
 
     def _calc_meas_cov(self, timestep, n_meas, meas_fun_args):
-        est_points = np.array([self._est_meas(timestep, x.reshape((x.size, 1)),
-                                              n_meas, meas_fun_args)[0]
-                               for x in self._stateSigmaPoints.points])
-        est_meas = gmath.weighted_sum_vec(self._stateSigmaPoints.weights_mean,
-                                          est_points)
+        est_points = np.array(
+            [
+                self._est_meas(timestep, x.reshape((x.size, 1)), n_meas, meas_fun_args)[
+                    0
+                ]
+                for x in self._stateSigmaPoints.points
+            ]
+        )
+        est_meas = gmath.weighted_sum_vec(
+            self._stateSigmaPoints.weights_mean, est_points
+        )
         diff = est_points - est_meas
         meas_cov_lst = diff @ diff.reshape((est_points.shape[0], 1, est_meas.size))
 
-        partial_cov = gmath.weighted_sum_mat(self._stateSigmaPoints.weights_cov,
-                                             meas_cov_lst)
+        partial_cov = gmath.weighted_sum_mat(
+            self._stateSigmaPoints.weights_cov, meas_cov_lst
+        )
         # estimate the measurement noise if applicable
         if self._est_meas_noise_fnc is not None:
             self.meas_noise = self._est_meas_noise_fnc(est_meas, partial_cov)
@@ -1363,16 +1442,18 @@ class UnscentedKalmanFilter(ExtendedKalmanFilter):
             measurement fit probability assuming a Gaussian distribution.
 
         """
-        meas_cov, est_points, est_meas = self._calc_meas_cov(timestep,
-                                                             meas.size,
-                                                             meas_fun_args)
+        meas_cov, est_points, est_meas = self._calc_meas_cov(
+            timestep, meas.size, meas_fun_args
+        )
 
         state_diff = self._stateSigmaPoints.points - cur_state.ravel()
-        meas_diff = (est_points - est_meas).reshape((est_points.shape[0],
-                                                     1, est_meas.size))
+        meas_diff = (est_points - est_meas).reshape(
+            (est_points.shape[0], 1, est_meas.size)
+        )
         cross_cov_lst = state_diff.reshape((*state_diff.shape, 1)) @ meas_diff
-        cross_cov = gmath.weighted_sum_mat(self._stateSigmaPoints.weights_cov,
-                                           cross_cov_lst)
+        cross_cov = gmath.weighted_sum_mat(
+            self._stateSigmaPoints.weights_cov, cross_cov_lst
+        )
 
         if self.use_cholesky_inverse:
             sqrt_inv_meas_cov = la.inv(la.cholesky(meas_cov))
@@ -1380,7 +1461,7 @@ class UnscentedKalmanFilter(ExtendedKalmanFilter):
         else:
             inv_meas_cov = la.inv(meas_cov)
         gain = cross_cov @ inv_meas_cov
-        inov = (meas - est_meas)
+        inov = meas - est_meas
 
         self.cov = self.cov - gain @ meas_cov @ gain.T
         self.cov = (self.cov + self.cov.T) * 0.5
@@ -1402,8 +1483,14 @@ class BootstrapFilter(BayesFilter):
     class as a base.
     """
 
-    def __init__(self, importance_dist_fnc=None, importance_weight_fnc=None,
-                 particleDistribution=None, rng=None, **kwargs):
+    def __init__(
+        self,
+        importance_dist_fnc=None,
+        importance_weight_fnc=None,
+        particleDistribution=None,
+        rng=None,
+        **kwargs
+    ):
         """Initializes the object.
 
         Parameters
@@ -1444,10 +1531,10 @@ class BootstrapFilter(BayesFilter):
     def save_filter_state(self):
         """Saves filter variables so they can be restored later."""
         filt_state = super().save_filter_state()
-        filt_state['importance_dist_fnc'] = self.importance_dist_fnc
-        filt_state['importance_weight_fnc'] = self.importance_weight_fnc
-        filt_state['particleDistribution'] = deepcopy(self.particleDistribution)
-        filt_state['rng'] = self.rng
+        filt_state["importance_dist_fnc"] = self.importance_dist_fnc
+        filt_state["importance_weight_fnc"] = self.importance_weight_fnc
+        filt_state["particleDistribution"] = deepcopy(self.particleDistribution)
+        filt_state["rng"] = self.rng
 
         return filt_state
 
@@ -1461,10 +1548,10 @@ class BootstrapFilter(BayesFilter):
         """
         super().load_filter_state(filt_state)
 
-        self.importance_dist_fnc = filt_state['importance_dist_fnc']
-        self.importance_weight_fnc = filt_state['importance_weight_fnc']
-        self.particleDistribution = filt_state['particleDistribution']
-        self.rng = filt_state['rng']
+        self.importance_dist_fnc = filt_state["importance_dist_fnc"]
+        self.importance_weight_fnc = filt_state["importance_weight_fnc"]
+        self.particleDistribution = filt_state["particleDistribution"]
+        self.rng = filt_state["rng"]
 
     def predict(self, timestep):
         """Prediction step of the filter.
@@ -1482,8 +1569,9 @@ class BootstrapFilter(BayesFilter):
         N x 1
             mean estimate of the particles.
         """
-        self.particleDistribution.particles = self.importance_dist_fnc(self.particleDistribution,
-                                                                       self.rng)
+        self.particleDistribution.particles = self.importance_dist_fnc(
+            self.particleDistribution, self.rng
+        )
 
         shape = (self.particleDistribution.particles.shape[1], 1)
         return np.mean(self.particleDistribution.particles, axis=0).reshape(shape)
@@ -1508,22 +1596,29 @@ class BootstrapFilter(BayesFilter):
         N x 1 numpy array
             mean estimate of the particles.
         """
-        self.particleDistribution.weights *= self.importance_weight_fnc(meas,
-                                                                        self.particleDistribution.particles)
+        self.particleDistribution.weights *= self.importance_weight_fnc(
+            meas, self.particleDistribution.particles
+        )
         tot = np.sum(self.particleDistribution.weights)
         if tot <= 0:
-            raise gerr.ParticleDepletionError('Importance weights sum to 0.')
+            raise gerr.ParticleDepletionError("Importance weights sum to 0.")
         self.particleDistribution.weights /= tot
 
         # selection
         num_parts = self.particleDistribution.num_particles
-        keep_inds = self.rng.choice(np.array(range(self.particleDistribution.weights.size)),
-                                    p=self.particleDistribution.weights, size=num_parts)
+        keep_inds = self.rng.choice(
+            np.array(range(self.particleDistribution.weights.size)),
+            p=self.particleDistribution.weights,
+            size=num_parts,
+        )
         unique_inds, counts = np.unique(keep_inds, return_counts=True)
         self.particleDistribution.num_parts_per_ind = counts
-        self.particleDistribution.particles = self.particleDistribution.particles[unique_inds, :]
-        self.particleDistribution.weights = (1 / num_parts
-                                             * np.ones(self.particleDistribution.particles.shape[0]))
+        self.particleDistribution.particles = self.particleDistribution.particles[
+            unique_inds, :
+        ]
+        self.particleDistribution.weights = (
+            1 / num_parts * np.ones(self.particleDistribution.particles.shape[0])
+        )
 
         if unique_inds.size <= 1:
             msg = "Only {:d} particles selected".format(unique_inds.size)
@@ -1535,13 +1630,17 @@ class BootstrapFilter(BayesFilter):
 
     def set_state_model(self, **kwargs):
         """Not used by the Bootstrap filter."""
-        warn('Not used by BootstrapFilter, directly handled by importance_dist_fnc.',
-             RuntimeWarning)
+        warn(
+            "Not used by BootstrapFilter, directly handled by importance_dist_fnc.",
+            RuntimeWarning,
+        )
 
     def set_measurement_model(self, **kwargs):
         """Not used by the Bootstrap filter."""
-        warn('Not used by BootstrapFilter, directly handled by importance_weight_fnc.',
-             RuntimeWarning)
+        warn(
+            "Not used by BootstrapFilter, directly handled by importance_weight_fnc.",
+            RuntimeWarning,
+        )
 
     def plot_particles(self, inds, **kwargs):
         """Wrapper for :class:`.distributions.SimpleParticleDistribution.plot_particles`."""
@@ -1575,8 +1674,15 @@ class ParticleFilter(BayesFilter):
     require_copy_prop_parts = True
     require_copy_can_dist = False
 
-    def __init__(self, dyn_obj=None, dyn_fun=None, part_dist=None,
-                 transition_prob_fnc=None, rng=None, **kwargs):
+    def __init__(
+        self,
+        dyn_obj=None,
+        dyn_fun=None,
+        part_dist=None,
+        transition_prob_fnc=None,
+        rng=None,
+        **kwargs
+    ):
 
         self.__meas_likelihood_fnc = None
         self.__proposal_sampling_fnc = None
@@ -1608,21 +1714,21 @@ class ParticleFilter(BayesFilter):
         """Saves filter variables so they can be restored later."""
         filt_state = super().save_filter_state()
 
-        filt_state['__meas_likelihood_fnc'] = self.__meas_likelihood_fnc
-        filt_state['__proposal_sampling_fnc'] = self.__proposal_sampling_fnc
-        filt_state['__proposal_fnc'] = self.__proposal_fnc
-        filt_state['__transition_prob_fnc'] = self.__transition_prob_fnc
+        filt_state["__meas_likelihood_fnc"] = self.__meas_likelihood_fnc
+        filt_state["__proposal_sampling_fnc"] = self.__proposal_sampling_fnc
+        filt_state["__proposal_fnc"] = self.__proposal_fnc
+        filt_state["__transition_prob_fnc"] = self.__transition_prob_fnc
 
-        filt_state['rng'] = self.rng
+        filt_state["rng"] = self.rng
 
-        filt_state['_dyn_fnc'] = self._dyn_fnc
-        filt_state['_dyn_obj'] = self._dyn_obj
+        filt_state["_dyn_fnc"] = self._dyn_fnc
+        filt_state["_dyn_obj"] = self._dyn_obj
 
-        filt_state['_meas_mat'] = self._meas_mat
-        filt_state['_meas_fnc'] = self._meas_fnc
+        filt_state["_meas_mat"] = self._meas_mat
+        filt_state["_meas_fnc"] = self._meas_fnc
 
-        filt_state['_particleDist'] = deepcopy(self._particleDist)
-        filt_state['prop_parts'] = deepcopy(self.prop_parts)
+        filt_state["_particleDist"] = deepcopy(self._particleDist)
+        filt_state["prop_parts"] = deepcopy(self.prop_parts)
 
         return filt_state
 
@@ -1636,21 +1742,21 @@ class ParticleFilter(BayesFilter):
         """
         super().load_filter_state(filt_state)
 
-        self.__meas_likelihood_fnc = filt_state['__meas_likelihood_fnc']
-        self.__proposal_sampling_fnc = filt_state['__proposal_sampling_fnc']
-        self.__proposal_fnc = filt_state['__proposal_fnc']
-        self.__transition_prob_fnc = filt_state['__transition_prob_fnc']
+        self.__meas_likelihood_fnc = filt_state["__meas_likelihood_fnc"]
+        self.__proposal_sampling_fnc = filt_state["__proposal_sampling_fnc"]
+        self.__proposal_fnc = filt_state["__proposal_fnc"]
+        self.__transition_prob_fnc = filt_state["__transition_prob_fnc"]
 
-        self.rng = filt_state['rng']
+        self.rng = filt_state["rng"]
 
-        self._dyn_fnc = filt_state['_dyn_fnc']
-        self._dyn_obj = filt_state['_dyn_obj']
+        self._dyn_fnc = filt_state["_dyn_fnc"]
+        self._dyn_obj = filt_state["_dyn_obj"]
 
-        self._meas_mat = filt_state['_meas_mat']
-        self._meas_fnc = filt_state['_meas_fnc']
+        self._meas_mat = filt_state["_meas_mat"]
+        self._meas_fnc = filt_state["_meas_fnc"]
 
-        self._particleDist = filt_state['_particleDist']
-        self.prop_parts = filt_state['prop_parts']
+        self._particleDist = filt_state["_particleDist"]
+        self.prop_parts = filt_state["prop_parts"]
 
     @property
     def meas_likelihood_fnc(self):
@@ -1780,7 +1886,7 @@ class ParticleFilter(BayesFilter):
         elif dyn_fun is not None:
             self._dyn_fnc = dyn_fun
         else:
-            msg = 'Invalid state model specified. Check arguments'
+            msg = "Invalid state model specified. Check arguments"
             raise RuntimeError(msg)
 
     def set_measurement_model(self, meas_mat=None, meas_fun=None):
@@ -1826,7 +1932,7 @@ class ParticleFilter(BayesFilter):
         elif meas_fun is not None:
             self._meas_fnc = meas_fun
         else:
-            raise RuntimeError('Invalid combination of inputs')
+            raise RuntimeError("Invalid combination of inputs")
 
     @property
     def cov(self):
@@ -1842,7 +1948,7 @@ class ParticleFilter(BayesFilter):
 
     @cov.setter
     def cov(self, x):
-        raise RuntimeError('Covariance is read only')
+        raise RuntimeError("Covariance is read only")
 
     @property
     def num_particles(self):
@@ -1904,17 +2010,18 @@ class ParticleFilter(BayesFilter):
         """
         num_parts = len(particle_lst)
         if num_parts <= 0:
-            warn('No particles to initialize. SKIPPING')
+            warn("No particles to initialize. SKIPPING")
             return
 
         self._particleDist.clear_particles()
-        self._particleDist.add_particle(particle_lst,
-                                        [1.0 / num_parts] * num_parts)
+        self._particleDist.add_particle(particle_lst, [1.0 / num_parts] * num_parts)
 
     def _calc_state(self):
         return self._particleDist.mean
 
-    def predict(self, timestep, dyn_fun_params=(), sampling_args=(), transition_args=()):
+    def predict(
+        self, timestep, dyn_fun_params=(), sampling_args=(), transition_args=()
+    ):
         """Predicts the next state.
 
         Parameters
@@ -1940,28 +2047,35 @@ class ParticleFilter(BayesFilter):
 
         """
         if self._dyn_obj is not None:
-            self.prop_parts = [self._dyn_obj.propagate_state(timestep, x,
-                                                             state_args=dyn_fun_params)
-                               for x in self._particleDist.particles]
-            mean = self._dyn_obj.propagate_state(timestep, self._particleDist.mean,
-                                                 state_args=dyn_fun_params)
+            self.prop_parts = [
+                self._dyn_obj.propagate_state(timestep, x, state_args=dyn_fun_params)
+                for x in self._particleDist.particles
+            ]
+            mean = self._dyn_obj.propagate_state(
+                timestep, self._particleDist.mean, state_args=dyn_fun_params
+            )
 
         elif self._dyn_fnc is not None:
-            self.prop_parts = [self._dyn_fnc(timestep, x, *dyn_fun_params)
-                               for x in self._particleDist.particles]
-            mean = self._dyn_fnc(timestep, self._particleDist.mean,
-                                 *dyn_fun_params)
+            self.prop_parts = [
+                self._dyn_fnc(timestep, x, *dyn_fun_params)
+                for x in self._particleDist.particles
+            ]
+            mean = self._dyn_fnc(timestep, self._particleDist.mean, *dyn_fun_params)
 
         else:
-            raise RuntimeError('No state model set')
+            raise RuntimeError("No state model set")
 
-        new_weights = [w * self.transition_prob_fnc(x, mean, *transition_args)
-                       if self.transition_prob_fnc is not None
-                       else w for x, w in zip(self.prop_parts,
-                                              self._particleDist.weights)]
+        new_weights = [
+            w * self.transition_prob_fnc(x, mean, *transition_args)
+            if self.transition_prob_fnc is not None
+            else w
+            for x, w in zip(self.prop_parts, self._particleDist.weights)
+        ]
 
-        new_parts = [self.proposal_sampling_fnc(p, self.rng, *sampling_args)
-                     for p in self.prop_parts]
+        new_parts = [
+            self.proposal_sampling_fnc(p, self.rng, *sampling_args)
+            for p in self.prop_parts
+        ]
 
         self._particleDist.clear_particles()
         for p, w in zip(new_parts, new_weights):
@@ -1976,7 +2090,7 @@ class ParticleFilter(BayesFilter):
         elif self._meas_mat is not None:
             est_meas = self._meas_mat @ cur_state
         else:
-            raise RuntimeError('No measurement model set')
+            raise RuntimeError("No measurement model set")
 
         return est_meas
 
@@ -2003,12 +2117,15 @@ class ParticleFilter(BayesFilter):
         if failed:
             tot = np.sum(self._particleDist.weights)
             self._particleDist.clear_particles()
-            msg = 'Failed to select enough particles, ' \
-                + 'check weights (sum = {})'.format(tot)
+            msg = (
+                "Failed to select enough particles, "
+                + "check weights (sum = {})".format(tot)
+            )
             raise gerr.ParticleDepletionError(msg)
 
-        inds_removed = [ii for ii in range(0, self.num_particles)
-                        if ii not in inds_kept]
+        inds_removed = [
+            ii for ii in range(0, self.num_particles) if ii not in inds_kept
+        ]
 
         self._particleDist.clear_particles()
         w = 1 / len(new_parts)
@@ -2016,8 +2133,15 @@ class ParticleFilter(BayesFilter):
 
         return inds_removed, old_weights, rel_likeli_out
 
-    def correct(self, timestep, meas, meas_fun_args=(), meas_likely_args=(),
-                proposal_args=(), selection=True):
+    def correct(
+        self,
+        timestep,
+        meas,
+        meas_fun_args=(),
+        meas_likely_args=(),
+        proposal_args=(),
+        selection=True,
+    ):
         """Corrects the state estimate.
 
         Parameters
@@ -2056,19 +2180,27 @@ class ParticleFilter(BayesFilter):
 
         """
         # calculate weights
-        est_meas = [self._est_meas(timestep, p, meas.size, meas_fun_args)
-                    for p in self._particleDist.particles]
+        est_meas = [
+            self._est_meas(timestep, p, meas.size, meas_fun_args)
+            for p in self._particleDist.particles
+        ]
         if self.meas_likelihood_fnc is None:
             rel_likeli = np.ones(len(est_meas))
         else:
-            rel_likeli = np.array([self.meas_likelihood_fnc(meas, y, *meas_likely_args)
-                                   for y in est_meas]).ravel()
+            rel_likeli = np.array(
+                [self.meas_likelihood_fnc(meas, y, *meas_likely_args) for y in est_meas]
+            ).ravel()
         if self.proposal_fnc is None or len(self.prop_parts) == 0:
             prop_fit = np.ones(len(self._particleDist.particles))
         else:
-            prop_fit = np.array([self.proposal_fnc(x_hat, cond, meas, *proposal_args)
-                                 for x_hat, cond in zip(self._particleDist.particles,
-                                                        self.prop_parts)]).ravel()
+            prop_fit = np.array(
+                [
+                    self.proposal_fnc(x_hat, cond, meas, *proposal_args)
+                    for x_hat, cond in zip(
+                        self._particleDist.particles, self.prop_parts
+                    )
+                ]
+            ).ravel()
 
         inds = np.where(prop_fit < np.finfo(float).eps)[0]
         if inds.size > 0:
@@ -2084,15 +2216,22 @@ class ParticleFilter(BayesFilter):
 
         # resample
         if selection:
-            inds_removed, rel_likeli = self._selection(unnorm_weights,
-                                                       rel_likeli_in=rel_likeli.tolist())[0:3:2]
+            inds_removed, rel_likeli = self._selection(
+                unnorm_weights, rel_likeli_in=rel_likeli.tolist()
+            )[0:3:2]
         else:
             inds_removed = []
 
         return (self._calc_state(), rel_likeli, inds_removed)
 
-    def plot_particles(self, inds, title='Particle Distribution',
-                       x_lbl='State', y_lbl='Probability', **kwargs):
+    def plot_particles(
+        self,
+        inds,
+        title="Particle Distribution",
+        x_lbl="State",
+        y_lbl="Probability",
+        **kwargs
+    ):
         """Plots the particle distribution.
 
         This will either plot a histogram for a single index, or plot a 2-d
@@ -2120,14 +2259,14 @@ class ParticleFilter(BayesFilter):
             Figure object the data was plotted on.
         """
         opts = pltUtil.init_plotting_opts(**kwargs)
-        f_hndl = opts['f_hndl']
-        lgnd_loc = opts['lgnd_loc']
+        f_hndl = opts["f_hndl"]
+        lgnd_loc = opts["lgnd_loc"]
 
         if f_hndl is None:
             f_hndl = plt.figure()
             f_hndl.add_subplot(1, 1, 1)
 
-        h_opts = {"histtype": "stepfilled", "bins": 'auto', "density": True}
+        h_opts = {"histtype": "stepfilled", "bins": "auto", "density": True}
         if (not isinstance(inds, list)) or len(inds) == 1:
             if isinstance(inds, list):
                 ii = inds[0]
@@ -2140,17 +2279,21 @@ class ParticleFilter(BayesFilter):
             y = [p[inds[1], 0] for p in self._particleDist.particles]
             f_hndl.axes[0].hist2d(x, y)
 
-        pltUtil.set_title_label(f_hndl, 0, opts, ttl=title,
-                                x_lbl=x_lbl, y_lbl=y_lbl)
+        pltUtil.set_title_label(f_hndl, 0, opts, ttl=title, x_lbl=x_lbl, y_lbl=y_lbl)
         if lgnd_loc is not None:
             plt.legend(loc=lgnd_loc)
         plt.tight_layout()
 
         return f_hndl
 
-    def plot_weighted_particles(self, inds, x_lbl='State', y_lbl='Weight',
-                                title='Weighted Particle Distribution',
-                                **kwargs):
+    def plot_weighted_particles(
+        self,
+        inds,
+        x_lbl="State",
+        y_lbl="Weight",
+        title="Weighted Particle Distribution",
+        **kwargs
+    ):
         """Plots the weight vs state distribution of the particles.
 
         This generates a bar chart and only works for single indices.
@@ -2176,8 +2319,8 @@ class ParticleFilter(BayesFilter):
             Figure object the data was plotted on.
         """
         opts = pltUtil.init_plotting_opts(**kwargs)
-        f_hndl = opts['f_hndl']
-        lgnd_loc = opts['lgnd_loc']
+        f_hndl = opts["f_hndl"]
+        lgnd_loc = opts["lgnd_loc"]
 
         if f_hndl is None:
             f_hndl = plt.figure()
@@ -2192,10 +2335,9 @@ class ParticleFilter(BayesFilter):
             y = [w for p, w in self._particleDist]
             f_hndl.axes[0].bar(x, y)
         else:
-            warn('Only 1 element supported for weighted particle distribution')
+            warn("Only 1 element supported for weighted particle distribution")
 
-        pltUtil.set_title_label(f_hndl, 0, opts, ttl=title,
-                                x_lbl=x_lbl, y_lbl=y_lbl)
+        pltUtil.set_title_label(f_hndl, 0, opts, ttl=title, x_lbl=x_lbl, y_lbl=y_lbl)
         if lgnd_loc is not None:
             plt.legend(loc=lgnd_loc)
         plt.tight_layout()
@@ -2226,7 +2368,7 @@ class MCMCParticleFilterBase(ParticleFilter):
         This must be overridden in the child class. It is recommended to keep
         the same function signature to allow for standardized wrappers.
         """
-        raise RuntimeError('Must implement thid function in derived class')
+        raise RuntimeError("Must implement thid function in derived class")
 
 
 class MaxCorrEntUKF(UnscentedKalmanFilter):
@@ -2257,10 +2399,10 @@ class MaxCorrEntUKF(UnscentedKalmanFilter):
         """Saves filter variables so they can be restored later."""
         filt_state = super().save_filter_state()
 
-        filt_state['kernel_bandwidth'] = self.kernel_bandwidth
-        filt_state['_past_state'] = self._past_state
-        filt_state['_cur_state'] = self._cur_state
-        filt_state['_meas'] = self._meas
+        filt_state["kernel_bandwidth"] = self.kernel_bandwidth
+        filt_state["_past_state"] = self._past_state
+        filt_state["_cur_state"] = self._cur_state
+        filt_state["_meas"] = self._meas
 
         return filt_state
 
@@ -2274,36 +2416,36 @@ class MaxCorrEntUKF(UnscentedKalmanFilter):
         """
         super().load_filter_state(filt_state)
 
-        self.kernel_bandwidth = filt_state['kernel_bandwidth']
-        self._past_state = filt_state['_past_state']
-        self._cur_state = filt_state['_cur_state']
-        self._meas = filt_state['_meas']
+        self.kernel_bandwidth = filt_state["kernel_bandwidth"]
+        self._past_state = filt_state["_past_state"]
+        self._cur_state = filt_state["_cur_state"]
+        self._meas = filt_state["_meas"]
 
     def _calc_meas_cov(self, timestep, n_meas, meas_fun_args):
-        meas_cov, est_points, est_meas = super()._calc_meas_cov(timestep,
-                                                                n_meas, meas_fun_args)
+        meas_cov, est_points, est_meas = super()._calc_meas_cov(
+            timestep, n_meas, meas_fun_args
+        )
 
         # find square root of combined covariance matrix
         n_state = self.cov.shape[0]
         n_meas = est_meas.shape[0]
         z_12 = np.zeros((n_state, n_meas))
         z_21 = np.zeros((n_meas, n_state))
-        comb_cov = np.vstack((np.hstack((self.cov, z_12)),
-                              np.hstack((z_21, self.meas_noise))))
+        comb_cov = np.vstack(
+            (np.hstack((self.cov, z_12)), np.hstack((z_21, self.meas_noise)))
+        )
         comb_cov = (comb_cov + comb_cov.T) * 0.5
         sqrt_comb = la.cholesky(comb_cov)
         inv_sqrt_comb = la.inv(sqrt_comb)
 
         # find error vector
-        pred_meas = self._est_meas(timestep, self._past_state, n_meas,
-                                   meas_fun_args)[0]
+        pred_meas = self._est_meas(timestep, self._past_state, n_meas, meas_fun_args)[0]
         g = inv_sqrt_comb @ np.vstack((self._past_state, pred_meas))
         d = inv_sqrt_comb @ np.vstack((self._cur_state, self._meas))
         e = (d - g).ravel()
 
         # kernel function on error
-        kern_lst = [gmath.gaussian_kernel(e_ii, self.kernel_bandwidth)
-                    for e_ii in e]
+        kern_lst = [gmath.gaussian_kernel(e_ii, self.kernel_bandwidth) for e_ii in e]
         c = np.diag(kern_lst)
         c_inv = la.inv(c)
 
@@ -2368,8 +2510,8 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
         """Saves filter variables so they can be restored later."""
         filt_state = super().save_filter_state()
 
-        filt_state['candDist'] = deepcopy(self.candDist)
-        filt_state['_filt'] = self._filt.save_filter_state()
+        filt_state["candDist"] = deepcopy(self.candDist)
+        filt_state["_filt"] = self._filt.save_filter_state()
 
         return filt_state
 
@@ -2383,8 +2525,8 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
         """
         super().load_filter_state(filt_state)
 
-        self.candDist = filt_state['candDist']
-        self._filt.load_filter_state(filt_state['_filt'])
+        self.candDist = filt_state["candDist"]
+        self._filt.load_filter_state(filt_state["_filt"])
 
     @property
     def meas_likelihood_fnc(self):
@@ -2411,13 +2553,13 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
         callable
             function to return the measurement likelihood.
         """
-        return lambda y, y_hat: stats.multivariate_normal.pdf(y.ravel(),
-                                                              y_hat.ravel(),
-                                                              self._filt.meas_noise)
+        return lambda y, y_hat: stats.multivariate_normal.pdf(
+            y.ravel(), y_hat.ravel(), self._filt.meas_noise
+        )
 
     @meas_likelihood_fnc.setter
     def meas_likelihood_fnc(self, val):
-        warn('Measuremnet likelihood has an assumed form.')
+        warn("Measuremnet likelihood has an assumed form.")
 
     @property
     def proposal_fnc(self):
@@ -2444,13 +2586,13 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
         callable
             function to return the proposal probability.
         """
-        return lambda x_hat, part: stats.multivariate_normal.pdf(x_hat.ravel(),
-                                                                 part.mean.ravel(),
-                                                                 part.uncertainty)
+        return lambda x_hat, part: stats.multivariate_normal.pdf(
+            x_hat.ravel(), part.mean.ravel(), part.uncertainty
+        )
 
     @proposal_fnc.setter
     def proposal_fnc(self, val):
-        warn('Proposal distribution has an assumed form.')
+        warn("Proposal distribution has an assumed form.")
 
     @property
     def proposal_sampling_fnc(self):
@@ -2467,12 +2609,13 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
         callable
             function to return a random sample.
         """
-        return lambda part: self.rng.multivariate_normal(part.mean.ravel(),
-                                                         part.uncertainty).reshape(part.mean.shape)
+        return lambda part: self.rng.multivariate_normal(
+            part.mean.ravel(), part.uncertainty
+        ).reshape(part.mean.shape)
 
     @proposal_sampling_fnc.setter
     def proposal_sampling_fnc(self, val):
-        warn('Proposal sampling has an assumed form.')
+        warn("Proposal sampling has an assumed form.")
 
     @property
     def transition_prob_fnc(self):
@@ -2499,13 +2642,13 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
         callable
             function to return the transition probability.
         """
-        return lambda x_hat, x, cov: stats.multivariate_normal.pdf(x_hat.ravel(),
-                                                                   x.ravel(),
-                                                                   cov)
+        return lambda x_hat, x, cov: stats.multivariate_normal.pdf(
+            x_hat.ravel(), x.ravel(), cov
+        )
 
     @transition_prob_fnc.setter
     def transition_prob_fnc(self, val):
-        warn('Transistion distribution has an assumed form.')
+        warn("Transistion distribution has an assumed form.")
 
     # @property
     # def cov(self):
@@ -2612,14 +2755,14 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
         state : N x 1 numpy array
             The predicted state.
         """
-        self._particleDist = self._predict_loop(timestep, ukf_kwargs,
-                                                self._particleDist)
+        self._particleDist = self._predict_loop(
+            timestep, ukf_kwargs, self._particleDist
+        )
         if self.use_MCMC:
             if self.candDist is None:  # first timestep
                 self.candDist = deepcopy(self._particleDist)
             else:
-                self.candDist = self._predict_loop(timestep, ukf_kwargs,
-                                                   self.candDist)
+                self.candDist = self._predict_loop(timestep, ukf_kwargs, self.candDist)
 
         return self._calc_state()
 
@@ -2628,8 +2771,7 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
         return self._filt.correct(timestep, meas, state, **filt_kwargs)
 
     def _est_meas(self, timestep, cur_state, n_meas, meas_fun_args):
-        return self._filt._est_meas(timestep, cur_state, n_meas,
-                                    meas_fun_args)[0]
+        return self._filt._est_meas(timestep, cur_state, n_meas, meas_fun_args)[0]
 
     def _correct_loop(self, timestep, meas, ukf_kwargs, dist):
         unnorm_weights = np.nan * np.ones(dist.num_particles)
@@ -2641,7 +2783,9 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
 
             # create a new particle and correct the predicted point with the measurement
             part = gdistrib.Particle()
-            part.point, rel_likeli[ii] = self._inner_correct(timestep, meas, p.point, ukf_kwargs)
+            part.point, rel_likeli[ii] = self._inner_correct(
+                timestep, meas, p.point, ukf_kwargs
+            )
             part.uncertainty = self._filt.cov
 
             # draw a sample from the proposal distribution using the corrected point
@@ -2708,28 +2852,36 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
             self.candDist = deepcopy(self._particleDist)
 
         # call UKF correction on each particle
-        (self._particleDist, rel_likeli,
-         unnorm_weights) = self._correct_loop(timestep, meas, ukf_kwargs,
-                                              self._particleDist)
+        (self._particleDist, rel_likeli, unnorm_weights) = self._correct_loop(
+            timestep, meas, ukf_kwargs, self._particleDist
+        )
         if self.use_MCMC:
-            (self.candDist, can_rel_likeli,
-             can_unnorm_weights) = self._correct_loop(timestep, meas,
-                                                      ukf_kwargs, self.candDist)
+            (self.candDist, can_rel_likeli, can_unnorm_weights) = self._correct_loop(
+                timestep, meas, ukf_kwargs, self.candDist
+            )
 
         # perform selection/resampling
-        (inds_removed, old_weights,
-         rel_likeli) = self._selection(unnorm_weights, rel_likeli_in=rel_likeli)
+        (inds_removed, old_weights, rel_likeli) = self._selection(
+            unnorm_weights, rel_likeli_in=rel_likeli
+        )
 
         # optionally move particles
         if self.use_MCMC:
-            rel_likeli = self.move_particles(timestep, meas, old_weights,
-                                             rel_likeli, can_unnorm_weights,
-                                             can_rel_likeli, **move_kwargs)
+            rel_likeli = self.move_particles(
+                timestep,
+                meas,
+                old_weights,
+                rel_likeli,
+                can_unnorm_weights,
+                can_rel_likeli,
+                **move_kwargs
+            )
 
         return (self._calc_state(), rel_likeli, inds_removed)
 
-    def move_particles(self, timestep, meas, old_weights, old_likeli,
-                       can_weight, can_likeli):
+    def move_particles(
+        self, timestep, meas, old_weights, old_likeli, can_weight, can_likeli
+    ):
         r"""Movement function for the MCMC move step.
 
         This modifies the internal particle distribution but does not return a
@@ -2756,9 +2908,16 @@ class UnscentedParticleFilter(MCMCParticleFilterBase):
         num_parts = self._particleDist.num_particles
         new_parts = [None] * num_parts
         new_likeli = [None] * num_parts
-        for ii, (can, exp, ex_weight, can_weight, ex_like, can_like) in \
-                enumerate(zip(self.candDist, self._particleDist,
-                              old_weights, can_weight, old_likeli, can_likeli)):
+        for ii, (can, exp, ex_weight, can_weight, ex_like, can_like) in enumerate(
+            zip(
+                self.candDist,
+                self._particleDist,
+                old_weights,
+                can_weight,
+                old_likeli,
+                can_likeli,
+            )
+        ):
 
             if accept_prob <= np.min([1, can_weight / ex_weight]):
                 # accept move
@@ -2795,7 +2954,7 @@ class MaxCorrEntUPF(UnscentedParticleFilter):
         """Saves filter variables so they can be restored later."""
         filt_state = super().save_filter_state()
 
-        filt_state['_past_state'] = self._past_state
+        filt_state["_past_state"] = self._past_state
 
         return filt_state
 
@@ -2809,12 +2968,13 @@ class MaxCorrEntUPF(UnscentedParticleFilter):
         """
         super().load_filter_state(filt_state)
 
-        self._past_state = filt_state['_past_state']
+        self._past_state = filt_state["_past_state"]
 
     def _inner_correct(self, timestep, meas, state, filt_kwargs):
         """Wrapper so child class can override."""
-        return self._filt.correct(timestep, meas, state, self._past_state,
-                                  **filt_kwargs)
+        return self._filt.correct(
+            timestep, meas, state, self._past_state, **filt_kwargs
+        )
 
     def correct(self, timestep, meas, past_state, **kwargs):
         """Correction step of the MCUPF.
@@ -2883,10 +3043,10 @@ class QuadratureKalmanFilter(KalmanFilter):
         """Saves filter variables so they can be restored later."""
         filt_state = super().save_filter_state()
 
-        filt_state['quadPoints'] = self.quadPoints
+        filt_state["quadPoints"] = self.quadPoints
 
-        filt_state['_sqrt_cov'] = self._sqrt_cov
-        filt_state['_dyn_fnc'] = self._dyn_fnc
+        filt_state["_sqrt_cov"] = self._sqrt_cov
+        filt_state["_dyn_fnc"] = self._dyn_fnc
 
         return filt_state
 
@@ -2900,9 +3060,9 @@ class QuadratureKalmanFilter(KalmanFilter):
         """
         super().load_filter_state(filt_state)
 
-        self.quadPoints = filt_state['quadPoints']
-        self._sqrt_cov = filt_state['_sqrt_cov']
-        self._dyn_fnc = filt_state['_dyn_fnc']
+        self.quadPoints = filt_state["quadPoints"]
+        self._sqrt_cov = filt_state["_sqrt_cov"]
+        self._dyn_fnc = filt_state["_dyn_fnc"]
 
     @property
     def points_per_axis(self):
@@ -2983,15 +3143,19 @@ class QuadratureKalmanFilter(KalmanFilter):
     def _pred_update_cov(self):
         self.cov = self.proc_noise + self.quadPoints.cov
 
-    def _predict_next_state(self, timestep, cur_state, cur_input, state_mat_args, input_mat_args):
+    def _predict_next_state(
+        self, timestep, cur_state, cur_input, state_mat_args, input_mat_args
+    ):
         if self._dyn_fnc is not None:
             return self._dyn_fnc(timestep, cur_state, *state_mat_args)
         else:
-            return super()._predict_next_state(timestep, cur_state, cur_input,
-                                               state_mat_args, input_mat_args)[0]
+            return super()._predict_next_state(
+                timestep, cur_state, cur_input, state_mat_args, input_mat_args
+            )[0]
 
-    def predict(self, timestep, cur_state, cur_input=None, state_mat_args=(),
-                input_mat_args=()):
+    def predict(
+        self, timestep, cur_state, cur_input=None, state_mat_args=(), input_mat_args=()
+    ):
         """Prediction step of the filter.
 
         Parameters
@@ -3030,8 +3194,9 @@ class QuadratureKalmanFilter(KalmanFilter):
 
         # predict each point using the dynamics
         for ii, (point, _) in enumerate(self.quadPoints):
-            pred_point = self._predict_next_state(timestep, point, cur_input,
-                                                  state_mat_args, input_mat_args)
+            pred_point = self._predict_next_state(
+                timestep, point, cur_input, state_mat_args, input_mat_args
+            )
             self.quadPoints.points[ii, :] = pred_point.ravel()
 
         # update covariance as Q - m * x * x^T + sum(w_i * X_i * X_i^T)
@@ -3047,8 +3212,9 @@ class QuadratureKalmanFilter(KalmanFilter):
         if self._meas_fnc is not None:
             return self._meas_fnc(timestep, cur_state, *meas_fun_args).ravel()
         else:
-            return super()._est_meas(timestep, cur_state, n_meas,
-                                     meas_fun_args)[0].ravel()
+            return (
+                super()._est_meas(timestep, cur_state, n_meas, meas_fun_args)[0].ravel()
+            )
 
     def _corr_core(self, timestep, cur_state, meas, meas_fun_args):
         # factorize covariance as P = sqrt(P) * sqrt(P)^T
@@ -3059,11 +3225,14 @@ class QuadratureKalmanFilter(KalmanFilter):
 
         # Estimate a measurement for each quad point, Z_i
         measQuads = gdistrib.QuadraturePoints(num_axes=meas.size)
-        measQuads.points = np.nan * np.ones((self.quadPoints.points.shape[0], meas.size))
+        measQuads.points = np.nan * np.ones(
+            (self.quadPoints.points.shape[0], meas.size)
+        )
         measQuads.weights = self.quadPoints.weights
         for ii, (point, _) in enumerate(self.quadPoints):
-            measQuads.points[ii, :] = self._est_meas(timestep, point, meas.size,
-                                                     meas_fun_args)
+            measQuads.points[ii, :] = self._est_meas(
+                timestep, point, meas.size, meas_fun_args
+            )
 
         # estimate predicted measurement as sum of est measurement quad points
         est_meas = measQuads.mean
@@ -3101,8 +3270,7 @@ class QuadratureKalmanFilter(KalmanFilter):
             covariance assuming Gaussian noise.
 
         """
-        measQuads, est_meas = self._corr_core(timestep, cur_state, meas,
-                                              meas_fun_args)
+        measQuads, est_meas = self._corr_core(timestep, cur_state, meas, meas_fun_args)
 
         # estimate the measurement noise online if applicable
         if self._est_meas_noise_fnc is not None:
@@ -3161,9 +3329,9 @@ class SquareRootQKF(QuadratureKalmanFilter):
         """Saves filter variables so they can be restored later."""
         filt_state = super().save_filter_state()
 
-        filt_state['_meas_noise'] = self._meas_noise
-        filt_state['_sqrt_p_noise'] = self._sqrt_p_noise
-        filt_state['_sqrt_m_noise'] = self._sqrt_m_noise
+        filt_state["_meas_noise"] = self._meas_noise
+        filt_state["_sqrt_p_noise"] = self._sqrt_p_noise
+        filt_state["_sqrt_m_noise"] = self._sqrt_m_noise
 
         return filt_state
 
@@ -3177,9 +3345,9 @@ class SquareRootQKF(QuadratureKalmanFilter):
         """
         super().load_filter_state(filt_state)
 
-        self._meas_noise = filt_state['_meas_noise']
-        self._sqrt_p_noise = filt_state['_sqrt_p_noise']
-        self._sqrt_m_noise = filt_state['_sqrt_m_noise']
+        self._meas_noise = filt_state["_meas_noise"]
+        self._sqrt_p_noise = filt_state["_sqrt_p_noise"]
+        self._sqrt_m_noise = filt_state["_sqrt_m_noise"]
 
     def set_measurement_noise_estimator(self, function):
         """Sets the model used for estimating the measurement noise parameters.
@@ -3247,17 +3415,22 @@ class SquareRootQKF(QuadratureKalmanFilter):
     def _pred_update_cov(self):
         weight_mat = np.diag(np.sqrt(self.quadPoints.weights))
         x_hat = self.quadPoints.mean
-        state_mat = np.concatenate([x.reshape((x.size, 1)) - x_hat
-                                    for x in self.quadPoints.points], axis=1)
+        state_mat = np.concatenate(
+            [x.reshape((x.size, 1)) - x_hat for x in self.quadPoints.points], axis=1
+        )
 
-        self._sqrt_cov = la.qr(np.concatenate((state_mat @ weight_mat,
-                                               self._sqrt_p_noise.T), axis=1).T,
-                               mode='r').T
+        self._sqrt_cov = la.qr(
+            np.concatenate((state_mat @ weight_mat, self._sqrt_p_noise.T), axis=1).T,
+            mode="r",
+        ).T
 
     def _corr_update_cov(self, gain, state_mat, meas_mat):
-        self._sqrt_cov = la.qr(np.concatenate((state_mat - gain @ meas_mat,
-                                               gain @ self._sqrt_m_noise), axis=1).T,
-                               mode='r').T
+        self._sqrt_cov = la.qr(
+            np.concatenate(
+                (state_mat - gain @ meas_mat, gain @ self._sqrt_m_noise), axis=1
+            ).T,
+            mode="r",
+        ).T
 
     def correct(self, timestep, meas, cur_state, meas_fun_args=()):
         """Implements the correction step of the filter.
@@ -3290,25 +3463,32 @@ class SquareRootQKF(QuadratureKalmanFilter):
             covariance assuming Gaussian noise.
 
         """
-        measQuads, est_meas = self._corr_core(timestep, cur_state, meas,
-                                              meas_fun_args)
+        measQuads, est_meas = self._corr_core(timestep, cur_state, meas, meas_fun_args)
 
         weight_mat = np.diag(np.sqrt(self.quadPoints.weights))
 
         # calculate sqrt of the measurement covariance
-        meas_mat = np.concatenate([z.reshape((z.size, 1)) - est_meas
-                                   for z in measQuads.points], axis=1) @ weight_mat
+        meas_mat = (
+            np.concatenate(
+                [z.reshape((z.size, 1)) - est_meas for z in measQuads.points], axis=1
+            )
+            @ weight_mat
+        )
         if self._est_meas_noise_fnc is not None:
             self.meas_noise = self._est_meas_noise_fnc(est_meas, meas_mat @ meas_mat.T)
 
-        sqrt_inov_cov = la.qr(np.concatenate((meas_mat,
-                                              self._sqrt_m_noise), axis=1).T,
-                              mode='r').T
+        sqrt_inov_cov = la.qr(
+            np.concatenate((meas_mat, self._sqrt_m_noise), axis=1).T, mode="r"
+        ).T
 
         # calculate cross covariance
         x_hat = self.quadPoints.mean
-        state_mat = np.concatenate([x.reshape((x.size, 1)) - x_hat
-                                    for x in self.quadPoints.points], axis=1) @ weight_mat
+        state_mat = (
+            np.concatenate(
+                [x.reshape((x.size, 1)) - x_hat for x in self.quadPoints.points], axis=1
+            )
+            @ weight_mat
+        )
         cross_cov = state_mat @ meas_mat.T
 
         # calculate gain
@@ -3393,11 +3573,12 @@ class _GSMProcNoiseEstimator:
         qk_khat_diff = qk - self._last_q_hat
         qklast_khat_diff = qk_last - self._last_q_hat
         bk_diff = bk_last - bk
-        next_est = cur_est + 1 / win_len_m1 \
-            * (qk_khat_diff @ qk_khat_diff.T
-               - qklast_khat_diff @ qklast_khat_diff.T
-               + inv_win_len * qk_klast_diff @ qk_klast_diff.T
-               + win_len_m1 * inv_win_len * bk_diff)
+        next_est = cur_est + 1 / win_len_m1 * (
+            qk_khat_diff @ qk_khat_diff.T
+            - qklast_khat_diff @ qklast_khat_diff.T
+            + inv_win_len * qk_klast_diff @ qk_klast_diff.T
+            + win_len_m1 * inv_win_len * bk_diff
+        )
 
         # for numerical reasons
         for ii in range(next_est.shape[0]):
@@ -3454,19 +3635,22 @@ class GSMFilterBase(BayesFilter):
         """
         filt_state = super().save_filter_state()
 
-        filt_state['enable_proc_noise_estimation'] = self.enable_proc_noise_estimation
+        filt_state["enable_proc_noise_estimation"] = self.enable_proc_noise_estimation
 
         if self._coreFilter is not None:
-            filt_state['_coreFilter'] = (type(self._coreFilter),
-                                         self._coreFilter.save_filter_state())
+            filt_state["_coreFilter"] = (
+                type(self._coreFilter),
+                self._coreFilter.save_filter_state(),
+            )
         else:
-            filt_state['_coreFilter'] = (None, self._coreFilter)
+            filt_state["_coreFilter"] = (None, self._coreFilter)
 
-        filt_state['_meas_noise_filters'] = [(type(f), f.save_filter_state())
-                                             for f in self._meas_noise_filters]
+        filt_state["_meas_noise_filters"] = [
+            (type(f), f.save_filter_state()) for f in self._meas_noise_filters
+        ]
 
-        filt_state['_import_w_factory_lst'] = self._import_w_factory_lst
-        filt_state['_procNoiseEstimator'] = self._procNoiseEstimator
+        filt_state["_import_w_factory_lst"] = self._import_w_factory_lst
+        filt_state["_procNoiseEstimator"] = self._procNoiseEstimator
 
         return filt_state
 
@@ -3480,47 +3664,47 @@ class GSMFilterBase(BayesFilter):
         """
         super().load_filter_state(filt_state)
 
-        self.enable_proc_noise_estimation = filt_state['enable_proc_noise_estimation']
+        self.enable_proc_noise_estimation = filt_state["enable_proc_noise_estimation"]
 
-        cls_type = filt_state['_coreFilter'][0]
+        cls_type = filt_state["_coreFilter"][0]
         if cls_type is not None:
             self._coreFilter = cls_type()
-            self._coreFilter.load_filter_state(filt_state['_coreFilter'][1])
+            self._coreFilter.load_filter_state(filt_state["_coreFilter"][1])
         else:
             self._coreFilter = None
 
-        num_m_filts = len(filt_state['_meas_noise_filters'])
+        num_m_filts = len(filt_state["_meas_noise_filters"])
         self._meas_noise_filters = [None] * num_m_filts
-        for ii, (cls_type, vals) in enumerate(filt_state['_meas_noise_filters']):
+        for ii, (cls_type, vals) in enumerate(filt_state["_meas_noise_filters"]):
             if cls_type is not None:
                 self._meas_noise_filters[ii] = cls_type()
                 self._meas_noise_filters[ii].load_filter_state(vals)
 
-        self._import_w_factory_lst = filt_state['_import_w_factory_lst']
-        self._procNoiseEstimator = filt_state['_procNoiseEstimator']
+        self._import_w_factory_lst = filt_state["_import_w_factory_lst"]
+        self._procNoiseEstimator = filt_state["_procNoiseEstimator"]
 
     def set_state_model(self, **kwargs):
         """Wrapper for the core filters set state model function."""
         if self._coreFilter is not None:
             self._coreFilter.set_state_model(**kwargs)
         else:
-            warn('Core filter is not set, use an inherited class.',
-                 RuntimeWarning)
+            warn("Core filter is not set, use an inherited class.", RuntimeWarning)
 
     def set_measurement_model(self, **kwargs):
         """Wrapper for the core filters set measurement model function."""
         if self._coreFilter is not None:
             self._coreFilter.set_measurement_model(**kwargs)
         else:
-            warn('Core filter is not set, use an inherited class.',
-                 RuntimeWarning)
+            warn("Core filter is not set, use an inherited class.", RuntimeWarning)
 
     def _define_student_t_pf(self, gsm, rng, num_parts):
         def import_w_factory(inov_cov):
             def import_w_fnc(meas, parts):
-                stds = np.sqrt(parts[:, 2] * parts[:, 1]**2 + inov_cov)
-                return np.array([stats.norm.pdf(meas.item(), scale=scale)
-                                 for scale in stds])
+                stds = np.sqrt(parts[:, 2] * parts[:, 1] ** 2 + inov_cov)
+                return np.array(
+                    [stats.norm.pdf(meas.item(), scale=scale) for scale in stds]
+                )
+
             return import_w_fnc
 
         def gsm_import_dist_factory():
@@ -3529,13 +3713,13 @@ class GSMFilterBase(BayesFilter):
 
                 disc = 0.99
                 a = (3 * disc - 1) / (2 * disc)
-                h = np.sqrt(1 - a**2)
+                h = np.sqrt(1 - a ** 2)
                 last_means = np.mean(parts.particles, axis=0)
                 means = a * parts.particles[:, 0:2] + (1 - a) * last_means[0:2]
 
                 # df, sig
                 for ind in range(means.shape[1]):
-                    std = np.sqrt(h**2 * np.cov(parts.particles[:, ind]))
+                    std = np.sqrt(h ** 2 * np.cov(parts.particles[:, ind]))
 
                     for ii, m in enumerate(means):
                         samp = stats.norm.rvs(loc=m[ind], scale=std, random_state=_rng)
@@ -3543,13 +3727,16 @@ class GSMFilterBase(BayesFilter):
 
                 df = np.mean(new_parts[:, 0])
                 if df < 0:
-                    msg = 'Degree of freedom must be > 0 {:.4f}'.format(df)
+                    msg = "Degree of freedom must be > 0 {:.4f}".format(df)
                     raise gerr.ParticleEstimationDomainError(msg)
-                new_parts[:, 2] = stats.invgamma.rvs(df / 2,
-                                                     scale=1 / (2 / df),
-                                                     random_state=_rng,
-                                                     size=new_parts.shape[0])
+                new_parts[:, 2] = stats.invgamma.rvs(
+                    df / 2,
+                    scale=1 / (2 / df),
+                    random_state=_rng,
+                    size=new_parts.shape[0],
+                )
                 return new_parts
+
             return import_dist_fnc
 
         pf = BootstrapFilter()
@@ -3558,30 +3745,97 @@ class GSMFilterBase(BayesFilter):
 
         df_scale = gsm.df_range[1] - gsm.df_range[0]
         df_loc = gsm.df_range[0]
-        df_particles = stats.uniform.rvs(loc=df_loc, scale=df_scale,
-                                         size=num_parts, random_state=rng)
+        df_particles = stats.uniform.rvs(
+            loc=df_loc, scale=df_scale, size=num_parts, random_state=rng
+        )
 
         sig_scale = gsm.scale_range[1] - gsm.scale_range[0]
         sig_loc = gsm.scale_range[0]
-        sig_particles = stats.uniform.rvs(loc=sig_loc, scale=sig_scale,
-                                          size=num_parts, random_state=rng)
+        sig_particles = stats.uniform.rvs(
+            loc=sig_loc, scale=sig_scale, size=num_parts, random_state=rng
+        )
 
         z_particles = np.nan * np.ones(num_parts)
         for ii, v in enumerate(df_particles):
-            z_particles[ii] = stats.invgamma.rvs(v / 2, scale=1 / (2 / v),
-                                                 random_state=rng)
+            z_particles[ii] = stats.invgamma.rvs(
+                v / 2, scale=1 / (2 / v), random_state=rng
+            )
 
-        pf.particleDistribution.particles = np.stack((df_particles, sig_particles,
-                                                      z_particles), axis=1)
+        pf.particleDistribution.particles = np.stack(
+            (df_particles, sig_particles, z_particles), axis=1
+        )
         pf.particleDistribution.num_parts_per_ind = np.ones(num_parts)
         pf.particleDistribution.weights = 1 / num_parts * np.ones(num_parts)
         pf.rng = rng
 
         return pf, import_w_factory
 
-    def set_meas_noise_model(self, bootstrap_lst=None,
-                             importance_weight_factory_lst=None,
-                             gsm_lst=None, num_parts=None, rng=None):
+    def _define_cauchy_pf(self, gsm, rng, num_parts):
+        def import_w_factory(inov_cov):
+            def import_w_fnc(meas, parts):
+                stds = np.sqrt(parts[:, 1] * parts[:, 0] ** 2 + inov_cov)
+                return np.array(
+                    [stats.norm.pdf(meas.item(), scale=scale) for scale in stds]
+                )
+
+            return import_w_fnc
+
+        def gsm_import_dist_factory():
+            def import_dist_fnc(parts, _rng):
+                new_parts = np.nan * np.ones(parts.particles.shape)
+
+                disc = 0.99
+                a = (3 * disc - 1) / (2 * disc)
+                h = np.sqrt(1 - a ** 2)
+                last_means = np.mean(parts.particles, axis=0)
+                means = a * parts.particles[:, 0] + (1 - a) * last_means[0]
+
+                # df, sig
+                for ind in range(means.shape[1]):
+                    std = np.sqrt(h ** 2 * np.cov(parts.particles[:, ind]))
+
+                    for ii, m in enumerate(means):
+                        samp = stats.norm.rvs(loc=m[ind], scale=std, random_state=_rng)
+                        new_parts[ii, ind] = samp
+
+                new_parts[:, 1] = stats.invgamma.rvs(
+                    1 / 2, scale=1 / 2, random_state=_rng, size=new_parts.shape[0]
+                )
+                return new_parts
+
+            return import_dist_fnc
+
+        pf = BootstrapFilter()
+        pf.importance_dist_fnc = gsm_import_dist_factory()
+        pf.particleDistribution = gdistrib.SimpleParticleDistribution()
+
+        sig_scale = gsm.scale_range[1] - gsm.scale_range[0]
+        sig_loc = gsm.scale_range[0]
+        sig_particles = stats.uniform.rvs(
+            loc=sig_loc, scale=sig_scale, size=num_parts, random_state=rng
+        )
+
+        z_particles = stats.invgamma.rvs(
+            1 / 2, scale=1 / 2, random_state=rng, size=num_parts
+        )
+
+        pf.particleDistribution.particles = np.stack(
+            (sig_particles, z_particles), axis=1
+        )
+        pf.particleDistribution.num_parts_per_ind = np.ones(num_parts)
+        pf.particleDistribution.weights = 1 / num_parts * np.ones(num_parts)
+        pf.rng = rng
+
+        return pf, import_w_factory
+
+    def set_meas_noise_model(
+        self,
+        bootstrap_lst=None,
+        importance_weight_factory_lst=None,
+        gsm_lst=None,
+        num_parts=None,
+        rng=None,
+    ):
         """Initializes the measurement noise estimators.
 
         The filters and importance
@@ -3638,21 +3892,27 @@ class GSMFilterBase(BayesFilter):
             self._meas_noise_filters = bootstrap_lst
             if importance_weight_factory_lst is not None:
                 if not len(importance_weight_factory_lst) == len(bootstrap_lst):
-                    msg = 'Importance weight factory list ' \
-                        + 'length ({:d}) '.format(len(importance_weight_factory_lst)) \
-                        + 'does not match the number of bootstrap filters ({:d})'.format(len(bootstrap_lst))
+                    msg = (
+                        "Importance weight factory list "
+                        + "length ({:d}) ".format(len(importance_weight_factory_lst))
+                        + "does not match the number of bootstrap filters ({:d})".format(
+                            len(bootstrap_lst)
+                        )
+                    )
                     raise RuntimeError(msg)
 
                 self._import_w_factory_lst = importance_weight_factory_lst
             else:
-                msg = 'Must supply an importance weight factory when ' \
-                    + 'specifying the bootstrap filters.'
+                msg = (
+                    "Must supply an importance weight factory when "
+                    + "specifying the bootstrap filters."
+                )
                 raise RuntimeError(msg)
         elif gsm_lst is not None:
             num_filts = len(gsm_lst)
             if not (isinstance(num_parts, list) or isinstance(num_parts, tuple)):
                 if num_parts is None:
-                    msg = 'Must specify number of particles when giving a list of GSM objects.'
+                    msg = "Must specify number of particles when giving a list of GSM objects."
                     raise RuntimeError(msg)
                 else:
                     num_parts = [num_parts] * num_filts
@@ -3663,21 +3923,34 @@ class GSMFilterBase(BayesFilter):
                 if rng is None:
                     rng = rnd.default_rng()
 
-                if gsm.type in [GSMTypes.STUDENTS_T, GSMTypes.CAUCHY]:
-                    (self._meas_noise_filters[ii],
-                     self._import_w_factory_lst[ii]) = self._define_student_t_pf(gsm, rng, num_parts[ii])
+                if gsm.type is GSMTypes.STUDENTS_T:
+                    (
+                        self._meas_noise_filters[ii],
+                        self._import_w_factory_lst[ii],
+                    ) = self._define_student_t_pf(gsm, rng, num_parts[ii])
+
+                elif GSMTypes.CAUCHY:
+                    (
+                        self._meas_noise_filters[ii],
+                        self._import_w_factory_lst[ii],
+                    ) = self._define_cauchy_pf(gsm, rng, num_parts[ii])
 
                 else:
-                    msg = 'GSM filter can not automatically setup Bootstrap ' \
-                        + 'filter for GSM Type {:s}. '.format(gsm.type) \
-                        + 'Update implementation.'
+                    msg = (
+                        "GSM filter can not automatically setup Bootstrap "
+                        + "filter for GSM Type {:s}. ".format(gsm.type)
+                        + "Update implementation."
+                    )
                     raise RuntimeError(msg)
         else:
-            msg = 'Incorrect input arguement combination. See documentation for details.'
+            msg = (
+                "Incorrect input arguement combination. See documentation for details."
+            )
             raise RuntimeError(msg)
 
-    def set_process_noise_model(self, initial_est=None, filter_length=None,
-                                startup_delay=None):
+    def set_process_noise_model(
+        self, initial_est=None, filter_length=None, startup_delay=None
+    ):
         """Sets the filter parameters for estimating process noise.
 
         This assumes the same process noise model as in
@@ -3707,10 +3980,13 @@ class GSMFilterBase(BayesFilter):
         if filter_length is not None:
             self._procNoiseEstimator.maxlen = filter_length
 
-        if initial_est is None and (self.proc_noise is None
-                                    or self.proc_noise.size <= 0):
-            msg = 'Please manually set the initial process noise ' \
-                + 'or specify a value here.'
+        if initial_est is None and (
+            self.proc_noise is None or self.proc_noise.size <= 0
+        ):
+            msg = (
+                "Please manually set the initial process noise "
+                + "or specify a value here."
+            )
             warn(msg)
         elif initial_est is not None:
             self.proc_noise = initial_est
@@ -3752,8 +4028,10 @@ class GSMFilterBase(BayesFilter):
 
     @meas_noise.setter
     def meas_noise(self, val):
-        warn('Measurement noise is estimated online. NOT SETTING VALUE HERE.',
-             RuntimeWarning)
+        warn(
+            "Measurement noise is estimated online. NOT SETTING VALUE HERE.",
+            RuntimeWarning,
+        )
 
     def predict(self, timestep, cur_state, **kwargs):
         """Prediction step of the GSM filter.
@@ -3776,27 +4054,27 @@ class GSMFilterBase(BayesFilter):
             f_meas = (meas - est_meas).ravel()
             inov_cov = np.diag(inov_cov)
             for ii, filt in enumerate(self._meas_noise_filters):
-                filt.importance_weight_fnc = self._import_w_factory_lst[ii](inov_cov[ii])
+                filt.importance_weight_fnc = self._import_w_factory_lst[ii](
+                    inov_cov[ii]
+                )
                 filt.predict(timestep)
                 state = filt.correct(timestep, f_meas[ii].reshape((1, 1)))
-                m_diag[ii] = state[2] * state[1]**2  # z * sig^2
+                m_diag[ii] = state[2] * state[1] ** 2  # z * sig^2
 
             return np.diag(m_diag)
 
         self._coreFilter.set_measurement_noise_estimator(est_meas_noise)
 
         pred_cov = self.cov.copy()
-        cor_state, meas_fit_prob = self._coreFilter.correct(timestep, meas,
-                                                            cur_state,
-                                                            **core_filt_kwargs)
+        cor_state, meas_fit_prob = self._coreFilter.correct(
+            timestep, meas, cur_state, **core_filt_kwargs
+        )
 
         # update process noise estimate (if applicable)
         if self.enable_proc_noise_estimation:
-            self.proc_noise = self._procNoiseEstimator.estimate_next(self.proc_noise,
-                                                                     cur_state,
-                                                                     pred_cov,
-                                                                     cor_state,
-                                                                     self.cov)
+            self.proc_noise = self._procNoiseEstimator.estimate_next(
+                self.proc_noise, cur_state, pred_cov, cor_state, self.cov
+            )
 
         return cor_state, meas_fit_prob
 
@@ -3822,16 +4100,20 @@ class GSMFilterBase(BayesFilter):
             Each value is a string corresponding to a key in the resulting dictionary
         """
         figs = {}
-        key_base = 'meas_noise_particles_F{:02d}_D{:02d}'
+        key_base = "meas_noise_particles_F{:02d}_D{:02d}"
         keys = []
         if not isinstance(filt_inds, list):
             key = key_base.format(filt_inds, dist_inds)
-            figs[key] = self._meas_noise_filters[filt_inds].plot_particles(dist_inds, **kwargs)
+            figs[key] = self._meas_noise_filters[filt_inds].plot_particles(
+                dist_inds, **kwargs
+            )
             keys.append(key)
         else:
             for ii in filt_inds:
                 key = key_base.format(ii, dist_inds)
-                figs[key] = self._meas_noise_filters[ii].plot_particles(dist_inds, **kwargs)
+                figs[key] = self._meas_noise_filters[ii].plot_particles(
+                    dist_inds, **kwargs
+                )
                 keys.append(key)
 
         return figs, keys
