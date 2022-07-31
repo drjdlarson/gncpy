@@ -4,7 +4,7 @@ window: !WindowParams
     height: 640
 
 start_time: 0
-max_time: 10
+max_time: -1
 
 physics: !Physics2dParams
     min_pos: [0, 0]

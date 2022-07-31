@@ -24,6 +24,9 @@ library_config_dir = os.path.join(
 """Directory of the libraries game configs where the default yaml files live."""
 
 
+def ndarray_representer(dumper, data):
+    return dumper.represent_list(data.tolist())
+
 class WindowParams:
     """Parameters of the game window to be parsed by the yaml parser.
 
@@ -76,7 +79,7 @@ class Base2dParams(BaseParams):
         super().__init__()
         self.physics = Physics2dParams()
         self.start_time = 0.0
-        self.max_time = np.inf
+        self.max_time = float("inf")
 
 
 class BaseGame(ABC):
@@ -173,7 +176,7 @@ class BaseGame(ABC):
 
         self.parse_config_file()
         if self.params.max_time < 0:
-            self.params.max_time = np.inf
+            self.params.max_time = float("inf")
 
     def register_params(self, yaml):
         """Register classes with the yaml parser.
@@ -185,6 +188,7 @@ class BaseGame(ABC):
         yaml : ruamel.yaml YAML object
             yaml parser to use, should be the global parser.
         """
+        yaml.representer.add_representer(np.ndarray, ndarray_representer)
         yaml.register_class(WindowParams)
         yaml.register_class(BaseParams)
 

@@ -11,8 +11,9 @@ import gncpy.dynamics.aircraft as gaircraft
 from gncpy.games.SimpleUAV2d import SimpleUAV2d, EventType
 import gncpy.game_engine.components as gcomp
 import gncpy.game_engine.physics2d as gphysics
+import gncpy.dynamics.aircraft.lager_super_bindings as super_bind
 from gncpy.game_engine.physics2d import Physics2dParams as BasePhysicsParams
-from gncpy.coordinate_transforms import lla_to_NED
+from gncpy.coordinate_transforms import lla_to_NED, ned_to_LLA
 
 
 class DynamicsParams:
@@ -88,6 +89,19 @@ class Physics2dParams(BasePhysicsParams):
     @step_factor.setter
     def step_factor(self, val):
         pass
+
+
+class CFlyHeight:
+    """Component for the height the UAV flies at.
+
+    Attributes
+    ----------
+    fly_height : float
+        Altitude the UAV flies at.
+    """
+
+    def __init__(self, fly_height=None):
+        self.fly_height = fly_height
 
 
 class SimpleLagerSUPER2d(SimpleUAV2d):
@@ -201,23 +215,70 @@ class SimpleLagerSUPER2d(SimpleUAV2d):
         """
         eDyn.state = eDyn.dynObj.propagate_state(self.current_time).reshape((-1, 1))
 
-    def _super_wp_to_xy(self, wp, obj):
-        lat = wp.x / obj.wp_xy_scale * np.pi / 180
-        lon = wp.y / obj.wp_xy_scale * np.pi / 180
-        alt = wp.z + obj.home_alt_wgs84_m
+    def create_player(self, params):
+        """Creates a player entity.
 
-        ned = lla_to_NED(
-            obj.home_lat_rad, obj.home_lon_rad, obj.home_alt_wgs84_m, lat, lon, alt
-        )
+        Parameters
+        ----------
+        params : :class:`gncpy.games.SimpleUAV2d.PlayerParams`
+            Parameters for the player being created.
 
-        x = gphysics.dist_to_pixels(
-            ned[1], self.dist_per_pix[0], min_pos=self.params.physics.min_pos[0]
-        )
-        y = gphysics.dist_to_pixels(
-            ned[0], self.dist_per_pix[1], min_pos=self.params.physics.min_pos[1]
-        )
+        Returns
+        -------
+        p : :class:`gncpy.game_engine.entities.Entity`
+            Reference to the player entity that was created.
+        """
+        p = super().create_player(params)
+        if p is not None:
+            p.add_component(CFlyHeight, fly_height=params.dynamics.fly_height)
 
-        return np.vstack((x, y))
+        return p
+
+    def convert_waypoints(self, input_arr, player):
+        """Converts array of x/y waypoints into form for LAGER model.
+
+        Parameters
+        ----------
+        input_arr : Nx2 numpy array
+            Each row is the x, y position in real units.
+        player : :class:`gncpy.game_engine.entities.Entity`
+            Player entity the waypoints are being created for.
+
+        Returns
+        -------
+        wp_lst : list
+            List of waypoint objects that can be passed to LAGER's upload waypoints.
+        """
+        pDyn = player.get_component(gcomp.CDynamics)
+        pFly = player.get_component(CFlyHeight)
+
+        if not isinstance(input_arr, np.ndarray):
+            input_arr = np.array(input_arr)
+        if input_arr.shape[1] != 2:
+            input_arr = input_arr.T
+
+        r2d = 180 / np.pi
+        wp_lst = [super_bind.MissionItem() for ii in range(input_arr.shape[0])]
+        for ii, (xy, wp) in enumerate(zip(input_arr, wp_lst)):
+            # x is east, y is north
+            lla = ned_to_LLA(
+                np.hstack((xy[::-1], -pFly.fly_height)),
+                pDyn.dynObj.home_lat_rad,
+                pDyn.dynObj.home_lon_rad,
+                pDyn.dynObj.home_alt_wgs84_m,
+            )
+            wp.frame = int(3)
+            wp.cmd = int(16)
+            wp.param1 = float(0)
+            wp.param2 = float(0)
+            wp.param3 = float(0)
+            wp.param4 = float(0)
+            wp.x = int(lla[0] * gaircraft.SimpleLAGERSuper.wp_xy_scale * r2d)
+            wp.y = int(lla[1] * gaircraft.SimpleLAGERSuper.wp_xy_scale * r2d)
+            wp.z = float(pFly.fly_height)
+            wp.autocontinue = ii != (len(wp_lst) - 1)
+
+        return wp_lst
 
     def s_input(self, user_input):
         """Validate user input.
@@ -227,8 +288,9 @@ class SimpleLagerSUPER2d(SimpleUAV2d):
         Parameters
         ----------
         user_input : dict
-            Each key is an entity id. Each value is a list representing
-            the waypoints for that entity.
+            Each key is an entity id. Each value is a Nx2 numpy array
+            representing the waypoints for that entity. Each row is the x,y
+            position in real units for the player.
 
         Returns
         -------
@@ -239,7 +301,8 @@ class SimpleLagerSUPER2d(SimpleUAV2d):
             for p in self.entityManager.get_entities("player"):
                 if p.id in user_input:
                     p_dyn = p.get_component(gcomp.CDynamics)
-                    p_dyn.dynObj.upload_waypoints(user_input[p.id])
+                    wps = self.convert_waypoints(user_input[p.id], p)
+                    p_dyn.dynObj.upload_waypoints(wps)
 
                     # if waypoints already exist then destroy them
                     if self.waypoints.get(p.id, None) is not None:
@@ -254,7 +317,17 @@ class SimpleLagerSUPER2d(SimpleUAV2d):
                         e = self.entityManager.add_entity("waypoint")
 
                         eTrans = e.add_component(gcomp.CTransform)
-                        eTrans.pos = self._super_wp_to_xy(wp, p_dyn.dynObj)
+                        x = gphysics.dist_to_pixels(
+                            wp[0],
+                            self.dist_per_pix[0],
+                            min_pos=self.params.physics.min_pos[0],
+                        )
+                        y = gphysics.dist_to_pixels(
+                            wp[1],
+                            self.dist_per_pix[1],
+                            min_pos=self.params.physics.min_pos[1],
+                        )
+                        eTrans.pos = np.array([x, y]).reshape((2, 1))
 
                         e.add_component(
                             gcomp.CShape,
