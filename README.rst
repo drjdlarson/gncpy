@@ -158,15 +158,30 @@ Testing
 Unit and validation tests make use of **pytest** for the test runner, and tox for automation. The test scripts are located within the **test/** sub-directory.
 The tests can be run through a command line with python 3 and tox installed. If the Spyder setup instructions were followed then the tests can also be run as standalone scripts from within Spyder by uncommenting the appropriate line under the :code:`__main__` section.
 
-The available test environments can be found by running :code:`tox -av`. Specific environments can be run with :code:`-e NAME` and additional
-arguments passed to pytest by :code:`-- ARGS`. For example to run any test cases containing a keyword, run the following,
+The available test environments can be found by running
+
+.. code-block:: bash
+
+    tox -av
+
+Each environment uses a specific version of python. If that version is not available on your system
+then the tests will be skipped. To run all default environments run :code:`tox` without any arguments, this will skip any environments using a version of python that is unavailable.
+Specific environments can be run with
+
+.. code-block::
+
+    tox -e NAME
+
+and additional arguments passed to pytest by appending :code:`-- ARGS`.
+For example to run any test cases containing a keyword, run the following (replacing `guidance` with the desired keyword),
 
 .. code-block:: bash
 
     tox -e NAME -- -k guidance
 
-To run tests marked as slow, pass the :code:`--runslow` option to pytest. Each environment uses a specific version of python. If that version is not available on your system
-then the tests will be skipped. To run all default environments run :code:`tox` without any arguments, this will skip any environments using a version of python that is unavailable.
+Custom options for the tests include
+
+    * :code:`--runslow` Runs additional tests that are more time consuming, by default these are skipped.
 
 The unit test environment runs all tests within the **test/unit/** sub-directory. These tests are designed to confirm basic functionality.
 Many of them do not ensure algorithm performance but may do some basic checking of a few key parameters.

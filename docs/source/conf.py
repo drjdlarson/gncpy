@@ -16,6 +16,11 @@ import sphinx_theme
 
 sys.path.append(os.path.abspath("../../gncpy"))
 
+# run all example code to generate necesary figures
+sys.path.append(os.path.abspath("."))
+from example_runner import run_examples
+run_examples()
+
 
 # -- Project information -----------------------------------------------------
 
@@ -40,7 +45,13 @@ extensions = [
     "sphinx.ext.todo",
     "sphinx.ext.viewcode",
     "sphinxcontrib.bibtex",
+    'sphinx_copybutton',  # allow copying of code blocks
 ]
+
+# configure copy button for code snippets
+copybutton_only_copy_prompt_lines = False
+# Note that we do not include `_static`
+# because the path should be *relative* to the static folder.
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
