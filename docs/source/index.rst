@@ -7,6 +7,7 @@ Welcome to GNCPy's documentation!
 
    api
    toolchain
+   usage
    References
    license
 

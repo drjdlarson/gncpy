@@ -1,5 +1,8 @@
 .directory
 
+# auto generated documentation images
+docs/source/examples/**/*.png
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
