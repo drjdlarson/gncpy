@@ -2,6 +2,7 @@
 
 # auto generated documentation images
 docs/source/examples/**/*.png
+docs/source/examples/**/*.gif
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

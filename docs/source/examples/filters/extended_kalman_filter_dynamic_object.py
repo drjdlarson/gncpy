@@ -94,10 +94,9 @@ def main():
 def run():
     import os
 
-    fig = main()
-
-    fig.savefig(
-        os.path.join(
-            os.path.dirname(__file__), "{}.png".format(os.path.basename(__file__)[:-3])
-        )
+    fout = os.path.join(
+        os.path.dirname(__file__), "{}.png".format(os.path.basename(__file__)[:-3])
     )
+    if not os.path.isfile(fout):
+        fig = main()
+        fig.savefig(fout)
