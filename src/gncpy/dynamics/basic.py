@@ -228,10 +228,7 @@ class NonlinearDynamicsBase(DynamicsBase):
             f_args. They must return the new state for the given index in the
             list/state vector.
         """
-        raise NotImplementedError
-        # msg = 'cont_fnc_lst not implemented'
-        # warn(msg, RuntimeWarning)
-        # return []
+        raise NotImplementedError()
 
     def _cont_dyn(self, t, x, u, state_args, ctrl_args):
         r"""Implements the continuous time dynamics.
@@ -239,7 +236,7 @@ class NonlinearDynamicsBase(DynamicsBase):
         This automatically sets up the combined differential equation based on
         the supplied continuous function list.
 
-        This implements the equation :math:`\dot{x} = f(t, x) + g(t, u)` and
+        This implements the equation :math:`\dot{x} = f(t, x) + g(t, x, u)` and
         returns the state derivatives as a vector. Note the control input is
         only used if an appropriate control model is set by the user.
 
@@ -272,7 +269,9 @@ class NonlinearDynamicsBase(DynamicsBase):
 
         return out
 
-    def get_state_mat(self, timestep, state, *f_args):
+    def get_state_mat(
+        self, timestep, state, *f_args, u=None, ctrl_args=None, use_continuous=False
+    ):
         """Calculates the state matrix from the ode list.
 
         Parameters
@@ -289,7 +288,65 @@ class NonlinearDynamicsBase(DynamicsBase):
         N x N numpy array
             state transition matrix.
         """
-        return gmath.get_state_jacobian(timestep, state, self.cont_fnc_lst, f_args)
+        if use_continuous:
+            if self.control_model is not None and u is not None:
+                if ctrl_args is None:
+                    ctrl_args = ()
+
+                def _fun_factory(state_fun, ctrl_fun):
+                    def _fun(t, x, u, *args):
+                        return state_fun(t, x, *f_args) + ctrl_fun(t, x, u, *ctrl_args)
+
+                return gmath.get_state_jacobian(
+                    timestep,
+                    state,
+                    [
+                        _fun_factory(f, g)
+                        for f, g in zip(self.cont_fnc_lst, self.control_model)
+                    ],
+                    (),
+                    u=u,
+                )
+            return gmath.get_state_jacobian(timestep, state, self.cont_fnc_lst, f_args)
+
+        else:
+            return gmath.get_state_jacobian(
+                timestep,
+                state,
+                lambda _t, _x, *_args: self.propagate_state(
+                    _t, _x, u=u, state_args=_args, ctrl_args=ctrl_args
+                ),
+                f_args,
+            )
+
+    def get_input_mat(self, timestep, state, u, state_args=None, ctrl_args=None):
+        """Calculates the input matrix from the control model.
+
+        This calculates the jacobian of the control model. If no control model
+        is specified than it returns a zero matrix.
+
+        Parameters
+        ----------
+        timestep : float
+            current timestep.
+        state : N x 1 numpy array
+            current state.
+        u : Nu x 1
+            current control input.
+        *f_args : tuple
+            Additional arguments to pass to the control model.
+
+        Returns
+        -------
+        N x Nu numpy array
+            Control input matrix.
+        """
+        if self.control_model is None:
+            warn("Control model is None")
+            return np.zeros((state.size, u.size))
+        return gmath.get_input_jacobian(timestep, state, u, lambda _t, _x, _u, *_args: self.propagate_state(
+            _t, _x, u=_u, state_args=state_args, ctrl_args=ctrl_args
+        ), ())
 
     def propagate_state(self, timestep, state, u=None, state_args=None, ctrl_args=None):
         """Propagates the continuous time dynamics.
@@ -742,3 +799,58 @@ class KarlgaardOrbit(NonlinearDynamicsBase):
             return (-2 * theta_d * phi - 2 * phi_d * r_d) - phi
 
         return [f0, f1, f2, f3, f4, f5]
+
+
+class IRobotCreate(NonlinearDynamicsBase):
+    """A differential drive robot based on the iRobot Create.
+
+    This has a control model predefined because the dynamics themselves do not
+    change the state.
+
+    Notes
+    -----
+    This is taken from :cite:`Berg2016_ExtendedLQRLocallyOptimalFeedbackControlforSystemswithNonLinearDynamicsandNonQuadraticCost`
+    It represents a 2 wheel robot with some distance between its wheels.
+    """
+
+    state_names = ('pos_x', 'pos_v', 'turn_angle')
+
+    def __init__(self, wheel_separation=0.258, radius=3.35/2, **kwargs):
+        """Initialize an object.
+
+        Parameters
+        ----------
+        wheel_separation : float, optional
+            Distance between the two wheels in meters.
+        radius : float
+            Radius of the bounding box for the robot in meters.
+        **kwargs : dict
+            Additional arguments for the parent class.
+        """
+        super().__init__(**kwargs)
+        self.wheel_separation = wheel_separation
+
+        def g0(t, x, u, *args):
+            return 0.5 * ((u[0] + u[1]) * np.cos(x[2])).item()
+
+        def g1(t, x, u, *args):
+            return 0.5 * ((u[0] + u[1]) * np.sin(x[2])).item()
+
+        def g2(t, x, u, *args):
+            return (u[0] - u[1]) / self._wheel_separation
+
+        self.control_model = [g0, g1, g2]
+
+    @property
+    def cont_fnc_lst(self):
+        """Implements the contiuous time dynamics."""
+        def f0(t, x, *args):
+            return 0
+
+        def f1(t, x, *args):
+            return 0
+
+        def f2(t, x, *args):
+            return 0
+
+        return [f0, f1, f2]

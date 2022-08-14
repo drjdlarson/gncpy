@@ -262,8 +262,8 @@ class AStar:
 
         return True
 
-    def draw_map(self, fig, startNode, endNode):
-        """Draws the map to the figure.
+    def draw_start(self, fig, startNode):
+        """Draw starting node on the figure.
 
         Parameters
         ----------
@@ -271,8 +271,6 @@ class AStar:
             Figure to draw on.
         startNode : :class:`.Node`
             Starting node.
-        endNode : :class:`.Node`
-            Ending node.
         """
         pos = self.ind_to_pos(startNode.indices) - self.resolution / 2
         fig.axes[0].add_patch(
@@ -281,6 +279,16 @@ class AStar:
             ),
         )
 
+    def draw_end(self, fig, endNode):
+        """Draw the ending node on the figure.
+
+        Parameters
+        ----------
+        fig : matplotlib figure
+            Figure to draw on.
+        endNode : :class:`.Node`
+            Ending node.
+        """
         pos = self.ind_to_pos(endNode.indices) - self.resolution / 2
         fig.axes[0].add_patch(
             Rectangle(
@@ -288,6 +296,14 @@ class AStar:
             ),
         )
 
+    def draw_map(self, fig):
+        """Draws the map to the figure.
+
+        Parameters
+        ----------
+        fig : matplotlib figure
+            Figure to draw on.
+        """
         rows, cols = np.where(np.isinf(self._map))
         inds = np.vstack((rows, cols)).T
         for ii in inds:
@@ -399,6 +415,7 @@ class AStar:
         save_animation=False,
         plt_opts=None,
         ttl=None,
+        fig=None
     ):
         """Runs the search algorithm.
 
@@ -423,6 +440,10 @@ class AStar:
         ttl : string, optional
             title string of the plot. The default is None which gives a generic
             name of the algorithm.
+        fig : matplotlib figure, optional
+            Figure object to plot on. The default is None which makes a new
+            figure. If a figure is provided, then only the ending state,
+            searched nodes, and best path are added to the figure.
 
         Returns
         -------
@@ -447,35 +468,40 @@ class AStar:
         frame_list = []
 
         if show_animation:
-            fig = plt.figure()
-            fig.add_subplot(1, 1, 1)
+            if fig is None:
+                fig = plt.figure()
+                fig.add_subplot(1, 1, 1)
 
-            # fig.axes[0].grid(True)
-            fig.axes[0].set_aspect("equal", adjustable="box")
+                # fig.axes[0].grid(True)
+                fig.axes[0].set_aspect("equal", adjustable="box")
+
+                fig.axes[0].set_xlim((self.min[0], self.max[0]))
+                fig.axes[0].set_ylim((self.min[1], self.max[1]))
+
+                if plt_opts is None:
+                    plt_opts = gplot.init_plotting_opts(f_hndl=fig)
+
+                if ttl is None:
+                    ttl = "A* Pathfinding"
+                    if self.use_beam_search:
+                        ttl += " with Beam Search"
+
+                gplot.set_title_label(fig, 0, plt_opts, ttl=ttl)
+
+                # draw map
+                self.draw_start(fig, startNode)
+                self.draw_map(fig)
+                fig.tight_layout()
+
+            self.draw_end(fig, endNode)
+            plt.pause(0.01)
 
             # for stopping simulation with the esc key.
             fig.canvas.mpl_connect(
                 "key_release_event",
                 lambda event: [exit(0) if event.key == "escape" else None],
             )
-            fig.axes[0].set_xlim((self.min[0], self.max[0]))
-            fig.axes[0].set_ylim((self.min[1], self.max[1]))
-
-            if plt_opts is None:
-                plt_opts = gplot.init_plotting_opts(f_hndl=fig)
-
-            if ttl is None:
-                ttl = "A* Pathfinding"
-                if self.use_beam_search:
-                    ttl += " with Beam Search"
-
-            gplot.set_title_label(fig, 0, plt_opts, ttl=ttl)
-            fig.tight_layout()
             fig_w, fig_h = fig.canvas.get_width_height()
-
-            # draw map
-            self.draw_map(fig, startNode, endNode)
-            plt.pause(0.01)
 
             # save first frame of animation
             if save_animation:
@@ -494,7 +520,6 @@ class AStar:
         closed_set = {}
         ind = self.ravel_ind(startNode.indices)
         open_set[ind] = startNode
-        # open_set = [(ind, startNode),]
 
         while len(open_set) > 0:
             s_inds = np.argsort(
@@ -514,14 +539,6 @@ class AStar:
 
             if show_animation:
                 pos = self.ind_to_pos(curNode.indices)
-                # fig.axes[0].add_patch(
-                #     Rectangle(
-                #         pos - self.resolution / 2,
-                #         self.resolution[0],
-                #         self.resolution[1],
-                #         color="c",
-                #     )
-                # )
                 fig.axes[0].scatter(pos[0], pos[1], marker="x", color="c")
                 if len(closed_set) % 10 == 0:
                     plt.pause(0.001)

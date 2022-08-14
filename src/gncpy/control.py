@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.linalg as la
 
+import gncpy.dynamics.basic as gdyn
 from gncpy.math import get_state_jacobian, get_input_jacobian
 
 
@@ -26,8 +27,8 @@ class BaseLQR:
         cross_penalty (Nu x N numpy array): Cross penalty matrix
         horizon_len (int): Length of trajectory to optimize over
     """
-    def __init__(self, Q=None, R=None, cross_penalty=None, horizon_len=None,
-                 **kwargs):
+
+    def __init__(self, Q=None, R=None, cross_penalty=None, horizon_len=None, **kwargs):
         if Q is None:
             Q = np.array([[]])
         self.state_penalty = Q
@@ -71,473 +72,313 @@ class BaseLQR:
         """
 
         if self.horizon_len == np.inf:
-            P = la.solve_discrete_are(F, G, self.state_penalty,
-                                      self.ctrl_penalty)
-            feedback_gain = la.inv(G.T @ P @ G + self.ctrl_penalty) \
-                @ (G.T @ P @ F + self.cross_penalty)
+            P = la.solve_discrete_are(F, G, self.state_penalty, self.ctrl_penalty)
+            feedback_gain = la.inv(G.T @ P @ G + self.ctrl_penalty) @ (
+                G.T @ P @ F + self.cross_penalty
+            )
             return feedback_gain
         else:
             # ##TODO: implement
             c = self.__class__.__name__
             name = self.iterate.__name__
-            msg = '{}.{} not implemented'.format(c, name)
+            msg = "{}.{} not implemented".format(c, name)
             raise RuntimeError(msg)
 
 
-class BaseELQR(BaseLQR):
-    """ Implements an Extended Linear Quadratic Regulator (ELQR) controller.
+class ELQR:
+    def __init__(self, max_iters=1e3, tol=1e-4, time_horizon=10, start_time=0):
+        self.max_iters = int(max_iters)
+        self.tol = tol
+        self.time_horizon = time_horizon
+        self._dt = dt
+        self.start_time = start_time
 
-        This implements an ELQR controller for cases where the dynamics are
-        non-linear and the cost function is non-quadratic in terms of the
-        state. This can be extended to include other forms of non-quadratic
-        cost functions. See :cite:`Berg2016_ExtendedLQRLocallyOptimalFeedbackControlforSystemswithNonLinearDynamicsandNonQuadraticCost`
+        self.u_nom = np.array([])
+        self.ct_come_mats = np.array([])
+        self.ct_come_vecs = np.array([])
+        self.ct_go_mats = np.array([])
+        self.ct_go_vecs = np.array([])
+        self.feedback_gain = np.array([])
+        self.feedthrough_gain = np.array([])
 
-    Args:
-        max_iters (int): Max number of iterations for cost to converge
-        horizon_len (int): See :py:class:`gasur.guidance.base.BaseLQR`
-            (default: 3), can not be Inf
-        cost_tol (float): Tolerance on cost to achieve convergence (default:
-            1e-4)
+        self.use_custom_cost = False
+        self._init_state = np.array([])
+        self._end_state = np.array([])
+        self._Q = None
+        self._R = None
+        self._non_quad_fun = None
+        self._cost_fun = None
 
-    Raises:
-        RuntimeError: If `horizon_len` is Inf
+        self.dynObj = None
 
-    Attributes:
-        max_iters (int): Max number of iterations for cost to converge
-        horizon_len (int): See :py:mod:`gasur.guidance.base.baseLQR`
-        cost_tol (float): Tolerance on cost to achieve convergence
-    """
-
-    def __init__(self, max_iters=50, horizon_len=3, cost_tol=10**-4, **kwargs):
-        self.max_iters = max_iters
-        self.cost_tol = cost_tol
-        super().__init__(horizon_len=horizon_len, **kwargs)
-        if self.horizon_len == np.inf:
-            raise RuntimeError('Horizon must be finite for ELQR')
-
-    def initialize(self, x_start, n_inputs, **kwargs):
-        """ Initialze the start of an iteration.
-
-        Args:
-            x_start (N x 1 numpy array): starting state of the iteration
-            n_inputs (int): number of control inputs
-
-        Keyword Args:
-            feedback (Nu x N numpy array): Feedback matrix
-            feedforward (Nu x 1 numpy array): Feedforward matrix
-            cost_go_mat (N x N numpy array): Cost-to-go matrix
-            cost_go_vec (N x 1 numpy array): Cost-to-go vector
-            cost_come_mat (N x N numpy array): Cost-to-come matrix
-            cost_come_vec (N x 1 numpy array): Cost-to-come vector
-
-        Returns:
-            tuple containing
-
-                - feedback (Nu x N numpy array): Feedback matrix
-                - feedforward (Nu x 1 numpy array): Feedforward matrix
-                - cost_go_mat (N x N numpy array): Cost-to-go matrix
-                - cost_go_vec (N x 1 numpy array): Cost-to-go vector
-                - cost_come_mat (N x N numpy array): Cost-to-come matrix
-                - cost_come_vec (N x 1 numpy array): Cost-to-come vector
-        """
-        n_states = x_start.size
-        x_hat = x_start
-        feedback = kwargs.get('feedback', np.zeros((n_inputs, n_states)))
-        feedforward = kwargs.get('feedforward', np.zeros((n_inputs, 1)))
-        cost_go_mat = kwargs.get('cost_go_mat', np.zeros((n_states, n_states)))
-        cost_go_vec = kwargs.get('cost_go_vec', np.zeros((n_states, 1)))
-        cost_come_mat = kwargs.get('cost_come_mat',
-                                   np.zeros((n_states, n_states)))
-        cost_come_vec = kwargs.get('cost_come_vec', np.zeros((n_states, 1)))
-        return (feedback, feedforward, cost_go_mat, cost_go_vec,
-                cost_come_mat, cost_come_vec, x_hat)
-
-    def quadratize_cost(self, x_start, u_nom, timestep, **kwargs):
-        r""" Quadratizes the cost function.
-
-        This assumes the true cost function is given
-
-        .. math::
-            c_0 &= \frac{1}{2}(x - x_0)^T Q (x - x_0) + \frac{1}{2}(u
-                - u_0)^T R (u - u_0) \\
-            c_t &= \frac{1}{2}(u - u_{nom})^T R (u - u_{nom})
-                + \text{non quadratic state term(s)} \\
-            c_{end} &= \frac{1}{2}(x - x_{end})^T Q (x - x_{end})
-
-        Args:
-            x_start (N x 1 numpy array): Starting point of the iteration
-            u_nom (Nu x 1 numpy array): Nominal control input
-            timestep (int): Timestep number, starts at 0 and is relative to
-                the begining of the current time horizon
-            **kwargs : any arguments needed by
-                :py:meth:`gncpy.control.BaseELQR.quadratize_non_quad_state`
-
-        Returns:
-            tuple containing
-
-                - P (Nu x N numpy array): cross state penalty matrix
-                - Q (N x N numpy array): state penalty matrix
-                - R (Nu x Nu numpy array): control input penalty matrix
-                - q (N x 1 numpy array): state penalty vector
-                - r (Nu x 1 numpy array): control input penalty vector
-        """
-        if timestep == 0:
-            Q = self.state_penalty
-            q = -Q @ x_start
+    @property
+    def dt(self):
+        if self.dynObj is not None and isinstance(
+            self.dynObj, gdyn.NonlinearDynamicsBase
+        ):
+            return self.dynObj.dt
         else:
-            Q, q = self.quadratize_non_quad_state(**kwargs)
+            return self._dt
 
-        R = self.ctrl_penalty
-        r = -R @ u_nom
-        P = np.zeros((u_nom.size, x_start.size))
+    @dt.setter
+    def dt(self, val):
+        if self.dynObj is not None and isinstance(
+            self.dynObj, gdyn.NonlinearDynamicsBase
+        ):
+            self.dynObj.dt = val
+        else:
+            self._dt = val
+
+    def set_state_model(self, u_nom, dynObj=None, dt=None):
+        self.u_nom = u_nom.reshape((-1, 1))
+        self.dynObj = dynObj
+        if dt is not None:
+            self.dt = dt
+
+    def set_cost_model(self, Q=None, R=None, non_quadratic_fun=None, cost_fun=None):
+        if Q is not None and R is not None and non_quadratic_fun is not None:
+            self._Q = Q
+            self._R = R
+            self._non_quad_fun = non_quadratic_fun
+        elif cost_fun is not None:
+            self._cost_fun = cost_fun
+            self.use_custom_cost = True
+
+        else:
+            raise RuntimeError("Invalid combination of inputs.")
+
+    def cost_function(
+        self, tt, state, ctrl_input, cost_args, is_initial=False, is_final=False,
+    ):
+        if not self.use_custom_cost:
+            if is_final:
+                sdiff = state - self._end_state
+                return 0.5 * (sdiff.T @ self._Q @ sdiff).item()
+            else:
+                cost = 0
+                if is_initial:
+                    sdiff = state - self._init_state
+                    cost += 0.5 * (sdiff.T @ self._Q @ sdiff)
+
+                cdiff = ctrl_input = self.u_nom
+                cost += 0.5 * (cdiff.T @ self._R @ cdiff).item()
+                cost += self._non_quad_fun(
+                    tt,
+                    state,
+                    ctrl_input,
+                    self._end_state,
+                    is_initial,
+                    is_final,
+                    *cost_args
+                )
+
+                return cost
+
+        return self._cost_fun(
+            tt, state, ctrl_input, self._end_state, is_initial, is_final, *cost_args
+        )
+
+    def prop_state_forward(self, tt, x_hat, u_hat, state_args, ctrl_args):
+        if self.dynObj is not None:
+            if isinstance(self.dynObj, gdyn.NonlinearDynamicsBase):
+                if self.dynObj.dt < 0:
+                    self.dynObj.dt *= -1  # set to go forward
+                x_hat_p = self.dynObj.propagate_state(
+                    tt, x_hat, u=u_hat, state_args=state_args, ctrl_args=ctrl_args
+                )
+
+                self.dynObj.dt *= -1  # set to inverrse dynamics
+                ABar = self.dynObj.get_state_mat(
+                    tt, x_hat_p, *state_args, u=u_hat, ctrl_args=ctrl_args
+                )
+                BBar = self.dynObj.get_input_mat(tt, x_hat_p, u_hat, *ctrl_args)
+
+            else:
+                raise NotImplementedError("Need to implement this")
+
+        else:
+            raise NotImplementedError("Need to implement this")
+        cBar = x_hat - ABar @ x_hat_p - BBar @ u_hat
+
+        return x_hat_p, ABar, BBar, cBar
+
+    def prop_state_backward(self, tt, x_hat, u_hat, state_args, ctrl_args):
+        if self.dynObj is not None:
+            if isinstance(self.dynObj, gdyn.NonlinearDynamicsBase):
+                if self.dynObj.dt > 0:
+                    self.dynObj.dt *= -1  # set to go backward
+                x_hat_p = self.dynObj.propagate_state(
+                    tt, x_hat, u=u_hat, state_args=state_args, ctrl_args=ctrl_args
+                )
+                self.dynObj.dt *= -1  # flip back to forward to get forward matrices
+                A = self.dynObj.get_state_mat(
+                    tt, x_hat_p, *state_args, u=u_hat, ctrl_args=ctrl_args
+                )
+                B = self.dynObj.get_input_mat(tt, x_hat_p, u_hat, *ctrl_args)
+
+            else:
+                raise NotImplementedError("Need to implement this case")
+
+        else:
+            raise NotImplementedError("Need to implement this case")
+
+        c = x_hat - A @ x_hat_p - B @ u_hat
+
+        return x_hat_p, A, B, c
+
+    def quadratize_cost(self, x_hat, is_initial, is_final, cost_args):
+        if not self.use_custom_cost:
+            P = np.zeros((self.u_nom.size, x_hat.size))
+            if is_final:
+                Q = self._Q
+                q = -(Q @ self._end_state)
+                R = np.zeros(self._R.shape)
+                r = np.zeros(self.u_nom.shape)
+            else:
+                if is_initial:
+                    Q = self._Q
+                    q = -(Q @ self._init_state)
+                    R = self._R
+                    r = -(R @ self.u_nom)
+                else:
+                    Q = np.zeros(self._Q.shape)
+                    q = np.zeros(self._init_state.shape)
+                    R = self._R
+                    r = -(R @ self.u_nom)
+
+                non_Q, non_q = get_hessian(self._non_quad_fun)
+
+                # regularize the non-quadratic term to keep it pos semi-def
+                vals, vecs = np.linalg.eig(non_Q)
+                vals[vals < 0] = 0
+                non_Q = vecs @ np.diag(vals) @ vecs.T
+
+                Q += non_Q
+                q += non_q - non_Q @ x_hat
+        else:
+            # TODO: get hessians
+            raise NotImplementedError("Need to implement this")
 
         return P, Q, R, q, r
 
-    def quadratize_non_quad_state(self, x_hat=None, **kwargs):
-        r"""Quadratizes the non-quadratic state.
+    def forward_pass(self, num_timesteps, x_hat):
+        for kk in range(num_timesteps):
+            tt = kk * abs(self.dt) + self.start_time
 
-        This assumes the true cost function is given
+            u_hat = self.feedback_gain[kk] @ x_hat + self.feedthrough_gain[kk]
+            x_hat_p, ABar, BBar, cBar = self.prop_state_forward(tt, x_hat, u_hat)
 
-        .. math::
-            c_0 &= \frac{1}{2}(x - x_0)^T Q (x - x_0) + \frac{1}{2}(u
-                - u_0)^T R (u - u_0) \\
-            c_t &= \frac{1}{2}(u - u_{nom})^T R (u - u_{nom})
-                + \text{non quadratic state term(s)} \\
-            c_{end} &= \frac{1}{2}(x - x_{end})^T Q (x - x_{end})
+            P, Q, R, q, r = self.quadratize_cost(tt, x_hat, u_hat)
 
-        Args:
-            x_hat (N x 1 numpy array): Current state
+            CBar = BBar.T @ (self.ct_come_mats[kk] + Q) @ ABar + P @ ABar
+            DBar = ABar.T @ (self.ct_come_mats[kk] + Q) @ ABar
+            EBar = (
+                BBar.T @ (self.ct_come_mats[kk] + Q) @ BBar
+                + R
+                + P @ BBar
+                + BBar.T @ P.T
+            )
+            dBar = ABar.T @ (
+                self.ct_come_vecs[kk] + q + (self.ct_come_mats[kk] + Q) @ cBar
+            )
+            eBar = (
+                BBar.T
+                @ (self.ct_come_vecs[kk] + q + (self.ct_come_mats[kk] + Q) @ cBar)
+                + r
+                + P @ cBar
+            )
 
-        Returns:
-            tuple containing
+            self.feedback_gain[kk] = -np.linalg.inv(EBar) @ CBar
+            self.feedthrough_gain[kk] = -np.linalg.inv(EBar) @ eBar
 
-                - Q (N x N numpy array): state penalty matrix
-                - q (N x 1 numpy array): state penalty vector
+            self.ct_come_mats[kk + 1] = DBar + CBar.T @ self.feedback_gain[kk]
+            self.ct_come_vecs[kk + 1] = dBar + CBar.T @ self.feedthrough_gain[kk]
 
-        Todo:
-            Improve implementation to use the hessian of the non-quadratic
-            cost function
-        """
-        Q = self.state_penalty
-        q = np.zeros((x_hat.size, 1))
-        return Q, q
+            x_hat = -(
+                np.linalg.inv(self.ct_go_mats[kk + 1] + self.ct_come_mats[kk + 1])
+                @ (self.ct_go_vecs[kk + 1] + self.ct_come_vecs[kk + 1])
+            )
 
-    def quadratize_final_cost(self, x_end, **kwargs):
-        r"""Quadratizes the cost for the final timestep.
+    def backward_pass(self, num_timesteps, x_hat):
+        for kk in range(num_timesteps - 1, -1, -1):
+            tt = kk * abs(self.dt) + self.start_time
 
-        This assumes the true cost function is given
+            u_hat = self.feedback_gain[kk] @ x_hat + self.feedthough_gain[kk]
+            x_hat_p, A, B, c = self.prop_state_backward(tt, x_hat, u_hat)
 
-        .. math::
-            c_0 &= \frac{1}{2}(x - x_0)^T Q (x - x_0) + \frac{1}{2}(u
-                - u_0)^T R (u - u_0) \\
-            c_t &= \frac{1}{2}(u - u_{nom})^T R (u - u_{nom})
-                + \text{non quadratic state term(s)} \\
-            c_{end} &= \frac{1}{2}(x - x_{end})^T Q (x - x_{end})
+            P, Q, R, q, r = self.quadratize_cost(tt, x_hat_p, u_hat)
 
-        Args:
-            x_end (N x 1 numpy array): Desired ending state
+            C = P + B.T @ self.ct_go_mats[kk + 1] @ A
+            D = Q + A.T @ self.ct_go_mats[kk + 1] @ A
+            E = R + B.T @ self.ct_go_mats[kk + 1] @ B
+            d = q + A.T @ (self.ct_go_vecs[kk + 1] + self.ct_go_mats[kk + 1] @ c)
+            e = r + B.T @ (self.ct_go_vecs[kk + 1] + self.ct_go_mats[kk + 1] @ c)
 
-        Returns:
-            tuple containing
+            self.feedback_gain[kk] = -np.linalg.inv(E) @ C
+            self.feedthrough_gain[kk] = -np.linalg.inv(E) @ e
 
-                - Q (N x N numpy array): state penalty matrix
-                - q (N x 1 numpy array): state penalty vector
-        """
-        Q = self.state_penalty
-        q = -Q @ x_end
+            self.ct_go_mats[kk] = D + C.T @ self.feedback_gain[kk]
+            self.ct_go_vecs[kk] = d + C.T @ self.feedthrough_gain[kk]
 
-        return Q, q
+            x_hat = -(
+                np.linalg.inv(self.ct_go_mats[kk] + self.ct_come_mats[kk])
+                @ (self.ct_go_vecs[kk] + self.ct_come_vecs[kk])
+            )
 
-    def iterate(self, x_start, x_end, u_nom, **kwargs):
-        cost_function = kwargs['cost_function']
-        dyn_fncs = kwargs['dynamics_fncs']
+    def calculate_control(self, tt, cur_state, end_state):
+        old_cost = float("inf")
+        num_timesteps = int(self.time_horizon / self.dt)
+        self._init_state = cur_state.reshape((-1, 1))
+        self._end_state = end_state.reshape((-1, 1))
+        x_hat = cur_state.reshape((-1, 1))
 
-        feedback, feedforward, cost_go_mat, cost_go_vec, cost_come_mat, \
-            cost_come_vec, x_hat = self.initialize(x_start, u_nom.size,
-                                                   **kwargs)
+        # TODO: check initialization
+        self.ct_come_mats = np.zeros(
+            (num_timesteps + 1, cur_state.size, cur_state.size)
+        )
+        self.ct_come_vecs = np.zeros((num_timesteps + 1, cur_state.size, 1))
+        self.ct_go_mats = np.zeros(self.ct_come_mats.shape)
+        self.ct_go_vecs = np.zeros(self.ct_come_vecs.shape)
 
-        converged = False
-        old_cost = 0
-        for iteration in range(0, self.max_iters):
+        self.feedback_gain = np.zeros(
+            (num_timesteps + 1, self.u_nom.size, cur_state.size)
+        )
+        self.feedthrough_gain = np.zeros((num_timesteps + 1, self.u_nom.size, 1))
+
+        for ii in range(self.max_iters):
             # forward pass
-            for kk in range(0, self.horizon_len - 1):
-                (x_hat, u_hat, feedback[kk], feedforward[kk],
-                 cost_come_mat[kk+1],
-                 cost_come_vec[kk+1]) = self.forward_pass(x_hat, feedback[kk],
-                                                          feedforward[kk],
-                                                          cost_come_mat[kk],
-                                                          cost_come_vec[kk],
-                                                          cost_go_mat[kk+1],
-                                                          cost_go_vec[kk+1],
-                                                          kk, x_start=x_start,
-                                                          u_nom=u_nom,
-                                                          **kwargs)
+            self.forward_pass(num_timesteps, x_hat)
 
-            # quadratize final cost
-            cost_go_mat[-1], cost_go_vec[-1] = \
-                self.quadratize_final_cost(x_hat, u_hat, x_end=x_end, **kwargs)
-            x_hat = -la.inv(cost_go_mat[-1] + cost_come_mat[-1]) \
-                @ (cost_go_vec[-1] + cost_come_vec[-1])
+            # quadratize final cost (kk = num_timesteps)
+            (
+                _,
+                self.ct_go_mats[num_timesteps],
+                _,
+                self.ct_go_vecs[num_timesteps],
+            ) = self.quadratize_cost(x_hat, False, True)
+            x_hat = -(
+                np.linalg.inv(
+                    self.ct_go_mats[num_timesteps] + self.ct_come_mats[num_timesteps]
+                )
+                @ (self.ct_go_vecs[num_timesteps] + self.ct_come_vecs[num_timesteps])
+            )
 
             # backward pass
-            for kk in range(self.horizon_len - 2, -1, -1):
-                x_hat, u_hat, feedback[kk], feedforward[kk], cost_go_mat[kk], \
-                    cost_go_vec[kk] = self.backward_pass(x_hat, feedback[kk],
-                                                         feedforward[kk],
-                                                         cost_come_mat[kk],
-                                                         cost_come_vec[kk],
-                                                         cost_go_mat[kk+1],
-                                                         cost_go_vec[kk+1],
-                                                         kk, x_start=x_start,
-                                                         u_nom=u_nom, **kwargs)
+            self.backward_pass(num_timesteps, x_hat)
 
-            # find real cost of trajectory
-            state = x_hat
-            cur_cost = 0
-            for kk in range(0, self.horizon_len-1):
-                ctrl_input = feedback[kk] @ state + feedforward[kk]
-                cur_cost += cost_function(state, ctrl_input, **kwargs)
-                state = dyn_fncs(state, ctrl_input, **kwargs)
-            cur_cost += self.final_cost_function(state, x_end)
+            # TODO: get cost
+            cost = 0
+            x = x_hat.copy()
+            for kk in range(num_timesteps):
+                tt = kk * abs(self.dt) + self.start_time
+                u = self.feedback_gain[kk] @ x + self.feedthrough_gain[kk]
+                cost += self.cost_function(
+                    tt, x, u, is_initial=(kk == 0), is_final=(kk == num_timesteps - 1),
+                )
+                x = self.prop_state_forward(tt, x, u, state_args, ctrl_args)
 
-            # check for convergence
-            if iteration != 0:
-                converged = np.abs(old_cost - cur_cost) < self.cost_tol
-
-            old_cost = cur_cost
-            if converged:
+            if abs(old_cost - cost) / cost < self.tol:
                 break
+            old_cost = cost
 
-        return feedback, feedforward
-
-    def final_cost_function(self, state, goal, **kwargs):
-        """Cost function at the ending state.
-
-        Args:
-            state (numpy array): final state
-            goal (numpy array): desired ending state
-
-        Returns:
-            (float): cost of the final state
-
-        Raises:
-            RuntimeError: if the goal and state are different dimensions
-        """
-        if state.ndim != 2:
-            state = state.reshape((state.size, 1))
-        if goal.ndim != 2:
-            goal = goal.reshape((goal.size, 1))
-        if goal.shape[0] != state.shape[0]:
-            msg = 'State ({}) and goal ({}) '.format(state.shape[0],
-                                                     goal.shape[0]) \
-                + 'do not have the same dimension'.format()
-            raise RuntimeError(msg)
-        diff = state - goal
-        return (diff.T @ self.state_penalty @ diff).squeeze()
-
-    def cost_to_go(self, cost_go_mat, cost_go_vec, P, Q, R, q, r,
-                   state_mat, input_mat, c_vec, **kwargs):
-        """Calculates the cost-to-go.
-
-        Calculates the cost-to-go matrix and vectors as well as the
-        feedforward and feedback gains
-
-        Args:
-            cost_go_mat (N x N numpy array): current cost-to-go matrix
-            cost_go_vec (N x 1 numpy array): current cost-to-go vector
-            P (Nu x N numpy array): cross penalty matrix
-            Q (N x N numpy array): state penalty matrix
-            R (Nu x Nu numpy array): input penalty matrix
-            q (N x 1 numpy array): state penalty vector
-            r (Nu x 1 numpy array): input penalty vector
-            state_mat (N x N numpy array): state transition matrix
-            input_mat (N x Nu numpy array): control input matrix
-            c_vec (N x 1): extra vector from the state space equation
-
-        Returns:
-            tuple containing
-
-                - cost_go_mat_out (N x N numpy array): cost-to-go matrix
-                - cost_go_vec_out (N x 1 numpy array): cost-to-go vector
-                - feedback (Nu x N numpy array): feedback gain matrix
-                - feedforward (N x 1 numpy array): feedforward gain matrix
-        """
-        c_mat = input_mat.T @ cost_go_mat @ state_mat + P
-        d_mat = state_mat.T @ cost_go_mat @ state_mat + Q
-        e_mat = input_mat.T @ cost_go_mat @ input_mat + R
-        tmp = (cost_go_vec + cost_go_mat @ c_vec)
-        d_vec = state_mat.T @ tmp + q
-        e_vec = input_mat.T @ tmp + r
-
-        e_inv = la.inv(e_mat)
-        feedback = -e_inv @ c_mat
-        feedforward = -e_inv @ e_vec
-
-        cost_go_mat_out = d_mat + c_mat.T @ feedback
-        cost_go_vec_out = d_vec + c_mat.T @ feedforward
-
-        return cost_go_mat_out, cost_go_vec_out, feedback, feedforward
-
-    def cost_to_come(self, cost_come_mat, cost_come_vec, P, Q, R, q, r,
-                     state_mat_bar, input_mat_bar, c_bar_vec, **kwargs):
-        """Calculates the cost-to-come.
-
-        Calculates the cost-to-come matrix and vectors as well as the
-        feedforward and feedback gains
-
-        Args:
-            cost_come_mat (N x N numpy array): current cost-to-go matrix
-            cost_come_vec (N x 1 numpy array): current cost-to-go vector
-            P (Nu x N numpy array): cross penalty matrix
-            Q (N x N numpy array): state penalty matrix
-            R (Nu x Nu numpy array): input penalty matrix
-            q (N x 1 numpy array): state penalty vector
-            r (Nu x 1 numpy array): input penalty vector
-            state_mat_bar (N x N numpy array): inverse state transition matrix
-            input_mat_bar (N x Nu numpy array): inverse control input matrix
-            c_vec_bar (N x 1): extra vector from the inverse state space
-                equation
-
-        Returns:
-            tuple containing
-
-                - cost_come_mat_out (N x N numpy array): cost-to-go matrix
-                - cost_come_vec_out (N x 1 numpy array): cost-to-go vector
-                - feedback (Nu x N numpy array): feedback gain matrix
-                - feedforward (N x 1 numpy array): feedforward gain matrix
-        """
-        S_bar_Q = cost_come_mat + Q
-        s_bar_q_sqr_c_bar = cost_come_vec + q + S_bar_Q @ c_bar_vec
-
-        c_bar_mat = input_mat_bar.T @ S_bar_Q @ state_mat_bar \
-            + P @ state_mat_bar
-        d_bar_mat = state_mat_bar.T @ S_bar_Q @ state_mat_bar
-        e_bar_mat = input_mat_bar.T @ S_bar_Q @ input_mat_bar \
-            + R + P @ input_mat_bar + input_mat_bar.T @ P.T
-        d_bar_vec = state_mat_bar.T @ s_bar_q_sqr_c_bar
-        e_bar_vec = input_mat_bar.T @ s_bar_q_sqr_c_bar + r + P @ c_bar_vec
-
-        # find controller gains
-        e_inv = la.inv(e_bar_mat)
-        feedback = -e_inv @ c_bar_mat
-        feedforward = -e_inv @ e_bar_vec
-
-        # update cost-to-come
-        cost_come_mat_out = d_bar_mat + c_bar_mat.T @ feedback
-        cost_come_vec_out = d_bar_vec + c_bar_mat.T @ feedforward
-
-        return cost_come_mat_out, cost_come_vec_out, feedback, feedforward
-
-    def backward_pass(self, x_hat, u_hat, feedback, feedforward,
-                      cost_come_mat, cost_come_vec, cost_go_mat, cost_go_vec,
-                      timestep, dyn_fncs, inv_dyn_fncs, **kwargs):
-        """ Implements the backward pass of the ELQR algorithm for a single
-        timestep.
-
-        Args:
-            x_hat (N x 1 numpy array): current state
-            u_hat (N x 1 numpy array): current input
-            feedback (Nu x N numpy array): feedback gain matrix
-            feedforward (Nu x 1 numpy array): feedforward gain matrix
-            cost_come_mat (N x N numpy array): cost-to-come matrix
-            cost_come_vec (N x 1 numpy array): cost-to-come vector
-            cost_go_mat (N x N numpy array): cost-to-go matrix
-            cost_go_vec (N x 1 numpy array): cost-to-go vector
-            timestep (int): current time step, starts at 0 every time horizon
-            dyn_fncs (list of functions): dynamics functions, one per state,
-                must take in x, u as parameters
-            inv_dyn_fncs (list of functions): inverse dynamics functions,
-                one per state, must take in x, u as parameters
-            **kwargs : passed through to
-                :py:meth:`gncpy.control.BaseELQR.quadratize_cost`
-
-        Returns:
-            tuple containing
-
-                - x_hat (N x 1 numpy array): prior state
-                - feedback (Nu x N numpy array): prior feedback gain
-                - feedforward (N x 1 numpy array): prior feedforward gain
-                - cost_go_mat_out (N x N numpy array): prior cost-to-go matrix
-                - cost_go_vec_out (N x 1 numpy array): prior cost-to-go vector
-        """
-        x_hat_prime = np.zeros(x_hat.shape)
-        for ii, gg in enumerate(inv_dyn_fncs):
-            x_hat_prime[ii] = gg(x_hat, u_hat, **kwargs)
-
-        state_mat = get_state_jacobian(x_hat_prime, u_hat,
-                                       dyn_fncs, **kwargs)
-        input_mat = get_input_jacobian(x_hat_prime, u_hat,
-                                       dyn_fncs, **kwargs)
-        c_vec = x_hat - state_mat @ x_hat_prime - input_mat @ u_hat
-
-        P, Q, R, q, r = self.quadratize_cost(x_hat=x_hat_prime,
-                                             timestep=timestep, **kwargs)
-
-        (cost_go_mat_out, cost_go_vec_out, feedback,
-         feedforward) = self.cost_to_go(cost_go_mat, cost_go_vec, P, Q, R, q,
-                                        r, state_mat, input_mat, c_vec)
-
-        # update state estimate
-        x_hat = -la.inv(cost_go_mat_out + cost_come_mat) \
-            @ (cost_go_vec_out + cost_come_vec)
-
-        return (x_hat, feedback, feedforward, cost_go_mat_out,
-                cost_go_vec_out)
-
-    def forward_pass(self, x_hat, u_hat, feedback, feedforward, cost_come_mat,
-                     cost_come_vec, cost_go_mat, cost_go_vec, timestep,
-                     dyn_fncs, inv_dyn_fncs, **kwargs):
-        """ Implements the forward pass of the ELQR algorithm for a single
-        timestep.
-
-        Args:
-            x_hat (N x 1 numpy array): current state
-            u_hat (N x 1 numpy array): current input
-            feedback (Nu x N numpy array): feedback gain matrix
-            feedforward (Nu x 1 numpy array): feedforward gain matrix
-            cost_come_mat (N x N numpy array): cost-to-come matrix
-            cost_come_vec (N x 1 numpy array): cost-to-come vector
-            cost_go_mat (N x N numpy array): cost-to-go matrix
-            cost_go_vec (N x 1 numpy array): cost-to-go vector
-            timestep (int): current time step, starts at 0 every time horizon
-            dyn_fncs (list of functions): dynamics functions, one per state,
-                must take in x, u as parameters
-            inv_dyn_fncs (list of functions): inverse dynamics functions,
-                one per state, must take in x, u as parameters
-            **kwargs : passed through to
-                :py:meth:`gncpy.control.BaseELQR.quadratize_cost`
-
-        Returns:
-            tuple containing
-
-                - x_hat (N x 1 numpy array): next state
-                - feedback (Nu x N numpy array): next feedback gain
-                - feedforward (N x 1 numpy array): next feedforward gain
-                - cost_go_mat_out (N x N numpy array): next cost-to-go matrix
-                - cost_go_vec_out (N x 1 numpy array): next cost-to-go vector
-        """
-        x_hat_prime = np.zeros(x_hat.shape)
-        for ii, ff in enumerate(dyn_fncs):
-            x_hat_prime[ii] = ff(x_hat, u_hat, **kwargs)
-
-        state_mat_bar = get_state_jacobian(x_hat_prime, u_hat,
-                                           inv_dyn_fncs, **kwargs)
-        input_mat_bar = get_input_jacobian(x_hat_prime, u_hat,
-                                           inv_dyn_fncs, **kwargs)
-        c_bar_vec = x_hat - state_mat_bar @ x_hat_prime \
-            - input_mat_bar @ u_hat
-
-        P, Q, R, q, r = self.quadratize_cost(x_hat=x_hat, timestep=timestep,
-                                             **kwargs)
-
-        (cost_come_mat_out, cost_come_vec_out, feedback,
-         feedforward) = self.cost_to_come(cost_come_mat, cost_come_vec,
-                                          P, Q, R, q, r, state_mat_bar,
-                                          input_mat_bar, c_bar_vec)
-
-        # update state estimate
-        x_hat = -la.inv(cost_go_mat + cost_come_mat_out) \
-            @ (cost_go_vec + cost_come_vec_out)
-
-        return (x_hat, feedback, feedforward, cost_come_mat_out,
-                cost_come_vec_out)
+        return

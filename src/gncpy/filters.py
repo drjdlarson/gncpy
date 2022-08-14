@@ -678,7 +678,7 @@ class ExtendedKalmanFilter(KalmanFilter):
                 dt = self.dt
             else:
                 state_mat = self._dyn_obj.get_state_mat(
-                    timestep, cur_state, dyn_fun_params
+                    timestep, cur_state, *dyn_fun_params, use_continuous=self.cont_cov
                 )
                 dt = self._dyn_obj.dt
         elif self._ode_lst is not None:
@@ -698,9 +698,12 @@ class ExtendedKalmanFilter(KalmanFilter):
                 msg = "Integration failed at time {}".format(timestep)
                 raise RuntimeError(msg)
 
-            state_mat = gmath.get_state_jacobian(
-                timestep, cur_state, self._ode_lst, dyn_fun_params
-            )
+            if self.cont_cov:
+                state_mat = gmath.get_state_jacobian(
+                    timestep, cur_state, self._ode_lst, dyn_fun_params
+                )
+            else:
+                raise NotImplementedError("Non-continous covariance is not implemented yet for ode list")
 
             dt = self.dt
         else:
