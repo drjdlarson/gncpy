@@ -288,38 +288,34 @@ class NonlinearDynamicsBase(DynamicsBase):
         N x N numpy array
             state transition matrix.
         """
+        if ctrl_args is None:
+            ctrl_args = ()
         if use_continuous:
             if self.control_model is not None and u is not None:
-                if ctrl_args is None:
-                    ctrl_args = ()
-
-                def _fun_factory(state_fun, ctrl_fun):
-                    def _fun(t, x, u, *args):
-                        return state_fun(t, x, *f_args) + ctrl_fun(t, x, u, *ctrl_args)
+                def factory(ii):
+                    return lambda _t, _x, _u, *_args: self._cont_dyn(
+                        _t, _x, _u, _args, ctrl_args
+                    )[ii]
 
                 return gmath.get_state_jacobian(
                     timestep,
                     state,
-                    [
-                        _fun_factory(f, g)
-                        for f, g in zip(self.cont_fnc_lst, self.control_model)
-                    ],
-                    (),
+                    [factory(ii) for ii in range(state.size)],
+                    f_args,
                     u=u,
                 )
+
             return gmath.get_state_jacobian(timestep, state, self.cont_fnc_lst, f_args)
 
         else:
+
             def factory(ii):
                 return lambda _t, _x, *_args: self.propagate_state(
                     _t, _x, u=u, state_args=_args, ctrl_args=ctrl_args
                 )[ii]
 
             return gmath.get_state_jacobian(
-                timestep,
-                state,
-                [factory(ii) for ii in range(state.size)],
-                f_args,
+                timestep, state, [factory(ii) for ii in range(state.size)], f_args,
             )
 
     def get_input_mat(self, timestep, state, u, state_args=None, ctrl_args=None):
@@ -347,26 +343,21 @@ class NonlinearDynamicsBase(DynamicsBase):
         if self.control_model is None:
             warn("Control model is None")
             return np.zeros((state.size, u.size))
-        # def factory(ii):
-        #     return lambda _t, _x, _u, *_args: self.control_model(
-        #         _t, _x, _u, *ctrl_args
-        #     )[ii]
 
-        # return gmath.get_input_jacobian(
-        #     timestep,
-        #     state,
-        #     u,
-        #     [factory(ii) for ii in range(state.size)],
-        #     (),
-        # )
+        if state_args is None:
+            state_args = ()
+        if ctrl_args is None:
+            ctrl_args = ()
+
+        def factory(ii):
+            return lambda _t, _x, _u, *_args: self.propagate_state(
+                _t, _x, u=_u, state_args=state_args, ctrl_args=ctrl_args
+            )[ii]
 
         return gmath.get_input_jacobian(
-            timestep,
-            state,
-            u,
-            self.control_model,
-            (),
+            timestep, state, u, [factory(ii) for ii in range(state.size)], (),
         )
+        # return gmath.get_input_jacobian(timestep, state, u, self.control_model, (),)
 
     def propagate_state(self, timestep, state, u=None, state_args=None, ctrl_args=None):
         """Propagates the continuous time dynamics.
@@ -833,9 +824,9 @@ class IRobotCreate(NonlinearDynamicsBase):
     It represents a 2 wheel robot with some distance between its wheels.
     """
 
-    state_names = ('pos_x', 'pos_v', 'turn_angle')
+    state_names = ("pos_x", "pos_v", "turn_angle")
 
-    def __init__(self, wheel_separation=0.258, radius=3.35/2, **kwargs):
+    def __init__(self, wheel_separation=0.258, radius=0.335 / 2, **kwargs):
         """Initialize an object.
 
         Parameters
@@ -858,7 +849,7 @@ class IRobotCreate(NonlinearDynamicsBase):
             return 0.5 * ((u[0] + u[1]) * np.sin(x[2])).item()
 
         def g2(t, x, u, *args):
-            return (u[0] - u[1]) / self.wheel_separation
+            return (u[1] - u[0]) / self.wheel_separation
 
         self.control_model = [g0, g1, g2]
 
@@ -869,6 +860,7 @@ class IRobotCreate(NonlinearDynamicsBase):
     @property
     def cont_fnc_lst(self):
         """Implements the contiuous time dynamics."""
+
         def f0(t, x, *args):
             return 0
 

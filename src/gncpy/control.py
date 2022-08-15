@@ -107,6 +107,7 @@ class ELQR:
         self._Q = None
         self._R = None
         self._non_quad_fun = None
+        self._quad_modifier = None
         self._cost_fun = None
 
         self.dynObj = None
@@ -135,11 +136,14 @@ class ELQR:
         if dt is not None:
             self.dt = dt
 
-    def set_cost_model(self, Q=None, R=None, non_quadratic_fun=None, cost_fun=None):
+    def set_cost_model(
+        self, Q=None, R=None, non_quadratic_fun=None, quad_modifier=None, cost_fun=None
+    ):
         if Q is not None and R is not None and non_quadratic_fun is not None:
             self._Q = Q
             self._R = R
             self._non_quad_fun = non_quadratic_fun
+            self._quad_modifier = quad_modifier
         elif cost_fun is not None:
             self._cost_fun = cost_fun
             self.use_custom_cost = True
@@ -158,7 +162,7 @@ class ELQR:
                 cost = 0
                 if is_initial:
                     sdiff = state - self._init_state
-                    cost += 0.5 * (sdiff.T @ self._Q @ sdiff)
+                    cost += 0.5 * (sdiff.T @ self._Q @ sdiff).item()
 
                 cdiff = ctrl_input = self.u_nom
                 cost += 0.5 * (cdiff.T @ self._R @ cdiff).item()
@@ -226,7 +230,7 @@ class ELQR:
 
         return x_hat_p, A, B, c
 
-    def quadratize_cost(self, tt, x_hat, u_hat, is_initial, is_final, cost_args):
+    def quadratize_cost(self, tt, itr, x_hat, u_hat, is_initial, is_final, cost_args):
         if not self.use_custom_cost:
             P = np.zeros((self.u_nom.size, x_hat.size))
             if is_final:
@@ -246,57 +250,70 @@ class ELQR:
                     R = self._R
                     r = -(R @ self.u_nom)
 
+                    if self._quad_modifier is not None:
+                        P, Q, R, q, r = self._quad_modifier(itr, tt, P, Q, R, q, r)
+
                 xdim = x_hat.size
                 udim = u_hat.size
                 comb_state = np.vstack((x_hat, u_hat)).ravel()
-                big_mat = gmath.get_hessian(comb_state,
-                                            lambda _x, *_args:
-                                                self._non_quad_fun(tt,
-                                                                   _x[:xdim],
-                                                                   _x[xdim:],
-                                                                   self._end_state,
-                                                                   is_initial,
-                                                                   is_final,
-                                                                   *cost_args))
+                big_mat = gmath.get_hessian(
+                    comb_state,
+                    lambda _x, *_args: self._non_quad_fun(
+                        tt,
+                        _x[:xdim],
+                        _x[xdim:],
+                        self._end_state,
+                        is_initial,
+                        is_final,
+                        *cost_args
+                    ),
+                )
 
                 # regularize hessian to keep it pos semi def
-                # vals, vecs = np.linalg.eig(big_mat)
-                # vals[vals < 0] = 0
-                # big_mat = vecs @ np.diag(vals) @ vecs.T
+                vals, vecs = np.linalg.eig(big_mat)
+                vals[vals < 0] = 0
+                big_mat = vecs @ np.diag(vals) @ vecs.T
 
                 # extract non-quadratic terms
                 non_Q = big_mat[:xdim, :xdim]
 
                 # regularize hessian to keep it pos semi def
-                vals, vecs = np.linalg.eig(non_Q)
-                vals[vals < 0] = 0
-                non_Q = vecs @ np.diag(vals) @ vecs.T
+                # vals, vecs = np.linalg.eig(non_Q)
+                # vals[vals < 0] = 0
+                # non_Q = vecs @ np.diag(vals) @ vecs.T
 
                 non_P = big_mat[xdim:, :xdim]
                 non_R = big_mat[xdim:, xdim:]
 
                 # regularize hessian to keep it pos semi def
-                vals, vecs = np.linalg.eig(non_R)
-                vals[vals < 0] = 0
-                non_R = vecs @ np.diag(vals) @ vecs.T
+                # vals, vecs = np.linalg.eig(non_R)
+                # vals[vals < 0] = 0
+                # non_R = vecs @ np.diag(vals) @ vecs.T
 
-                big_vec = gmath.get_jacobian(comb_state,
-                                             lambda _x, *args:
-                                                 self._non_quad_fun(tt,
-                                                                    _x[:xdim],
-                                                                    _x[xdim:],
-                                                                    self._end_state,
-                                                                    is_initial,
-                                                                    is_final,
-                                                                    *cost_args))
+                big_vec = gmath.get_jacobian(
+                    comb_state,
+                    lambda _x, *args: self._non_quad_fun(
+                        tt,
+                        _x[:xdim],
+                        _x[xdim:],
+                        self._end_state,
+                        is_initial,
+                        is_final,
+                        *cost_args
+                    ),
+                )
 
-                non_q = big_vec[:xdim].reshape((xdim, 1)) - (non_Q @ x_hat + non_P.T @ u_hat)
-                non_r = big_vec[xdim:].reshape((udim, 1)) - (non_P @ x_hat + non_R @ u_hat)
+                non_q = big_vec[:xdim].reshape((xdim, 1)) - (
+                    non_Q @ x_hat + non_P.T @ u_hat
+                )
+                non_r = big_vec[xdim:].reshape((udim, 1)) - (
+                    non_P @ x_hat + non_R @ u_hat
+                )
 
                 Q += non_Q
-                q += non_q - non_Q @ x_hat
+                q += non_q
                 R += non_R
-                r += non_r - non_R @ u_hat
+                r += non_r
 
         else:
             # TODO: get hessians
@@ -304,15 +321,19 @@ class ELQR:
 
         return P, Q, R, q, r
 
-    def forward_pass(self, num_timesteps, x_hat, state_args, ctrl_args, cost_args):
+    def forward_pass(self, itr, num_timesteps, x_hat, state_args, ctrl_args, cost_args):
         for kk in range(num_timesteps):
             tt = kk * abs(self.dt) + self.start_time
 
             u_hat = self.feedback_gain[kk] @ x_hat + self.feedthrough_gain[kk]
-            x_hat_p, ABar, BBar, cBar = self.prop_state_forward(tt, x_hat, u_hat, state_args, ctrl_args)
+            x_hat_p, ABar, BBar, cBar = self.prop_state_forward(
+                tt, x_hat, u_hat, state_args, ctrl_args
+            )
 
             # final cost is handled after the forward pass
-            P, Q, R, q, r = self.quadratize_cost(tt, x_hat, u_hat, kk==0, False, cost_args)
+            P, Q, R, q, r = self.quadratize_cost(
+                tt, itr, x_hat, u_hat, kk == 0, False, cost_args
+            )
 
             CBar = BBar.T @ (self.ct_come_mats[kk] + Q) @ ABar + P @ ABar
             DBar = ABar.T @ (self.ct_come_mats[kk] + Q) @ ABar
@@ -343,14 +364,22 @@ class ELQR:
                 @ (self.ct_go_vecs[kk + 1] + self.ct_come_vecs[kk + 1])
             )
 
-    def backward_pass(self, num_timesteps, x_hat, state_args, ctrl_args, cost_args):
+        return x_hat
+
+    def backward_pass(
+        self, itr, num_timesteps, x_hat, state_args, ctrl_args, cost_args
+    ):
         for kk in range(num_timesteps - 1, -1, -1):
             tt = kk * abs(self.dt) + self.start_time
 
             u_hat = self.feedback_gain[kk] @ x_hat + self.feedthrough_gain[kk]
-            x_hat_p, A, B, c = self.prop_state_backward(tt, x_hat, u_hat, state_args, ctrl_args)
+            x_hat_p, A, B, c = self.prop_state_backward(
+                tt, x_hat, u_hat, state_args, ctrl_args
+            )
 
-            P, Q, R, q, r = self.quadratize_cost(tt, x_hat_p, u_hat, kk==0, False, cost_args)
+            P, Q, R, q, r = self.quadratize_cost(
+                tt, itr, x_hat_p, u_hat, kk == 0, False, cost_args
+            )
 
             C = P + B.T @ self.ct_go_mats[kk + 1] @ A
             D = Q + A.T @ self.ct_go_mats[kk + 1] @ A
@@ -369,7 +398,18 @@ class ELQR:
                 @ (self.ct_go_vecs[kk] + self.ct_come_vecs[kk])
             )
 
-    def calculate_control(self, tt, cur_state, end_state, state_args=None, ctrl_args=None, cost_args=None, provide_details=False):
+        return x_hat
+
+    def calculate_control(
+        self,
+        tt,
+        cur_state,
+        end_state,
+        state_args=None,
+        ctrl_args=None,
+        cost_args=None,
+        provide_details=False,
+    ):
         if state_args is None:
             state_args = ()
         if ctrl_args is None:
@@ -396,23 +436,29 @@ class ELQR:
         self.feedback_gain = np.zeros(
             (num_timesteps + 1, self.u_nom.size, cur_state.size)
         )
-        self.feedthrough_gain = self.u_nom * np.ones((num_timesteps + 1, self.u_nom.size, 1))
+        self.feedthrough_gain = self.u_nom * np.ones(
+            (num_timesteps + 1, self.u_nom.size, 1)
+        )
 
         for ii in range(self.max_iters):
-            print(ii)
             # forward pass
-            self.forward_pass(num_timesteps, x_hat, state_args, ctrl_args, cost_args)
+            x_hat = self.forward_pass(
+                ii, num_timesteps, x_hat, state_args, ctrl_args, cost_args
+            )
 
-            # quadratize final cost (kk = num_timesteps)
+            # quadratize final cost (ii = num_timesteps)
             tt = num_timesteps * self.dt + self.start_time
-            u_hat = self.feedback_gain[num_timesteps] @ x_hat + self.feedthrough_gain[num_timesteps]
+            u_hat = (
+                self.feedback_gain[num_timesteps] @ x_hat
+                + self.feedthrough_gain[num_timesteps]
+            )
             (
                 _,
                 self.ct_go_mats[num_timesteps],
                 _,
                 self.ct_go_vecs[num_timesteps],
                 _,
-            ) = self.quadratize_cost(tt, x_hat, u_hat, False, True, cost_args)
+            ) = self.quadratize_cost(tt, ii, x_hat, u_hat, False, True, cost_args)
             x_hat = -(
                 np.linalg.inv(
                     self.ct_go_mats[num_timesteps] + self.ct_come_mats[num_timesteps]
@@ -421,16 +467,23 @@ class ELQR:
             )
 
             # backward pass
-            self.backward_pass(num_timesteps, x_hat, state_args, ctrl_args, cost_args)
+            x_hat = self.backward_pass(
+                ii, num_timesteps, x_hat, state_args, ctrl_args, cost_args
+            )
 
             # get cost
             cost = 0
             x = x_hat.copy()
-            for kk in range(num_timesteps):
+            for kk in range(num_timesteps + 1):
                 tt = kk * abs(self.dt) + self.start_time
                 u = self.feedback_gain[kk] @ x + self.feedthrough_gain[kk]
                 cost += self.cost_function(
-                    tt, x, u, cost_args, is_initial=(kk == 0), is_final=(kk == num_timesteps - 1),
+                    tt,
+                    x,
+                    u,
+                    cost_args,
+                    is_initial=(kk == 0),
+                    is_final=(kk == num_timesteps),
                 )
                 x = self.prop_state_forward(tt, x, u, state_args, ctrl_args)[0]
 
@@ -439,18 +492,43 @@ class ELQR:
                 break
             old_cost = cost
 
+            print("iter ", ii, " cost: ", cost)
+
         # create outputs and return
         ctrl_signal = np.nan * np.ones((num_timesteps, self.u_nom.size))
-        state_traj = np.nan * np.ones((num_timesteps+1, self._init_state.size))
+        state_traj = np.nan * np.ones((num_timesteps + 1, self._init_state.size))
         cost = 0
         state_traj[0, :] = self._init_state.flatten()
         for kk in range(num_timesteps):
             tt = kk * abs(self.dt) + self.start_time
-            ctrl_signal[kk, :] = (self.feedback_gain[kk] @ x + self.feedthrough_gain[kk]).ravel()
+            ctrl_signal[kk, :] = (
+                self.feedback_gain[kk] @ x + self.feedthrough_gain[kk]
+            ).ravel()
             cost += self.cost_function(
-                tt, x, u, cost_args, is_initial=(kk == 0), is_final=(kk == num_timesteps - 1),
+                tt,
+                state_traj[kk, :].reshape((-1, 1)),
+                ctrl_signal[kk, :].reshape((-1, 1)),
+                cost_args,
+                is_initial=(kk == 0),
+                is_final=False,
             )
-            state_traj[kk+1, :] = self.prop_state_forward(tt, state_traj[kk, :].reshape((-1, 1)), ctrl_signal[kk, :].reshape((-1, 1)), state_args, ctrl_args)[0].ravel()
+            state_traj[kk + 1, :] = self.prop_state_forward(
+                tt,
+                state_traj[kk, :].reshape((-1, 1)),
+                ctrl_signal[kk, :].reshape((-1, 1)),
+                state_args,
+                ctrl_args,
+            )[0].ravel()
+
+        cost += self.cost_function(
+            tt,
+            state_traj[num_timesteps, :].reshape((-1, 1)),
+            ctrl_signal[num_timesteps - 1, :].reshape((-1, 1)),
+            cost_args,
+            is_initial=False,
+            is_final=True,
+        )
+
         u = ctrl_signal[0, :].reshape((-1, 1))
         details = (cost, state_traj, ctrl_signal)
         return (u, *details) if provide_details else u
