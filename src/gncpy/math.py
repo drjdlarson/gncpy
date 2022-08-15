@@ -47,7 +47,7 @@ def get_hessian(x, fnc, f_args=(), step_size=np.finfo(float).eps**(1 / 4)):
     x : numpy array
         DESCRIPTION.
     fnc : callable
-        Function.
+        The function to evaluate, must be of the form `f(x, *f_args)`.
     f_args : tuple, optional
         Additional arguments for the function. The default is ().
     step_size : float, optional

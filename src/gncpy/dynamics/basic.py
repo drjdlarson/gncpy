@@ -310,12 +310,15 @@ class NonlinearDynamicsBase(DynamicsBase):
             return gmath.get_state_jacobian(timestep, state, self.cont_fnc_lst, f_args)
 
         else:
+            def factory(ii):
+                return lambda _t, _x, *_args: self.propagate_state(
+                    _t, _x, u=u, state_args=_args, ctrl_args=ctrl_args
+                )[ii]
+
             return gmath.get_state_jacobian(
                 timestep,
                 state,
-                lambda _t, _x, *_args: self.propagate_state(
-                    _t, _x, u=u, state_args=_args, ctrl_args=ctrl_args
-                ),
+                [factory(ii) for ii in range(state.size)],
                 f_args,
             )
 
@@ -344,9 +347,26 @@ class NonlinearDynamicsBase(DynamicsBase):
         if self.control_model is None:
             warn("Control model is None")
             return np.zeros((state.size, u.size))
-        return gmath.get_input_jacobian(timestep, state, u, lambda _t, _x, _u, *_args: self.propagate_state(
-            _t, _x, u=_u, state_args=state_args, ctrl_args=ctrl_args
-        ), ())
+        # def factory(ii):
+        #     return lambda _t, _x, _u, *_args: self.control_model(
+        #         _t, _x, _u, *ctrl_args
+        #     )[ii]
+
+        # return gmath.get_input_jacobian(
+        #     timestep,
+        #     state,
+        #     u,
+        #     [factory(ii) for ii in range(state.size)],
+        #     (),
+        # )
+
+        return gmath.get_input_jacobian(
+            timestep,
+            state,
+            u,
+            self.control_model,
+            (),
+        )
 
     def propagate_state(self, timestep, state, u=None, state_args=None, ctrl_args=None):
         """Propagates the continuous time dynamics.
@@ -828,7 +848,8 @@ class IRobotCreate(NonlinearDynamicsBase):
             Additional arguments for the parent class.
         """
         super().__init__(**kwargs)
-        self.wheel_separation = wheel_separation
+        self._wheel_separation = wheel_separation
+        self.radius = radius
 
         def g0(t, x, u, *args):
             return 0.5 * ((u[0] + u[1]) * np.cos(x[2])).item()
@@ -837,9 +858,13 @@ class IRobotCreate(NonlinearDynamicsBase):
             return 0.5 * ((u[0] + u[1]) * np.sin(x[2])).item()
 
         def g2(t, x, u, *args):
-            return (u[0] - u[1]) / self._wheel_separation
+            return (u[0] - u[1]) / self.wheel_separation
 
         self.control_model = [g0, g1, g2]
+
+    @property
+    def wheel_separation(self):
+        return self._wheel_separation
 
     @property
     def cont_fnc_lst(self):
