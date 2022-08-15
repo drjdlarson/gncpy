@@ -157,15 +157,15 @@ class ELQR:
         if not self.use_custom_cost:
             if is_final:
                 sdiff = state - self._end_state
-                return 0.5 * (sdiff.T @ self._Q @ sdiff).item()
+                return (sdiff.T @ self._Q @ sdiff).item()
             else:
                 cost = 0
                 if is_initial:
                     sdiff = state - self._init_state
-                    cost += 0.5 * (sdiff.T @ self._Q @ sdiff).item()
+                    cost += (sdiff.T @ self._Q @ sdiff).item()
 
-                cdiff = ctrl_input = self.u_nom
-                cost += 0.5 * (cdiff.T @ self._R @ cdiff).item()
+                cdiff = ctrl_input - self.u_nom
+                cost += (cdiff.T @ self._R @ cdiff).item()
                 cost += self._non_quad_fun(
                     tt,
                     state,
@@ -502,7 +502,7 @@ class ELQR:
         for kk in range(num_timesteps):
             tt = kk * abs(self.dt) + self.start_time
             ctrl_signal[kk, :] = (
-                self.feedback_gain[kk] @ x + self.feedthrough_gain[kk]
+                self.feedback_gain[kk] @ state_traj[kk, :].reshape((-1, 1)) + self.feedthrough_gain[kk]
             ).ravel()
             cost += self.cost_function(
                 tt,

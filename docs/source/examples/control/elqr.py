@@ -75,16 +75,16 @@ def basic():
             dist = np.sqrt(np.sum(diff * diff))
             # signed distance is negative if the robot is within the obstacle
             signed_dist = (dist - dynObj.radius) - obs[2]
-            cost += _obs_factor * np.exp(-_scale_factor * signed_dist)
+            cost += _obs_factor * np.exp(-_scale_factor * signed_dist).item()
 
         # add cost for going out of bounds
         for ii, b in enumerate(_bottom_left):
             dist = (state[ii] - b) - dynObj.radius
-            cost += _obs_factor * np.exp(-_scale_factor * dist)
+            cost += _obs_factor * np.exp(-_scale_factor * dist).item()
 
         for ii, b in enumerate(_top_right):
             dist = (b - state[ii]) - dynObj.radius
-            cost += _obs_factor * np.exp(-_scale_factor * dist)
+            cost += _obs_factor * np.exp(-_scale_factor * dist).item()
 
         return cost
 
@@ -143,7 +143,7 @@ def modify_quadratize():
     )
 
     # define enviornment bounds for the robot
-    bottom_left = np.array([-2.0, -3])
+    bottom_left = np.array([-2, -3])
     top_right = np.array([2, 3])
 
     # define Q and R weights for using standard cost function
@@ -176,16 +176,16 @@ def modify_quadratize():
             dist = np.sqrt(np.sum(diff * diff))
             # signed distance is negative if the robot is within the obstacle
             signed_dist = (dist - dynObj.radius) - obs[2]
-            cost += _obs_factor * np.exp(-_scale_factor * signed_dist)
+            cost += _obs_factor * np.exp(-_scale_factor * signed_dist).item()
 
         # add cost for going out of bounds
         for ii, b in enumerate(_bottom_left):
             dist = (state[ii] - b) - dynObj.radius
-            cost += _obs_factor * np.exp(-_scale_factor * dist)
+            cost += _obs_factor * np.exp(-_scale_factor * dist).item()
 
         for ii, b in enumerate(_top_right):
             dist = (b - state[ii]) - dynObj.radius
-            cost += _obs_factor * np.exp(-_scale_factor * dist)
+            cost += _obs_factor * np.exp(-_scale_factor * dist).item()
 
         return cost
 
