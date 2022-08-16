@@ -182,16 +182,26 @@ class ELQR:
             tt, state, ctrl_input, self._end_state, is_initial, is_final, *cost_args
         )
 
-    def prop_state_forward(self, tt, x_hat, u_hat, state_args, ctrl_args):
+    def _prop_state(self, tt, x_hat, u_hat, state_args, ctrl_args, forward):
         if self.dynObj is not None:
             if isinstance(self.dynObj, gdyn.NonlinearDynamicsBase):
-                if self.dynObj.dt < 0:
+                if forward and self.dynObj.dt < 0:
                     self.dynObj.dt *= -1  # set to go forward
-                x_hat_p = self.dynObj.propagate_state(
+                elif not forward and self.dynObj.dt > 0:
+                    self.dynObj.dt *= -1
+
+                return self.dynObj.propagate_state(
                     tt, x_hat, u=u_hat, state_args=state_args, ctrl_args=ctrl_args
                 )
 
+    def prop_state_forward(self, tt, x_hat, u_hat, state_args, ctrl_args):
+        x_hat_p = self._prop_state(tt, x_hat, u_hat, state_args, ctrl_args, True)
+
+        if self.dynObj is not None:
+            if isinstance(self.dynObj, gdyn.NonlinearDynamicsBase):
+                # if self.dynObj.dt > 0:
                 self.dynObj.dt *= -1  # set to inverse dynamics
+
                 ABar = self.dynObj.get_state_mat(
                     tt, x_hat_p, *state_args, u=u_hat, ctrl_args=ctrl_args
                 )
@@ -207,14 +217,13 @@ class ELQR:
         return x_hat_p, ABar, BBar, cBar
 
     def prop_state_backward(self, tt, x_hat, u_hat, state_args, ctrl_args):
+        x_hat_p = self._prop_state(tt, x_hat, u_hat, state_args, ctrl_args, False)
+
         if self.dynObj is not None:
             if isinstance(self.dynObj, gdyn.NonlinearDynamicsBase):
-                if self.dynObj.dt > 0:
-                    self.dynObj.dt *= -1  # set to go backward
-                x_hat_p = self.dynObj.propagate_state(
-                    tt, x_hat, u=u_hat, state_args=state_args, ctrl_args=ctrl_args
-                )
+                # if self.dynObj.dt < 0:
                 self.dynObj.dt *= -1  # flip back to forward to get forward matrices
+
                 A = self.dynObj.get_state_mat(
                     tt, x_hat_p, *state_args, u=u_hat, ctrl_args=ctrl_args
                 )
@@ -277,18 +286,8 @@ class ELQR:
                 # extract non-quadratic terms
                 non_Q = big_mat[:xdim, :xdim]
 
-                # regularize hessian to keep it pos semi def
-                # vals, vecs = np.linalg.eig(non_Q)
-                # vals[vals < 0] = 0
-                # non_Q = vecs @ np.diag(vals) @ vecs.T
-
                 non_P = big_mat[xdim:, :xdim]
                 non_R = big_mat[xdim:, xdim:]
-
-                # regularize hessian to keep it pos semi def
-                # vals, vecs = np.linalg.eig(non_R)
-                # vals[vals < 0] = 0
-                # non_R = vecs @ np.diag(vals) @ vecs.T
 
                 big_vec = gmath.get_jacobian(
                     comb_state,
@@ -321,9 +320,13 @@ class ELQR:
 
         return P, Q, R, q, r
 
-    def forward_pass(self, itr, num_timesteps, x_hat, state_args, ctrl_args, cost_args):
+    def forward_pass(
+        self, itr, num_timesteps, x_hat, state_args, ctrl_args, cost_args, time_vec
+    ):
+        abs_dt = np.abs(self.dt)
         for kk in range(num_timesteps):
-            tt = kk * abs(self.dt) + self.start_time
+            # tt = kk * abs_dt + self.start_time
+            tt = time_vec[kk]
 
             u_hat = self.feedback_gain[kk] @ x_hat + self.feedthrough_gain[kk]
             x_hat_p, ABar, BBar, cBar = self.prop_state_forward(
@@ -335,26 +338,18 @@ class ELQR:
                 tt, itr, x_hat, u_hat, kk == 0, False, cost_args
             )
 
-            CBar = BBar.T @ (self.ct_come_mats[kk] + Q) @ ABar + P @ ABar
-            DBar = ABar.T @ (self.ct_come_mats[kk] + Q) @ ABar
-            EBar = (
-                BBar.T @ (self.ct_come_mats[kk] + Q) @ BBar
-                + R
-                + P @ BBar
-                + BBar.T @ P.T
-            )
-            dBar = ABar.T @ (
-                self.ct_come_vecs[kk] + q + (self.ct_come_mats[kk] + Q) @ cBar
-            )
-            eBar = (
-                BBar.T
-                @ (self.ct_come_vecs[kk] + q + (self.ct_come_mats[kk] + Q) @ cBar)
-                + r
-                + P @ cBar
-            )
+            ctm_Q = self.ct_come_mats[kk] + Q
+            ctm_Q_A = ctm_Q @ ABar
+            ctv_q_ctm_Q_c = self.ct_come_vecs[kk] + q + ctm_Q @ cBar
+            CBar = BBar.T @ ctm_Q_A + P @ ABar
+            DBar = ABar.T @ ctm_Q_A
+            EBar = BBar.T @ ctm_Q @ BBar + R + P @ BBar + BBar.T @ P.T
+            dBar = ABar.T @ ctv_q_ctm_Q_c
+            eBar = BBar.T @ ctv_q_ctm_Q_c + r + P @ cBar
 
-            self.feedback_gain[kk] = -np.linalg.inv(EBar) @ CBar
-            self.feedthrough_gain[kk] = -np.linalg.inv(EBar) @ eBar
+            neg_inv_EBar = -np.linalg.inv(EBar)
+            self.feedback_gain[kk] = neg_inv_EBar @ CBar
+            self.feedthrough_gain[kk] = neg_inv_EBar @ eBar
 
             self.ct_come_mats[kk + 1] = DBar + CBar.T @ self.feedback_gain[kk]
             self.ct_come_vecs[kk + 1] = dBar + CBar.T @ self.feedthrough_gain[kk]
@@ -367,10 +362,12 @@ class ELQR:
         return x_hat
 
     def backward_pass(
-        self, itr, num_timesteps, x_hat, state_args, ctrl_args, cost_args
+        self, itr, num_timesteps, x_hat, state_args, ctrl_args, cost_args, time_vec
     ):
+        abs_dt = np.abs(self.dt)
         for kk in range(num_timesteps - 1, -1, -1):
-            tt = kk * abs(self.dt) + self.start_time
+            # tt = kk * abs_dt + self.start_time
+            tt = time_vec[kk]
 
             u_hat = self.feedback_gain[kk] @ x_hat + self.feedthrough_gain[kk]
             x_hat_p, A, B, c = self.prop_state_backward(
@@ -381,14 +378,17 @@ class ELQR:
                 tt, itr, x_hat_p, u_hat, kk == 0, False, cost_args
             )
 
-            C = P + B.T @ self.ct_go_mats[kk + 1] @ A
-            D = Q + A.T @ self.ct_go_mats[kk + 1] @ A
+            ctm_A = self.ct_go_mats[kk + 1] @ A
+            ctv_ctm_c = self.ct_go_vecs[kk + 1] + self.ct_go_mats[kk + 1] @ c
+            C = P + B.T @ ctm_A
+            D = Q + A.T @ ctm_A
             E = R + B.T @ self.ct_go_mats[kk + 1] @ B
-            d = q + A.T @ (self.ct_go_vecs[kk + 1] + self.ct_go_mats[kk + 1] @ c)
-            e = r + B.T @ (self.ct_go_vecs[kk + 1] + self.ct_go_mats[kk + 1] @ c)
+            d = q + A.T @ ctv_ctm_c
+            e = r + B.T @ ctv_ctm_c
 
-            self.feedback_gain[kk] = -np.linalg.inv(E) @ C
-            self.feedthrough_gain[kk] = -np.linalg.inv(E) @ e
+            neg_inv_E = -np.linalg.inv(E)
+            self.feedback_gain[kk] = neg_inv_E @ C
+            self.feedthrough_gain[kk] = neg_inv_E @ e
 
             self.ct_go_mats[kk] = D + C.T @ self.feedback_gain[kk]
             self.ct_go_vecs[kk] = d + C.T @ self.feedthrough_gain[kk]
@@ -409,6 +409,7 @@ class ELQR:
         ctrl_args=None,
         cost_args=None,
         provide_details=False,
+        disp=True,
     ):
         if state_args is None:
             state_args = ()
@@ -421,11 +422,10 @@ class ELQR:
 
         old_cost = float("inf")
         num_timesteps = int(self.time_horizon / self.dt)
-        self._init_state = cur_state.reshape((-1, 1))
-        self._end_state = end_state.reshape((-1, 1))
-        x_hat = cur_state.reshape((-1, 1))
+        self._init_state = cur_state.reshape((-1, 1)).copy()
+        self._end_state = end_state.reshape((-1, 1)).copy()
+        x_hat = cur_state.reshape((-1, 1)).copy()
 
-        # TODO: check initialization
         self.ct_come_mats = np.zeros(
             (num_timesteps + 1, cur_state.size, cur_state.size)
         )
@@ -440,10 +440,17 @@ class ELQR:
             (num_timesteps + 1, self.u_nom.size, 1)
         )
 
+        abs_dt = np.abs(self.dt)
+
+        if disp:
+            print("Starting ELQR optimization loop...")
+
+        time_vec = np.arange(self.start_time, abs_dt * (num_timesteps + 1), abs_dt)
+
         for ii in range(self.max_iters):
             # forward pass
             x_hat = self.forward_pass(
-                ii, num_timesteps, x_hat, state_args, ctrl_args, cost_args
+                ii, num_timesteps, x_hat, state_args, ctrl_args, cost_args, time_vec
             )
 
             # quadratize final cost (ii = num_timesteps)
@@ -468,14 +475,14 @@ class ELQR:
 
             # backward pass
             x_hat = self.backward_pass(
-                ii, num_timesteps, x_hat, state_args, ctrl_args, cost_args
+                ii, num_timesteps, x_hat, state_args, ctrl_args, cost_args, time_vec
             )
 
             # get cost
             cost = 0
             x = x_hat.copy()
-            for kk in range(num_timesteps + 1):
-                tt = kk * abs(self.dt) + self.start_time
+            for kk, tt in enumerate(time_vec):
+                # tt = kk * abs_dt + self.start_time
                 u = self.feedback_gain[kk] @ x + self.feedthrough_gain[kk]
                 cost += self.cost_function(
                     tt,
@@ -485,24 +492,26 @@ class ELQR:
                     is_initial=(kk == 0),
                     is_final=(kk == num_timesteps),
                 )
-                x = self.prop_state_forward(tt, x, u, state_args, ctrl_args)[0]
+                x = self._prop_state(tt, x, u, state_args, ctrl_args, True)
+
+            if disp:
+                print("\tIteration: {:3d} Cost: {:10.4f}".format(ii, cost))
 
             # check for convergence
-            if abs(old_cost - cost) / cost < self.tol:
+            if np.abs(old_cost - cost) / cost < self.tol:
                 break
             old_cost = cost
-
-            print("iter ", ii, " cost: ", cost)
 
         # create outputs and return
         ctrl_signal = np.nan * np.ones((num_timesteps, self.u_nom.size))
         state_traj = np.nan * np.ones((num_timesteps + 1, self._init_state.size))
         cost = 0
         state_traj[0, :] = self._init_state.flatten()
-        for kk in range(num_timesteps):
-            tt = kk * abs(self.dt) + self.start_time
+        for kk, tt in enumerate(time_vec[:-1]):
+            # tt = kk * abs_dt + self.start_time
             ctrl_signal[kk, :] = (
-                self.feedback_gain[kk] @ state_traj[kk, :].reshape((-1, 1)) + self.feedthrough_gain[kk]
+                self.feedback_gain[kk] @ state_traj[kk, :].reshape((-1, 1))
+                + self.feedthrough_gain[kk]
             ).ravel()
             cost += self.cost_function(
                 tt,
@@ -512,16 +521,17 @@ class ELQR:
                 is_initial=(kk == 0),
                 is_final=False,
             )
-            state_traj[kk + 1, :] = self.prop_state_forward(
+            state_traj[kk + 1, :] = self._prop_state(
                 tt,
                 state_traj[kk, :].reshape((-1, 1)),
                 ctrl_signal[kk, :].reshape((-1, 1)),
                 state_args,
                 ctrl_args,
-            )[0].ravel()
+                True,
+            ).ravel()
 
         cost += self.cost_function(
-            tt,
+            time_vec[-1],
             state_traj[num_timesteps, :].reshape((-1, 1)),
             ctrl_signal[num_timesteps - 1, :].reshape((-1, 1)),
             cost_args,
