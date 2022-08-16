@@ -134,8 +134,14 @@ extras["all"] = list(
     itertools.chain.from_iterable(map(lambda group: extras[group], extras.keys()))
 )
 
+if sys.platform == "linux" or sys.platform == "linux2":
+    ext_modules = [CMakeExtension("gncpy.dynamics.aircraft.lager_super_bindings._lager_super_bindings"),]
+    cmdclass = dict(build_ext=CMakeBuild)
+else:
+    ext_modules = []
+    cmdclass = {}
 setup(
     extras_require=extras,
-    ext_modules=[CMakeExtension("gncpy.dynamics.aircraft.lager_super_bindings._lager_super_bindings")],
-    cmdclass=dict(build_ext=CMakeBuild),
+    ext_modules=ext_modules,
+    cmdclass=cmdclass,
 )

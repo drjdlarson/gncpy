@@ -106,6 +106,7 @@ def basic():
 def modify_quadratize():
     import numpy as np
 
+    import gncpy.plotting as gplot
     import gncpy.control as gcontrol
     from gncpy.dynamics.basic import IRobotCreate
 
@@ -207,25 +208,44 @@ def modify_quadratize():
         Q=Q, R=R, non_quadratic_fun=non_quadratic_cost, quad_modifier=quad_modifier
     )
 
-    # calculate control
-    u, cost, state_trajectory, control_signal = elqr.calculate_control(
-        tt, start_state, end_state, cost_args=cost_args, provide_details=True
-    )
-
-    plt.figure()
-    plt.scatter(start_state[0], start_state[1], marker='o', color='g', zorder=1000)
-    plt.scatter(end_state[0], end_state[1], marker='x', color='r', zorder=1000)
-    plt.plot(state_trajectory[:, 0], state_trajectory[:, 1])
-    plt.xlim((bottom_left[0], top_right[0]))
-    plt.ylim((bottom_left[1], top_right[1]))
-
+    fig = plt.figure()
+    fig.add_subplot(1, 1, 1)
+    fig.axes[0].set_aspect("equal", adjustable="box")
+    fig.axes[0].set_xlim((bottom_left[0], top_right[0]))
+    fig.axes[0].set_ylim((bottom_left[1], top_right[1]))
+    fig.axes[0].scatter(start_state[0], start_state[1], marker='o', color='g', zorder=1000)
     for obs in obstacles:
         c = Circle(obs[:2], radius=obs[2], color='k', zorder=1000)
-        plt.gca().add_patch(c)
-    plt.gca().set_aspect('equal')
+        fig.axes[0].add_patch(c)
+    plt_opts = gplot.init_plotting_opts(f_hndl=fig)
+    gplot.set_title_label(fig, 0, plt_opts, ttl="ELQR with Modified Quadratize Cost")
+    
+    # calculate control
+    u, cost, state_trajectory, control_signal, fig, frame_list = elqr.calculate_control(
+        tt, start_state, end_state, cost_args=cost_args, provide_details=True, show_animation=True, save_animation=True, plt_inds=[0, 1], fig=fig
+    )
+    
+    return frame_list
 
+    
+def run():
+    import os
+
+    fout = os.path.join(os.path.dirname(__file__), "elqr_modify_quadratize.gif")
+    if not os.path.isfile(fout):
+        frame_list = modify_quadratize()
+    
+        frame_list[0].save(
+                fout,
+                save_all=True,
+                append_images=frame_list[1:],
+                duration=10,  # convert s to ms
+                loop=0,
+        )
 
 if __name__ == "__main__":
     plt.close('all')
-    # basic()
-    modify_quadratize()
+    
+    run()
+    
+    plt.show()
