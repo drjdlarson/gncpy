@@ -118,6 +118,7 @@ class ELQR:
 
     @property
     def dt(self):
+        """Timestep in seconds."""
         if self.dynObj is not None and isinstance(
             self.dynObj, gdyn.NonlinearDynamicsBase
         ):
@@ -135,6 +136,19 @@ class ELQR:
             self._dt = val
 
     def set_state_model(self, u_nom, dynObj=None, dt=None):
+        """Set the state/dynamics model.
+
+        Parameters
+        ----------
+        u_nom : Nu x 1 numpy array
+            Nominal control input.
+        dynObj : :class:`gncpy.dynamics.basic.DynamicsBase`, optional
+            System dynamics to control. The default is None.
+        dt : float, optional
+            Timestep to use. Will update the dynamic object if applicable.
+            The default is None.
+        """
+
         self.u_nom = u_nom.reshape((-1, 1))
         self.dynObj = dynObj
         if dt is not None:
@@ -427,7 +441,7 @@ class ELQR:
             ctrl_args = ()
         if cost_args is None:
             cost_args = ()
-            
+
         if plt_inds is None:
             plt_inds = [0, 1]
 
@@ -455,7 +469,7 @@ class ELQR:
         )
 
         abs_dt = np.abs(self.dt)
-        
+
         frame_list = []
         if show_animation:
             if fig is None:
@@ -477,7 +491,7 @@ class ELQR:
 
             fig.axes[0].scatter(self._end_state[plt_inds[0], 0], self._end_state[plt_inds[1], 0], marker='x', color='r', zorder=1000)
             plt.pause(0.01)
-            
+
             # for stopping simulation with the esc key.
             fig.canvas.mpl_connect(
                 "key_release_event",
@@ -524,22 +538,22 @@ class ELQR:
                 )
                 @ (self.ct_go_vecs[num_timesteps] + self.ct_come_vecs[num_timesteps])
             ).ravel()
-            
+
             if show_animation:
                 # plot forward pass trajectory
                 fig.axes[0].plot(traj[:, plt_inds[0]], traj[:, plt_inds[1]], color=(0.5, 0.5, 0.5), alpha=0.2, zorder=-10)
                 plt.pause(0.005)
-                
+
 
             # backward pass
             traj = self.backward_pass(
                 ii, num_timesteps, traj, state_args, ctrl_args, cost_args, time_vec
             )
-            
+
             if show_animation:
                 # plot backward pass trajectory
                 fig.axes[0].plot(traj[:, plt_inds[0]], traj[:, plt_inds[1]], color=(0.5, 0.5, 0.5), alpha=0.2, zorder=-10)
-                
+
                 plt.pause(0.005)
                 if save_animation:
                     with io.BytesIO() as buff:
@@ -609,7 +623,7 @@ class ELQR:
             is_initial=False,
             is_final=True,
         )
-        
+
         if show_animation:
             fig.axes[0].plot(state_traj[:, plt_inds[0]], state_traj[:, plt_inds[1]], linestyle="-", color="g")
             plt.pause(0.001)

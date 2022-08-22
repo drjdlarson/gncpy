@@ -25,7 +25,7 @@ class DynamicsBase(ABC):
         list of callables where each callable returns the modification to the
         corresponding state, :math:`g(t, x_i, u_i)`, in the differential equation
         :math:`\dot{x}_i = f(t, x_i) + g(t, x_i, u_i)` and has the signature
-        `t, u, *ctrl_args`.
+        `t, x, u, *ctrl_args`.
     state_constraint : callable
         Has the signature `t, x` where `t` is the current timestep and `x`
         is the propagated state. It returns the propagated state with
@@ -43,6 +43,10 @@ class DynamicsBase(ABC):
         super().__init__()
         self.control_model = control_model
         self.state_constraint = state_constraint
+
+    @abstractmethod
+    def get_input_mat(self, timestep, state, *args, **kwargs):
+        raise NotImplementedError()
 
     @abstractmethod
     def propagate_state(self, *args, **kwargs):
@@ -67,25 +71,10 @@ class DynamicsBase(ABC):
         next_state : N x 1 numpy array
             The propagated state.
         """
-        raise NotImplementedError
-
-
-class LinearDynamicsBase(DynamicsBase):
-    """Base class for all linear dynamics models.
-
-    Child classes should define their own get_state_mat function and set the
-    state names class variable. The remainder of the functions autogenerate
-    based on these values.
-
-    """
-
-    __slots__ = ()
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        raise NotImplementedError()
 
     @abstractmethod
-    def get_state_mat(self, timestep, *args):
+    def get_state_mat(self, timestep, *args, **kwargs):
         """Abstract method for getting the discrete time state matrix.
 
         Must be overridden in child classes.
@@ -102,7 +91,48 @@ class LinearDynamicsBase(DynamicsBase):
         N x N numpy array
             state matrix.
         """
-        raise NotImplementedError
+        raise NotImplementedError()
+
+
+class LinearDynamicsBase(DynamicsBase):
+    """Base class for all linear dynamics models.
+
+    Child classes should define their own get_state_mat function and set the
+    state names class variable. The remainder of the functions autogenerate
+    based on these values.
+
+    """
+
+    __slots__ = ()
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def get_input_mat(self, timestep, state, ctrl_args=None):
+        """Calculates the input matrix from the control model.
+
+        This calculates the jacobian of the control model. If no control model
+        is specified than it returns a zero matrix.
+
+        Parameters
+        ----------
+        timestep : float
+            current timestep.
+        state : N x 1 numpy array
+            current state.
+        *ctrl_args : tuple
+            Additional arguments to pass to the control model.
+
+        Returns
+        -------
+        N x Nu numpy array
+            Control input matrix.
+        """
+        if self.control_model is None:
+            raise RuntimeWarning('Control model is not set.')
+
+
+        return self.controla-model(timestep, state, *ctrl_args)
 
     def get_dis_process_noise_mat(self, dt, *f_args):
         """Class method for getting the process noise.
