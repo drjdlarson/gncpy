@@ -89,32 +89,25 @@ class BaseLQR:
             raise RuntimeError(msg)
 
 
-class ELQR:
-    def __init__(self, max_iters=1e3, tol=1e-4, time_horizon=10):
-        self.max_iters = int(max_iters)
-        self.tol = tol
-        self.time_horizon = time_horizon
-        self._dt = None
-        self.start_time = None
+class LQR:
+    r""" Implements a Linear Quadratic Regulator (LQR) controller.
 
-        self.u_nom = np.array([])
-        self.ct_come_mats = np.array([])
-        self.ct_come_vecs = np.array([])
-        self.ct_go_mats = np.array([])
-        self.ct_go_vecs = np.array([])
-        self.feedback_gain = np.array([])
-        self.feedthrough_gain = np.array([])
+        This implements an LQR controller for the cost function
 
-        self.use_custom_cost = False
-        self._init_state = np.array([])
-        self._end_state = np.array([])
+        .. math::
+            J = \frac{1}{2} \left[x_f^T Q x_f + \int^{t_f}_0 x^T Q x + u^T R u
+                     + u^T P x\right]
+    """
+
+    def __init__(self):
+        super().__init__()
+
         self._Q = None
         self._R = None
-        self._non_quad_fun = None
-        self._quad_modifier = None
-        self._cost_fun = None
+        self._P = None
 
         self.dynObj = None
+        self._dt = None
 
     @property
     def dt(self):
@@ -155,13 +148,146 @@ class ELQR:
             self.dt = dt
 
     def set_cost_model(
+        self, Q, R, P=None,
+    ):
+        self._Q = Q
+        self._R = R
+
+        if P is None:
+            self._P = np.zeros((self._R.shape[0], self._Q.shape[0]))
+        else:
+            self._P = P
+
+    def calculate_control(
+        self,
+        cur_time,
+        cur_state,
+        time_horizon,
+        end_state=None,
+        end_state_tol=1e-2,
+        check_inds=None,
+        state_args=None,
+        ctrl_args=None,
+        provide_details=False,
+    ):
+        if state_args is None:
+            state_args = ()
+        if ctrl_args is None:
+            ctrl_args = ()
+
+        if np.isinf(time_horizon) or time_horizon <= 0:
+            F = self.dynObj.get_state_mat(cur_time, *state_args)
+            G = self.dynObj.get_input_mat(cur_time, cur_state, *ctrl_args)
+            # TODO: make this work for other dynamic models
+            # F, G = self.get_state_space(cur_time, cur_state, state_args)
+            P = la.solve_discrete_are(F, G, self._Q, self._R)
+            feedback_gain = la.inv(G.T @ P @ G + self._R) @ (G.T @ P @ F + self._P)
+            state_traj = cur_state.reshape((1, -1)).copy()
+
+            if end_state is not None:
+                dx = end_state - cur_state
+
+                if self.dt is None:
+                    dx = cur_state
+                    ctrl_signal = (feedback_gain @ dx + self.u_nom).ravel()
+                    cost = np.nan
+
+                else:
+                    ctrl_signal = None
+                    cost = 0
+
+                    if check_inds is None:
+                        check_inds = range(cur_state.size)
+
+                    timestep = cur_time
+                    while (
+                        np.linalg.norm(
+                            state_traj[-1, check_inds] - end_state[check_inds, 0]
+                        )
+                        > end_state_tol
+                    ):
+                        timestep += self.dt
+                        dx = end_state - state_traj[-1, :].reshape((-1, 1))
+                        u = feedback_gain @ dx + self.u_nom
+                        if ctrl_signal is None:
+                            ctrl_signal = u.flatten()
+                        else:
+                            ctrl_signal = np.vstack((ctrl_signal, u.ravel()))
+
+                        # TODO: fix this for other dynamics models
+                        x = self.dynObj.propagate_state(
+                            timestep,
+                            state_traj[-1, :].reshape((-1, 1)),
+                            u=u,
+                            state_args=state_args,
+                        )
+                        state_traj = np.vstack((state_traj, x.ravel()))
+
+                        # TODO: update cost here
+                        # cost += cost_fun()
+
+            else:
+                dx = cur_state
+                ctrl_signal = (feedback_gain @ dx + self.u_nom).ravel()
+                cost = np.nan
+
+        else:
+            feedback_gain = None
+            num_timesteps = int(time_horizon / self.dt)
+            time_vec = np.arange(
+                self.start_time, self.dt * (num_timesteps + 1), self.dt
+            )
+            ctrl_signal = np.nan * np.ones((num_timesteps, self.u_nom.size))
+            state_traj = np.nan * np.ones((num_timesteps + 1, cur_state.size))
+            cost = 0
+            for kk, tt in enumerate(time_vec):
+                # TODO: implement this
+                pass
+
+            raise NotImplementedError()
+
+        u = ctrl_signal[0, :].reshape((-1, 1))
+        details = (
+            cost,
+            state_traj,
+            ctrl_signal,
+            feedback_gain,
+        )
+        return (u, *details) if provide_details else u
+
+
+class ELQR(LQR):
+    def __init__(self, max_iters=1e3, tol=1e-4, time_horizon=10):
+        super().__init__()
+        self.max_iters = int(max_iters)
+        self.tol = tol
+        self.time_horizon = time_horizon
+        self._dt = None
+        self.start_time = None
+
+        self.u_nom = np.array([])
+        self.ct_come_mats = np.array([])
+        self.ct_come_vecs = np.array([])
+        self.ct_go_mats = np.array([])
+        self.ct_go_vecs = np.array([])
+        self.feedback_gain = np.array([])
+        self.feedthrough_gain = np.array([])
+
+        self.use_custom_cost = False
+        self._init_state = np.array([])
+        self._end_state = np.array([])
+        self._non_quad_fun = None
+        self._quad_modifier = None
+        self._cost_fun = None
+
+    def set_cost_model(
         self, Q=None, R=None, non_quadratic_fun=None, quad_modifier=None, cost_fun=None
     ):
         if Q is not None and R is not None and non_quadratic_fun is not None:
-            self._Q = Q
-            self._R = R
+            super().set_cost_model(Q, R)
             self._non_quad_fun = non_quadratic_fun
             self._quad_modifier = quad_modifier
+
         elif cost_fun is not None:
             self._cost_fun = cost_fun
             self.use_custom_cost = True
@@ -259,7 +385,7 @@ class ELQR:
 
     def quadratize_cost(self, tt, itr, x_hat, u_hat, is_initial, is_final, cost_args):
         if not self.use_custom_cost:
-            P = np.zeros((self.u_nom.size, x_hat.size))
+            P = self._P
             if is_final:
                 Q = self._Q
                 q = -(Q @ self._end_state)
@@ -331,6 +457,7 @@ class ELQR:
                 q += non_q
                 R += non_R
                 r += non_r
+                P += non_P
 
         else:
             # TODO: get hessians
@@ -346,7 +473,10 @@ class ELQR:
             # tt = kk * abs_dt + self.start_time
             tt = time_vec[kk]
 
-            u_hat = self.feedback_gain[kk] @ traj[kk, :].reshape((-1, 1)) + self.feedthrough_gain[kk]
+            u_hat = (
+                self.feedback_gain[kk] @ traj[kk, :].reshape((-1, 1))
+                + self.feedthrough_gain[kk]
+            )
             x_hat_p, ABar, BBar, cBar = self.prop_state_forward(
                 tt, traj[kk, :].reshape((-1, 1)), u_hat, state_args, ctrl_args
             )
@@ -372,7 +502,7 @@ class ELQR:
             self.ct_come_mats[kk + 1] = DBar + CBar.T @ self.feedback_gain[kk]
             self.ct_come_vecs[kk + 1] = dBar + CBar.T @ self.feedthrough_gain[kk]
 
-            traj[kk+1, :] = -(
+            traj[kk + 1, :] = -(
                 np.linalg.inv(self.ct_go_mats[kk + 1] + self.ct_come_mats[kk + 1])
                 @ (self.ct_go_vecs[kk + 1] + self.ct_come_vecs[kk + 1])
             ).ravel()
@@ -387,9 +517,12 @@ class ELQR:
             # tt = kk * abs_dt + self.start_time
             tt = time_vec[kk]
 
-            u_hat = self.feedback_gain[kk] @ traj[kk+1, :].reshape((-1, 1)) + self.feedthrough_gain[kk]
+            u_hat = (
+                self.feedback_gain[kk] @ traj[kk + 1, :].reshape((-1, 1))
+                + self.feedthrough_gain[kk]
+            )
             x_hat_p, A, B, c = self.prop_state_backward(
-                tt, traj[kk+1, :].reshape((-1, 1)), u_hat, state_args, ctrl_args
+                tt, traj[kk + 1, :].reshape((-1, 1)), u_hat, state_args, ctrl_args
             )
 
             P, Q, R, q, r = self.quadratize_cost(
@@ -433,7 +566,7 @@ class ELQR:
         plt_opts=None,
         ttl=None,
         fig=None,
-        plt_inds=None
+        plt_inds=None,
     ):
         if state_args is None:
             state_args = ()
@@ -486,10 +619,22 @@ class ELQR:
                 gplot.set_title_label(fig, 0, plt_opts, ttl=ttl)
 
                 # draw start
-                fig.axes[0].scatter(self._init_state[plt_inds[0], 0], self._init_state[plt_inds[1], 0], marker='o', color='g', zorder=1000)
+                fig.axes[0].scatter(
+                    self._init_state[plt_inds[0], 0],
+                    self._init_state[plt_inds[1], 0],
+                    marker="o",
+                    color="g",
+                    zorder=1000,
+                )
                 fig.tight_layout()
 
-            fig.axes[0].scatter(self._end_state[plt_inds[0], 0], self._end_state[plt_inds[1], 0], marker='x', color='r', zorder=1000)
+            fig.axes[0].scatter(
+                self._end_state[plt_inds[0], 0],
+                self._end_state[plt_inds[1], 0],
+                marker="x",
+                color="r",
+                zorder=1000,
+            )
             plt.pause(0.01)
 
             # for stopping simulation with the esc key.
@@ -522,7 +667,8 @@ class ELQR:
 
             # quadratize final cost (ii = num_timesteps)
             u_hat = (
-                self.feedback_gain[num_timesteps] @ traj[num_timesteps-1, :].reshape((-1, 1))
+                self.feedback_gain[num_timesteps]
+                @ traj[num_timesteps - 1, :].reshape((-1, 1))
                 + self.feedthrough_gain[num_timesteps]
             )
             (
@@ -531,7 +677,15 @@ class ELQR:
                 _,
                 self.ct_go_vecs[num_timesteps],
                 _,
-            ) = self.quadratize_cost(time_vec[-1], ii, traj[num_timesteps-1, :].reshape((-1, 1)), u_hat, False, True, cost_args)
+            ) = self.quadratize_cost(
+                time_vec[-1],
+                ii,
+                traj[num_timesteps - 1, :].reshape((-1, 1)),
+                u_hat,
+                False,
+                True,
+                cost_args,
+            )
             traj[num_timesteps, :] = -(
                 np.linalg.inv(
                     self.ct_go_mats[num_timesteps] + self.ct_come_mats[num_timesteps]
@@ -541,9 +695,14 @@ class ELQR:
 
             if show_animation:
                 # plot forward pass trajectory
-                fig.axes[0].plot(traj[:, plt_inds[0]], traj[:, plt_inds[1]], color=(0.5, 0.5, 0.5), alpha=0.2, zorder=-10)
+                fig.axes[0].plot(
+                    traj[:, plt_inds[0]],
+                    traj[:, plt_inds[1]],
+                    color=(0.5, 0.5, 0.5),
+                    alpha=0.2,
+                    zorder=-10,
+                )
                 plt.pause(0.005)
-
 
             # backward pass
             traj = self.backward_pass(
@@ -552,7 +711,13 @@ class ELQR:
 
             if show_animation:
                 # plot backward pass trajectory
-                fig.axes[0].plot(traj[:, plt_inds[0]], traj[:, plt_inds[1]], color=(0.5, 0.5, 0.5), alpha=0.2, zorder=-10)
+                fig.axes[0].plot(
+                    traj[:, plt_inds[0]],
+                    traj[:, plt_inds[1]],
+                    color=(0.5, 0.5, 0.5),
+                    alpha=0.2,
+                    zorder=-10,
+                )
 
                 plt.pause(0.005)
                 if save_animation:
@@ -625,7 +790,12 @@ class ELQR:
         )
 
         if show_animation:
-            fig.axes[0].plot(state_traj[:, plt_inds[0]], state_traj[:, plt_inds[1]], linestyle="-", color="g")
+            fig.axes[0].plot(
+                state_traj[:, plt_inds[0]],
+                state_traj[:, plt_inds[1]],
+                linestyle="-",
+                color="g",
+            )
             plt.pause(0.001)
             if save_animation:
                 with io.BytesIO() as buff:

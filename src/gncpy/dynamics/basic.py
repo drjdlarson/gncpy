@@ -108,7 +108,7 @@ class LinearDynamicsBase(DynamicsBase):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def get_input_mat(self, timestep, state, ctrl_args=None):
+    def get_input_mat(self, timestep, state, *ctrl_args):
         """Calculates the input matrix from the control model.
 
         This calculates the jacobian of the control model. If no control model
@@ -131,8 +131,7 @@ class LinearDynamicsBase(DynamicsBase):
         if self.control_model is None:
             raise RuntimeWarning('Control model is not set.')
 
-
-        return self.controla-model(timestep, state, *ctrl_args)
+        return self.control_model(timestep, state, *ctrl_args)
 
     def get_dis_process_noise_mat(self, dt, *f_args):
         """Class method for getting the process noise.
