@@ -3,90 +3,11 @@ import numpy as np
 import scipy.linalg as la
 import matplotlib.pyplot as plt
 from PIL import Image
+from sys import exit
 
 import gncpy.dynamics.basic as gdyn
 import gncpy.math as gmath
 import gncpy.plotting as gplot
-
-
-class BaseLQR:
-    r""" Implements a Linear Quadratic Regulator (LQR) controller.
-
-        This implements an LQR controller for the cost function
-
-        .. math::
-            J = \frac{1}{2} \left[x_f^T Q x_f + \int^{t_f}_0 x^T Q x + u^T R u
-                     + u^T P x\right]
-
-    Args:
-        Q (N x N numpy array): State penalty matrix (default: empty array)
-        R (Nu x Nu numpy array): Control penalty matrix (default: empty arary)
-        cross_penalty (Nu x N numpy array): Cross penalty matrix (default:
-            zero)
-        horizon_len (int): Length of trajectory to optimize over (default: Inf)
-
-    Attributes:
-        state_penalty (N x N numpy array): State penalty matrix :math:`Q`
-        ctrl_penalty (Nu x Nu numpy array): Control penalty matrix :math:`R`
-        cross_penalty (Nu x N numpy array): Cross penalty matrix
-        horizon_len (int): Length of trajectory to optimize over
-    """
-
-    def __init__(self, Q=None, R=None, cross_penalty=None, horizon_len=None, **kwargs):
-        if Q is None:
-            Q = np.array([[]])
-        self.state_penalty = Q
-        if R is None:
-            R = np.array([[]])
-        self.ctrl_penalty = R
-        if cross_penalty is None:
-            def_rows = self.ctrl_penalty.shape[1]
-            if self.state_penalty.size > 0:
-                def_cols = self.state_penalty.shape[0]
-            else:
-                def_cols = 0
-            cross_penalty = np.zeros((def_rows, def_cols))
-        self.cross_penalty = cross_penalty
-        if horizon_len is None:
-            horizon_len = np.inf
-        self.horizon_len = horizon_len
-        super().__init__(**kwargs)
-
-    def iterate(self, F, G, **kwargs):
-        """Calculates the feedback gain.
-
-        If using a finite time horizon, this loops over the entire horizon
-        to calculate the gain :math:`K` such that the control input is
-
-        .. math::
-            u = -Kx
-
-        Args:
-            F (N x N numpy array): Discrete time state matrix
-            G (N x Nu numpy array): Discrete time input matrix
-
-        Raises:
-            RuntimeError: Raised for the finite horizon case
-
-        Todo:
-            Implement the finite horizon case
-
-        Returns:
-            (Nu x N numpy array): Feedback gain :math:`K`
-        """
-
-        if self.horizon_len == np.inf:
-            P = la.solve_discrete_are(F, G, self.state_penalty, self.ctrl_penalty)
-            feedback_gain = la.inv(G.T @ P @ G + self.ctrl_penalty) @ (
-                G.T @ P @ F + self.cross_penalty
-            )
-            return feedback_gain
-        else:
-            # ##TODO: implement
-            c = self.__class__.__name__
-            name = self.iterate.__name__
-            msg = "{}.{} not implemented".format(c, name)
-            raise RuntimeError(msg)
 
 
 class LQR:
@@ -99,7 +20,7 @@ class LQR:
                      + u^T P x\right]
     """
 
-    def __init__(self):
+    def __init__(self, time_horizon=float("inf")):
         super().__init__()
 
         self._Q = None
@@ -108,6 +29,17 @@ class LQR:
 
         self.dynObj = None
         self._dt = None
+
+        self.time_horizon = time_horizon
+
+        self.u_nom = np.array([])
+        self.ct_go_mats = np.array([])
+        self.ct_go_vecs = np.array([])
+        self.feedback_gain = np.array([])
+        self.feedthrough_gain = np.array([])
+
+        self._init_state = np.array([])
+        self._end_state = np.array([])
 
     @property
     def dt(self):
@@ -158,124 +90,343 @@ class LQR:
         else:
             self._P = P
 
+    def _prop_state(
+        self,
+        tt,
+        x_hat,
+        u_hat,
+        state_args,
+        ctrl_args,
+        forward,
+        inv_state_args,
+        inv_ctrl_args,
+    ):
+        if self.dynObj is not None:
+            if isinstance(self.dynObj, gdyn.NonlinearDynamicsBase):
+                if forward and self.dynObj.dt < 0:
+                    self.dynObj.dt *= -1  # set to go forward
+                elif not forward and self.dynObj.dt > 0:
+                    self.dynObj.dt *= -1
+
+            if forward:
+                return self.dynObj.propagate_state(
+                    tt, x_hat, u=u_hat, state_args=state_args, ctrl_args=ctrl_args
+                )
+            else:
+                return self.dynObj.propagate_state(
+                    tt,
+                    x_hat,
+                    u=u_hat,
+                    state_args=inv_state_args,
+                    ctrl_args=inv_ctrl_args,
+                )
+
+        else:
+            raise NotImplementedError()
+
+    def get_state_space(self, tt, x_hat, u_hat, state_args, ctrl_args):
+        if self.dynObj is not None:
+            if isinstance(self.dynObj, gdyn.NonlinearDynamicsBase):
+                if self.dynObj.dt < 0:
+                    self.dynObj.dt *= -1  # flip back to forward to get forward matrices
+
+                A = self.dynObj.get_state_mat(
+                    tt, x_hat, *state_args, u=u_hat, ctrl_args=ctrl_args
+                )
+                B = self.dynObj.get_input_mat(tt, x_hat, u_hat, *ctrl_args)
+
+            else:
+                A = self.dynObj.get_state_mat(tt, *state_args)
+                B = self.dynObj.get_input_mat(tt, *ctrl_args)
+
+        else:
+            raise NotImplementedError("Need to implement this case")
+
+        return A, B
+
+    def prop_state_backward(
+        self, tt, x_hat, u_hat, state_args, ctrl_args, inv_state_args, inv_ctrl_args
+    ):
+        x_hat_p = self._prop_state(
+            tt,
+            x_hat,
+            u_hat,
+            state_args,
+            ctrl_args,
+            False,
+            inv_state_args,
+            inv_ctrl_args,
+        )
+
+        A, B = self.get_state_space(tt, x_hat_p, u_hat, state_args, ctrl_args)
+        c = x_hat - A @ x_hat_p - B @ u_hat
+
+        return x_hat_p, A, B, c
+
+    def _determine_cost_matrices(
+        self, tt, itr, x_hat, u_hat, is_initial, is_final, cost_args
+    ):
+        P = self._P
+        if is_final:
+            Q = self._Q
+            q = -(Q @ self._end_state)
+            R = np.zeros(self._R.shape)
+            r = np.zeros(self.u_nom.shape)
+        else:
+            if is_initial:
+                Q = self._Q
+                q = -(Q @ self._init_state)
+                R = self._R
+                r = -(R @ self.u_nom)
+            else:
+                Q = np.zeros(self._Q.shape)
+                q = np.zeros(self._init_state.shape)
+                R = self._R
+                r = -(R @ self.u_nom)
+        return P, Q, R, q, r
+
+    def _back_pass_update_traj(self, x_hat_p, kk):
+        return x_hat_p.ravel()
+
+    def backward_pass(
+        self,
+        itr,
+        num_timesteps,
+        traj,
+        state_args,
+        ctrl_args,
+        cost_args,
+        time_vec,
+        inv_state_args,
+        inv_ctrl_args,
+    ):
+        abs_dt = np.abs(self.dt)
+        for kk in range(num_timesteps - 1, -1, -1):
+            tt = time_vec[kk]
+            u_hat = (
+                self.feedback_gain[kk] @ traj[kk + 1, :].reshape((-1, 1))
+                + self.feedthrough_gain[kk]
+            )
+            x_hat_p, A, B, c = self.prop_state_backward(
+                tt,
+                traj[kk + 1, :].reshape((-1, 1)),
+                u_hat,
+                state_args,
+                ctrl_args,
+                inv_state_args,
+                inv_ctrl_args,
+            )
+
+            P, Q, R, q, r = self._determine_cost_matrices(
+                tt, itr, x_hat_p, u_hat, kk == 0, False, cost_args
+            )
+
+            ctm_A = self.ct_go_mats[kk + 1] @ A
+            ctv_ctm_c = self.ct_go_vecs[kk + 1] + self.ct_go_mats[kk + 1] @ c
+            C = P + B.T @ ctm_A
+            D = Q + A.T @ ctm_A
+            E = R + B.T @ self.ct_go_mats[kk + 1] @ B
+            d = q + A.T @ ctv_ctm_c
+            e = r + B.T @ ctv_ctm_c
+
+            neg_inv_E = -np.linalg.inv(E)
+            self.feedback_gain[kk] = neg_inv_E @ C
+            self.feedthrough_gain[kk] = neg_inv_E @ e
+
+            self.ct_go_mats[kk] = D + C.T @ self.feedback_gain[kk]
+            self.ct_go_vecs[kk] = d + C.T @ self.feedthrough_gain[kk]
+
+            traj[kk, :] = self._back_pass_update_traj(x_hat_p, kk)
+
+        return traj
+
+    def cost_function(
+        self, tt, state, ctrl_input, is_initial=False, is_final=False,
+    ):
+        if is_final:
+            sdiff = state - self._end_state
+            return (sdiff.T @ self._Q @ sdiff).item()
+
+        else:
+            cost = 0
+            if is_initial:
+                sdiff = state - self._init_state
+                cost += (sdiff.T @ self._Q @ sdiff).item()
+
+            cdiff = ctrl_input - self.u_nom
+            cost += (cdiff.T @ self._R @ cdiff).item()
+        return cost
+
     def calculate_control(
         self,
         cur_time,
         cur_state,
-        time_horizon,
         end_state=None,
         end_state_tol=1e-2,
         check_inds=None,
         state_args=None,
         ctrl_args=None,
+        inv_state_args=None,
+        inv_ctrl_args=None,
         provide_details=False,
     ):
         if state_args is None:
             state_args = ()
         if ctrl_args is None:
             ctrl_args = ()
+        if inv_state_args is None:
+            inv_state_args = ()
+        if inv_ctrl_args is None:
+            inv_ctrl_args = ()
+        if end_state is None:
+            end_state = np.zeros((cur_state.size, 1))
 
-        if np.isinf(time_horizon) or time_horizon <= 0:
-            F = self.dynObj.get_state_mat(cur_time, *state_args)
-            G = self.dynObj.get_input_mat(cur_time, cur_state, *ctrl_args)
-            # TODO: make this work for other dynamic models
-            # F, G = self.get_state_space(cur_time, cur_state, state_args)
-            P = la.solve_discrete_are(F, G, self._Q, self._R)
-            feedback_gain = la.inv(G.T @ P @ G + self._R) @ (G.T @ P @ F + self._P)
+        self._init_state = cur_state.reshape((-1, 1)).copy()
+        self._end_state = end_state.reshape((-1, 1)).copy()
+
+        if np.isinf(self.time_horizon) or self.time_horizon <= 0:
+            F, G = self.get_state_space(cur_time, cur_state, self.u_nom, state_args, ctrl_args)
+            S = la.solve_discrete_are(F, G, self._Q, self._R)
+            self.feedback_gain = la.inv(G.T @ S @ G + self._R) @ (G.T @ S @ F + self._P)
+            self.feedthrough_gain = self.u_nom.copy()
             state_traj = cur_state.reshape((1, -1)).copy()
 
-            if end_state is not None:
-                dx = end_state - cur_state
+            dx = end_state - cur_state
 
-                if self.dt is None:
-                    dx = cur_state
-                    ctrl_signal = (feedback_gain @ dx + self.u_nom).ravel()
-                    cost = np.nan
+            if self.dt is None:
+                ctrl_signal = (self.feedback_gain @ dx + self.feedthrough_gain).ravel()
+                cost = np.nan
 
-                else:
-                    ctrl_signal = None
-                    cost = 0
+            else:
+                ctrl_signal = None
+                cost = self.cost_function(
+                    cur_time, cur_state, self.u_nom, is_initial=True, is_final=False
+                )
 
-                    if check_inds is None:
-                        check_inds = range(cur_state.size)
+                if check_inds is None:
+                    check_inds = range(cur_state.size)
 
-                    timestep = cur_time
-                    while (
+                timestep = cur_time
+                done = (
+                    np.linalg.norm(
+                        state_traj[-1, check_inds] - end_state[check_inds, 0]
+                    )
+                    <= end_state_tol
+                )
+
+                while not done:
+                    timestep += self.dt
+                    dx = end_state - state_traj[-1, :].reshape((-1, 1))
+                    u = self.feedback_gain @ dx + self.feedthrough_gain
+                    if ctrl_signal is None:
+                        ctrl_signal = u.flatten()
+                    else:
+                        ctrl_signal = np.vstack((ctrl_signal, u.ravel()))
+
+                    x = self._prop_state(
+                        timestep,
+                        state_traj[-1, :].reshape((-1, 1)),
+                        u,
+                        state_args,
+                        ctrl_args,
+                        True,
+                        (),
+                        (),
+                    )
+                    state_traj = np.vstack((state_traj, x.ravel()))
+
+                    done = (
                         np.linalg.norm(
                             state_traj[-1, check_inds] - end_state[check_inds, 0]
                         )
-                        > end_state_tol
-                    ):
-                        timestep += self.dt
-                        dx = end_state - state_traj[-1, :].reshape((-1, 1))
-                        u = feedback_gain @ dx + self.u_nom
-                        if ctrl_signal is None:
-                            ctrl_signal = u.flatten()
-                        else:
-                            ctrl_signal = np.vstack((ctrl_signal, u.ravel()))
+                        <= end_state_tol
+                    )
 
-                        # TODO: fix this for other dynamics models
-                        x = self.dynObj.propagate_state(
-                            timestep,
-                            state_traj[-1, :].reshape((-1, 1)),
-                            u=u,
-                            state_args=state_args,
-                        )
-                        state_traj = np.vstack((state_traj, x.ravel()))
-
-                        # TODO: update cost here
-                        # cost += cost_fun()
-
-            else:
-                dx = cur_state
-                ctrl_signal = (feedback_gain @ dx + self.u_nom).ravel()
-                cost = np.nan
+                    cost += self.cost_function(
+                        timestep, x, u, is_initial=False, is_final=done
+                    )
 
         else:
-            feedback_gain = None
-            num_timesteps = int(time_horizon / self.dt)
-            time_vec = np.arange(
-                self.start_time, self.dt * (num_timesteps + 1), self.dt
+            num_timesteps = int(self.time_horizon / self.dt)
+            time_vec = np.arange(cur_time, self.dt * (num_timesteps + 1), self.dt)
+
+            self.ct_go_mats = np.zeros(
+                (num_timesteps + 1, cur_state.size, cur_state.size)
             )
+            self.ct_go_vecs = np.zeros((num_timesteps + 1, cur_state.size, 1))
+            self.ct_go_mats[-1] = self._Q.copy()
+            self.ct_go_vecs[-1] = -(self._Q @ self._end_state)
+            self.feedback_gain = np.zeros(
+                (num_timesteps + 1, self.u_nom.size, cur_state.size)
+            )
+            self.feedthrough_gain = self.u_nom * np.ones(
+                (num_timesteps + 1, self.u_nom.size, 1)
+            )
+
+            traj = np.nan * np.ones((num_timesteps + 1, cur_state.size))
+            traj[-1, :] = end_state.flatten()
+            self.backward_pass(
+                0,
+                num_timesteps,
+                traj,
+                state_args,
+                ctrl_args,
+                (),
+                time_vec,
+                inv_state_args,
+                inv_ctrl_args,
+            )
+
             ctrl_signal = np.nan * np.ones((num_timesteps, self.u_nom.size))
             state_traj = np.nan * np.ones((num_timesteps + 1, cur_state.size))
+            state_traj[0, :] = cur_state.flatten()
             cost = 0
-            for kk, tt in enumerate(time_vec):
-                # TODO: implement this
-                pass
+            for kk, tt in enumerate(time_vec[:-1]):
+                u = (
+                    self.feedback_gain[kk] @ state_traj[kk, :].reshape((-1, 1))
+                    + self.feedthrough_gain[kk]
+                )
+                ctrl_signal[kk, :] = u.ravel()
 
-            raise NotImplementedError()
+                x = self._prop_state(
+                    tt,
+                    state_traj[kk, :].reshape((-1, 1)),
+                    u,
+                    state_args,
+                    ctrl_args,
+                    True,
+                    (),
+                    (),
+                )
+                state_traj[kk + 1, :] = x.ravel()
+
+                cost += self.cost_function(
+                    tt, x, u, is_initial=False, is_final=(kk == time_vec.size)
+                )
 
         u = ctrl_signal[0, :].reshape((-1, 1))
         details = (
             cost,
             state_traj,
             ctrl_signal,
-            feedback_gain,
         )
         return (u, *details) if provide_details else u
 
 
 class ELQR(LQR):
-    def __init__(self, max_iters=1e3, tol=1e-4, time_horizon=10):
-        super().__init__()
+    def __init__(self, max_iters=1e3, tol=1e-4, **kwargs):
+        key = "time_horizon"
+        if key not in kwargs:
+            kwargs.update(key, 10)
+
+        super().__init__(**kwargs)
         self.max_iters = int(max_iters)
         self.tol = tol
-        self.time_horizon = time_horizon
-        self._dt = None
-        self.start_time = None
 
-        self.u_nom = np.array([])
         self.ct_come_mats = np.array([])
         self.ct_come_vecs = np.array([])
-        self.ct_go_mats = np.array([])
-        self.ct_go_vecs = np.array([])
-        self.feedback_gain = np.array([])
-        self.feedthrough_gain = np.array([])
 
         self.use_custom_cost = False
-        self._init_state = np.array([])
-        self._end_state = np.array([])
         self._non_quad_fun = None
         self._quad_modifier = None
         self._cost_fun = None
@@ -299,18 +450,14 @@ class ELQR(LQR):
         self, tt, state, ctrl_input, cost_args, is_initial=False, is_final=False,
     ):
         if not self.use_custom_cost:
-            if is_final:
-                sdiff = state - self._end_state
-                return (sdiff.T @ self._Q @ sdiff).item()
-            else:
-                cost = 0
-                if is_initial:
-                    sdiff = state - self._init_state
-                    cost += (sdiff.T @ self._Q @ sdiff).item()
-
-                cdiff = ctrl_input - self.u_nom
-                cost += (cdiff.T @ self._R @ cdiff).item()
-                cost += self._non_quad_fun(
+            cost = super().cost_function(
+                tt, state, ctrl_input, is_initial=is_initial, is_final=is_final
+            )
+            return (
+                cost
+                if is_final
+                else cost
+                + self._non_quad_fun(
                     tt,
                     state,
                     ctrl_input,
@@ -319,32 +466,23 @@ class ELQR(LQR):
                     is_final,
                     *cost_args
                 )
-
-                return cost
+            )
 
         return self._cost_fun(
             tt, state, ctrl_input, self._end_state, is_initial, is_final, *cost_args
         )
 
-    def _prop_state(self, tt, x_hat, u_hat, state_args, ctrl_args, forward):
-        if self.dynObj is not None:
-            if isinstance(self.dynObj, gdyn.NonlinearDynamicsBase):
-                if forward and self.dynObj.dt < 0:
-                    self.dynObj.dt *= -1  # set to go forward
-                elif not forward and self.dynObj.dt > 0:
-                    self.dynObj.dt *= -1
-
-                return self.dynObj.propagate_state(
-                    tt, x_hat, u=u_hat, state_args=state_args, ctrl_args=ctrl_args
-                )
-
-    def prop_state_forward(self, tt, x_hat, u_hat, state_args, ctrl_args):
-        x_hat_p = self._prop_state(tt, x_hat, u_hat, state_args, ctrl_args, True)
+    def prop_state_forward(
+        self, tt, x_hat, u_hat, state_args, ctrl_args, inv_state_args, inv_ctrl_args
+    ):
+        x_hat_p = self._prop_state(
+            tt, x_hat, u_hat, state_args, ctrl_args, True, inv_state_args, inv_ctrl_args
+        )
 
         if self.dynObj is not None:
             if isinstance(self.dynObj, gdyn.NonlinearDynamicsBase):
-                # if self.dynObj.dt > 0:
-                self.dynObj.dt *= -1  # set to inverse dynamics
+                if self.dynObj.dt > 0:
+                    self.dynObj.dt *= -1  # set to inverse dynamics
 
                 ABar = self.dynObj.get_state_mat(
                     tt, x_hat_p, *state_args, u=u_hat, ctrl_args=ctrl_args
@@ -360,51 +498,14 @@ class ELQR(LQR):
 
         return x_hat_p, ABar, BBar, cBar
 
-    def prop_state_backward(self, tt, x_hat, u_hat, state_args, ctrl_args):
-        x_hat_p = self._prop_state(tt, x_hat, u_hat, state_args, ctrl_args, False)
-
-        if self.dynObj is not None:
-            if isinstance(self.dynObj, gdyn.NonlinearDynamicsBase):
-                # if self.dynObj.dt < 0:
-                self.dynObj.dt *= -1  # flip back to forward to get forward matrices
-
-                A = self.dynObj.get_state_mat(
-                    tt, x_hat_p, *state_args, u=u_hat, ctrl_args=ctrl_args
-                )
-                B = self.dynObj.get_input_mat(tt, x_hat_p, u_hat, *ctrl_args)
-
-            else:
-                raise NotImplementedError("Need to implement this case")
-
-        else:
-            raise NotImplementedError("Need to implement this case")
-
-        c = x_hat - A @ x_hat_p - B @ u_hat
-
-        return x_hat_p, A, B, c
-
     def quadratize_cost(self, tt, itr, x_hat, u_hat, is_initial, is_final, cost_args):
         if not self.use_custom_cost:
-            P = self._P
-            if is_final:
-                Q = self._Q
-                q = -(Q @ self._end_state)
-                R = np.zeros(self._R.shape)
-                r = np.zeros(self.u_nom.shape)
-            else:
-                if is_initial:
-                    Q = self._Q
-                    q = -(Q @ self._init_state)
-                    R = self._R
-                    r = -(R @ self.u_nom)
-                else:
-                    Q = np.zeros(self._Q.shape)
-                    q = np.zeros(self._init_state.shape)
-                    R = self._R
-                    r = -(R @ self.u_nom)
+            P, Q, R, q, r = super()._determine_cost_matrices(
+                tt, itr, x_hat, u_hat, is_initial, is_final, cost_args
+            )
 
-                    if self._quad_modifier is not None:
-                        P, Q, R, q, r = self._quad_modifier(itr, tt, P, Q, R, q, r)
+            if not is_initial and not is_final and self._quad_modifier is not None:
+                P, Q, R, q, r = self._quad_modifier(itr, tt, P, Q, R, q, r)
 
                 xdim = x_hat.size
                 udim = u_hat.size
@@ -465,12 +566,33 @@ class ELQR(LQR):
 
         return P, Q, R, q, r
 
+    def _determine_cost_matrices(
+        self, tt, itr, x_hat, u_hat, is_initial, is_final, cost_args
+    ):
+        return self.quadratize_cost(
+            tt, itr, x_hat, u_hat, is_initial, is_final, cost_args
+        )
+
+    def _back_pass_update_traj(self, x_hat_p, kk):
+        return -(
+            np.linalg.inv(self.ct_go_mats[kk] + self.ct_come_mats[kk])
+            @ (self.ct_go_vecs[kk] + self.ct_come_vecs[kk])
+        ).ravel()
+
     def forward_pass(
-        self, itr, num_timesteps, traj, state_args, ctrl_args, cost_args, time_vec
+        self,
+        itr,
+        num_timesteps,
+        traj,
+        state_args,
+        ctrl_args,
+        cost_args,
+        time_vec,
+        inv_state_args,
+        inv_ctrl_args,
     ):
         abs_dt = np.abs(self.dt)
         for kk in range(num_timesteps):
-            # tt = kk * abs_dt + self.start_time
             tt = time_vec[kk]
 
             u_hat = (
@@ -478,11 +600,17 @@ class ELQR(LQR):
                 + self.feedthrough_gain[kk]
             )
             x_hat_p, ABar, BBar, cBar = self.prop_state_forward(
-                tt, traj[kk, :].reshape((-1, 1)), u_hat, state_args, ctrl_args
+                tt,
+                traj[kk, :].reshape((-1, 1)),
+                u_hat,
+                state_args,
+                ctrl_args,
+                inv_state_args,
+                inv_ctrl_args,
             )
 
             # final cost is handled after the forward pass
-            P, Q, R, q, r = self.quadratize_cost(
+            P, Q, R, q, r = self._determine_cost_matrices(
                 tt, itr, traj[kk, :].reshape((-1, 1)), u_hat, kk == 0, False, cost_args
             )
 
@@ -509,48 +637,6 @@ class ELQR(LQR):
 
         return traj
 
-    def backward_pass(
-        self, itr, num_timesteps, traj, state_args, ctrl_args, cost_args, time_vec
-    ):
-        abs_dt = np.abs(self.dt)
-        for kk in range(num_timesteps - 1, -1, -1):
-            # tt = kk * abs_dt + self.start_time
-            tt = time_vec[kk]
-
-            u_hat = (
-                self.feedback_gain[kk] @ traj[kk + 1, :].reshape((-1, 1))
-                + self.feedthrough_gain[kk]
-            )
-            x_hat_p, A, B, c = self.prop_state_backward(
-                tt, traj[kk + 1, :].reshape((-1, 1)), u_hat, state_args, ctrl_args
-            )
-
-            P, Q, R, q, r = self.quadratize_cost(
-                tt, itr, x_hat_p, u_hat, kk == 0, False, cost_args
-            )
-
-            ctm_A = self.ct_go_mats[kk + 1] @ A
-            ctv_ctm_c = self.ct_go_vecs[kk + 1] + self.ct_go_mats[kk + 1] @ c
-            C = P + B.T @ ctm_A
-            D = Q + A.T @ ctm_A
-            E = R + B.T @ self.ct_go_mats[kk + 1] @ B
-            d = q + A.T @ ctv_ctm_c
-            e = r + B.T @ ctv_ctm_c
-
-            neg_inv_E = -np.linalg.inv(E)
-            self.feedback_gain[kk] = neg_inv_E @ C
-            self.feedthrough_gain[kk] = neg_inv_E @ e
-
-            self.ct_go_mats[kk] = D + C.T @ self.feedback_gain[kk]
-            self.ct_go_vecs[kk] = d + C.T @ self.feedthrough_gain[kk]
-
-            traj[kk, :] = -(
-                np.linalg.inv(self.ct_go_mats[kk] + self.ct_come_mats[kk])
-                @ (self.ct_go_vecs[kk] + self.ct_come_vecs[kk])
-            ).ravel()
-
-        return traj
-
     def calculate_control(
         self,
         tt,
@@ -559,6 +645,8 @@ class ELQR(LQR):
         state_args=None,
         ctrl_args=None,
         cost_args=None,
+        inv_state_args=None,
+        inv_ctrl_args=None,
         provide_details=False,
         disp=True,
         show_animation=False,
@@ -574,11 +662,13 @@ class ELQR(LQR):
             ctrl_args = ()
         if cost_args is None:
             cost_args = ()
+        if inv_state_args is None:
+            inv_state_args = ()
+        if inv_ctrl_args is None:
+            inv_ctrl_args = ()
 
         if plt_inds is None:
             plt_inds = [0, 1]
-
-        self.start_time = tt
 
         old_cost = float("inf")
         num_timesteps = int(self.time_horizon / self.dt)
@@ -657,12 +747,20 @@ class ELQR(LQR):
         if disp:
             print("Starting ELQR optimization loop...")
 
-        time_vec = np.arange(self.start_time, abs_dt * (num_timesteps + 1), abs_dt)
+        time_vec = np.arange(tt, abs_dt * (num_timesteps + 1), abs_dt)
 
         for ii in range(self.max_iters):
             # forward pass
             traj = self.forward_pass(
-                ii, num_timesteps, traj, state_args, ctrl_args, cost_args, time_vec
+                ii,
+                num_timesteps,
+                traj,
+                state_args,
+                ctrl_args,
+                cost_args,
+                time_vec,
+                inv_state_args,
+                inv_ctrl_args,
             )
 
             # quadratize final cost (ii = num_timesteps)
@@ -706,7 +804,15 @@ class ELQR(LQR):
 
             # backward pass
             traj = self.backward_pass(
-                ii, num_timesteps, traj, state_args, ctrl_args, cost_args, time_vec
+                ii,
+                num_timesteps,
+                traj,
+                state_args,
+                ctrl_args,
+                cost_args,
+                time_vec,
+                inv_state_args,
+                inv_ctrl_args,
             )
 
             if show_animation:
@@ -742,7 +848,7 @@ class ELQR(LQR):
                     is_initial=(kk == 0),
                     is_final=(kk == num_timesteps),
                 )
-                x = self._prop_state(tt, x, u, state_args, ctrl_args, True)
+                x = self._prop_state(tt, x, u, state_args, ctrl_args, True, inv_state_args, inv_ctrl_args)
 
             if disp:
                 print("\tIteration: {:3d} Cost: {:10.4f}".format(ii, cost))
@@ -758,7 +864,6 @@ class ELQR(LQR):
         cost = 0
         state_traj[0, :] = self._init_state.flatten()
         for kk, tt in enumerate(time_vec[:-1]):
-            # tt = kk * abs_dt + self.start_time
             ctrl_signal[kk, :] = (
                 self.feedback_gain[kk] @ state_traj[kk, :].reshape((-1, 1))
                 + self.feedthrough_gain[kk]
@@ -778,6 +883,8 @@ class ELQR(LQR):
                 state_args,
                 ctrl_args,
                 True,
+                inv_state_args,
+                inv_ctrl_args,
             ).ravel()
 
         cost += self.cost_function(

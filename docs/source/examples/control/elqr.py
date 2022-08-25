@@ -5,6 +5,7 @@ from matplotlib.patches import Circle
 def basic():
     import numpy as np
 
+    import gncpy.plotting as gplot
     import gncpy.control as gcontrol
     from gncpy.dynamics.basic import IRobotCreate
 
@@ -37,12 +38,12 @@ def basic():
             [-1.1, 2.1, 0.2],
             [-0.1, 1.6, 0.2],
             [-1.1, -1.9, 0.2],
-            [1.0 + np.sqrt(2), -1.5 - np.sqrt(2), 0.2],
+            [(10 + np.sqrt(2)) / 10, (-15 - np.sqrt(2)) / 10, 0.2],
         ]
     )
 
     # define enviornment bounds for the robot
-    bottom_left = np.array([-2.0, -3])
+    bottom_left = np.array([-2, -3])
     top_right = np.array([2, 3])
 
     # define Q and R weights for using standard cost function
@@ -94,13 +95,35 @@ def basic():
     elqr.dt = dt  # set here or within the dynamic object
     elqr.set_cost_model(Q=Q, R=R, non_quadratic_fun=non_quadratic_cost)
 
+    # create figure with obstacles to plot animation on
+    fig = plt.figure()
+    fig.add_subplot(1, 1, 1)
+    fig.axes[0].set_aspect("equal", adjustable="box")
+    fig.axes[0].set_xlim((bottom_left[0], top_right[0]))
+    fig.axes[0].set_ylim((bottom_left[1], top_right[1]))
+    fig.axes[0].scatter(
+        start_state[0], start_state[1], marker="o", color="g", zorder=1000
+    )
+    for obs in obstacles:
+        c = Circle(obs[:2], radius=obs[2], color="k", zorder=1000)
+        fig.axes[0].add_patch(c)
+    plt_opts = gplot.init_plotting_opts(f_hndl=fig)
+    gplot.set_title_label(fig, 0, plt_opts, ttl="ELQR")
+
     # calculate control
-    u, cost, state_trajectory, control_signal = elqr.calculate_control(
-        tt, start_state, end_state, cost_args=cost_args, provide_details=True
+    u, cost, state_trajectory, control_signal, fig, frame_list = elqr.calculate_control(
+        tt,
+        start_state,
+        end_state,
+        cost_args=cost_args,
+        provide_details=True,
+        show_animation=True,
+        save_animation=True,
+        plt_inds=[0, 1],
+        fig=fig,
     )
 
-    plt.figure()
-    plt.plot(state_trajectory[:, 0], state_trajectory[:, 1])
+    return frame_list
 
 
 def modify_quadratize():
@@ -139,7 +162,7 @@ def modify_quadratize():
             [-1.1, 2.1, 0.2],
             [-0.1, 1.6, 0.2],
             [-1.1, -1.9, 0.2],
-            [1.0 + np.sqrt(2), -1.5 - np.sqrt(2), 0.2],
+            [(10 + np.sqrt(2)) / 10, (-15 - np.sqrt(2)) / 10, 0.2],
         ]
     )
 
@@ -213,39 +236,62 @@ def modify_quadratize():
     fig.axes[0].set_aspect("equal", adjustable="box")
     fig.axes[0].set_xlim((bottom_left[0], top_right[0]))
     fig.axes[0].set_ylim((bottom_left[1], top_right[1]))
-    fig.axes[0].scatter(start_state[0], start_state[1], marker='o', color='g', zorder=1000)
+    fig.axes[0].scatter(
+        start_state[0], start_state[1], marker="o", color="g", zorder=1000
+    )
     for obs in obstacles:
-        c = Circle(obs[:2], radius=obs[2], color='k', zorder=1000)
+        c = Circle(obs[:2], radius=obs[2], color="k", zorder=1000)
         fig.axes[0].add_patch(c)
     plt_opts = gplot.init_plotting_opts(f_hndl=fig)
     gplot.set_title_label(fig, 0, plt_opts, ttl="ELQR with Modified Quadratize Cost")
-    
+
     # calculate control
     u, cost, state_trajectory, control_signal, fig, frame_list = elqr.calculate_control(
-        tt, start_state, end_state, cost_args=cost_args, provide_details=True, show_animation=True, save_animation=True, plt_inds=[0, 1], fig=fig
+        tt,
+        start_state,
+        end_state,
+        cost_args=cost_args,
+        provide_details=True,
+        show_animation=True,
+        save_animation=True,
+        plt_inds=[0, 1],
+        fig=fig,
     )
-    
+
     return frame_list
 
-    
+
 def run():
     import os
+
+    fout = os.path.join(os.path.dirname(__file__), "elqr_basic.gif")
+    if not os.path.isfile(fout):
+        frame_list = basic()
+
+        frame_list[0].save(
+            fout,
+            save_all=True,
+            append_images=frame_list[1:],
+            duration=10,  # convert s to ms
+            loop=0,
+        )
 
     fout = os.path.join(os.path.dirname(__file__), "elqr_modify_quadratize.gif")
     if not os.path.isfile(fout):
         frame_list = modify_quadratize()
-    
+
         frame_list[0].save(
-                fout,
-                save_all=True,
-                append_images=frame_list[1:],
-                duration=10,  # convert s to ms
-                loop=0,
+            fout,
+            save_all=True,
+            append_images=frame_list[1:],
+            duration=10,  # convert s to ms
+            loop=0,
         )
 
+
 if __name__ == "__main__":
-    plt.close('all')
-    
+    plt.close("all")
+
     run()
-    
+
     plt.show()

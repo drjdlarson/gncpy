@@ -19,7 +19,7 @@ class DynamicsBase(ABC):
     ----------
     control_model : callable or list of callables, optional
         For objects of :class:`gncpy.dynamics.LinearDynamicsBase` it is a
-        callable with the signature `t, x, *ctrl_args` and returns the
+        callable with the signature `t, *ctrl_args` and returns the
         input matrix :math:`G_k` from :math:`x_{k+1} = F_k x_k + G_k u_k`.
         For objects of :class:`gncpy.dynamics.NonlinearDynamicsBase` it is a
         list of callables where each callable returns the modification to the
@@ -49,17 +49,25 @@ class DynamicsBase(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def propagate_state(self, *args, **kwargs):
+    def propagate_state(self, timestep, state, u=None, state_args=None, ctrl_args=None):
         """Abstract method for propagating the state forward in time.
 
         Must be overridden in child classes.
 
         Parameters
         ----------
-        *args : tuple
-            Specifics defined by child class.
-        **kwargs : dict
-            Specifics defined by child class.
+        timestep : float
+            timestep.
+        state : N x 1 numpy array
+            state vector.
+        u : Nu x 1 numpy array, optional
+            Control effort vector. The default is None.
+        state_args : tuple, optional
+            Additional arguments needed by the `get_state_mat` function. The
+            default is ().
+        ctrl_args : tuple, optional
+            Additional arguments needed by the get input mat function. The
+            default is (). Only used if a control effort is supplied.
 
         Raises
         ------
@@ -93,6 +101,10 @@ class DynamicsBase(ABC):
         """
         raise NotImplementedError()
 
+    @abstractmethod
+    def get_input_mat(self, timestep, *args, **kwargs):
+        raise NotImplementedError()
+
 
 class LinearDynamicsBase(DynamicsBase):
     """Base class for all linear dynamics models.
@@ -108,7 +120,7 @@ class LinearDynamicsBase(DynamicsBase):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def get_input_mat(self, timestep, state, *ctrl_args):
+    def get_input_mat(self, timestep, *ctrl_args):
         """Calculates the input matrix from the control model.
 
         This calculates the jacobian of the control model. If no control model
@@ -131,7 +143,7 @@ class LinearDynamicsBase(DynamicsBase):
         if self.control_model is None:
             raise RuntimeWarning('Control model is not set.')
 
-        return self.control_model(timestep, state, *ctrl_args)
+        return self.control_model(timestep, *ctrl_args)
 
     def get_dis_process_noise_mat(self, dt, *f_args):
         """Class method for getting the process noise.
@@ -172,7 +184,7 @@ class LinearDynamicsBase(DynamicsBase):
             timestep.
         state : N x 1 numpy array
             state vector.
-        u : N x Nu numpy array, optional
+        u : Nu x 1 numpy array, optional
             Control effort vector. The default is None.
         state_args : tuple, optional
             Additional arguments needed by the `get_state_mat` function. The

@@ -13,15 +13,24 @@ def run_filters():
     sys.path.pop(0)
 
 
-def run_a_star():
+def run_planning():
     sys.path.insert(0, os.path.abspath("./examples/planning"))
     import a_star
-    import extended_kalman_filter_dynamic_object as ekf_dyn
 
     a_star.run()
 
     sys.path.pop(0)
 
+def run_control():
+    sys.path.insert(0, os.path.abspath("./examples/control"))
+    import elqr
+    import lqr
+
+    elqr.run()
+    lqr.run()
+
+    sys.path.pop(0)
+
 def run_examples():
     run_filters()
-    run_a_star()
+    run_planning()
