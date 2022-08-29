@@ -3788,7 +3788,7 @@ class GSMFilterBase(BayesFilter):
                 a = (3 * disc - 1) / (2 * disc)
                 h = np.sqrt(1 - a ** 2)
                 last_means = np.mean(parts.particles, axis=0)
-                means = a * parts.particles[:, 0] + (1 - a) * last_means[0]
+                means = a * parts.particles[:, [0]] + (1 - a) * last_means[0]
 
                 # df, sig
                 for ind in range(means.shape[1]):
@@ -4059,8 +4059,10 @@ class GSMFilterBase(BayesFilter):
                 )
                 filt.predict(timestep)
                 state = filt.correct(timestep, f_meas[ii].reshape((1, 1)))
-                m_diag[ii] = state[2] * state[1] ** 2  # z * sig^2
-
+                if state.size==3:
+                    m_diag[ii] = state[2] * state[1] ** 2  # z * sig^2
+                else:
+                    m_diag[ii] = state[1] * state[0] ** 2  # z * sig^2
             return np.diag(m_diag)
 
         self._coreFilter.set_measurement_noise_estimator(est_meas_noise)
