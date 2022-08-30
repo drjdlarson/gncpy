@@ -159,6 +159,8 @@ def weighted_a_star():
 def run():
     import os
 
+    print("Generating A* examples")
+
     fout = os.path.join(os.path.dirname(__file__), "normal_a_star.gif")
     if not os.path.isfile(fout):
         frame_list = normal_a_star()

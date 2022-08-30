@@ -1,3 +1,7 @@
+"""Implements control algorithms.
+
+Some algorithms may also be used for path planning.
+"""
 import io
 import numpy as np
 import scipy.linalg as la
@@ -11,16 +15,56 @@ import gncpy.plotting as gplot
 
 
 class LQR:
-    r""" Implements a Linear Quadratic Regulator (LQR) controller.
+    r"""Implements a Linear Quadratic Regulator (LQR) controller.
 
-        This implements an LQR controller for the cost function
+    Notes
+    -----
+    It can be either an infinite horizon where a single controller gain :math:`K`
+    is found or a finite horizon where value iteration is preformed during the
+    backward pass to calculate a controller gain matrix at every step of the
+    time horizon. The finite horizon case is consistent with a Receding Horizon
+    formulation of the controller. If non-linear dyanmics are supplied then they
+    are linearized at every step of the finite horizon, or once about the initial
+    state for infinite horizon. This can also track references by supplying an
+    end state. If infinite horizon the the control input is given by
 
-        .. math::
-            J = \frac{1}{2} \left[x_f^T Q x_f + \int^{t_f}_0 x^T Q x + u^T R u
-                     + u^T P x\right]
+    .. math::
+
+        u = K (r - x) + k
+
+    if the problem is finite horizon the control input (with or without reference
+    tracking) is given by
+
+    .. math::
+
+        u = K x + k
+
+    Attributes
+    ----------
+    dynObj : :class:`gncpy.dynamics.basic.DynamicsBase`
+        Dynamics model to generate control parameters for.
+    time_horizon : float
+        Length of the time horizon for the controller.
+    u_nom : Nu x 1 numpy array
+        Nominal control input
+    ct_go_mats : Nh+1 x N x N numpy array
+        Cost-to-go matrices, 1 per step in the time horizon.
+    ct_go_vecs : Nh+1 x N x 1 numpy array
+        Cost-to-go vectors, 1 per step in the time horizon.
+    feedback_gain : (Nh) x Nu x N numpy array
+        Feedback gain matrix. If finite horizon there is 1 per timestep.
+    feedthrough_gain : (Nh) x Nu x 1
+        Feedthrough gain vector. If finite horizon there is 1 per timestep.
     """
 
     def __init__(self, time_horizon=float("inf")):
+        """Initialize an object.
+
+        Parameters
+        ----------
+        time_horizon : float, optional
+            Time horizon for the controller. The default is float("inf").
+        """
         super().__init__()
 
         self._Q = None
@@ -43,7 +87,7 @@ class LQR:
 
     @property
     def dt(self):
-        """Timestep in seconds."""
+        """Timestep."""
         if self.dynObj is not None and isinstance(
             self.dynObj, gdyn.NonlinearDynamicsBase
         ):
@@ -73,15 +117,32 @@ class LQR:
             Timestep to use. Will update the dynamic object if applicable.
             The default is None.
         """
-
         self.u_nom = u_nom.reshape((-1, 1))
         self.dynObj = dynObj
         if dt is not None:
             self.dt = dt
 
-    def set_cost_model(
-        self, Q, R, P=None,
-    ):
+    def set_cost_model(self, Q, R, P=None):
+        r"""Sets the cost model used.
+
+        Notes
+        -----
+        This implements an LQR controller for the cost function
+
+        .. math::
+
+            J = \int^{t_f}_0 x^T Q x + u^T R u + u^T P x d\tau
+
+        Parameters
+        ----------
+        Q : N x N numpy array
+            State cost matrix.
+        R : Nu x Nu numpy array
+            Control input cost matrix.
+        P : Nu x N, optional
+            State and control correlation cost matrix. The default is None which
+            gives a zero matrix.
+        """
         self._Q = Q
         self._R = R
 
@@ -101,6 +162,7 @@ class LQR:
         inv_state_args,
         inv_ctrl_args,
     ):
+        """Propagate the state in time."""
         if self.dynObj is not None:
             if isinstance(self.dynObj, gdyn.NonlinearDynamicsBase):
                 if forward and self.dynObj.dt < 0:
@@ -125,6 +187,33 @@ class LQR:
             raise NotImplementedError()
 
     def get_state_space(self, tt, x_hat, u_hat, state_args, ctrl_args):
+        """Return the :math:`A, B` matrices.
+
+        Parameters
+        ----------
+        tt : float
+            Current timestep.
+        x_hat : N x 1 numpy array
+            Current state.
+        u_hat : Nu x 1 numpy array
+            Current control input.
+        state_args : tuple
+            Extra arguments for the state calculation.
+        ctrl_args : tuple
+            Extra arguments for the control calculation.
+
+        Raises
+        ------
+        NotImplementedError
+            If unsupported dynamics are used.
+
+        Returns
+        -------
+        A : N x N numpy array
+            State matrix.
+        B : N x Nu numpy array
+            Input matrix.
+        """
         if self.dynObj is not None:
             if isinstance(self.dynObj, gdyn.NonlinearDynamicsBase):
                 if self.dynObj.dt < 0:
@@ -147,6 +236,36 @@ class LQR:
     def prop_state_backward(
         self, tt, x_hat, u_hat, state_args, ctrl_args, inv_state_args, inv_ctrl_args
     ):
+        """Propagate the state backward and get the forward state space.
+
+        Parameters
+        ----------
+        tt : float
+            Future timestep.
+        x_hat : N x 1 numpy array
+            Future state.
+        u_hat : Nu x 1 numpy array
+            Future control input.
+        state_args : tuple
+            Extra arguments for the state matrix calculation.
+        ctrl_args : tuple
+            Extra arguments for the control matrix calculation.
+        inv_state_args : tuple
+            Extra arguments for the inverse state matrix calculation.
+        inv_ctrl_args : tuple
+            Extra arguments for the inverse control matrix calculation.
+
+        Returns
+        -------
+        x_hat_p : N x 1 numpy array
+            Previous state.
+        A : N x N numpy array
+            Forward state transition matrix.
+        B : N x Nu
+            Forward input matrix.
+        c : N x 1 numpy array
+            Forward c vector.
+        """
         x_hat_p = self._prop_state(
             tt,
             x_hat,
@@ -166,6 +285,7 @@ class LQR:
     def _determine_cost_matrices(
         self, tt, itr, x_hat, u_hat, is_initial, is_final, cost_args
     ):
+        """Calculate the cost matrices."""
         P = self._P
         if is_final:
             Q = self._Q
@@ -186,6 +306,7 @@ class LQR:
         return P, Q, R, q, r
 
     def _back_pass_update_traj(self, x_hat_p, kk):
+        """Get the next state for backward pass, helpful for inherited classes."""
         return x_hat_p.ravel()
 
     def backward_pass(
@@ -200,7 +321,34 @@ class LQR:
         inv_state_args,
         inv_ctrl_args,
     ):
-        abs_dt = np.abs(self.dt)
+        """Backward pass for the finite horizon case.
+
+        Parameters
+        ----------
+        itr : int
+            iteration number.
+        num_timesteps : int
+            Total number of timesteps.
+        traj : Nh+1 x N numpy array
+            State trajectory.
+        state_args : tuple
+            Extra arguments for the state matrix calculation.
+        ctrl_args : tuple
+            Extra arguments for the control matrix calculation.
+        cost_args : tuple
+            Extra arguments for the cost function. Not used for LQR.
+        time_vec : Nh+1 numpy array
+            Time vector for control horizon.
+        inv_state_args : tuple
+            Extra arguments for the inverse state matrix calculation.
+        inv_ctrl_args : tuple
+            Extra arguments for the inverse control matrix calculation.
+
+        Returns
+        -------
+        traj : Nh+1 x N numpy array
+            State trajectory.
+        """
         for kk in range(num_timesteps - 1, -1, -1):
             tt = time_vec[kk]
             u_hat = (
@@ -240,9 +388,27 @@ class LQR:
 
         return traj
 
-    def cost_function(
-        self, tt, state, ctrl_input, is_initial=False, is_final=False,
-    ):
+    def cost_function(self, tt, state, ctrl_input, is_initial=False, is_final=False):
+        """Calculates the cost for the state and control input.
+
+        Parameters
+        ----------
+        tt : float
+            Current timestep.
+        state : N x 1 numpy array
+            Current state.
+        ctrl_input : Nu x 1 numpy array
+            Current control input.
+        is_initial : bool, optional
+            Flag indicating if it's the initial time. The default is False.
+        is_final : bool, optional
+            Flag indicating if it's the final time. The default is False.
+
+        Returns
+        -------
+        float
+            Cost.
+        """
         if is_final:
             sdiff = state - self._end_state
             return (sdiff.T @ self._Q @ sdiff).item()
@@ -270,6 +436,52 @@ class LQR:
         inv_ctrl_args=None,
         provide_details=False,
     ):
+        """Calculate the control parameters and state trajectory.
+
+        This can track a reference or regulate to zero. It can also be inifinte
+        or finite horizon.
+
+        Parameters
+        ----------
+        cur_time : float
+            Current time when starting the control calculation.
+        cur_state : N x 1 numpy array
+            Current state.
+        end_state : N x 1 numpy array, optional
+            Desired/reference ending state. The default is None.
+        end_state_tol : float, optional
+            Tolerance on the reference state when calculating the state trajectory
+            for the inifinte horizon case. The default is 1e-2.
+        check_inds : list, optional
+            List of indices of the state vector to check when determining
+            the end condition for the state trajectory calculation for the
+            infinite horizon case. The default is None which checks the full
+            state vector.
+        state_args : tuple, optional
+            Extra arguments for calculating the state matrix. The default is None.
+        ctrl_args : tuple, optional
+            Extra arguments for calculating the input matrix. The default is None.
+        inv_state_args : tuple, optional
+            Extra arguments for calculating the inverse state matrix. The
+            default is None.
+        inv_ctrl_args : tuple, optional
+            Extra arguments for calculating the inverse input matrix. The
+            default is None.
+        provide_details : bool, optional
+            Flag indicating if additional outputs should be provided. The
+            default is False.
+
+        Returns
+        -------
+        u : Nu x 1 numpy array
+            Control input for current timestep.
+        cost : float, optional
+            Cost of the trajectory
+        state_traj : Nh+1 x N numpy array, optional
+            State trajectory over the horizon, or until the reference is reached.
+        ctrl_signal : Nh x Nu numy array, optional
+            Control inputs over the horizon, or until the reference is reached.
+        """
         if state_args is None:
             state_args = ()
         if ctrl_args is None:
@@ -285,7 +497,9 @@ class LQR:
         self._end_state = end_state.reshape((-1, 1)).copy()
 
         if np.isinf(self.time_horizon) or self.time_horizon <= 0:
-            F, G = self.get_state_space(cur_time, cur_state, self.u_nom, state_args, ctrl_args)
+            F, G = self.get_state_space(
+                cur_time, cur_state, self.u_nom, state_args, ctrl_args
+            )
             S = la.solve_discrete_are(F, G, self._Q, self._R)
             self.feedback_gain = la.inv(G.T @ S @ G + self._R) @ (G.T @ S @ F + self._P)
             self.feedthrough_gain = self.u_nom.copy()
@@ -348,7 +562,9 @@ class LQR:
 
         else:
             num_timesteps = int(self.time_horizon / self.dt)
-            time_vec = np.arange(cur_time, self.dt * (num_timesteps + 1), self.dt)
+            time_vec = cur_time + self.dt * np.linspace(
+                0, 1, num_timesteps + 1, endpoint=True
+            )
 
             self.ct_go_mats = np.zeros(
                 (num_timesteps + 1, cur_state.size, cur_state.size)
@@ -414,7 +630,35 @@ class LQR:
 
 
 class ELQR(LQR):
+    """Implements an Extended Linear Quadratic Regulator (ELQR) controller.
+
+    Attributes
+    ----------
+    max_iters : int
+        Maximum number of iterations to try for convergence.
+    tol : float
+        Tolerance for convergence.
+    ct_come_mats : Nh+1 x N x N numpy array
+        Cost-to-come matrices, 1 per step in the time horizon.
+    ct_come_vecs : Nh+1 x N x 1 numpy array
+        Cost-to-come vectors, 1 per step in the time horizon.
+    use_custom_cost : bool
+        Flag indicating if a custom cost function should be used.
+    """
+
     def __init__(self, max_iters=1e3, tol=1e-4, **kwargs):
+        """Initialize an object.
+
+        Parameters
+        ----------
+        max_iters : int, optional
+            Maximum number of iterations to try for convergence. The default is
+            1e3.
+        tol : flaot, optional
+            Tolerance on convergence. The default is 1e-4.
+        **kwargs : dict
+            Additional arguments.
+        """
         key = "time_horizon"
         if key not in kwargs:
             kwargs.update(key, 10)
@@ -434,10 +678,58 @@ class ELQR(LQR):
     def set_cost_model(
         self, Q=None, R=None, non_quadratic_fun=None, quad_modifier=None, cost_fun=None
     ):
+        r"""Sets the cost model.
+
+        Either `Q`, `R`, and `non_quadratic_fun` must be supplied (and
+        optionally `quad_modifier`) or `cost_fun`.
+
+        Notes
+        -----
+        This assumes the following form for the cost function
+
+        .. math::
+
+            J = x_f^T Q x_f + \int_{t_0}^{t_f} x^T Q x + u^T R u + u^T P x + f(\tau, x, u) d\tau
+
+        where :math:`f(t, x, u)` contains the non-quadratic terms and gets
+        automatically quadratized by the algorithm.
+
+        A custom cost function can also be provided for :math:`J` in which case
+        the entire function :math:`J(t, x, u)` will be quadratized at every
+        timestep.
+
+        Parameters
+        ----------
+        Q : N x N numpy array, optional
+            State cost matrix. The default is None.
+        R : Nu x Nu numpy array, optional
+            Control cost matrix. The default is None.
+        non_quadratic_fun : callable, optional
+            Non-quadratic portion of the standard cost function. This should
+            have the form
+            :code:`f(t, state, ctrl_input, end_state, is_initial, is_final, *args)`
+            and return a scalar additional cost. The default is None.
+        quad_modifier : callable, optional
+            Function to modifiy the :math:`P, Q, R, q, r` matrices before
+            adding the non-quadratic terms. Must have the form
+            :code:`f(itr, t, P, Q, R, q, r)` and return a tuple of
+            :code:`(P, Q, R, q, r)`. The default is None.
+        cost_fun : callable, optional
+            Custom cost function, must handle all cases and will be numericaly
+            quadratized at every timestep. Must have the form
+            :code:`f(t, state, ctrl_input, end_state, is_initial, is_final, *args)`
+            and return a scalar total cost. The default is None.
+
+        Raises
+        ------
+        RuntimeError
+            Invlaid combination of input arguments.
+        """
         if Q is not None and R is not None and non_quadratic_fun is not None:
             super().set_cost_model(Q, R)
             self._non_quad_fun = non_quadratic_fun
             self._quad_modifier = quad_modifier
+            self.use_custom_cost = False
 
         elif cost_fun is not None:
             self._cost_fun = cost_fun
@@ -447,8 +739,31 @@ class ELQR(LQR):
             raise RuntimeError("Invalid combination of inputs.")
 
     def cost_function(
-        self, tt, state, ctrl_input, cost_args, is_initial=False, is_final=False,
+        self, tt, state, ctrl_input, cost_args, is_initial=False, is_final=False
     ):
+        """Calculates the cost for the state and control input.
+
+        Parameters
+        ----------
+        tt : float
+            Current timestep.
+        state : N x 1 numpy array
+            Current state.
+        ctrl_input : Nu x 1 numpy array
+            Current control input.
+        cost_args : tuple
+            Additional arguments for the non-quadratic part or the custom cost
+            function.
+        is_initial : bool, optional
+            Flag indicating if it's the initial time. The default is False.
+        is_final : bool, optional
+            Flag indicating if it's the final time. The default is False.
+
+        Returns
+        -------
+        float
+            Cost.
+        """
         if not self.use_custom_cost:
             cost = super().cost_function(
                 tt, state, ctrl_input, is_initial=is_initial, is_final=is_final
@@ -475,6 +790,36 @@ class ELQR(LQR):
     def prop_state_forward(
         self, tt, x_hat, u_hat, state_args, ctrl_args, inv_state_args, inv_ctrl_args
     ):
+        """Propagate the state forward and get the backward state space.
+
+        Parameters
+        ----------
+        tt : float
+            Current timestep.
+        x_hat : N x 1 numpy array
+            Current state.
+        u_hat : Nu x 1 numpy array
+            Current control input.
+        state_args : tuple
+            Extra arguments for the state matrix calculation.
+        ctrl_args : tuple
+            Extra arguments for the control matrix calculation.
+        inv_state_args : tuple
+            Extra arguments for the inverse state matrix calculation.
+        inv_ctrl_args : tuple
+            Extra arguments for the inverse control matrix calculation.
+
+        Returns
+        -------
+        x_hat_p : N x 1 numpy array
+            Next state.
+        Abar : N x N numpy array
+            Backward state transition matrix.
+        Bbar : N x Nu
+            Backward input matrix.
+        cbar : N x 1 numpy array
+            Backward c vector.
+        """
         x_hat_p = self._prop_state(
             tt, x_hat, u_hat, state_args, ctrl_args, True, inv_state_args, inv_ctrl_args
         )
@@ -499,13 +844,55 @@ class ELQR(LQR):
         return x_hat_p, ABar, BBar, cBar
 
     def quadratize_cost(self, tt, itr, x_hat, u_hat, is_initial, is_final, cost_args):
+        """Quadratizes the cost function.
+
+        If the non-quadratic portion of the standard cost function is not
+        positive semi-definite then it is regularized by setting the negative
+        eigen values to zero and reconstructing the matrix.
+
+        Parameters
+        ----------
+        tt : float
+            Current timestep.
+        itr : int
+            Iteration number.
+        x_hat : N x 1 numpy array
+            Current state.
+        u_hat : Nu x 1 numpy array
+            Current control input.
+        is_initial : bool
+            Flag indicating if this is the first timestep.
+        is_final : bool
+            Flag indicating if this is the last timestep.
+        cost_args : tuple
+            Additional arguments for the cost calculation.
+
+        Raises
+        ------
+        NotImplementedError
+            Unsupported configuration.
+
+        Returns
+        -------
+        P : Nu x N numpy array
+            State and control correlation cost matrix.
+        Q : N x N numpy array
+            State cost matrix.
+        R : Nu x Nu numpy array
+            Control input cost matrix.
+        q : N x 1
+            State cost vector.
+        r : Nu x 1
+            Control input cost vector.
+        """
         if not self.use_custom_cost:
             P, Q, R, q, r = super()._determine_cost_matrices(
                 tt, itr, x_hat, u_hat, is_initial, is_final, cost_args
             )
 
-            if not is_initial and not is_final and self._quad_modifier is not None:
-                P, Q, R, q, r = self._quad_modifier(itr, tt, P, Q, R, q, r)
+            if not is_initial and not is_final:
+                if self._quad_modifier is not None:
+                    P, Q, R, q, r = self._quad_modifier(itr, tt, P, Q, R, q, r)
 
                 xdim = x_hat.size
                 udim = u_hat.size
@@ -591,7 +978,34 @@ class ELQR(LQR):
         inv_state_args,
         inv_ctrl_args,
     ):
-        abs_dt = np.abs(self.dt)
+        """Forward pass for the smoothing.
+
+        Parameters
+        ----------
+        itr : int
+            iteration number.
+        num_timesteps : int
+            Total number of timesteps.
+        traj : Nh+1 x N numpy array
+            State trajectory.
+        state_args : tuple
+            Extra arguments for the state matrix calculation.
+        ctrl_args : tuple
+            Extra arguments for the control matrix calculation.
+        cost_args : tuple
+            Extra arguments for the cost function.
+        time_vec : Nh+1 numpy array
+            Time vector for control horizon.
+        inv_state_args : tuple
+            Extra arguments for the inverse state matrix calculation.
+        inv_ctrl_args : tuple
+            Extra arguments for the inverse control matrix calculation.
+
+        Returns
+        -------
+        traj : Nh+1 x N numpy array
+            State trajectory.
+        """
         for kk in range(num_timesteps):
             tt = time_vec[kk]
 
@@ -656,6 +1070,69 @@ class ELQR(LQR):
         fig=None,
         plt_inds=None,
     ):
+        """Calculate the control parameters and state trajectory.
+
+        Parameters
+        ----------
+        tt : float
+            Current time when starting the control calculation.
+        cur_state : N x 1 numpy array
+            Current state.
+        end_state : N x 1 numpy array
+            Desired/reference ending state.
+        state_args : tuple, optional
+            Extra arguments for calculating the state matrix. The default is None.
+        ctrl_args : tuple, optional
+            Extra arguments for calculating the input matrix. The default is None.
+        cost_args : tuple, optional
+            Extra arguments for the cost function, either the non-quadratic
+            part or the custom function. The default is None.
+        inv_state_args : tuple, optional
+            Extra arguments for calculating the inverse state matrix. The
+            default is None.
+        inv_ctrl_args : tuple, optional
+            Extra arguments for calculating the inverse input matrix. The
+            default is None.
+        provide_details : bool, optional
+            Flag indicating if additional outputs should be provided. The
+            default is False.
+        disp : bool, optional
+            Flag indicating if extra text should be displayed during the
+            optimization. The default is True.
+        show_animation : bool, optional
+            Flag indicating if an animation should be shown during the
+            optimization. The default is False.
+        save_animation : bool, optional
+            Flag indicating if the frames of the animation should be saved.
+            Requires that the animation is shown. The default is False.
+        plt_opts : dict, optional
+            Options for the plot, see :func:`gncpy.plotting.init_plotting_opts`.
+            The default is None.
+        ttl : string, optional
+            Title for the plot. The default is None.
+        fig : matplotlib figure, optional
+            Figure to draw on. If supplied only the end point and paths are
+            drawn, the rest of the figure remains unchanged. The default is None
+            which creates a new figure and adds a title.
+        plt_inds : list, optional
+            2 element list of state indices for plotting. The default is None
+            which assumes [0, 1].
+
+        Returns
+        -------
+        u : Nu x 1 numpy array
+            Control input for current timestep.
+        cost : float, optional
+            Cost of the trajectory
+        state_traj : Nh+1 x N numpy array, optional
+            State trajectory over the horizon, or until the reference is reached.
+        ctrl_signal : Nh x Nu numy array, optional
+            Control inputs over the horizon, or until the reference is reached.
+        fig : matplotlib figure, optional
+            Figure handle for the generated plot, None if animation is not shown.
+        frame_list : list, optional
+            Each element is a PIL.Image corresponding to an animation frame.
+        """
         if state_args is None:
             state_args = ()
         if ctrl_args is None:
@@ -747,7 +1224,7 @@ class ELQR(LQR):
         if disp:
             print("Starting ELQR optimization loop...")
 
-        time_vec = np.arange(tt, abs_dt * (num_timesteps + 1), abs_dt)
+        time_vec = tt + abs_dt * np.linspace(0, 1, num_timesteps + 1, endpoint=True)
 
         for ii in range(self.max_iters):
             # forward pass
@@ -848,7 +1325,9 @@ class ELQR(LQR):
                     is_initial=(kk == 0),
                     is_final=(kk == num_timesteps),
                 )
-                x = self._prop_state(tt, x, u, state_args, ctrl_args, True, inv_state_args, inv_ctrl_args)
+                x = self._prop_state(
+                    tt, x, u, state_args, ctrl_args, True, inv_state_args, inv_ctrl_args
+                )
 
             if disp:
                 print("\tIteration: {:3d} Cost: {:10.4f}".format(ii, cost))

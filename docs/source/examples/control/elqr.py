@@ -18,7 +18,7 @@ def basic():
     start_state = np.array([0, -2.5, np.pi]).reshape((3, 1))
 
     # define nominal control input
-    u_nom = np.array([0.25, 0.25]).reshape((2, 1))
+    u_nom = np.zeros((2, 1))
 
     # define dynamics
     # IRobot Create has a dt that can be set here or it can be set by the control
@@ -47,7 +47,8 @@ def basic():
     top_right = np.array([2, 3])
 
     # define Q and R weights for using standard cost function
-    Q = 50 * np.eye(len(dynObj.state_names))
+    # Q = np.diag([50, 50, 0.4 * np.pi / 2])
+    Q = 50 * np.eye(3)
     R = 0.6 * np.eye(u_nom.size)
 
     # define non-quadratic term for cost function
@@ -76,6 +77,8 @@ def basic():
             dist = np.sqrt(np.sum(diff * diff))
             # signed distance is negative if the robot is within the obstacle
             signed_dist = (dist - dynObj.radius) - obs[2]
+            if signed_dist > 0:
+                continue
             cost += _obs_factor * np.exp(-_scale_factor * signed_dist).item()
 
         # add cost for going out of bounds
@@ -142,7 +145,7 @@ def modify_quadratize():
     start_state = np.array([0, -2.5, np.pi]).reshape((3, 1))
 
     # define nominal control input
-    u_nom = np.array([0.25, 0.25]).reshape((2, 1))
+    u_nom = np.zeros((2, 1))
 
     # define dynamics
     # IRobot Create has a dt that can be set here or it can be set by the control
@@ -200,6 +203,8 @@ def modify_quadratize():
             dist = np.sqrt(np.sum(diff * diff))
             # signed distance is negative if the robot is within the obstacle
             signed_dist = (dist - dynObj.radius) - obs[2]
+            if signed_dist > 0:
+                continue
             cost += _obs_factor * np.exp(-_scale_factor * signed_dist).item()
 
         # add cost for going out of bounds
@@ -263,6 +268,8 @@ def modify_quadratize():
 
 def run():
     import os
+
+    print("Generating ELQR examples")
 
     fout = os.path.join(os.path.dirname(__file__), "elqr_basic.gif")
     if not os.path.isfile(fout):
