@@ -20,31 +20,41 @@ class RRTStar:
     def __init__(self, x0, xdes, obstacles, randArea, Q, R, dynObj, dt):
         self.start = Node(x0)
         # Start Node
+
         self.end = Node(xdes)
         # End Node
+
         self.numPos = int(randArea.shape[0] / 2)
         self.min_rand = randArea[0 : self.numPos]
         # Min State space to sample RRT* Paths
+
         self.max_rand = randArea[self.numPos :]
         # Max State space to sample RRT* Paths
+
         self.goal_sample_rate = 10
         # Samples goal 10% of time
+
         self.max_iter = 300
         # Max RRT* Iteration
+
         self.connect_circle_dist = 2
         # Circular Radius of to Calculate Near Nodes
+
         self.step_size = 1
         # Step size of Interpolation between k and k+1
+
         self.expand_dis = 1
         # To find CLosest Node to the end Node
+
         self.update_plot = 20
         # Update plot Iteration
+
         self.d = len(x0) - 1
         # Dimension of State minus one
 
         # Obstacles
         self.ell_con = 1
-        # Ellipsoid Obstacle Model
+        # Ellipsoid Obstacle Model for 2d
         if self.numPos == 2:
             self.Nobs = obstacles.shape[0]
             # Number of Obstacles
@@ -70,19 +80,14 @@ class RRTStar:
                 # Shape of Obstacle
                 k = k + 1
 
-        # LQR IC
-        self.MAX_ITER_LQR_Cost = 30
-        # Max Iteration for Computing Ricatti Equation
-        self.EPS = 0.1
-        # Tolerance for computing Ricatti Equation
-        self.MAX_TIME = 100
-        # Number of steps LQR trajectory is computed
-        self.N = self.MAX_TIME
-        # Number of steps LQR trajectory is computed
-        self.DT = dt
-        # Time-Step
+        # setup LQR planner
+        self.lqr = gcontrol.LQR(time_horizon=100 * dt)
+        self.lqr.set_state_model(u_nom, dynObj=dynObj, dt=dt)
+        self.lqr.set_cost_model(Q, R)
+
         self.GOAL_DIST = 0.1
         # Max Distance from xdes for LQR Convergence
+
         self.eps = 1e-8
         # eps for finite differences
 
@@ -91,128 +96,6 @@ class RRTStar:
         # Number of states
         self.nu = R.shape[0]
         # Number of Control Inputs
-        self.Q = Q
-        self.R = R
-        # Control Cost Matrix
-        self.S = []
-        # Ricatti Solution
-
-        # B Matrix of LTV System for Rigid Body Dynamics
-        self.B = np.array(
-            [
-                [0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0],
-                [1 / self.m, 0, 0, 0, 0, 0],
-                [0, 1 / self.m, 0, 0, 0, 0],
-                [0, 0, 1 / self.m, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 1 / self.I[0, 0], 0, 0],
-                [0, 0, 0, 0, 1 / self.I[1, 1], 0],
-                [0, 0, 0, 0, 0, 1 / self.I[2, 2]],
-            ]
-        )
-
-    def A(self, x):  # A Matrix of LTV System for Rigid Body Dynamics
-        q11 = np.array(
-            [
-                [0, 0, 0, 1, 0, 0],
-                [0, 0, 0, 0, 1, 0],
-                [0, 0, 0, 0, 0, 1],
-                [0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0],
-            ]
-        )
-        q12 = np.zeros((6, 7))
-        q21 = np.zeros((7, 6))
-        q22 = np.array(
-            [
-                [
-                    0,
-                    0.5 * x[12],
-                    -0.5 * x[11],
-                    0.5 * x[10],
-                    0.5 * x[9],
-                    -0.5 * x[8],
-                    0.5 * x[7],
-                ],
-                [
-                    -0.5 * x[12],
-                    0,
-                    0.5 * x[10],
-                    0.5 * x[11],
-                    0.5 * x[8],
-                    0.5 * x[9],
-                    -0.5 * x[6],
-                ],
-                [
-                    0.5 * x[11],
-                    -0.5 * x[10],
-                    0,
-                    0.5 * x[12],
-                    -0.5 * x[7],
-                    0.5 * x[6],
-                    0.5 * x[9],
-                ],
-                [
-                    -0.5 * x[10],
-                    -0.5 * x[11],
-                    -0.5 * x[12],
-                    0,
-                    -0.5 * x[6],
-                    -0.5 * x[7],
-                    -0.5 * x[8],
-                ],
-                [
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    (self.I[1, 1] - self.I[2, 2]) / self.I[0, 0] * x[12],
-                    (self.I[1, 1] - self.I[2, 2]) / self.I[0, 0] * x[11],
-                ],
-                [
-                    0,
-                    0,
-                    0,
-                    0,
-                    (self.I[2, 2] - self.I[0, 0]) / self.I[1, 1] * x[12],
-                    0,
-                    (self.I[2, 2] - self.I[0, 0]) / self.I[1, 1] * x[10],
-                ],
-                [
-                    0,
-                    0,
-                    0,
-                    0,
-                    (self.I[0, 0] - self.I[1, 1]) / self.I[2, 2] * x[11],
-                    (self.I[0, 0] - self.I[1, 1]) / self.I[2, 2] * x[10],
-                    0,
-                ],
-            ]
-        )
-        Aout = np.bmat([[q11, q12], [q21, q22]]).A
-        return Aout
-
-    def ubar(self, xbar):  # Equilibrium ubar for linearized LTV System
-        uout = np.array(
-            [
-                [
-                    0,
-                    0,
-                    0,
-                    (self.I[2, 2] - self.I[1, 1]) * xbar[11] * xbar[12],
-                    (self.I[0, 0] - self.I[2, 2]) * xbar[10] * xbar[12],
-                    (self.I[1, 1] - self.I[0, 0]) * xbar[10] * xbar[11],
-                ]
-            ]
-        ).T
-        return uout
 
     def E(self, x):
         G = np.array(
@@ -225,29 +108,6 @@ class RRTStar:
         )
         Eout = scipy.linalg.block_diag(self.eye3, self.eye3, G, self.eye3)
         return Eout
-
-    def fn_dyn(self, x, u, m, I):  # Nonlinear Rigid Body Dynamic System
-        xyzdot = x[3:6]
-        xyzdotdot = u[0:3] / m
-        x[6:10, :] = x[6:10, :] / np.linalg.norm(x[6:10, :])
-        qdot = (
-            0.5
-            * np.array(
-                [
-                    [0.0, x[12, 0], -x[11, 0], x[10, 0]],
-                    [-x[12, 0], 0.0, x[10, 0], x[11, 0]],
-                    [x[11, 0], -x[10, 0], 0.0, x[12, 0]],
-                    [-x[10, 0], -x[11, 0], -x[12, 0], 0.0],
-                ]
-            )
-            @ x[6:10]
-        )
-        wdot = (
-            self.invI @ (np.cross(-x[10:13], I @ x[10:13], axisa=0, axisb=0).T)
-            + self.invI @ u[3:6]
-        )
-        xdot = np.concatenate([xyzdot, xyzdotdot, qdot, wdot])
-        return xdot
 
     def slerp(self, q1, q2, t):  # Quaternion Interpolation
         lamb = np.dot(q1, q2)
@@ -291,29 +151,30 @@ class RRTStar:
     def dx(
         self, x1, x2
     ):  # x1 goes to x2. Difference between current state to Reference State
-        phi = self.psiinv(self.qprod(self.qinv(x2[6:10]), x1[6:10]))
-        dxout = np.bmat([[x1[0:6] - x2[0:6], phi, x1[10:13] - x2[10:13]]]).A.T
-        return dxout
+        return (x1 - x2).reshape((-1, 1))
 
-    def plan(self):  # LQR-RRT* Planner
+    def plan(self, disp=True):  # LQR-RRT* Planner
         search_until_max_iter = 0
         self.node_list = [self.start]
 
-        for i in range(self.max_iter):
+        if disp:
+            print("Starting LQRRRT* Planning...")
 
-            # hello_str = "hello world %s" % rospy.get_time()
+        for i in range(self.max_iter):
             rnd = self.get_random_node()
-            if (i) % self.update_plot == 0:
-                Iter_str = (
-                    "Iter: " + str(i) + ", number of nodes: " + str(len(self.node_list))
+            if disp and (i % self.update_plot == 0):
+                print(
+                    "\tIter: {:4d}, number of nodes: {:6d}".format(
+                        i, len(self.node_list)
+                    )
                 )
-                # print(Iter_str);#Undo Print
 
                 last_index = self.search_best_goal_node()
                 traj = None
                 if last_index:
                     traj, u_traj = self.generate_final_course(last_index)
-                # self.draw_plot(rnd,traj);
+                # self.draw_plot(rnd,traj)
+
             nearest_ind = self.get_nearest_node_index(rnd)
             new_node = self.steer(self.node_list[nearest_ind], rnd)
             if new_node is None:
@@ -542,40 +403,27 @@ class RRTStar:
 
     def get_nearest_node_index(self, rnd_node):  # Get nearest node index in tree
         Ad, Bd = self.get_system_model(rnd_node.sv)
-        self.S = self.solve_dare(Ad, Bd)
+        S = self.solve_dare(Ad, Bd)
         # dlist=float('inf')*np.ones((len(self.node_list),1));
-        dlist = [
-            np.matmul(
-                np.matmul(self.dx(node.sv, rnd_node.sv).T, self.S),
-                self.dx(node.sv, rnd_node.sv),
-            )
-            for node in self.node_list
-        ]
-        minind = dlist.index(min(dlist))
+        dlist = np.array(
+            [
+                (self.dx(node.sv, rnd_node.sv).T @ S) @ self.dx(node.sv, rnd_node.sv)
+                for node in self.node_list
+            ]
+        )
+        minind = np.argmin(dlist)[0]
+        # minind = dlist.index(min(dlist))
         return minind
 
     def solve_dare(self, A, B):  # Solve discrete Ricatti Equation for LQR
-        X = self.Q
-        Xn = self.Q
+        Q, R = self.lqr.Q, self.lqr.R
+        X = Q
+        Xn = Q
         for i in range(self.MAX_ITER_LQR_Cost):
             Xn = (
-                np.matmul(np.matmul(A.T, X), A)
-                - np.matmul(
-                    np.matmul(
-                        np.matmul(
-                            np.matmul(
-                                np.matmul(np.matmul(A.T, X), B),
-                                np.linalg.pinv(
-                                    self.R + np.matmul(np.matmul(B.T, X), B)
-                                ),
-                            ),
-                            B.T,
-                        ),
-                        X,
-                    ),
-                    A,
-                )
-                + self.Q
+                A.T @ X @ A
+                - (((A.T @ X @ B) @ np.linalg.pinv(R + B.T @ X @ B)) @ B.T @ X @ A)
+                + Q
             )
             if (abs(Xn - X)).max() < self.EPS:
                 break
@@ -585,21 +433,21 @@ class RRTStar:
     def steer(
         self, from_node, to_node
     ):  # Obtain trajectory between from_node to to_node using LQR and save trajectory
-        x_sim, u_sim = self.LQR_planning(from_node.sv, to_node.sv)
+        x_sim, u_sim = self.lqr.calculate_control(
+            cur_time,
+            from_node.sv.reshape((-1, 1)),
+            end_state=to_node.sv.reshape((-1, 1)),
+            provide_details=True,
+        )[2:4]
+        # TODO: S used to be calculated in the LQR_planning function that used to be called above and is used in sample_path
         x_sim_sample, u_sim_sample, course_lens = self.sample_path(x_sim, u_sim)
         if len(x_sim_sample) == 0:
             return None
-        newNode = copy.deepcopy(from_node)
-        newNode.x = x_sim_sample[0, -1]
-        newNode.y = x_sim_sample[1, -1]
-        newNode.z = x_sim_sample[2, -1]
+        newNode = Node()
         newNode.sv = x_sim_sample[:, -1]
-        newNode.path_x = x_sim_sample[0, :]
-        newNode.path_y = x_sim_sample[1, :]
-        newNode.path_z = x_sim_sample[2, :]
-        newNode.path = x_sim_sample[0:13, :]
-        newNode.u = u_sim_sample[:, :]
-        newNode.cost += sum([abs(c) for c in course_lens])
+        newNode.u = u_sim_sample
+        newNode.path = x_sim_sample
+        newNode.cost = from_node.cost + np.sum(np.abs(course_lens))
         newNode.parent = from_node
         return newNode
 
@@ -635,58 +483,12 @@ class RRTStar:
         clen = np.einsum("ij,ij->i", (diff_x_sim.T @ self.S), diff_x_sim.T)
         return x_sim_sample, u_sim_sample, clen
 
-    def LQR_planning(self, x0, xdes):  # LQR Trajectory planner
-
-        found_path = False
-        Ad, Bd = self.get_system_model(xdes)
-        self.S = self.solve_dare(Ad, Bd)
-        ubar = self.ubar(xdes)
-        xsim = np.zeros((self.nx, self.N))
-        xsim[:, [0]] = x0.reshape((-1, 1))
-        usim = np.zeros((self.nu, self.N))
-        K = np.linalg.pinv(Bd.T @ self.S @ Bd + self.R) @ (Bd.T @ self.S @ Ad)
-        dold = 100000000000
-        for k in range(0, self.N - 1):
-            dx = self.dx(xsim[:, k], xdes)
-            # usim[:,[k]]=-K@dx+ubar;
-            usim[:, [k]] = np.minimum(np.maximum(-K @ dx + ubar, -self.max), self.max)
-            f1 = self.DT * self.fn_dyn(xsim[:, [k]], usim[:, [k]], self.m, self.I)
-            f2 = self.DT * self.fn_dyn(
-                xsim[:, [k]] + 0.5 * f1, usim[:, [k]], self.m, self.I
-            )
-            f3 = self.DT * self.fn_dyn(
-                xsim[:, [k]] + 0.5 * f2, usim[:, [k]], self.m, self.I
-            )
-            f4 = self.DT * self.fn_dyn(xsim[:, [k]] + f3, usim[:, [k]], self.m, self.I)
-            xsim[:, [k + 1]] = xsim[:, [k]] + 1 / 6 * (f1 + 2 * f2 + 2 * f3 + f4)
-            xsim[6:10, [k + 1]] = xsim[6:10, [k + 1]] / np.linalg.norm(
-                xsim[6:10, [k + 1]]
-            )
-            d = np.sqrt(
-                self.dx(xsim[:, k + 1], xdes)[0:3].T
-                @ self.dx(xsim[:, k + 1], xdes)[0:3]
-            )
-            # if np.abs(d-dold)<.001:
-            #    break;
-            if np.abs(d) < self.GOAL_DIST:
-                found_path = True
-                xsim = xsim[:, 0 : k + 2]
-                usim = usim[:, 0 : k + 1]
-                break
-            dold = d
-        if not found_path:
-            NoPath_str = "Cannot find path"
-            # print(NoPath_str)#Undo Print
-
-            return np.array([]), np.array([])
-        return xsim, usim
-
-    def get_system_model(self, xdes):  # Get Discrete model of LTV system
-        Ad = np.identity(self.nx - 1) + self.DT * (
-            self.E(xdes).T @ self.A(xdes) @ self.E(xdes)
+    def get_system_model(
+        self, tt, xdes, state_args, ctrl_args
+    ):  # Get Discrete model of LTV system
+        return self.lqr.get_state_space(
+            tt, xdes.reshape((-1, 1)), self.lqr.u_nom, state_args, ctrl_args
         )
-        Bd = self.DT * (self.E(xdes).T @ self.B)
-        return Ad, Bd
 
     def cfinitediff(self, xtraj, utraj):
         xdotdot = np.zeros((xtraj.shape[0], xtraj.shape[1]))

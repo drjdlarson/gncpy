@@ -104,6 +104,16 @@ class LQR:
         else:
             self._dt = val
 
+    @property
+    def Q(self):
+        """Read only state penalty matrix."""
+        return self._Q
+
+    @property
+    def R(self):
+        """Read only control penalty matrix."""
+        return self._R
+
     def set_state_model(self, u_nom, dynObj=None, dt=None):
         """Set the state/dynamics model.
 
@@ -631,6 +641,9 @@ class LQR:
 
 class ELQR(LQR):
     """Implements an Extended Linear Quadratic Regulator (ELQR) controller.
+
+    This is based on
+    :cite:`Berg2016_ExtendedLQRLocallyOptimalFeedbackControlforSystemswithNonLinearDynamicsandNonQuadraticCost`.
 
     Attributes
     ----------
