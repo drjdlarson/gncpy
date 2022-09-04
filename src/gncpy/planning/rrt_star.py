@@ -3,6 +3,7 @@ import scipy.linalg
 
 import gncpy.dynamics as gdyn
 import gncpy.control as gcontrol
+import matplotlib.pyplot as plt
 
 
 class Node:  # Each node on the tree has these properties
@@ -17,7 +18,11 @@ class Node:  # Each node on the tree has these properties
 
 
 class RRTStar:
-    def __init__(self, x0, xdes, obstacles, randArea, Q, R, dynObj, dt):
+    def __init__(self, x0, xdes, obstacles, randArea, Q, R, dynObj, state_args):
+
+        self.dt = state_args[0];
+        # dt
+
         self.start = Node(x0)
         # Start Node
 
@@ -58,7 +63,7 @@ class RRTStar:
         if self.numPos == 2:
             self.Nobs = obstacles.shape[0]
             # Number of Obstacles
-            self.obstacle_list = obstacles[:, 0:-1]
+            self.obstacle_list = obstacles[:, 0:-1].T
             # States of each Obstacle
             self.P = np.zeros((2, 2, self.Nobs))
             k = 0
@@ -69,7 +74,7 @@ class RRTStar:
         elif self.numPos == 3:
             self.Nobs = obstacles.shape[0]
             # Number of Obstacles
-            self.obstacle_list = obstacles[:, 0:-1]
+            self.obstacle_list = obstacles[:, 0:-1].T;
             # States of each Obstacle
             self.P = np.zeros((3, 3, self.Nobs))
             k = 0
@@ -80,9 +85,20 @@ class RRTStar:
                 # Shape of Obstacle
                 k = k + 1
 
+        self.pos_orient = list(range(0, self.numPos))
+        self.nx = len(dynObj.state_names)
+        # Number of states
+        self.nu = R.shape[0]
+        # Number of Control Inputs
+
+        # Arguments for Dynamics and LQR Class Objects
+        self.cur_time = 0;
+        self.state_args = state_args;
+
         # setup LQR planner
-        self.lqr = gcontrol.LQR(time_horizon=100 * dt)
-        self.lqr.set_state_model(u_nom, dynObj=dynObj, dt=dt)
+        u_nom = np.zeros((self.nu,1))
+        self.lqr = gcontrol.LQR()
+        self.lqr.set_state_model(u_nom, dynObj=dynObj, dt=self.dt)
         self.lqr.set_cost_model(Q, R)
 
         self.GOAL_DIST = 0.1
@@ -90,63 +106,6 @@ class RRTStar:
 
         self.eps = 1e-8
         # eps for finite differences
-
-        self.pos_orient = list(range(0, self.numPos))
-        self.nx = len(dynObj.state_names)
-        # Number of states
-        self.nu = R.shape[0]
-        # Number of Control Inputs
-
-    def E(self, x):
-        G = np.array(
-            [
-                [x[9], -x[8], x[7]],
-                [x[8], x[9], -x[6]],
-                [-x[7], x[6], x[9]],
-                [-x[6], -x[7], -x[8]],
-            ]
-        )
-        Eout = scipy.linalg.block_diag(self.eye3, self.eye3, G, self.eye3)
-        return Eout
-
-    def slerp(self, q1, q2, t):  # Quaternion Interpolation
-        lamb = np.dot(q1, q2)
-        if lamb < 0:
-            q2 = -q2
-            lamb = -lamb
-        if np.sqrt((1 - lamb) ** 2) < 0.000001:
-            r = 1 - t
-            s = t
-        else:
-            alpha = np.arccos(lamb)
-            gamma = 1 / np.sin(alpha)
-            r = np.sin((1 - t) * alpha) * gamma
-            s = np.sin(t * alpha) * gamma
-        qi = r * q1 + s * q2
-        Q = qi / np.linalg.norm(qi)
-        return Q
-
-    def qinv(self, q1):  # Quaternion inverse
-        qout = scipy.linalg.block_diag(-np.identity(3), 1) @ q1
-        return qout
-
-    def qprod(self, q2, q1):  # q1 goes to q2 (ref), Quaternion Multiplication
-        Psi = np.array(
-            [
-                [q1[3], q1[2], -q1[1]],
-                [-q1[2], q1[3], q1[0]],
-                [q1[1], -q1[0], q1[3]],
-                [-q1[0], -q1[1], -q1[2]],
-            ]
-        )
-        qdot = np.bmat([Psi, q1.reshape((4, 1))]).A
-        qout = qdot @ q2
-        return qout
-
-    def psiinv(self, q):  # Quaternion to 3 variable representation
-        q = q / np.linalg.norm(q)
-        out = q[0:3] / q[3]
-        return out
 
     def dx(
         self, x1, x2
@@ -173,13 +132,13 @@ class RRTStar:
                 traj = None
                 if last_index:
                     traj, u_traj = self.generate_final_course(last_index)
-                # self.draw_plot(rnd,traj)
+                self.draw_plot(rnd,traj)
 
             nearest_ind = self.get_nearest_node_index(rnd)
             new_node = self.steer(self.node_list[nearest_ind], rnd)
             if new_node is None:
                 continue
-            if self.check_collision(new_node) and self.check_vel(new_node):
+            if self.check_collision(new_node):
                 near_indices = self.find_near_nodes(new_node, nearest_ind)
                 new_node = self.choose_parent(new_node, near_indices)
                 if new_node:
@@ -190,7 +149,7 @@ class RRTStar:
             # traj=None;
             # if last_index:
             #    traj, u_traj=self.generate_final_course(last_index);
-            # self.draw_plot(rnd,traj);
+            self.draw_plot(rnd,traj);
 
             if (not search_until_max_iter) and new_node:
                 last_index = self.search_best_goal_node()
@@ -211,8 +170,8 @@ class RRTStar:
         return None, None
 
     def generate_final_course(self, goal_index):  # Generate Final Course
-        path = self.end.sv[0:13].reshape(-1, 1)
-        u_path = np.empty((6, 0))
+        path = self.end.sv.reshape(-1, 1)
+        u_path = np.empty((self.nu, 0))
         node = self.node_list[goal_index]
         while node.parent:
             i = np.flip(node.path, 1)
@@ -249,23 +208,23 @@ class RRTStar:
         )
         return dist
 
-    # def draw_plot(self,rnd=None,traj=None): # Draws 3D Trajectory using LQR-RRT*
-    #    plt.clf()
-    #    ax = plt.axes(projection="3d");
-    #    #if rnd is not None:
-    #    #    ax.scatter3D(rnd.x,rnd.y,rnd.z,c="black");
-    #    for node in self.node_list:
-    #        if node.parent:
-    #            ax.plot3D(node.path_x,node.path_y,node.path_z,"-g");
-    #    ax.scatter3D(self.start.x, self.start.y, c="red")
-    #    ax.scatter3D(self.end.x, self.end.y, c="limegreen")
-    #    if traj is not None:
-    #        ax.plot3D(traj[0,:],traj[1,:],traj[2,:],"-r");
-    #    ax.set_xlim3d(-2, 8);
-    #    ax.set_ylim3d(-2,8);
-    #    ax.set_zlim3d(-2,2);
-    #    ax.grid(True);
-    #    plt.pause(0.01);
+    def draw_plot(self,rnd=None,traj=None): # Draws 3D Trajectory using LQR-RRT*
+       plt.clf()
+       ax = plt.axes(projection="3d");
+       #if rnd is not None:
+       #    ax.scatter3D(rnd.x,rnd.y,rnd.z,c="black");
+       for node in self.node_list:
+           if node.parent:
+               ax.plot3D(node.path[0,:],node.path[1,:],"-g");
+       ax.scatter3D(self.start.sv[0], self.start.sv[1], c="red")
+       ax.scatter3D(self.end.sv[0], self.end.sv[1], c="limegreen")
+       if traj is not None:
+           ax.plot3D(traj[0,:],traj[1,:],traj[2,:],"-r");
+       ax.set_xlim3d(-3, 3);
+       ax.set_ylim3d(-3,3);
+       ax.set_zlim3d(-3,3);
+       ax.grid(True);
+       plt.pause(0.01);
     def rewire(self, new_node, near_inds):  # Rewires the Nodes
         for i in near_inds:
             near_node = self.node_list[i]
@@ -317,7 +276,15 @@ class RRTStar:
         return new_node
 
     def calc_new_cost(self, from_node, to_node):  # Calculates cost of node
-        x_sim, u_sim = self.LQR_planning(from_node.sv, to_node.sv)
+        x_sim, u_sim = self.lqr.calculate_control(
+            self.cur_time,
+            from_node.sv.reshape((-1, 1)),
+            end_state=to_node.sv.reshape((-1, 1)),
+            provide_details=True,
+            state_args = self.state_args,
+        )[2:4]
+        x_sim = x_sim.T;
+        u_sim = u_sim.T;
         x_sim_sample, u_sim_sample, course_lens = self.sample_path(x_sim, u_sim)
         if len(x_sim_sample) == 0:
             return float("inf")
@@ -344,75 +311,29 @@ class RRTStar:
     def check_collision(self, node):  # Check for collisions with Ellipsoids
         k = 0
         for xobs in self.obstacle_list.T:
-            distxyz = (node.path[0:3, :].T - xobs.T).T
+            distxyz = (node.path[:self.numPos, :].T - xobs.T).T
             d_list = np.einsum("ij,ij->i", (distxyz.T @ self.P[:, :, k]), distxyz.T)
             k = k + 1
             if -min(d_list) + self.ell_con >= 0.0:
                 return False
         return True
 
-    def check_vel(self, node):
-        for k in range(node.path.shape[1]):
-            vel_bool = np.abs(node.path[3:6, [k]]) < self.vel_max_array
-            # angvel_bool=np.abs(node.path[10:13,[k]])<self.angvel_max_array;
-            for i in range(3):
-                if vel_bool[i, 0] == False:  # or angvel_bool[i,0]==False
-                    # print(vel_bool)
-                    # rospy.loginfo(i)
-                    # print(angvel_bool)
-                    # print('---------')
-                    return False
-        return True
-
     def get_random_node(self):  # Find a random node from the state space
         if np.random.randint(0, 100) > self.goal_sample_rate:
-            rand_trans = np.array(
-                [
-                    [
-                        np.random.uniform(self.min_rand[0], self.max_rand[0]),
-                        np.random.uniform(self.min_rand[1], self.max_rand[1]),
-                        np.random.uniform(self.min_rand[2], self.max_rand[2]),
-                        0.0,
-                        0.0,
-                        0.0,
-                    ]
-                ]
-            ).T
-            s = np.random.uniform()
-            sigma1 = np.sqrt(1 - s)
-            sigma2 = np.sqrt(s)
-            theta1 = 2 * 3.1415 * np.random.uniform()
-            theta2 = 2 * 3.1415 * np.random.uniform()
-            rand_rot = np.array(
-                [
-                    [
-                        np.sin(theta1) * sigma1,
-                        np.cos(theta1) * sigma1,
-                        np.sin(theta2) * sigma2,
-                        np.cos(theta2) * sigma2,
-                        0.0,
-                        0.0,
-                        0.0,
-                    ]
-                ]
-            ).T
-            rnd = Node(np.bmat([[rand_trans], [rand_rot]]).A)
+            rand_Pos = np.zeros((self.numPos,1));
+            for k in range(self.numPos):
+                rand_Pos[k,0] = np.random.uniform(self.min_rand[k], self.max_rand[k]);
+            rand_x = np.block([[rand_Pos],[np.zeros((2,1))]]);
+            rnd = Node(rand_x)
         else:  # goal point sampling
             rnd = Node(self.end.sv.reshape((self.nx, 1)))
         return rnd
 
     def get_nearest_node_index(self, rnd_node):  # Get nearest node index in tree
-        Ad, Bd = self.get_system_model(rnd_node.sv)
-        S = self.solve_dare(Ad, Bd)
+        self.S, Ad, Bd = self.lqr.solve_dare(self.cur_time, rnd_node.sv.reshape((-1,1)), self.state_args, None)
         # dlist=float('inf')*np.ones((len(self.node_list),1));
-        dlist = np.array(
-            [
-                (self.dx(node.sv, rnd_node.sv).T @ S) @ self.dx(node.sv, rnd_node.sv)
-                for node in self.node_list
-            ]
-        )
-        minind = np.argmin(dlist)[0]
-        # minind = dlist.index(min(dlist))
+        dlist=[ np.matmul(np.matmul(self.dx(node.sv,rnd_node.sv).T,self.S),self.dx(node.sv,rnd_node.sv)) for node in self.node_list];
+        minind = dlist.index(min(dlist))
         return minind
 
     def solve_dare(self, A, B):  # Solve discrete Ricatti Equation for LQR
@@ -434,17 +355,19 @@ class RRTStar:
         self, from_node, to_node
     ):  # Obtain trajectory between from_node to to_node using LQR and save trajectory
         x_sim, u_sim = self.lqr.calculate_control(
-            cur_time,
+            self.cur_time,
             from_node.sv.reshape((-1, 1)),
             end_state=to_node.sv.reshape((-1, 1)),
             provide_details=True,
+            state_args = self.state_args,
         )[2:4]
+        x_sim = x_sim.T;
+        u_sim = u_sim.T;
         # TODO: S used to be calculated in the LQR_planning function that used to be called above and is used in sample_path
         x_sim_sample, u_sim_sample, course_lens = self.sample_path(x_sim, u_sim)
         if len(x_sim_sample) == 0:
             return None
-        newNode = Node()
-        newNode.sv = x_sim_sample[:, -1]
+        newNode = Node(x_sim_sample[:,-1].reshape((-1,1)))
         newNode.u = u_sim_sample
         newNode.path = x_sim_sample
         newNode.cost = from_node.cost + np.sum(np.abs(course_lens))
@@ -460,16 +383,10 @@ class RRTStar:
         for i in range(x_sim.shape[1] - 1):
             for t in np.arange(0.0, 1.0, self.step_size):
                 u_sim_sample.append(u_sim[:, i])
-                x_trans = (t * x_sim[0:6, i + 1] + (1.0 - t) * x_sim[0:6, i]).reshape(
+                x_sample = (t * x_sim[:, i + 1] + (1.0 - t) * x_sim[:, i]).reshape(
                     (-1, 1)
                 )[:, 0]
-                q1 = x_sim[6:10, i]
-                q2 = x_sim[6:10, i + 1]
-                x_rot = self.slerp(q1, q2, t)
-                x_rot_vel = (
-                    t * x_sim[10:13, i + 1] + (1.0 - t) * x_sim[10:13, i]
-                ).reshape((-1, 1))[:, 0]
-                x_sim_sample.append(np.concatenate((x_trans, x_rot, x_rot_vel), axis=0))
+                x_sim_sample.append(x_sample)
         x_sim_sample = np.array(x_sim_sample).T
         u_sim_sample = np.array(u_sim_sample).T
         # diff_x_sim=np.diff(x_sim_sample);
