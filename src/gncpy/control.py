@@ -500,6 +500,7 @@ class LQR:
         cur_state,
         end_state=None,
         end_state_tol=1e-2,
+        max_inf_iters=int(1e3),
         check_inds=None,
         state_args=None,
         ctrl_args=None,
@@ -523,6 +524,10 @@ class LQR:
         end_state_tol : float, optional
             Tolerance on the reference state when calculating the state trajectory
             for the inifinte horizon case. The default is 1e-2.
+        max_inf_iters : int
+            Maximum number of steps to use in the trajectory when finding
+            the state trajectory for the infinite horizon case to avoid infinite
+            loops.
         check_inds : list, optional
             List of indices of the state vector to check when determining
             the end condition for the state trajectory calculation for the
@@ -598,6 +603,7 @@ class LQR:
                     <= end_state_tol
                 )
 
+                itr = 0
                 while not done:
                     timestep += self.dt
                     dx = end_state - state_traj[-1, :].reshape((-1, 1))
@@ -619,11 +625,13 @@ class LQR:
                     )
                     state_traj = np.vstack((state_traj, x.ravel()))
 
+                    itr += 1
                     done = (
                         np.linalg.norm(
                             state_traj[-1, check_inds] - end_state[check_inds, 0]
                         )
                         <= end_state_tol
+                        or itr >= max_inf_iters
                     )
 
                     cost += self.cost_function(
