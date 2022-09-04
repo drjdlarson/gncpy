@@ -7,11 +7,13 @@ from gncpy.planning.rrt_star import RRTStar
 
 def main():
     dt = 0.01
-
+    state_args = (dt,)
     # define dynamics
     dynObj = gdyn.DoubleIntegrator()
     uSize = 2
-
+    dynObj.control_model = lambda _t, *_args: np.array(
+        [[0, 0], [0, 0], [1, 0], [0, 1]]
+    )
     # define starting and ending state for control calculation
     xdes = np.array([0, 2.5, 0, 0]).reshape((4, 1))
     x0 = np.array([0, -2.5, 0, 0]).reshape((4, 1))
@@ -43,9 +45,10 @@ def main():
     randArea = np.concatenate((minxy, maxxy))
 
     # Initialize LQR-RRT* Planner
-    param = RRTStar(x0, xdes, obstacles, randArea, Q, R, dynObj, dt)
+    param = RRTStar(x0, xdes, obstacles, randArea, Q, R, dynObj, state_args)
+    # Run Planner
+    trajectory,u_traj, solution=param.plan();
 
-    a = 3
 
 
 if __name__ == "__main__":
