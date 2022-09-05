@@ -163,7 +163,7 @@ class LQR:
         else:
             self._P = P
 
-    def _prop_state(
+    def prop_state(
         self,
         tt,
         x_hat,
@@ -278,7 +278,7 @@ class LQR:
         c : N x 1 numpy array
             Forward c vector.
         """
-        x_hat_p = self._prop_state(
+        x_hat_p = self.prop_state(
             tt,
             x_hat,
             u_hat,
@@ -609,11 +609,11 @@ class LQR:
                     dx = end_state - state_traj[-1, :].reshape((-1, 1))
                     u = self.feedback_gain @ dx + self.feedthrough_gain
                     if ctrl_signal is None:
-                        ctrl_signal = u.flatten()
+                        ctrl_signal = u.reshape((1, -1))
                     else:
                         ctrl_signal = np.vstack((ctrl_signal, u.ravel()))
 
-                    x = self._prop_state(
+                    x = self.prop_state(
                         timestep,
                         state_traj[-1, :].reshape((-1, 1)),
                         u,
@@ -637,6 +637,10 @@ class LQR:
                     cost += self.cost_function(
                         timestep, x, u, is_initial=False, is_final=done
                     )
+
+                # if we start too close to the end state ctrl_signal can be None
+                if ctrl_signal is None:
+                    ctrl_signal = self.u_nom.copy().reshape((1, -1))
 
         else:
 
@@ -683,7 +687,7 @@ class LQR:
                 )
                 ctrl_signal[kk, :] = u.ravel()
 
-                x = self._prop_state(
+                x = self.prop_state(
                     tt,
                     state_traj[kk, :].reshape((-1, 1)),
                     u,
@@ -820,9 +824,10 @@ class ELQR(LQR):
         if non_quadratic_fun is not None:
             self._non_quad_fun = non_quadratic_fun
 
+        self._quad_modifier = quad_modifier
+
         if Q is not None and R is not None:
             super().set_cost_model(Q, R)
-            self._quad_modifier = quad_modifier
             self.use_custom_cost = False
 
         elif cost_fun is not None:
@@ -915,7 +920,7 @@ class ELQR(LQR):
         cbar : N x 1 numpy array
             Backward c vector.
         """
-        x_hat_p = self._prop_state(
+        x_hat_p = self.prop_state(
             tt, x_hat, u_hat, state_args, ctrl_args, True, inv_state_args, inv_ctrl_args
         )
 
@@ -1476,7 +1481,7 @@ class ELQR(LQR):
                 cost += self.cost_function(
                     tt, x, u, cost_args, is_initial=(kk == 0), is_final=False,
                 )
-                x = self._prop_state(
+                x = self.prop_state(
                     tt, x, u, state_args, ctrl_args, True, inv_state_args, inv_ctrl_args
                 )
             cost += self.cost_function(
@@ -1487,7 +1492,7 @@ class ELQR(LQR):
                 print("\tIteration: {:3d} Cost: {:10.4f}".format(ii, cost))
 
             # check for convergence
-            if np.abs(old_cost - cost) / cost < self.tol:
+            if np.abs((old_cost - cost) / cost) < self.tol:
                 break
             old_cost = cost
 
@@ -1509,7 +1514,7 @@ class ELQR(LQR):
                 is_initial=(kk == 0),
                 is_final=False,
             )
-            state_traj[kk + 1, :] = self._prop_state(
+            state_traj[kk + 1, :] = self.prop_state(
                 tt,
                 state_traj[kk, :].reshape((-1, 1)),
                 ctrl_signal[kk, :].reshape((-1, 1)),

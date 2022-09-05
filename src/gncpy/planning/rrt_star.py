@@ -1,9 +1,14 @@
+import io
 import numpy as np
-import scipy.linalg
+import matplotlib.pyplot as plt
+from matplotlib.patches import Circle
+from copy import deepcopy
+from PIL import Image
+from sys import exit
 
 import gncpy.dynamics as gdyn
 import gncpy.control as gcontrol
-import matplotlib.pyplot as plt
+import gncpy.plotting as gplot
 
 
 class Node:  # Each node on the tree has these properties
@@ -17,173 +22,320 @@ class Node:  # Each node on the tree has these properties
         # Node cost
 
 
-class RRTStar:
-    def __init__(self, x0, xdes, obstacles, randArea, Q, R, dynObj, state_args):
+class LQRRRTStar:
+    def __init__(
+        self,
+        lqr=None,
+        goal_sample_rate=10,
+        max_iter=300,
+        connect_circle_dist=2,
+        step_size=1,
+        expand_dis=1,
+        update_plot=1,
+        rng=None,
+    ):
 
-        self.dt = state_args[0];
-        # dt
+        if rng is None:
+            rng = np.random.default_rng()
+        self.rng = rng
 
-        self.start = Node(x0)
-        # Start Node
-
-        self.end = Node(xdes)
-        # End Node
-
-        self.numPos = int(randArea.shape[0] / 2)
-        self.min_rand = randArea[0 : self.numPos]
+        self.start = None
+        self.end = None
+        self.node_list = []
+        self.numPos = 0
+        self.min_rand = np.array([])
         # Min State space to sample RRT* Paths
 
-        self.max_rand = randArea[self.numPos :]
+        self.max_rand = np.array([])
         # Max State space to sample RRT* Paths
 
-        self.goal_sample_rate = 10
-        # Samples goal 10% of time
-
-        self.max_iter = 300
-        # Max RRT* Iteration
-
-        self.connect_circle_dist = 2
-        # Circular Radius of to Calculate Near Nodes
-
-        self.step_size = 1
-        # Step size of Interpolation between k and k+1
-
-        self.expand_dis = 1
-        # To find CLosest Node to the end Node
-
-        self.update_plot = 20
-        # Update plot Iteration
-
-        self.d = len(x0) - 1
-        # Dimension of State minus one
+        self.goal_sample_rate = goal_sample_rate
+        self.max_iter = max_iter
+        self.connect_circle_dist = connect_circle_dist
+        self.step_size = step_size
+        self.expand_dis = expand_dis
+        self.update_plot = update_plot
 
         # Obstacles
-        self.ell_con = 1
-        # Ellipsoid Obstacle Model for 2d
-        if self.numPos == 2:
-            self.Nobs = obstacles.shape[0]
-            # Number of Obstacles
-            self.obstacle_list = obstacles[:, 0:-1].T
-            # States of each Obstacle
-            self.P = np.zeros((2, 2, self.Nobs))
-            k = 0
-            for r in obstacles[:, -1]:
-                self.P[:, :, k] = r ** (-2) * np.array([[1, 0], [0, 1]])
-                # Shape of Obstacle
-                k = k + 1
-        elif self.numPos == 3:
-            self.Nobs = obstacles.shape[0]
-            # Number of Obstacles
-            self.obstacle_list = obstacles[:, 0:-1].T;
-            # States of each Obstacle
-            self.P = np.zeros((3, 3, self.Nobs))
-            k = 0
-            for r in obstacles[:, -1]:
-                self.P[:, :, k] = r ** (-2) * np.array(
-                    [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-                )
-                # Shape of Obstacle
-                k = k + 1
+        self.ell_con = None
+        self.Nobs = 0
+        self.obstacle_list = np.array([])
+        # States of each Obstacle
+        self.P = np.zeros((self.numPos, self.numPos, self.Nobs))
 
         self.pos_orient = list(range(0, self.numPos))
-        self.nx = len(dynObj.state_names)
-        # Number of states
-        self.nu = R.shape[0]
-        # Number of Control Inputs
-
-        # Arguments for Dynamics and LQR Class Objects
-        self.cur_time = 0;
-        self.state_args = state_args;
 
         # setup LQR planner
-        u_nom = np.zeros((self.nu,1))
-        self.lqr = gcontrol.LQR()
-        self.lqr.set_state_model(u_nom, dynObj=dynObj, dt=self.dt)
-        self.lqr.set_cost_model(Q, R)
+        self.lqr = lqr
+        self.S = np.array([[]])
 
-        self.GOAL_DIST = 0.1
-        # Max Distance from xdes for LQR Convergence
+    def set_control_model(self, lqr):
+        if not isinstance(lqr, gcontrol.LQR):
+            raise TypeError("Must specify an LQR instance")
+        self.lqr = lqr
+        self.lqr.time_horizon = float("inf")  # must generate trajecotries to end state
 
-        self.eps = 1e-8
-        # eps for finite differences
+    def set_environment(self, search_area=None, obstacles=None):
+        if search_area is not None:
+            self.numPos = int(search_area.shape[0] / 2)
+            self.min_rand = search_area[0 : self.numPos]
+            self.max_rand = search_area[self.numPos :]
+            self.pos_orient = list(range(0, self.numPos))
+
+        if obstacles is not None:
+            self.ell_con = 1
+            self.Nobs = obstacles.shape[0]
+            self.obstacle_list = obstacles
+
+            self.P = np.zeros((self.numPos, self.numPos, self.Nobs))
+            for k, r in enumerate(self.obstacle_list[:, -1]):
+                self.P[:, :, k] = r ** (-2) * np.eye(self.numPos)
 
     def dx(
         self, x1, x2
     ):  # x1 goes to x2. Difference between current state to Reference State
         return (x1 - x2).reshape((-1, 1))
 
-    def plan(self, disp=True):  # LQR-RRT* Planner
-        search_until_max_iter = 0
-        self.node_list = [self.start]
+    def _make_sphere(self, xc, yc, zc, r):
+        u = np.linspace(0, 2 * np.pi, 39)
+        v = np.linspace(0, np.pi, 21)
+
+        x = r * np.outer(np.cos(u), np.sin(v)) + xc
+        y = r * np.outer(np.sin(u), np.sin(v)) + yc
+        z = r * np.outer(np.ones(np.size(u)), np.cos(v)) + zc
+
+        return x, y, z
+
+    def plan(
+        self,
+        cur_time,
+        cur_state,
+        end_state,
+        search_until_max_iter=False,
+        state_args=None,
+        ctrl_args=None,
+        provide_details=False,
+        disp=True,
+        show_animation=False,
+        save_animation=False,
+        plt_opts=None,
+        ttl=None,
+        fig=None,
+        plt_inds=None,
+    ):
+        if state_args is None:
+            state_args = ()
+        if ctrl_args is None:
+            ctrl_args = ()
+        if plt_inds is None:
+            plt_inds = [0, 1]
+
+        self.start = Node(cur_state.reshape((-1, 1)))
+        self.end = Node(end_state.reshape((-1, 1)))
+        self.node_list = [
+            deepcopy(self.start),
+        ]
+
+        frame_list = []
+        if show_animation:
+            if fig is None:
+                fig = plt.figure()
+                if self.numPos == 2:
+                    fig.add_subplot(1, 1, 1)
+                    fig.axes[0].set_aspect("equal", adjustable="box")
+                    fig.axes[0].set_xlim((self.min_rand[0], self.max_rand[0]))
+                    fig.axes[0].set_ylim((self.min_rand[1], self.max_rand[1]))
+                elif self.numPos == 3:
+                    fig.add_subplot(1, 1, 1, projection="3d")
+                    fig.axes[0].set_xlim((self.min_rand[0], self.max_rand[0]))
+                    fig.axes[0].set_ylim((self.min_rand[1], self.max_rand[1]))
+                    fig.axes[0].set_zlim((self.min_rand[2], self.max_rand[2]))
+
+                if plt_opts is None:
+                    plt_opts = gplot.init_plotting_opts(f_hndl=fig)
+                if ttl is None:
+                    ttl = "LQR-RRT*"
+                gplot.set_title_label(fig, 0, plt_opts, ttl=ttl)
+
+                fig.axes[0].scatter(
+                    *self.start.sv[plt_inds], color="g", marker="o", zorder=1000,
+                )
+
+                for obs in self.obstacle_list:
+                    if self.numPos == 2:
+                        c = Circle(obs[:2], radius=obs[-1], color="k", zorder=1000)
+                        fig.axes[0].add_patch(c)
+
+                    elif self.numPos == 3:
+                        fig.axes[0].plot_surface(
+                            *self._make_sphere(*obs), rstride=3, cstride=3, color="k"
+                        )
+
+            fig.axes[0].scatter(
+                *self.end.sv[plt_inds], color="r", marker="x", zorder=1000,
+            )
+            fig.tight_layout()
+            plt.pause(0.1)
+
+            # for stopping simulation with the esc key.
+            fig.canvas.mpl_connect(
+                "key_release_event",
+                lambda event: [exit(0) if event.key == "escape" else None],
+            )
+            fig_w, fig_h = fig.canvas.get_width_height()
+
+            # save first frame of animation
+            if save_animation:
+                with io.BytesIO() as buff:
+                    fig.savefig(buff, format="raw")
+                    buff.seek(0)
+                    img = np.frombuffer(buff.getvalue(), dtype=np.uint8).reshape(
+                        (fig_h, fig_w, -1)
+                    )
+                frame_list.append(Image.fromarray(img))
 
         if disp:
-            print("Starting LQRRRT* Planning...")
+            print("Starting LQR-RRT* Planning...")
 
         for i in range(self.max_iter):
             rnd = self.get_random_node()
-            if disp and (i % self.update_plot == 0):
+            if disp:
                 print(
                     "\tIter: {:4d}, number of nodes: {:6d}".format(
                         i, len(self.node_list)
                     )
                 )
 
-                last_index = self.search_best_goal_node()
-                traj = None
-                if last_index:
-                    traj, u_traj = self.generate_final_course(last_index)
-                self.draw_plot(rnd,traj)
-
-            nearest_ind = self.get_nearest_node_index(rnd)
-            new_node = self.steer(self.node_list[nearest_ind], rnd)
+            nearest_ind = self.get_nearest_node_index(
+                cur_time, rnd, state_args, ctrl_args
+            )
+            new_node = self.steer(
+                cur_time, self.node_list[nearest_ind], rnd, state_args, ctrl_args
+            )
             if new_node is None:
                 continue
             if self.check_collision(new_node):
                 near_indices = self.find_near_nodes(new_node, nearest_ind)
-                new_node = self.choose_parent(new_node, near_indices)
+                new_node = self.choose_parent(
+                    cur_time, new_node, near_indices, state_args, ctrl_args
+                )
                 if new_node:
                     self.node_list.append(new_node)
-                    self.rewire(new_node, near_indices)
-            # if (i)%self.update_plot==0:
-            # last_index=self.search_best_goal_node();
-            # traj=None;
-            # if last_index:
-            #    traj, u_traj=self.generate_final_course(last_index);
-            self.draw_plot(rnd,traj);
+                    self.rewire(cur_time, new_node, near_indices, state_args, ctrl_args)
+
+            if show_animation and (i % self.update_plot == 0):
+                last_index = self.search_best_goal_node()
+                if last_index:
+                    traj = self.generate_final_course(last_index)[0]
+
+                    if self.numPos == 2:
+                        fig.axes[0].plot(
+                            traj[plt_inds[0], :],
+                            traj[plt_inds[1], :],
+                            color=(0.5, 0.5, 0.5),
+                            alpha=0.1,
+                            zorder=-10,
+                        )
+                    elif self.numPos == 3:
+                        fig.axes[0].plot(
+                            traj[plt_inds[0], :],
+                            traj[plt_inds[1], :],
+                            traj[plt_inds[2], :],
+                            color=(0.5, 0.5, 0.5),
+                            alpha=0.1,
+                            zorder=-10,
+                        )
+                    plt.pause(0.001)
+                    if save_animation:
+                        with io.BytesIO() as buff:
+                            fig.savefig(buff, format="raw")
+                            buff.seek(0)
+                            img = np.frombuffer(
+                                buff.getvalue(), dtype=np.uint8
+                            ).reshape((fig_h, fig_w, -1))
+                        frame_list.append(Image.fromarray(img))
 
             if (not search_until_max_iter) and new_node:
                 last_index = self.search_best_goal_node()
                 if last_index:
                     traj, u_traj = self.generate_final_course(last_index)
-                    return traj, u_traj, self
-        MaxIter_str = "Reached Max Iteration"
-        print(MaxIter_str)
+                    if show_animation:
+                        if self.numPos == 2:
+                            fig.axes[0].plot(
+                                traj[plt_inds[0], :], traj[plt_inds[1], :], color="g",
+                            )
+                        elif self.numPos == 3:
+                            fig.axes[0].plot(
+                                traj[plt_inds[0], :],
+                                traj[plt_inds[1], :],
+                                traj[plt_inds[2], :],
+                                color="g",
+                            )
+                        plt.pause(0.01)
+                        if save_animation:
+                            with io.BytesIO() as buff:
+                                fig.savefig(buff, format="raw")
+                                buff.seek(0)
+                                img = np.frombuffer(
+                                    buff.getvalue(), dtype=np.uint8
+                                ).reshape((fig_h, fig_w, -1))
+                            frame_list.append(Image.fromarray(img))
+                    details = (u_traj, fig, frame_list)
+                    return (traj, *details) if provide_details else traj
+
+        if disp:
+            print("\tReached Max Iteration!!")
 
         last_index = self.search_best_goal_node()
         if last_index:
             traj, u_traj = self.generate_final_course(last_index)
-            return traj, u_traj, self
+            if show_animation:
+                if self.numPos == 2:
+                    fig.axes[0].plot(
+                        traj[plt_inds[0], :], traj[plt_inds[1], :], color="g",
+                    )
+                elif self.numPos == 3:
+                    fig.axes[0].plot(
+                        traj[plt_inds[0], :],
+                        traj[plt_inds[1], :],
+                        traj[plt_inds[2], :],
+                        color="g",
+                    )
+                plt.pause(0.01)
+                if save_animation:
+                    with io.BytesIO() as buff:
+                        fig.savefig(buff, format="raw")
+                        buff.seek(0)
+                        img = np.frombuffer(buff.getvalue(), dtype=np.uint8).reshape(
+                            (fig_h, fig_w, -1)
+                        )
+                    frame_list.append(Image.fromarray(img))
         else:
-            NoPath_str = "Cannot find path"
-            # print(NoPath_str) #Undo Print
+            traj = np.array([[]])
+            u_traj = np.array([[]])
+            if disp:
+                print("\tCannot find path!!")  # Undo Print
 
-        return None, None
+        details = (u_traj, fig, frame_list)
+        return (traj, *details) if provide_details else traj
 
     def generate_final_course(self, goal_index):  # Generate Final Course
         path = self.end.sv.reshape(-1, 1)
-        u_path = np.empty((self.nu, 0))
+        u_path = np.array([])
         node = self.node_list[goal_index]
         while node.parent:
             i = np.flip(node.path, 1)
             path = np.append(path, i, axis=1)
 
             j = np.flip(node.u, 1)
-            u_path = np.append(u_path, j, axis=1)
+            if u_path.size == 0:
+                u_path = j
+            else:
+                u_path = np.append(u_path, j, axis=1)
 
             node = node.parent
         path = np.flip(path, 1)
         u_path = np.flip(u_path, 1)
-        # path.append([self.start.sv]);
         return path, u_path
 
     def search_best_goal_node(self):  # Finds Node closest to Goal Node
@@ -208,48 +360,37 @@ class RRTStar:
         )
         return dist
 
-    def draw_plot(self,rnd=None,traj=None): # Draws 3D Trajectory using LQR-RRT*
-       plt.clf()
-       ax = plt.axes(projection="3d");
-       #if rnd is not None:
-       #    ax.scatter3D(rnd.x,rnd.y,rnd.z,c="black");
-       for node in self.node_list:
-           if node.parent:
-               ax.plot3D(node.path[0,:],node.path[1,:],"-g");
-       ax.scatter3D(self.start.sv[0], self.start.sv[1], c="red")
-       ax.scatter3D(self.end.sv[0], self.end.sv[1], c="limegreen")
-       if traj is not None:
-           ax.plot3D(traj[0,:],traj[1,:],traj[2,:],"-r");
-       ax.set_xlim3d(-3, 3);
-       ax.set_ylim3d(-3,3);
-       ax.set_zlim3d(-3,3);
-       ax.grid(True);
-       plt.pause(0.01);
-    def rewire(self, new_node, near_inds):  # Rewires the Nodes
+    def rewire(
+        self, cur_time, new_node, near_inds, state_args, ctrl_args
+    ):  # Rewires the Nodes
         for i in near_inds:
             near_node = self.node_list[i]
-            edge_node = self.steer(new_node, near_node)
+            edge_node = self.steer(cur_time, new_node, near_node, state_args, ctrl_args)
             if edge_node is None:
                 continue
-            edge_node.cost = self.calc_new_cost(new_node, near_node)
+            edge_node.cost = self.calc_new_cost(
+                cur_time, new_node, near_node, state_args, ctrl_args
+            )
             no_collision = self.check_collision(edge_node)
             improved_cost = near_node.cost > edge_node.cost
 
             if no_collision and improved_cost:
                 near_node = edge_node
                 near_node.parent = new_node
-                self.propagate_cost_to_leaves(new_node)
+                self.propagate_cost_to_leaves(cur_time, new_node, state_args, ctrl_args)
 
     def propagate_cost_to_leaves(
-        self, parent_node
+        self, cur_time, parent_node, state_args, ctrl_args
     ):  # Re-computes cost from rewired Nodes
         for node in self.node_list:
             if node.parent == parent_node:
-                node.cost = self.calc_new_cost(parent_node, node)
-                self.propagate_cost_to_leaves(node)
+                node.cost = self.calc_new_cost(
+                    cur_time, parent_node, node, state_args, ctrl_args
+                )
+                self.propagate_cost_to_leaves(cur_time, node, state_args, ctrl_args)
 
     def choose_parent(
-        self, new_node, near_inds
+        self, cur_time, new_node, near_inds, state_args, ctrl_args
     ):  # Chooses a parent node with lowest cost
 
         if not near_inds:
@@ -257,9 +398,13 @@ class RRTStar:
         costs = []
         for i in near_inds:
             near_node = self.node_list[i]
-            t_node = self.steer(near_node, new_node)
+            t_node = self.steer(cur_time, near_node, new_node, state_args, ctrl_args)
             if t_node and self.check_collision(t_node):
-                costs.append(self.calc_new_cost(near_node, new_node))
+                costs.append(
+                    self.calc_new_cost(
+                        cur_time, near_node, new_node, state_args, ctrl_args
+                    )
+                )
             else:
                 costs.append(float("inf"))
         min_cost = min(costs)
@@ -270,21 +415,26 @@ class RRTStar:
 
             return None
         min_ind = near_inds[costs.index(min_cost)]
-        new_node = self.steer(self.node_list[min_ind], new_node)
+        new_node = self.steer(
+            cur_time, self.node_list[min_ind], new_node, state_args, ctrl_args
+        )
         new_node.parent = self.node_list[min_ind]
         new_node.cost = min_cost
         return new_node
 
-    def calc_new_cost(self, from_node, to_node):  # Calculates cost of node
+    def calc_new_cost(
+        self, cur_time, from_node, to_node, state_args, ctrl_args
+    ):  # Calculates cost of node
         x_sim, u_sim = self.lqr.calculate_control(
-            self.cur_time,
+            cur_time,
             from_node.sv.reshape((-1, 1)),
             end_state=to_node.sv.reshape((-1, 1)),
             provide_details=True,
-            state_args = self.state_args,
+            state_args=state_args,
+            ctrl_args=ctrl_args,
         )[2:4]
-        x_sim = x_sim.T;
-        u_sim = u_sim.T;
+        x_sim = x_sim.T
+        u_sim = u_sim.T
         x_sim_sample, u_sim_sample, course_lens = self.sample_path(x_sim, u_sim)
         if len(x_sim_sample) == 0:
             return float("inf")
@@ -301,7 +451,7 @@ class RRTStar:
         r = (
             self.connect_circle_dist
             * np.amin(dist_list)
-            * (np.log(nnode) / nnode) ** (1 / (self.d))
+            * (np.log(nnode) / nnode) ** (1 / (new_node.sv.size - 1))
         )
         ind = [dist_list.index(i) for i in dist_list if i <= r]
         if not ind:
@@ -309,65 +459,60 @@ class RRTStar:
         return ind
 
     def check_collision(self, node):  # Check for collisions with Ellipsoids
-        k = 0
-        for xobs in self.obstacle_list.T:
-            distxyz = (node.path[:self.numPos, :].T - xobs.T).T
+        for k, xobs in enumerate(self.obstacle_list):
+            distxyz = (node.path[: self.numPos, :].T - xobs[:-1].reshape((1, -1))).T
             d_list = np.einsum("ij,ij->i", (distxyz.T @ self.P[:, :, k]), distxyz.T)
-            k = k + 1
             if -min(d_list) + self.ell_con >= 0.0:
                 return False
         return True
 
     def get_random_node(self):  # Find a random node from the state space
-        if np.random.randint(0, 100) > self.goal_sample_rate:
-            rand_Pos = np.zeros((self.numPos,1));
+        if self.rng.integers(0, high=100) > self.goal_sample_rate:
+            rand_Pos = np.zeros((self.numPos, 1))
             for k in range(self.numPos):
-                rand_Pos[k,0] = np.random.uniform(self.min_rand[k], self.max_rand[k]);
-            rand_x = np.block([[rand_Pos],[np.zeros((2,1))]]);
+                rand_Pos[k, 0] = self.rng.uniform(self.min_rand[k], self.max_rand[k])
+            rand_x = np.block([[rand_Pos], [np.zeros((2, 1))]])
             rnd = Node(rand_x)
         else:  # goal point sampling
-            rnd = Node(self.end.sv.reshape((self.nx, 1)))
+            rnd = Node(self.end.sv.reshape((-1, 1)))
         return rnd
 
-    def get_nearest_node_index(self, rnd_node):  # Get nearest node index in tree
-        self.S, Ad, Bd = self.lqr.solve_dare(self.cur_time, rnd_node.sv.reshape((-1,1)), self.state_args, None)
+    def get_nearest_node_index(
+        self, cur_time, rnd_node, state_args, ctrl_args
+    ):  # Get nearest node index in tree
+        self.S = self.lqr.solve_dare(
+            cur_time,
+            rnd_node.sv.reshape((-1, 1)),
+            state_args=state_args,
+            ctrl_args=ctrl_args,
+        )[0]
         # dlist=float('inf')*np.ones((len(self.node_list),1));
-        dlist=[ np.matmul(np.matmul(self.dx(node.sv,rnd_node.sv).T,self.S),self.dx(node.sv,rnd_node.sv)) for node in self.node_list];
+        dlist = [
+            np.matmul(
+                np.matmul(self.dx(node.sv, rnd_node.sv).T, self.S),
+                self.dx(node.sv, rnd_node.sv),
+            )
+            for node in self.node_list
+        ]
         minind = dlist.index(min(dlist))
         return minind
 
-    def solve_dare(self, A, B):  # Solve discrete Ricatti Equation for LQR
-        Q, R = self.lqr.Q, self.lqr.R
-        X = Q
-        Xn = Q
-        for i in range(self.MAX_ITER_LQR_Cost):
-            Xn = (
-                A.T @ X @ A
-                - (((A.T @ X @ B) @ np.linalg.pinv(R + B.T @ X @ B)) @ B.T @ X @ A)
-                + Q
-            )
-            if (abs(Xn - X)).max() < self.EPS:
-                break
-            X = Xn
-        return Xn
-
     def steer(
-        self, from_node, to_node
+        self, cur_time, from_node, to_node, state_args, ctrl_args,
     ):  # Obtain trajectory between from_node to to_node using LQR and save trajectory
         x_sim, u_sim = self.lqr.calculate_control(
-            self.cur_time,
+            cur_time,
             from_node.sv.reshape((-1, 1)),
             end_state=to_node.sv.reshape((-1, 1)),
             provide_details=True,
-            state_args = self.state_args,
+            state_args=state_args,
+            ctrl_args=ctrl_args,
         )[2:4]
-        x_sim = x_sim.T;
-        u_sim = u_sim.T;
-        # TODO: S used to be calculated in the LQR_planning function that used to be called above and is used in sample_path
-        x_sim_sample, u_sim_sample, course_lens = self.sample_path(x_sim, u_sim)
+
+        x_sim_sample, u_sim_sample, course_lens = self.sample_path(x_sim.T, u_sim.T)
         if len(x_sim_sample) == 0:
             return None
-        newNode = Node(x_sim_sample[:,-1].reshape((-1,1)))
+        newNode = Node(x_sim_sample[:, -1].reshape((-1, 1)))
         newNode.u = u_sim_sample
         newNode.path = x_sim_sample
         newNode.cost = from_node.cost + np.sum(np.abs(course_lens))
@@ -382,13 +527,16 @@ class RRTStar:
             return x_sim_sample, u_sim_sample, clen
         for i in range(x_sim.shape[1] - 1):
             for t in np.arange(0.0, 1.0, self.step_size):
-                u_sim_sample.append(u_sim[:, i])
+                u_sim_sample.append(u_sim[:, i].tolist())
                 x_sample = (t * x_sim[:, i + 1] + (1.0 - t) * x_sim[:, i]).reshape(
                     (-1, 1)
                 )[:, 0]
-                x_sim_sample.append(x_sample)
-        x_sim_sample = np.array(x_sim_sample).T
-        u_sim_sample = np.array(u_sim_sample).T
+                x_sim_sample.append(x_sample.tolist())
+
+        # enforce shape if x_sim_sample is empty list
+        x_sim_sample = np.array(x_sim_sample).T.reshape((x_sim.shape[0], -1))
+        u_sim_sample = np.array(u_sim_sample).T.reshape((u_sim.shape[0], -1))
+
         # diff_x_sim=np.diff(x_sim_sample);
         diff_x_sim2 = [
             self.dx(x_sim_sample[:, k + 1], x_sim_sample[:, k])[:, 0]
@@ -399,79 +547,3 @@ class RRTStar:
             return [], [], []
         clen = np.einsum("ij,ij->i", (diff_x_sim.T @ self.S), diff_x_sim.T)
         return x_sim_sample, u_sim_sample, clen
-
-    def get_system_model(
-        self, tt, xdes, state_args, ctrl_args
-    ):  # Get Discrete model of LTV system
-        return self.lqr.get_state_space(
-            tt, xdes.reshape((-1, 1)), self.lqr.u_nom, state_args, ctrl_args
-        )
-
-    def cfinitediff(self, xtraj, utraj):
-        xdotdot = np.zeros((xtraj.shape[0], xtraj.shape[1]))
-        for k in range(0, xtraj.shape[1]):
-            if k + 1 != xtraj.shape[1]:
-                xdotplus = xtraj[:, [k]] + self.eps * self.fn_dyn(
-                    xtraj[:, [k]], utraj[:, [k]], self.m, self.I
-                )
-                xdotminus = xtraj[:, [k]] - self.eps * self.fn_dyn(
-                    xtraj[:, [k]], utraj[:, [k]], self.m, self.I
-                )
-                xdotdot[:, [k]] = (xdotplus - xdotminus) / (2 * self.eps)
-            else:
-                uzeros = np.zeros((6, 1))
-                xdotplus = xtraj[:, [k]] + self.eps * self.fn_dyn(
-                    xtraj[:, [k]], uzeros, self.m, self.I
-                )
-                xdotminus = xtraj[:, [k]] - self.eps * self.fn_dyn(
-                    xtraj[:, [k]], uzeros, self.m, self.I
-                )
-                xdotdot[:, [k]] = (xdotplus - xdotminus) / (2 * self.eps)
-        return xdotdot
-
-
-def main():
-    dt = 0.01
-
-    # define dynamics
-    dynObj = gdyn.DoubleIntegrator()
-    uSize = 2
-
-    # define starting and ending state for control calculation
-    xdes = np.array([0, 2.5, 0, 0]).reshape((4, 1))
-    x0 = np.array([0, -2.5, 0, 0]).reshape((4, 1))
-
-    # define some circular obstacles with center pos and radius (x, y, radius)
-    obstacles = np.array(
-        [
-            [0, -1.35, 0.2],
-            [1.0, -0.5, 0.2],
-            [-0.95, -0.5, 0.2],
-            [-0.2, 0.3, 0.2],
-            [0.8, 0.7, 0.2],
-            [1.1, 2.0, 0.2],
-            [-1.2, 0.8, 0.2],
-            [-1.1, 2.1, 0.2],
-            [-0.1, 1.6, 0.2],
-            [-1.1, -1.9, 0.2],
-            [1.0 + np.sqrt(2), -1.5 - np.sqrt(2), 0.2],
-        ]
-    )
-
-    # define Q and R weights for using standard cost function
-    Q = 50 * np.eye(len(dynObj.state_names))
-    R = 0.6 * np.eye(uSize)
-
-    # define enviornment bounds for the robot
-    minxy = np.array([-2.0, -3])
-    maxxy = np.array([2, 3])
-    randArea = np.concatenate((minxy, maxxy))
-
-    # Initialize LQR-RRT* Planner
-    param = rrtStar(x0, xdes, obstacles, randArea, Q, R, dynObj, dt)
-
-    a = 3
-
-
-if __name__ == "__main__":
-    main()
