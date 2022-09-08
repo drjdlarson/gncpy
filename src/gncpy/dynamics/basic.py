@@ -45,10 +45,6 @@ class DynamicsBase(ABC):
         self.state_constraint = state_constraint
 
     @abstractmethod
-    def get_input_mat(self, timestep, state, *args, **kwargs):
-        raise NotImplementedError()
-
-    @abstractmethod
     def propagate_state(self, timestep, state, u=None, state_args=None, ctrl_args=None):
         """Abstract method for propagating the state forward in time.
 
@@ -103,6 +99,29 @@ class DynamicsBase(ABC):
 
     @abstractmethod
     def get_input_mat(self, timestep, *args, **kwargs):
+        """Should return the input matrix.
+
+        Must be overridden by the child class.
+
+        Parameters
+        ----------
+        timestep : float
+            Current timestep.
+        *args : tuple
+            Placeholder for additional arguments.
+        **kwargs : dict
+            Placeholder for additional arguments.
+
+        Raises
+        ------
+        NotImplementedError
+            Child class must implement this.
+
+        Returns
+        -------
+        N x Nu numpy array
+            input matrix for the system
+        """
         raise NotImplementedError()
 
 
@@ -511,6 +530,29 @@ class DoubleIntegrator(LinearDynamicsBase):
 
 
 class CurvilinearMotion(NonlinearDynamicsBase):
+    r"""Implements general curvilinear motion model in 2d.
+
+    This is a slight variation from normal :class:`.NonlinearDynamicsBase` classes
+    because it does not use a list of continuous functions but instead has
+    the state and input matrices coded directly. As a result, it also does not
+    use the control model attribute because it is hardcoded in the
+    :meth:`.get_input_mat` function.
+
+    Notes
+    -----
+    This implements the following system of ODEs.
+
+    .. math::
+
+        \begin{align}
+            \dot{x} &= v cos(\psi) \\
+            \dot{y} &= v sin(\psi) \\
+            \dot{v} &= u_0 \\
+            \dot{\psi} &= u_1
+        \end{align}
+
+    """
+
     __slots__ = ()
 
     state_names = (
@@ -521,17 +563,49 @@ class CurvilinearMotion(NonlinearDynamicsBase):
     )
 
     def __init__(self, **kwargs):
+        """Initialize an object.
+
+        Parameters
+        ----------
+        **kwargs : dict
+            Additional key word arguments for the parent.
+        """
         super().__init__(**kwargs)
         self.control_model = [None] * len(self.state_names)
 
     @property
     def cont_fnc_lst(self):
+        """Continuous time ODEs, not used."""
         warn("Not used by this class")
         return []
 
     def get_state_mat(
         self, timestep, state, *args, u=None, ctrl_args=None, use_continuous=False
     ):
+        """Returns the linearized state matrix that has been hardcoded.
+
+        Parameters
+        ----------
+        timestep : float
+            Current timestep.
+        state : N x 1 numpy array
+            current state.
+        *args : tuple
+            Additional arguments placeholde, not used.
+        u : Nu x 1 numpy array, optional
+            Control input. The default is None.
+        ctrl_args : tuple, optional
+            Additional agruments needed to get the input matrix. The default is
+            None.
+        use_continuous : bool, optional
+            Flag indicating if the continuous time A matrix should be returned.
+            The default is False.
+
+        Returns
+        -------
+        N x N numpy array
+            state transition matrix.
+        """
         x = state.ravel()
 
         A = np.array(
@@ -547,9 +621,56 @@ class CurvilinearMotion(NonlinearDynamicsBase):
         return np.eye(A.shape[0]) + self.dt * A
 
     def get_input_mat(self, timestep, state, u, state_args=None, ctrl_args=None):
-        return np.array([[0, 0], [0, 0], [self.dt, 0], [0, self.dt],])
+        """Returns the linearized input matrix.
+
+        Parameters
+        ----------
+        timestep : float
+            Current timestep.
+        state : N x 1 numpy array
+            Current state.
+        u : 2 x 1 numpy array
+            Current control input.
+        state_args : tuple, optional
+            Additional arguements needed to get the state matrix. The default
+            is None.
+        ctrl_args : tuple, optional
+            Additional arguments needed to get the input matrix. The default is
+            None.
+
+        Returns
+        -------
+        N x 2 numpy array
+            Input matrix.
+        """
+        return np.array([[0, 0], [0, 0], [self.dt, 0], [0, self.dt]])
 
     def propagate_state(self, timestep, state, u=None, state_args=None, ctrl_args=None):
+        """Propagates the state forward one timestep.
+
+        This uses the hardcoded form for the linearized state and input matrices
+        instead of numerical integration.
+
+        Parameters
+        ----------
+        timestep : float
+            Current timestep.
+        state : N x 1 numpy array
+            current state.
+        u : 2 x 1 numpy array, optional
+            Control input. The default is None.
+        state_args : tuple, optional
+            Additional arguements needed to get the state matrix. The default
+            is None. These are not needed.
+        ctrl_args : tuple, optional
+            Additional arguments needed to get the input matrix. The default is
+            None. These are not needed.
+
+        Returns
+        -------
+        N x 1 numpy array
+            Next state.
+        """
         if state_args is None:
             state_args = ()
         if ctrl_args is None:
@@ -567,7 +688,19 @@ class CurvilinearMotion(NonlinearDynamicsBase):
 
 
 class CoordinatedTurnKnown(LinearDynamicsBase):
-    """Implements the non-linear coordinated turn dynamics model."""
+    """Implements the linear coordinated turn with known turn rate model.
+
+    This is a slight variation from normal :class:`.LinearDynamicsBase` classes
+    because it does not allow for control models, instead it has the input
+    matrix coded directly. It also has the turn angle included in the state
+    to help with debugging and coding but is not strictly required by the
+    dynamics.
+
+    Attributes
+    ----------
+    turn_rate : float
+        Turn rate in rad/s
+    """
 
     __slots__ = "turn_rate"
 
@@ -580,6 +713,20 @@ class CoordinatedTurnKnown(LinearDynamicsBase):
         self.control_model = None
 
     def get_state_mat(self, timestep, dt):
+        """Returns the discrete time state matrix.
+
+        Parameters
+        ----------
+        timestep : float
+            timestep.
+        dt : float
+            time difference
+
+        Returns
+        -------
+        N x N numpy array
+            state matrix.
+        """
         ta = self.turn_rate * dt
         s_ta = np.sin(ta)
         c_ta = np.cos(ta)
@@ -594,9 +741,54 @@ class CoordinatedTurnKnown(LinearDynamicsBase):
         )
 
     def get_input_mat(self, timestep, *args):
+        """Gets the input matrix.
+
+        This enforces the no control model requirement of these dynamics by
+        forcing the input matrix to be zeros.
+
+        Parameters
+        ----------
+        timestep : float
+            Current timestep.
+        *args : tuple
+            additional arguments, not used.
+
+        Returns
+        -------
+        N x 1 numpy array
+            input matrix.
+        """
         return np.zeros((5, 1))
 
     def propagate_state(self, timestep, state, u=None, state_args=None, ctrl_args=None):
+        """Propagates the state forward in time.
+
+        Parameters
+        ----------
+        timestep : float
+            Current timestep.
+        state : N x 1 numpy array
+            current state.
+        u : 1 x 1 numpy array, optional
+            Control input, should not be needed with this model. The default is
+            None.
+        state_args : tuple, optional
+            Additional arguments needed to get the state matrix. The default is
+            None.
+        ctrl_args : tuple, optional
+            Additional arguments needed to get the input matrix, not needed.
+            The default is None.
+
+        Raises
+        ------
+        RuntimeError
+            If state_args is None.
+
+        Returns
+        -------
+        N x 1 numpy array
+            Next state.
+        """
         if state_args is None:
             raise RuntimeError("state_args must be (dt, )")
         if ctrl_args is None:
@@ -616,13 +808,37 @@ class CoordinatedTurnKnown(LinearDynamicsBase):
 
 
 class CoordinatedTurnUnknown(NonlinearDynamicsBase):
-    """Implements the non-linear coordinated turn dynamics model."""
+    """Implements the non-linear coordinated turn with unknown turn rate model.
+
+    Notes
+    -----
+    This can use either a Wiener process or a first order Markov process model
+    for the turn rate.
+
+    Attributes
+    ----------
+    velocity : float
+        Speed the vehicle is moving at.
+    turn_rate_cor_time : float
+        Correlation time for the turn rate. If None then a Wiener process is used.
+    """
 
     __slots__ = ("velocity", "turn_rate_cor_time")
 
     state_names = ("x pos", "y pos", "x vel", "y vel", "turn rate")
 
     def __init__(self, velocity=10, turn_rate_cor_time=None, **kwargs):
+        """Initialize an object.
+
+        Parameters
+        ----------
+        velocity : float, optional
+            Speed of the vehicle. The default is 10.
+        turn_rate_cor_time : float, optional
+            Correlation time of the turn rate. The default is None.
+        **kwargs : dict
+            Additional arguments for the parent.
+        """
         super().__init__(**kwargs)
         self.velocity = velocity
         self.turn_rate_cor_time = turn_rate_cor_time
@@ -631,6 +847,7 @@ class CoordinatedTurnUnknown(NonlinearDynamicsBase):
 
     @property
     def alpha(self):
+        """Read only inverse of the turn rate correlation time."""
         if self.turn_rate_cor_time is None:
             return 0
         else:
@@ -638,6 +855,7 @@ class CoordinatedTurnUnknown(NonlinearDynamicsBase):
 
     @property
     def beta(self):
+        """Read only value for correlation time in state matrix."""
         if self.turn_rate_cor_time is None:
             return 1
         else:
@@ -645,12 +863,37 @@ class CoordinatedTurnUnknown(NonlinearDynamicsBase):
 
     @property
     def cont_fnc_lst(self):
+        """Continuous time ODEs, not used."""
         warn("Not used by this class")
         return []
 
     def get_state_mat(
         self, timestep, state, *args, u=None, ctrl_args=None, use_continuous=False
     ):
+        """Returns the linearized state matrix that has been hardcoded.
+
+        Parameters
+        ----------
+        timestep : float
+            Current timestep.
+        state : N x 1 numpy array
+            current state.
+        *args : tuple
+            Additional arguments placeholde, not used.
+        u : Nu x 1 numpy array, optional
+            Control input. The default is None.
+        ctrl_args : tuple, optional
+            Additional agruments needed to get the input matrix. The default is
+            None.
+        use_continuous : bool, optional
+            Flag indicating if the continuous time A matrix should be returned.
+            The default is False.
+
+        Returns
+        -------
+        N x N numpy array
+            state transition matrix.
+        """
         x = state.ravel()
         ta = x[4] * self.dt
         s_ta = np.sin(ta)
@@ -693,6 +936,30 @@ class CoordinatedTurnUnknown(NonlinearDynamicsBase):
         )
 
     def get_input_mat(self, timestep, state, u, state_args=None, ctrl_args=None):
+        """Returns the linearized input matrix.
+
+        This assumes the control input is an AWGN signal.
+
+        Parameters
+        ----------
+        timestep : float
+            Current timestep.
+        state : N x 1 numpy array
+            Current state.
+        u : 3 x 1 numpy array
+            Current control input.
+        state_args : tuple, optional
+            Additional arguements needed to get the state matrix. The default
+            is None.
+        ctrl_args : tuple, optional
+            Additional arguments needed to get the input matrix. The default is
+            None.
+
+        Returns
+        -------
+        N x 2 numpy array
+            Input matrix.
+        """
         return np.array(
             [
                 [0.5 * self.dt ** 2, 0, 0],
@@ -704,6 +971,32 @@ class CoordinatedTurnUnknown(NonlinearDynamicsBase):
         )
 
     def propagate_state(self, timestep, state, u=None, state_args=None, ctrl_args=None):
+        """Propagates the state forward one timestep.
+
+        This uses the hardcoded form for the linearized state and input matrices
+        instead of numerical integration. It assumes the control input is an
+        AWGN signal.
+
+        Parameters
+        ----------
+        timestep : float
+            Current timestep.
+        state : N x 1 numpy array
+            current state.
+        u : 3 x 1 numpy array, optional
+            Control input. The default is None.
+        state_args : tuple, optional
+            Additional arguements needed to get the state matrix. The default
+            is None. These are not needed.
+        ctrl_args : tuple, optional
+            Additional arguments needed to get the input matrix. The default is
+            None. These are not needed.
+
+        Returns
+        -------
+        N x 1 numpy array
+            Next state.
+        """
         if state_args is None:
             state_args = ()
         if ctrl_args is None:
@@ -1033,6 +1326,7 @@ class IRobotCreate(NonlinearDynamicsBase):
 
     @property
     def wheel_separation(self):
+        """Read only wheel separation distance."""
         return self._wheel_separation
 
     @property

@@ -52,8 +52,15 @@ def lin_lqrrrtstar():
     lqr.set_cost_model(Q, R)
     lqr.set_state_model(u_nom, dynObj=dynObj, dt=dt)
 
+    # define the state sampler for the LQR-RRT* object
+    def sampling_fun(rng, pos_inds, min_pos, max_pos):
+        out = np.zeros((len(dynObj.state_names), 1))
+        out[pos_inds] = rng.uniform(min_pos.ravel(), max_pos.ravel()).reshape((-1, 1))
+
+        return out
+
     # Initialize LQR-RRT* Planner
-    lqrRRTStar = LQRRRTStar(rng=rng, max_iter=75)
+    lqrRRTStar = LQRRRTStar(rng=rng, sampling_fun=sampling_fun)
     lqrRRTStar.set_environment(search_area=search_area, obstacles=obstacles)
     lqrRRTStar.set_control_model(lqr, pos_inds)
 
@@ -180,6 +187,7 @@ def run():
     import os
 
     print("Generating RRT* examples")
+    duration = int(1 / 30 * 1e3)
 
     fout = os.path.join(os.path.dirname(__file__), "lqrrrtstar_linear.gif")
     if not os.path.isfile(fout):
@@ -188,7 +196,7 @@ def run():
             fout,
             save_all=True,
             append_images=frame_list[1:],
-            duration=int(1 / 30 * 1e3),  # convert s to ms
+            duration=duration,  # convert s to ms
             loop=0,
         )
 
@@ -199,7 +207,7 @@ def run():
             fout,
             save_all=True,
             append_images=frame_list[1:],
-            duration=int(1 / 30 * 1e3),  # convert s to ms
+            duration=duration,  # convert s to ms
             loop=0,
         )
 

@@ -16,7 +16,7 @@ The A* algorithm can be run with the following.
 
 which gives this as output.
 
-.. image:: /examples/planning/normal_a_star.gif
+.. image:: /examples/planning/a_star_normal.gif
    :align: center
 
 
@@ -30,7 +30,7 @@ A modified A* algorithm called beam search can be run with the following.
 
 which gives this as output.
 
-.. image:: /examples/planning/beam_search_a_star.gif
+.. image:: /examples/planning/a_star_beam_search.gif
    :align: center
 
 
@@ -44,5 +44,5 @@ A modified A* algorithm that weights the heuristic can be run with the following
 
 which gives this as output.
 
-.. image:: /examples/planning/weighted_a_star.gif
+.. image:: /examples/planning/a_star_weighted.gif
    :align: center

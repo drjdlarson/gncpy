@@ -16,8 +16,10 @@ def _run_filters():
 def _run_planning():
     sys.path.insert(0, os.path.abspath("./examples/planning"))
     import a_star
+    import rrt_star
 
     a_star.run()
+    rrt_star.run()
 
     sys.path.pop(0)
 

@@ -161,7 +161,7 @@ def run():
 
     print("Generating A* examples")
 
-    fout = os.path.join(os.path.dirname(__file__), "normal_a_star.gif")
+    fout = os.path.join(os.path.dirname(__file__), "a_star_normal.gif")
     if not os.path.isfile(fout):
         frame_list = normal_a_star()
         frame_list[0].save(
@@ -172,7 +172,7 @@ def run():
             loop=0,
         )
 
-    fout = os.path.join(os.path.dirname(__file__), "beam_search_a_star.gif")
+    fout = os.path.join(os.path.dirname(__file__), "a_star_beam_search.gif")
     if not os.path.isfile(fout):
         frame_list = beam_search()
         frame_list[0].save(
@@ -183,7 +183,7 @@ def run():
             loop=0,
         )
 
-    fout = os.path.join(os.path.dirname(__file__), "weighted_a_star.gif")
+    fout = os.path.join(os.path.dirname(__file__), "a_star_weighted.gif")
     if not os.path.isfile(fout):
         frame_list = weighted_a_star()
         frame_list[0].save(

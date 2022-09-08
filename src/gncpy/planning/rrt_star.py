@@ -1,3 +1,4 @@
+"""Implements variations of the RRT* algorithm."""
 import io
 import numpy as np
 import matplotlib.pyplot as plt
@@ -6,23 +7,85 @@ from copy import deepcopy
 from PIL import Image
 from sys import exit
 
-import gncpy.dynamics as gdyn
 import gncpy.control as gcontrol
 import gncpy.plotting as gplot
 
 
 class Node:  # Each node on the tree has these properties
+    """Helper class for nodes in the tree.
+
+    Attributes
+    ----------
+    sv : N numpy array
+        State vector
+    u : Nu numpy array
+        Control vector
+    path : N x Np numpy array
+        All state vectors in the path
+    parent : :class:`.Node`
+        Parent node.
+    cost : float
+        Node cost value.
+    """
+
     def __init__(self, state):
+        """Initialize an object.
+
+        Parameters
+        ----------
+        state : numpy array
+            state vector for the node.
+        """
         self.sv = state.ravel()
         self.u = []
         self.path = []
         self.parent = []
-        # Parent node this node corresponds to
         self.cost = 0
-        # Node cost
 
 
 class LQRRRTStar:
+    """Implements the LQR-RRT* algorithm.
+
+    Attributes
+    ----------
+    rng : numpy random number generator
+        Instance of a random number generator to use.
+    start : N x 1 numpy array
+        Starting state
+    end : N x 1 numpy array
+        Ending state
+    node_list : list
+        List of nodes in the tree.
+    min_rand : Np numpy array
+        Minimum position values when generating random nodes
+    max_rand : Np numpy array
+        Maximum position values when generating radnom nodes
+    pos_inds : list
+        List of position indices in the state vector
+    sampling_fun : callable
+        Function that returns a random sample from the state space. Must
+        take rng, pos_inds, min_rand, max_rand as inputs and return a numpy array
+        of the same size as the state vector.
+    goal_sample_rate : float
+    max_iter : int
+        Maximum iterations to search for.
+    connect_circle_dist : float
+    step_size : float
+    expand_dis : float
+    ell_con : float
+        Ellipsoidal constraint value
+    Nobs : int
+        Number of obstacles.
+    obstacle_list : Nobs x (3 or 4) numpy array
+        Each row describes an obstacle; x pos, y pos, (z pos), radius.
+    P : (2 or 3) x (2 or 3) x Nobs numpy array
+        States of each obstacle for collision checking.
+    lqr : :class:`gncpy.control.LQR`
+        Planner class instance for predicting paths.
+    S : N x N numpy array
+        Solution to the discrete time algebraic riccatti equation.
+    """
+
     def __init__(
         self,
         lqr=None,
@@ -43,11 +106,8 @@ class LQRRRTStar:
         self.end = None
         self.node_list = []
         self.min_rand = np.array([])
-        # Min State space to sample RRT* Paths
-        self.pos_inds = []
-
         self.max_rand = np.array([])
-        # Max State space to sample RRT* Paths
+        self.pos_inds = []
 
         self.sampling_fun = sampling_fun
 
@@ -61,7 +121,6 @@ class LQRRRTStar:
         self.ell_con = None
         self.Nobs = 0
         self.obstacle_list = np.array([])
-        # States of each Obstacle
         self.P = np.zeros((self.numPos, self.numPos, self.Nobs))
 
         # setup LQR planner
@@ -473,11 +532,6 @@ class LQRRRTStar:
     def get_random_node(self):  # Find a random node from the state space
         if self.rng.integers(0, high=100) > self.goal_sample_rate:
             rand_x = self.sampling_fun(self.rng, self.pos_inds, self.min_rand, self.max_rand)
-            # rand_Pos = np.zeros(self.numPos)
-            # for k in range(self.numPos):
-            #     rand_Pos[k] = self.rng.uniform(self.min_rand[k], self.max_rand[k])
-            # rand_x = np.zeros(self.end.sv.shape)
-            # rand_x[self.pos_inds] = rand_Pos
             rnd = Node(rand_x)
         else:  # goal point sampling
             rnd = Node(self.end.sv.reshape((-1, 1)))
