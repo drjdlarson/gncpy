@@ -28,13 +28,13 @@ def get_jacobian(x, fnc, f_args=(), step_size=10**-7):
     inv_step2 = 1 / (2 * step_size)
     n_vars = x.size
     J = np.zeros((n_vars, 1))
-    for ii in range(0, n_vars):
-        x_r = x.astype(float)
-        x_l = x.astype(float)
+    for ii in range(n_vars):
+        x_r = x.copy()
+        x_l = x.copy()
         x_r[ii] += step_size
         x_l[ii] -= step_size
-        J[ii] = (fnc(x_r, *f_args) - fnc(x_l, *f_args)) * inv_step2
-    return J
+        J[ii] = (fnc(x_r, *f_args) - fnc(x_l, *f_args))
+    return J * inv_step2
 
 
 def get_hessian(x, fnc, f_args=(), step_size=np.finfo(float).eps**(1 / 4)):
@@ -47,7 +47,7 @@ def get_hessian(x, fnc, f_args=(), step_size=np.finfo(float).eps**(1 / 4)):
     x : numpy array
         DESCRIPTION.
     fnc : callable
-        Function.
+        The function to evaluate, must be of the form `f(x, *f_args)`.
     f_args : tuple, optional
         Additional arguments for the function. The default is ().
     step_size : float, optional
@@ -62,27 +62,34 @@ def get_hessian(x, fnc, f_args=(), step_size=np.finfo(float).eps**(1 / 4)):
     den = 1 / (4 * step_size**2)
     n_vars = x.size
     H = np.zeros((n_vars, n_vars))
-    for ii in range(0, n_vars):
-        for jj in range(0, n_vars):
-            x_ip_jp = x.copy()
-            x_ip_jp[ii] += step_size
-            x_ip_jp[jj] += step_size
+    for ii in range(n_vars):
+        delta_i = np.zeros(x.shape)
+        delta_i[ii] = step_size
 
-            x_ip_jm = x.copy()
-            x_ip_jm[ii] += step_size
-            x_ip_jm[jj] -= step_size
+        x_ip = x + delta_i
+        x_im = x - delta_i
+        for jj in range(n_vars):
+            # only get upper triangle since hessian is symmetric
+            if jj < ii:
+                continue
+            delta_j = np.zeros(x.shape)
+            delta_j[jj] = step_size
 
-            x_im_jm = x.copy()
-            x_im_jm[ii] -= step_size
-            x_im_jm[jj] -= step_size
-
-            x_im_jp = x.copy()
-            x_im_jp[ii] -= step_size
-            x_im_jp[jj] += step_size
+            x_ip_jp = x_ip + delta_j
+            x_ip_jm = x_ip - delta_j
+            x_im_jm = x_im - delta_j
+            x_im_jp = x_im + delta_j
 
             H[ii, jj] = (fnc(x_ip_jp, *f_args) - fnc(x_ip_jm, *f_args)
                          - fnc(x_im_jp, *f_args) + fnc(x_im_jm, *f_args)) * den
-    return 0.5 * (H + H.T)
+
+    # fill full H matrix from upper triangle
+    for ii in range(n_vars):
+        for jj in range(n_vars):
+            if jj >= ii:
+                break
+            H[ii, jj] = H[jj, ii]
+    return H
 
 
 def get_state_jacobian(t, x, fncs, f_args, u=None, **kwargs):

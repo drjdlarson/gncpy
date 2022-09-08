@@ -851,82 +851,99 @@ class SimpleUAV2d(BaseGame2d):
             state0,
         )
 
+    def create_player(self, params):
+        """Creates a player entity.
+
+        Parameters
+        ----------
+        params : :class:`gncpy.games.SimpleUAV2d.PlayerParams`
+            Parameters for the player being created.
+
+        Returns
+        -------
+        p : :class:`gncpy.game_engine.entities.Entity`
+            Reference to the player entity that was created.
+        """
+        # check if using random birth time
+        if params.birth.times.size == 0:
+            req_spawn = self.rng.uniform(0.0, 1.0) < params.birth.prob
+        else:
+            diff = self.current_time - np.sort(params.birth.times)
+            inds = np.where(diff >= -1e-8)[0]
+            if inds.size == 0:
+                return None
+            min_diff = diff[inds[-1]]
+            # birth times don't have to align with updates
+            req_spawn = min_diff < self.params.physics.update_dt - 1e-8
+
+        if not req_spawn:
+            return None
+
+        e = self.entityManager.add_entity("player")
+
+        e.add_component(
+            gcomp.CBirth,
+            b_type=params.birth.type,
+            loc=params.birth.location,
+            scale=params.birth.scale,
+            params=params.birth.extra_params,
+            rng=self.rng,
+            randomize=params.birth.randomize,
+        )
+
+        e.add_component(gcomp.CDynamics)
+        cDyn = e.get_component(gcomp.CDynamics)
+        (
+            cDyn.dynObj,
+            cDyn.pos_inds,
+            cDyn.vel_inds,
+            cDyn.state_args,
+            cDyn.ctrl_args,
+            cDyn.state_low,
+            cDyn.state_high,
+            cDyn.state,
+        ) = self.create_dynamics(params.dynamics, e.get_component(gcomp.CBirth))
+
+        e.add_component(gcomp.CTransform)
+        cTrans = e.get_component(gcomp.CTransform)
+        p_ii = cDyn.pos_inds
+        v_ii = cDyn.vel_inds
+        cTrans.pos = gphysics.dist_to_pixels(
+            cDyn.state[p_ii], self.dist_per_pix, min_pos=self.params.physics.min_pos
+        )
+        if v_ii is not None:
+            cTrans.vel = gphysics.dist_to_pixels(
+                cDyn.state[v_ii], self.dist_per_pix
+            )
+
+        e.add_component(gcomp.CEvents)
+
+        e.add_component(
+            gcomp.CShape,
+            s_type=params.shape.type,
+            w=gphysics.dist_to_pixels(params.shape.width, self.dist_per_pix[0]),
+            h=gphysics.dist_to_pixels(params.shape.height, self.dist_per_pix[1]),
+            color=tuple(params.shape.color),
+            zorder=100,
+            fpath=params.shape.file,
+        )
+
+        e.add_component(
+            gcomp.CCollision,
+            w=gphysics.dist_to_pixels(params.collision.width, self.dist_per_pix[0]),
+            h=gphysics.dist_to_pixels(
+                params.collision.height, self.dist_per_pix[1]
+            ),
+        )
+
+        e.add_component(gcomp.CCapabilities, capabilities=params.capabilities)
+
+        return e
+
     def spawn_players(self):
         """Spawns a new player if needed."""
         for params in self.params.players:
-            # check if using random birth time
-            if params.birth.times.size == 0:
-                req_spawn = self.rng.uniform(0.0, 1.0) < params.birth.prob
-            else:
-                diff = self.current_time - np.sort(params.birth.times)
-                inds = np.where(diff >= -1e-8)[0]
-                if inds.size == 0:
-                    continue
-                min_diff = diff[inds[-1]]
-                # birth times don't have to align with updates
-                req_spawn = min_diff < self.params.physics.update_dt - 1e-8
-
-            if not req_spawn:
-                continue
-
-            e = self.entityManager.add_entity("player")
-
-            e.add_component(
-                gcomp.CBirth,
-                b_type=params.birth.type,
-                loc=params.birth.location,
-                scale=params.birth.scale,
-                params=params.birth.extra_params,
-                rng=self.rng,
-                randomize=params.birth.randomize,
-            )
-
-            e.add_component(gcomp.CDynamics)
-            cDyn = e.get_component(gcomp.CDynamics)
-            (
-                cDyn.dynObj,
-                cDyn.pos_inds,
-                cDyn.vel_inds,
-                cDyn.state_args,
-                cDyn.ctrl_args,
-                cDyn.state_low,
-                cDyn.state_high,
-                cDyn.state,
-            ) = self.create_dynamics(params.dynamics, e.get_component(gcomp.CBirth))
-
-            e.add_component(gcomp.CTransform)
-            cTrans = e.get_component(gcomp.CTransform)
-            p_ii = cDyn.pos_inds
-            v_ii = cDyn.vel_inds
-            cTrans.pos = gphysics.dist_to_pixels(
-                cDyn.state[p_ii], self.dist_per_pix, min_pos=self.params.physics.min_pos
-            )
-            if v_ii is not None:
-                cTrans.vel = gphysics.dist_to_pixels(
-                    cDyn.state[v_ii], self.dist_per_pix
-                )
-
-            e.add_component(gcomp.CEvents)
-
-            e.add_component(
-                gcomp.CShape,
-                s_type=params.shape.type,
-                w=gphysics.dist_to_pixels(params.shape.width, self.dist_per_pix[0]),
-                h=gphysics.dist_to_pixels(params.shape.height, self.dist_per_pix[1]),
-                color=tuple(params.shape.color),
-                zorder=100,
-                fpath=params.shape.file,
-            )
-
-            e.add_component(
-                gcomp.CCollision,
-                w=gphysics.dist_to_pixels(params.collision.width, self.dist_per_pix[0]),
-                h=gphysics.dist_to_pixels(
-                    params.collision.height, self.dist_per_pix[1]
-                ),
-            )
-
-            e.add_component(gcomp.CCapabilities, capabilities=params.capabilities)
+            self.create_player(params)
 
     def propagate_dynamics(self, eDyn, action):
         """Propagates the dynamics with the given action.
@@ -1084,7 +1101,7 @@ class SimpleUAV2d(BaseGame2d):
                     else:
                         if e.id not in c_hazard.entrance_times:
                             c_hazard.entrance_times[e.id] = self.current_time
-                        e.c_events.events.append(
+                        p_events.events.append(
                             (
                                 EventType.HAZARD,
                                 {

@@ -19,13 +19,13 @@ class DynamicsBase(ABC):
     ----------
     control_model : callable or list of callables, optional
         For objects of :class:`gncpy.dynamics.LinearDynamicsBase` it is a
-        callable with the signature `t, x, *ctrl_args` and returns the
+        callable with the signature `t, *ctrl_args` and returns the
         input matrix :math:`G_k` from :math:`x_{k+1} = F_k x_k + G_k u_k`.
         For objects of :class:`gncpy.dynamics.NonlinearDynamicsBase` it is a
         list of callables where each callable returns the modification to the
         corresponding state, :math:`g(t, x_i, u_i)`, in the differential equation
         :math:`\dot{x}_i = f(t, x_i) + g(t, x_i, u_i)` and has the signature
-        `t, u, *ctrl_args`.
+        `t, x, u, *ctrl_args`.
     state_constraint : callable
         Has the signature `t, x` where `t` is the current timestep and `x`
         is the propagated state. It returns the propagated state with
@@ -45,17 +45,25 @@ class DynamicsBase(ABC):
         self.state_constraint = state_constraint
 
     @abstractmethod
-    def propagate_state(self, *args, **kwargs):
+    def propagate_state(self, timestep, state, u=None, state_args=None, ctrl_args=None):
         """Abstract method for propagating the state forward in time.
 
         Must be overridden in child classes.
 
         Parameters
         ----------
-        *args : tuple
-            Specifics defined by child class.
-        **kwargs : dict
-            Specifics defined by child class.
+        timestep : float
+            timestep.
+        state : N x 1 numpy array
+            state vector.
+        u : Nu x 1 numpy array, optional
+            Control effort vector. The default is None.
+        state_args : tuple, optional
+            Additional arguments needed by the `get_state_mat` function. The
+            default is ().
+        ctrl_args : tuple, optional
+            Additional arguments needed by the get input mat function. The
+            default is (). Only used if a control effort is supplied.
 
         Raises
         ------
@@ -67,25 +75,10 @@ class DynamicsBase(ABC):
         next_state : N x 1 numpy array
             The propagated state.
         """
-        raise NotImplementedError
-
-
-class LinearDynamicsBase(DynamicsBase):
-    """Base class for all linear dynamics models.
-
-    Child classes should define their own get_state_mat function and set the
-    state names class variable. The remainder of the functions autogenerate
-    based on these values.
-
-    """
-
-    __slots__ = ()
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        raise NotImplementedError()
 
     @abstractmethod
-    def get_state_mat(self, timestep, *args):
+    def get_state_mat(self, timestep, *args, **kwargs):
         """Abstract method for getting the discrete time state matrix.
 
         Must be overridden in child classes.
@@ -102,7 +95,74 @@ class LinearDynamicsBase(DynamicsBase):
         N x N numpy array
             state matrix.
         """
-        raise NotImplementedError
+        raise NotImplementedError()
+
+    @abstractmethod
+    def get_input_mat(self, timestep, *args, **kwargs):
+        """Should return the input matrix.
+
+        Must be overridden by the child class.
+
+        Parameters
+        ----------
+        timestep : float
+            Current timestep.
+        *args : tuple
+            Placeholder for additional arguments.
+        **kwargs : dict
+            Placeholder for additional arguments.
+
+        Raises
+        ------
+        NotImplementedError
+            Child class must implement this.
+
+        Returns
+        -------
+        N x Nu numpy array
+            input matrix for the system
+        """
+        raise NotImplementedError()
+
+
+class LinearDynamicsBase(DynamicsBase):
+    """Base class for all linear dynamics models.
+
+    Child classes should define their own get_state_mat function and set the
+    state names class variable. The remainder of the functions autogenerate
+    based on these values.
+
+    """
+
+    __slots__ = ()
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def get_input_mat(self, timestep, *ctrl_args):
+        """Calculates the input matrix from the control model.
+
+        This calculates the jacobian of the control model. If no control model
+        is specified than it returns a zero matrix.
+
+        Parameters
+        ----------
+        timestep : float
+            current timestep.
+        state : N x 1 numpy array
+            current state.
+        *ctrl_args : tuple
+            Additional arguments to pass to the control model.
+
+        Returns
+        -------
+        N x Nu numpy array
+            Control input matrix.
+        """
+        if self.control_model is None:
+            raise RuntimeWarning("Control model is not set.")
+
+        return self.control_model(timestep, *ctrl_args)
 
     def get_dis_process_noise_mat(self, dt, *f_args):
         """Class method for getting the process noise.
@@ -143,7 +203,7 @@ class LinearDynamicsBase(DynamicsBase):
             timestep.
         state : N x 1 numpy array
             state vector.
-        u : N x Nu numpy array, optional
+        u : Nu x 1 numpy array, optional
             Control effort vector. The default is None.
         state_args : tuple, optional
             Additional arguments needed by the `get_state_mat` function. The
@@ -228,10 +288,7 @@ class NonlinearDynamicsBase(DynamicsBase):
             f_args. They must return the new state for the given index in the
             list/state vector.
         """
-        raise NotImplementedError
-        # msg = 'cont_fnc_lst not implemented'
-        # warn(msg, RuntimeWarning)
-        # return []
+        raise NotImplementedError()
 
     def _cont_dyn(self, t, x, u, state_args, ctrl_args):
         r"""Implements the continuous time dynamics.
@@ -239,7 +296,7 @@ class NonlinearDynamicsBase(DynamicsBase):
         This automatically sets up the combined differential equation based on
         the supplied continuous function list.
 
-        This implements the equation :math:`\dot{x} = f(t, x) + g(t, u)` and
+        This implements the equation :math:`\dot{x} = f(t, x) + g(t, x, u)` and
         returns the state derivatives as a vector. Note the control input is
         only used if an appropriate control model is set by the user.
 
@@ -272,7 +329,9 @@ class NonlinearDynamicsBase(DynamicsBase):
 
         return out
 
-    def get_state_mat(self, timestep, state, *f_args):
+    def get_state_mat(
+        self, timestep, state, *f_args, u=None, ctrl_args=None, use_continuous=False
+    ):
         """Calculates the state matrix from the ode list.
 
         Parameters
@@ -289,7 +348,77 @@ class NonlinearDynamicsBase(DynamicsBase):
         N x N numpy array
             state transition matrix.
         """
-        return gmath.get_state_jacobian(timestep, state, self.cont_fnc_lst, f_args)
+        if ctrl_args is None:
+            ctrl_args = ()
+        if use_continuous:
+            if self.control_model is not None and u is not None:
+
+                def factory(ii):
+                    return lambda _t, _x, _u, *_args: self._cont_dyn(
+                        _t, _x, _u, _args, ctrl_args
+                    )[ii]
+
+                return gmath.get_state_jacobian(
+                    timestep,
+                    state,
+                    [factory(ii) for ii in range(state.size)],
+                    f_args,
+                    u=u,
+                )
+
+            return gmath.get_state_jacobian(timestep, state, self.cont_fnc_lst, f_args)
+
+        else:
+
+            def factory(ii):
+                return lambda _t, _x, *_args: self.propagate_state(
+                    _t, _x, u=u, state_args=_args, ctrl_args=ctrl_args
+                )[ii]
+
+            return gmath.get_state_jacobian(
+                timestep, state, [factory(ii) for ii in range(state.size)], f_args,
+            )
+
+    def get_input_mat(self, timestep, state, u, state_args=None, ctrl_args=None):
+        """Calculates the input matrix from the control model.
+
+        This calculates the jacobian of the control model. If no control model
+        is specified than it returns a zero matrix.
+
+        Parameters
+        ----------
+        timestep : float
+            current timestep.
+        state : N x 1 numpy array
+            current state.
+        u : Nu x 1
+            current control input.
+        *f_args : tuple
+            Additional arguments to pass to the control model.
+
+        Returns
+        -------
+        N x Nu numpy array
+            Control input matrix.
+        """
+        if self.control_model is None:
+            warn("Control model is None")
+            return np.zeros((state.size, u.size))
+
+        if state_args is None:
+            state_args = ()
+        if ctrl_args is None:
+            ctrl_args = ()
+
+        def factory(ii):
+            return lambda _t, _x, _u, *_args: self.propagate_state(
+                _t, _x, u=_u, state_args=state_args, ctrl_args=ctrl_args
+            )[ii]
+
+        return gmath.get_input_jacobian(
+            timestep, state, u, [factory(ii) for ii in range(state.size)], (),
+        )
+        # return gmath.get_input_jacobian(timestep, state, u, self.control_model, (),)
 
     def propagate_state(self, timestep, state, u=None, state_args=None, ctrl_args=None):
         """Propagates the continuous time dynamics.
@@ -400,78 +529,488 @@ class DoubleIntegrator(LinearDynamicsBase):
         )
 
 
-class CoordinatedTurn(NonlinearDynamicsBase):
-    """Implements the non-linear coordinated turn dynamics model."""
+class CurvilinearMotion(NonlinearDynamicsBase):
+    r"""Implements general curvilinear motion model in 2d.
+
+    This is a slight variation from normal :class:`.NonlinearDynamicsBase` classes
+    because it does not use a list of continuous functions but instead has
+    the state and input matrices coded directly. As a result, it also does not
+    use the control model attribute because it is hardcoded in the
+    :meth:`.get_input_mat` function.
+
+    Notes
+    -----
+    This implements the following system of ODEs.
+
+    .. math::
+
+        \begin{align}
+            \dot{x} &= v cos(\psi) \\
+            \dot{y} &= v sin(\psi) \\
+            \dot{v} &= u_0 \\
+            \dot{\psi} &= u_1
+        \end{align}
+
+    """
 
     __slots__ = ()
 
-    state_names = ("x pos", "x vel", "y pos", "y vel", "turn angle")
+    state_names = (
+        "x pos",
+        "y pos",
+        "speed",
+        "turn angle",
+    )
 
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-    @property
-    def cont_fnc_lst(self):
-        """Continuous time dynamics.
-
-        Returns
-        -------
-        list
-            functions of the form :code:`(t, x, *args)`.
-        """
-        # returns x_dot
-        def f0(t, x, *args):
-            return x[1]
-
-        # returns x_dot_dot
-        def f1(t, x, *args):
-            return -x[4] * x[3]
-
-        # returns y_dot
-        def f2(t, x, *args):
-            return x[3]
-
-        # returns y_dot_dot
-        def f3(t, x, *args):
-            return x[4] * x[1]
-
-        # returns omega_dot
-        def f4(t, x, *args):
-            return 0
-
-        return [f0, f1, f2, f3, f4]
-
-    def get_dis_process_noise_mat(self, dt, posx_std, posy_std, turn_std):
-        """Discrete process noise matrix.
+        """Initialize an object.
 
         Parameters
         ----------
-        dt : float
-            time difference
-        posx_std : float
-            Standard deviation of the x position position process noise.
-        posy_std : float
-            Standard deviation of the y position position process noise.
-        turn_std : float
-            Standard deviation of the turn angle process noise.
+        **kwargs : dict
+            Additional key word arguments for the parent.
+        """
+        super().__init__(**kwargs)
+        self.control_model = [None] * len(self.state_names)
+
+    @property
+    def cont_fnc_lst(self):
+        """Continuous time ODEs, not used."""
+        warn("Not used by this class")
+        return []
+
+    def get_state_mat(
+        self, timestep, state, *args, u=None, ctrl_args=None, use_continuous=False
+    ):
+        """Returns the linearized state matrix that has been hardcoded.
+
+        Parameters
+        ----------
+        timestep : float
+            Current timestep.
+        state : N x 1 numpy array
+            current state.
+        *args : tuple
+            Additional arguments placeholde, not used.
+        u : Nu x 1 numpy array, optional
+            Control input. The default is None.
+        ctrl_args : tuple, optional
+            Additional agruments needed to get the input matrix. The default is
+            None.
+        use_continuous : bool, optional
+            Flag indicating if the continuous time A matrix should be returned.
+            The default is False.
 
         Returns
         -------
-        5 x 5 numpy array
-            Process noise matrix.
-
+        N x N numpy array
+            state transition matrix.
         """
-        gamma = np.array(
+        x = state.ravel()
+
+        A = np.array(
             [
-                [dt ** 2 / 2, 0, 0],
-                [dt, 0, 0],
-                [0, dt ** 2 / 2, 0],
-                [0, dt, 0],
+                [0, 0, np.cos(x[3]), -x[2] * np.sin(x[3]) * self.dt],
+                [0, 0, np.sin(x[3]), x[2] * np.cos(x[3]) * self.dt],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+            ]
+        )
+        if use_continuous:
+            return A
+        return np.eye(A.shape[0]) + self.dt * A
+
+    def get_input_mat(self, timestep, state, u, state_args=None, ctrl_args=None):
+        """Returns the linearized input matrix.
+
+        Parameters
+        ----------
+        timestep : float
+            Current timestep.
+        state : N x 1 numpy array
+            Current state.
+        u : 2 x 1 numpy array
+            Current control input.
+        state_args : tuple, optional
+            Additional arguements needed to get the state matrix. The default
+            is None.
+        ctrl_args : tuple, optional
+            Additional arguments needed to get the input matrix. The default is
+            None.
+
+        Returns
+        -------
+        N x 2 numpy array
+            Input matrix.
+        """
+        return np.array([[0, 0], [0, 0], [self.dt, 0], [0, self.dt]])
+
+    def propagate_state(self, timestep, state, u=None, state_args=None, ctrl_args=None):
+        """Propagates the state forward one timestep.
+
+        This uses the hardcoded form for the linearized state and input matrices
+        instead of numerical integration.
+
+        Parameters
+        ----------
+        timestep : float
+            Current timestep.
+        state : N x 1 numpy array
+            current state.
+        u : 2 x 1 numpy array, optional
+            Control input. The default is None.
+        state_args : tuple, optional
+            Additional arguements needed to get the state matrix. The default
+            is None. These are not needed.
+        ctrl_args : tuple, optional
+            Additional arguments needed to get the input matrix. The default is
+            None. These are not needed.
+
+        Returns
+        -------
+        N x 1 numpy array
+            Next state.
+        """
+        if state_args is None:
+            state_args = ()
+        if ctrl_args is None:
+            ctrl_args = ()
+
+        F = self.get_state_mat(
+            timestep, state, *state_args, u=u, ctrl_args=ctrl_args, use_continuous=False
+        )
+        if u is None:
+            return F @ state
+        G = self.get_input_mat(
+            timestep, state, u, state_args=state_args, ctrl_args=ctrl_args
+        )
+        return F @ state + G @ u
+
+
+class CoordinatedTurnKnown(LinearDynamicsBase):
+    """Implements the linear coordinated turn with known turn rate model.
+
+    This is a slight variation from normal :class:`.LinearDynamicsBase` classes
+    because it does not allow for control models, instead it has the input
+    matrix coded directly. It also has the turn angle included in the state
+    to help with debugging and coding but is not strictly required by the
+    dynamics.
+
+    Attributes
+    ----------
+    turn_rate : float
+        Turn rate in rad/s
+    """
+
+    __slots__ = "turn_rate"
+
+    state_names = ("x pos", "y pos", "x vel", "y vel", "turn angle")
+
+    def __init__(self, turn_rate=5 * np.pi / 180, **kwargs):
+        super().__init__(**kwargs)
+        self.turn_rate = turn_rate
+
+        self.control_model = None
+
+    def get_state_mat(self, timestep, dt):
+        """Returns the discrete time state matrix.
+
+        Parameters
+        ----------
+        timestep : float
+            timestep.
+        dt : float
+            time difference
+
+        Returns
+        -------
+        N x N numpy array
+            state matrix.
+        """
+        ta = self.turn_rate * dt
+        s_ta = np.sin(ta)
+        c_ta = np.cos(ta)
+        return np.array(
+            [
+                [1, 0, s_ta / self.turn_rate, -(1 - c_ta) / self.turn_rate, 0],
+                [0, 1, (1 - c_ta) / self.turn_rate, s_ta / self.turn_rate, 0],
+                [0, 0, c_ta, -s_ta, 0],
+                [0, 0, s_ta, c_ta, 0],
+                [0, 0, 0, 0, 1],
+            ]
+        )
+
+    def get_input_mat(self, timestep, *args):
+        """Gets the input matrix.
+
+        This enforces the no control model requirement of these dynamics by
+        forcing the input matrix to be zeros.
+
+        Parameters
+        ----------
+        timestep : float
+            Current timestep.
+        *args : tuple
+            additional arguments, not used.
+
+        Returns
+        -------
+        N x 1 numpy array
+            input matrix.
+        """
+        return np.zeros((5, 1))
+
+    def propagate_state(self, timestep, state, u=None, state_args=None, ctrl_args=None):
+        """Propagates the state forward in time.
+
+        Parameters
+        ----------
+        timestep : float
+            Current timestep.
+        state : N x 1 numpy array
+            current state.
+        u : 1 x 1 numpy array, optional
+            Control input, should not be needed with this model. The default is
+            None.
+        state_args : tuple, optional
+            Additional arguments needed to get the state matrix. The default is
+            None.
+        ctrl_args : tuple, optional
+            Additional arguments needed to get the input matrix, not needed.
+            The default is None.
+
+        Raises
+        ------
+        RuntimeError
+            If state_args is None.
+
+        Returns
+        -------
+        N x 1 numpy array
+            Next state.
+        """
+        if state_args is None:
+            raise RuntimeError("state_args must be (dt, )")
+        if ctrl_args is None:
+            ctrl_args = ()
+
+        F = self.get_state_mat(timestep, *state_args,)
+        if u is None:
+            return F @ state + np.array(
+                [0, 0, 0, 0, state_args[0] * self.turn_rate]
+            ).reshape((5, 1))
+        G = self.get_input_mat(timestep, *ctrl_args)
+        return (
+            F @ state
+            + G @ u
+            + np.array([0, 0, 0, 0, state_args[0] * self.turn_rate]).reshape((5, 1))
+        )
+
+
+class CoordinatedTurnUnknown(NonlinearDynamicsBase):
+    """Implements the non-linear coordinated turn with unknown turn rate model.
+
+    Notes
+    -----
+    This can use either a Wiener process or a first order Markov process model
+    for the turn rate.
+
+    Attributes
+    ----------
+    velocity : float
+        Speed the vehicle is moving at.
+    turn_rate_cor_time : float
+        Correlation time for the turn rate. If None then a Wiener process is used.
+    """
+
+    __slots__ = ("velocity", "turn_rate_cor_time")
+
+    state_names = ("x pos", "y pos", "x vel", "y vel", "turn rate")
+
+    def __init__(self, velocity=10, turn_rate_cor_time=None, **kwargs):
+        """Initialize an object.
+
+        Parameters
+        ----------
+        velocity : float, optional
+            Speed of the vehicle. The default is 10.
+        turn_rate_cor_time : float, optional
+            Correlation time of the turn rate. The default is None.
+        **kwargs : dict
+            Additional arguments for the parent.
+        """
+        super().__init__(**kwargs)
+        self.velocity = velocity
+        self.turn_rate_cor_time = turn_rate_cor_time
+
+        self.control_model = [None] * len(self.state_names)
+
+    @property
+    def alpha(self):
+        """Read only inverse of the turn rate correlation time."""
+        if self.turn_rate_cor_time is None:
+            return 0
+        else:
+            return 1 / self.turn_rate_cor_time
+
+    @property
+    def beta(self):
+        """Read only value for correlation time in state matrix."""
+        if self.turn_rate_cor_time is None:
+            return 1
+        else:
+            return np.exp(-self.dt / self.turn_rate_cor_time)
+
+    @property
+    def cont_fnc_lst(self):
+        """Continuous time ODEs, not used."""
+        warn("Not used by this class")
+        return []
+
+    def get_state_mat(
+        self, timestep, state, *args, u=None, ctrl_args=None, use_continuous=False
+    ):
+        """Returns the linearized state matrix that has been hardcoded.
+
+        Parameters
+        ----------
+        timestep : float
+            Current timestep.
+        state : N x 1 numpy array
+            current state.
+        *args : tuple
+            Additional arguments placeholde, not used.
+        u : Nu x 1 numpy array, optional
+            Control input. The default is None.
+        ctrl_args : tuple, optional
+            Additional agruments needed to get the input matrix. The default is
+            None.
+        use_continuous : bool, optional
+            Flag indicating if the continuous time A matrix should be returned.
+            The default is False.
+
+        Returns
+        -------
+        N x N numpy array
+            state transition matrix.
+        """
+        x = state.ravel()
+        ta = x[4] * self.dt
+        s_ta = np.sin(ta)
+        c_ta = np.cos(ta)
+
+        if use_continuous:
+            w2 = x[4] ** 2
+            return np.array(
+                [
+                    [
+                        1,
+                        0,
+                        s_ta / x[4],
+                        -(1 - c_ta) / x[4],
+                        (x[4] * self.dt * c_ta - s_ta) * x[2] / w2
+                        - (x[4] * self.dt * s_ta - 1 + c_ta) * x[3] / w2,
+                    ],
+                    [
+                        0,
+                        1,
+                        (1 - c_ta) / x[4],
+                        s_ta / x[4],
+                        (x[4] * self.dt * s_ta - 1 + c_ta) * x[2] / w2
+                        + (x[4] * self.dt * c_ta - s_ta) * x[3] / w2,
+                    ],
+                    [0, 0, c_ta, -s_ta, -self.dt * s_ta * x[2] - self.dt * c_ta * x[3]],
+                    [0, 0, s_ta, c_ta, self.dt * c_ta * x[2] - self.dt * s_ta * x[3]],
+                    [0, 0, 0, 0, self.beta],
+                ]
+            )
+
+        return np.array(
+            [
+                [1, 0, s_ta / x[4], -(1 - c_ta) / x[4], 0],
+                [0, 1, (1 - c_ta) / x[4], s_ta / x[4], 0],
+                [0, 0, c_ta, -s_ta, 0],
+                [0, 0, s_ta, c_ta, 0],
+                [0, 0, 0, 0, self.beta],
+            ]
+        )
+
+    def get_input_mat(self, timestep, state, u, state_args=None, ctrl_args=None):
+        """Returns the linearized input matrix.
+
+        This assumes the control input is an AWGN signal.
+
+        Parameters
+        ----------
+        timestep : float
+            Current timestep.
+        state : N x 1 numpy array
+            Current state.
+        u : 3 x 1 numpy array
+            Current control input.
+        state_args : tuple, optional
+            Additional arguements needed to get the state matrix. The default
+            is None.
+        ctrl_args : tuple, optional
+            Additional arguments needed to get the input matrix. The default is
+            None.
+
+        Returns
+        -------
+        N x 2 numpy array
+            Input matrix.
+        """
+        return np.array(
+            [
+                [0.5 * self.dt ** 2, 0, 0],
+                [0, 0.5 * self.dt ** 2, 0],
+                [self.dt, 0, 0],
+                [0, self.dt, 0],
                 [0, 0, 1],
             ]
         )
-        Q = np.diag([posx_std ** 2, posy_std ** 2, turn_std ** 2])
-        return gamma @ Q @ gamma.T
+
+    def propagate_state(self, timestep, state, u=None, state_args=None, ctrl_args=None):
+        """Propagates the state forward one timestep.
+
+        This uses the hardcoded form for the linearized state and input matrices
+        instead of numerical integration. It assumes the control input is an
+        AWGN signal.
+
+        Parameters
+        ----------
+        timestep : float
+            Current timestep.
+        state : N x 1 numpy array
+            current state.
+        u : 3 x 1 numpy array, optional
+            Control input. The default is None.
+        state_args : tuple, optional
+            Additional arguements needed to get the state matrix. The default
+            is None. These are not needed.
+        ctrl_args : tuple, optional
+            Additional arguments needed to get the input matrix. The default is
+            None. These are not needed.
+
+        Returns
+        -------
+        N x 1 numpy array
+            Next state.
+        """
+        if state_args is None:
+            state_args = ()
+        if ctrl_args is None:
+            ctrl_args = ()
+
+        F = self.get_state_mat(
+            timestep, state, *state_args, u=u, ctrl_args=ctrl_args, use_continuous=False
+        )
+        if u is None:
+            return F @ state
+        G = self.get_input_mat(
+            timestep, state, u, state_args=state_args, ctrl_args=ctrl_args
+        )
+        return F @ state + G @ u
 
 
 class ClohessyWiltshireOrbit(LinearDynamicsBase):
@@ -742,3 +1281,65 @@ class KarlgaardOrbit(NonlinearDynamicsBase):
             return (-2 * theta_d * phi - 2 * phi_d * r_d) - phi
 
         return [f0, f1, f2, f3, f4, f5]
+
+
+class IRobotCreate(NonlinearDynamicsBase):
+    """A differential drive robot based on the iRobot Create.
+
+    This has a control model predefined because the dynamics themselves do not
+    change the state.
+
+    Notes
+    -----
+    This is taken from :cite:`Berg2016_ExtendedLQRLocallyOptimalFeedbackControlforSystemswithNonLinearDynamicsandNonQuadraticCost`
+    It represents a 2 wheel robot with some distance between its wheels.
+    """
+
+    state_names = ("pos_x", "pos_v", "turn_angle")
+
+    def __init__(self, wheel_separation=0.258, radius=0.335 / 2, **kwargs):
+        """Initialize an object.
+
+        Parameters
+        ----------
+        wheel_separation : float, optional
+            Distance between the two wheels in meters.
+        radius : float
+            Radius of the bounding box for the robot in meters.
+        **kwargs : dict
+            Additional arguments for the parent class.
+        """
+        super().__init__(**kwargs)
+        self._wheel_separation = wheel_separation
+        self.radius = radius
+
+        def g0(t, x, u, *args):
+            return 0.5 * ((u[0] + u[1]) * np.cos(x[2])).item()
+
+        def g1(t, x, u, *args):
+            return 0.5 * ((u[0] + u[1]) * np.sin(x[2])).item()
+
+        def g2(t, x, u, *args):
+            return (u[1] - u[0]) / self.wheel_separation
+
+        self.control_model = [g0, g1, g2]
+
+    @property
+    def wheel_separation(self):
+        """Read only wheel separation distance."""
+        return self._wheel_separation
+
+    @property
+    def cont_fnc_lst(self):
+        """Implements the contiuous time dynamics."""
+
+        def f0(t, x, *args):
+            return 0
+
+        def f1(t, x, *args):
+            return 0
+
+        def f2(t, x, *args):
+            return 0
+
+        return [f0, f1, f2]
