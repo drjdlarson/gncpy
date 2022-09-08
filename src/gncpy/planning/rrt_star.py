@@ -13,7 +13,7 @@ import gncpy.plotting as gplot
 
 class Node:  # Each node on the tree has these properties
     def __init__(self, state):
-        self.sv = state[:, 0]
+        self.sv = state.ravel()
         self.u = []
         self.path = []
         self.parent = []
@@ -31,8 +31,8 @@ class LQRRRTStar:
         connect_circle_dist=2,
         step_size=1,
         expand_dis=1,
-        update_plot=1,
         rng=None,
+        sampling_fun=None
     ):
 
         if rng is None:
@@ -42,19 +42,20 @@ class LQRRRTStar:
         self.start = None
         self.end = None
         self.node_list = []
-        self.numPos = 0
         self.min_rand = np.array([])
         # Min State space to sample RRT* Paths
+        self.pos_inds = []
 
         self.max_rand = np.array([])
         # Max State space to sample RRT* Paths
+
+        self.sampling_fun = sampling_fun
 
         self.goal_sample_rate = goal_sample_rate
         self.max_iter = max_iter
         self.connect_circle_dist = connect_circle_dist
         self.step_size = step_size
         self.expand_dis = expand_dis
-        self.update_plot = update_plot
 
         # Obstacles
         self.ell_con = None
@@ -63,33 +64,36 @@ class LQRRRTStar:
         # States of each Obstacle
         self.P = np.zeros((self.numPos, self.numPos, self.Nobs))
 
-        self.pos_orient = list(range(0, self.numPos))
-
         # setup LQR planner
         self.lqr = lqr
         self.S = np.array([[]])
 
-    def set_control_model(self, lqr):
+    @property
+    def numPos(self):
+        return len(self.pos_inds)
+
+    def set_control_model(self, lqr, pos_inds):
         if not isinstance(lqr, gcontrol.LQR):
             raise TypeError("Must specify an LQR instance")
         self.lqr = lqr
-        self.lqr.time_horizon = float("inf")  # must generate trajecotries to end state
+        # self.lqr.time_horizon = float("inf")  # must generate trajecotries to end state
+        self.pos_inds = pos_inds
 
     def set_environment(self, search_area=None, obstacles=None):
         if search_area is not None:
-            self.numPos = int(search_area.shape[0] / 2)
-            self.min_rand = search_area[0 : self.numPos]
-            self.max_rand = search_area[self.numPos :]
-            self.pos_orient = list(range(0, self.numPos))
+            self.min_rand = search_area[0, :]
+            self.max_rand = search_area[1, :]
 
         if obstacles is not None:
             self.ell_con = 1
             self.Nobs = obstacles.shape[0]
             self.obstacle_list = obstacles
 
-            self.P = np.zeros((self.numPos, self.numPos, self.Nobs))
+            dim = int(max(obstacles.shape[1] - 1, 0))
+
+            self.P = np.zeros((dim, dim, self.Nobs))
             for k, r in enumerate(self.obstacle_list[:, -1]):
-                self.P[:, :, k] = r ** (-2) * np.eye(self.numPos)
+                self.P[:, :, k] = r ** (-2) * np.eye(dim)
 
     def dx(
         self, x1, x2
@@ -223,37 +227,34 @@ class LQRRRTStar:
                     self.node_list.append(new_node)
                     self.rewire(cur_time, new_node, near_indices, state_args, ctrl_args)
 
-            if show_animation and (i % self.update_plot == 0):
-                last_index = self.search_best_goal_node()
-                if last_index:
-                    traj = self.generate_final_course(last_index)[0]
+                    if show_animation and new_node is not None:
+                        if self.numPos == 2:
+                            fig.axes[0].plot(
+                                new_node.path[plt_inds[0], :],
+                                new_node.path[plt_inds[1], :],
+                                color=(0.5, 0.5, 0.5),
+                                alpha=0.15,
+                                zorder=-10,
+                            )
+                        elif self.numPos == 3:
+                            fig.axes[0].plot(
+                                new_node.path[plt_inds[0], :],
+                                new_node.path[plt_inds[1], :],
+                                new_node.path[plt_inds[2], :],
+                                color=(0.5, 0.5, 0.5),
+                                alpha=0.1,
+                                zorder=-10,
+                            )
 
-                    if self.numPos == 2:
-                        fig.axes[0].plot(
-                            traj[plt_inds[0], :],
-                            traj[plt_inds[1], :],
-                            color=(0.5, 0.5, 0.5),
-                            alpha=0.1,
-                            zorder=-10,
-                        )
-                    elif self.numPos == 3:
-                        fig.axes[0].plot(
-                            traj[plt_inds[0], :],
-                            traj[plt_inds[1], :],
-                            traj[plt_inds[2], :],
-                            color=(0.5, 0.5, 0.5),
-                            alpha=0.1,
-                            zorder=-10,
-                        )
-                    plt.pause(0.001)
-                    if save_animation:
-                        with io.BytesIO() as buff:
-                            fig.savefig(buff, format="raw")
-                            buff.seek(0)
-                            img = np.frombuffer(
-                                buff.getvalue(), dtype=np.uint8
-                            ).reshape((fig_h, fig_w, -1))
-                        frame_list.append(Image.fromarray(img))
+                        plt.pause(0.001)
+                        if save_animation:
+                            with io.BytesIO() as buff:
+                                fig.savefig(buff, format="raw")
+                                buff.seek(0)
+                                img = np.frombuffer(buff.getvalue(), dtype=np.uint8).reshape(
+                                    (fig_h, fig_w, -1)
+                                )
+                            frame_list.append(Image.fromarray(img))
 
             if (not search_until_max_iter) and new_node:
                 last_index = self.search_best_goal_node()
@@ -355,8 +356,8 @@ class LQRRRTStar:
 
     def calc_dist_to_goal(self, sv):  # Calculate distance between Node and the Goal
         dist = np.sqrt(
-            self.dx(sv, self.end.sv)[self.pos_orient].T
-            @ self.dx(sv, self.end.sv)[self.pos_orient]
+            self.dx(sv, self.end.sv)[self.pos_inds].T
+            @ self.dx(sv, self.end.sv)[self.pos_inds]
         )
         return dist
 
@@ -459,8 +460,11 @@ class LQRRRTStar:
         return ind
 
     def check_collision(self, node):  # Check for collisions with Ellipsoids
+        if len(self.obstacle_list) == 0:
+            return False
+
         for k, xobs in enumerate(self.obstacle_list):
-            distxyz = (node.path[: self.numPos, :].T - xobs[:-1].reshape((1, -1))).T
+            distxyz = (node.path[self.pos_inds, :].T - xobs[:-1].reshape((1, -1))).T
             d_list = np.einsum("ij,ij->i", (distxyz.T @ self.P[:, :, k]), distxyz.T)
             if -min(d_list) + self.ell_con >= 0.0:
                 return False
@@ -468,10 +472,12 @@ class LQRRRTStar:
 
     def get_random_node(self):  # Find a random node from the state space
         if self.rng.integers(0, high=100) > self.goal_sample_rate:
-            rand_Pos = np.zeros((self.numPos, 1))
-            for k in range(self.numPos):
-                rand_Pos[k, 0] = self.rng.uniform(self.min_rand[k], self.max_rand[k])
-            rand_x = np.block([[rand_Pos], [np.zeros((2, 1))]])
+            rand_x = self.sampling_fun(self.rng, self.pos_inds, self.min_rand, self.max_rand)
+            # rand_Pos = np.zeros(self.numPos)
+            # for k in range(self.numPos):
+            #     rand_Pos[k] = self.rng.uniform(self.min_rand[k], self.max_rand[k])
+            # rand_x = np.zeros(self.end.sv.shape)
+            # rand_x[self.pos_inds] = rand_Pos
             rnd = Node(rand_x)
         else:  # goal point sampling
             rnd = Node(self.end.sv.reshape((-1, 1)))

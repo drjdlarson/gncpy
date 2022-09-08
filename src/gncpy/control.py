@@ -234,7 +234,9 @@ class LQR:
                 A = self.dynObj.get_state_mat(
                     tt, x_hat, *state_args, u=u_hat, ctrl_args=ctrl_args
                 )
-                B = self.dynObj.get_input_mat(tt, x_hat, u_hat, *ctrl_args)
+                B = self.dynObj.get_input_mat(
+                    tt, x_hat, u_hat, state_args=state_args, ctrl_args=ctrl_args
+                )
 
             else:
                 A = self.dynObj.get_state_mat(tt, *state_args)

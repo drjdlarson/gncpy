@@ -141,7 +141,7 @@ class LinearDynamicsBase(DynamicsBase):
             Control input matrix.
         """
         if self.control_model is None:
-            raise RuntimeWarning('Control model is not set.')
+            raise RuntimeWarning("Control model is not set.")
 
         return self.control_model(timestep, *ctrl_args)
 
@@ -333,6 +333,7 @@ class NonlinearDynamicsBase(DynamicsBase):
             ctrl_args = ()
         if use_continuous:
             if self.control_model is not None and u is not None:
+
                 def factory(ii):
                     return lambda _t, _x, _u, *_args: self._cont_dyn(
                         _t, _x, _u, _args, ctrl_args
@@ -509,78 +510,214 @@ class DoubleIntegrator(LinearDynamicsBase):
         )
 
 
-class CoordinatedTurn(NonlinearDynamicsBase):
-    """Implements the non-linear coordinated turn dynamics model."""
-
+class CurvilinearMotion(NonlinearDynamicsBase):
     __slots__ = ()
 
-    state_names = ("x pos", "x vel", "y pos", "y vel", "turn angle")
+    state_names = (
+        "x pos",
+        "y pos",
+        "speed",
+        "turn angle",
+    )
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.control_model = [None] * len(self.state_names)
 
     @property
     def cont_fnc_lst(self):
-        """Continuous time dynamics.
+        warn("Not used by this class")
+        return []
 
-        Returns
-        -------
-        list
-            functions of the form :code:`(t, x, *args)`.
-        """
-        # returns x_dot
-        def f0(t, x, *args):
-            return x[1]
+    def get_state_mat(
+        self, timestep, state, *args, u=None, ctrl_args=None, use_continuous=False
+    ):
+        x = state.ravel()
 
-        # returns x_dot_dot
-        def f1(t, x, *args):
-            return -x[4] * x[3]
-
-        # returns y_dot
-        def f2(t, x, *args):
-            return x[3]
-
-        # returns y_dot_dot
-        def f3(t, x, *args):
-            return x[4] * x[1]
-
-        # returns omega_dot
-        def f4(t, x, *args):
-            return 0
-
-        return [f0, f1, f2, f3, f4]
-
-    def get_dis_process_noise_mat(self, dt, posx_std, posy_std, turn_std):
-        """Discrete process noise matrix.
-
-        Parameters
-        ----------
-        dt : float
-            time difference
-        posx_std : float
-            Standard deviation of the x position position process noise.
-        posy_std : float
-            Standard deviation of the y position position process noise.
-        turn_std : float
-            Standard deviation of the turn angle process noise.
-
-        Returns
-        -------
-        5 x 5 numpy array
-            Process noise matrix.
-
-        """
-        gamma = np.array(
+        A = np.array(
             [
-                [dt ** 2 / 2, 0, 0],
-                [dt, 0, 0],
-                [0, dt ** 2 / 2, 0],
-                [0, dt, 0],
+                [0, 0, np.cos(x[3]), -x[2] * np.sin(x[3]) * self.dt],
+                [0, 0, np.sin(x[3]), x[2] * np.cos(x[3]) * self.dt],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+            ]
+        )
+        if use_continuous:
+            return A
+        return np.eye(A.shape[0]) + self.dt * A
+
+    def get_input_mat(self, timestep, state, u, state_args=None, ctrl_args=None):
+        return np.array([[0, 0], [0, 0], [self.dt, 0], [0, self.dt],])
+
+    def propagate_state(self, timestep, state, u=None, state_args=None, ctrl_args=None):
+        if state_args is None:
+            state_args = ()
+        if ctrl_args is None:
+            ctrl_args = ()
+
+        F = self.get_state_mat(
+            timestep, state, *state_args, u=u, ctrl_args=ctrl_args, use_continuous=False
+        )
+        if u is None:
+            return F @ state
+        G = self.get_input_mat(
+            timestep, state, u, state_args=state_args, ctrl_args=ctrl_args
+        )
+        return F @ state + G @ u
+
+
+class CoordinatedTurnKnown(LinearDynamicsBase):
+    """Implements the non-linear coordinated turn dynamics model."""
+
+    __slots__ = "turn_rate"
+
+    state_names = ("x pos", "y pos", "x vel", "y vel", "turn angle")
+
+    def __init__(self, turn_rate=5 * np.pi / 180, **kwargs):
+        super().__init__(**kwargs)
+        self.turn_rate = turn_rate
+
+        self.control_model = None
+
+    def get_state_mat(self, timestep, dt):
+        ta = self.turn_rate * dt
+        s_ta = np.sin(ta)
+        c_ta = np.cos(ta)
+        return np.array(
+            [
+                [1, 0, s_ta / self.turn_rate, -(1 - c_ta) / self.turn_rate, 0],
+                [0, 1, (1 - c_ta) / self.turn_rate, s_ta / self.turn_rate, 0],
+                [0, 0, c_ta, -s_ta, 0],
+                [0, 0, s_ta, c_ta, 0],
+                [0, 0, 0, 0, 1],
+            ]
+        )
+
+    def get_input_mat(self, timestep, *args):
+        return np.zeros((5, 1))
+
+    def propagate_state(self, timestep, state, u=None, state_args=None, ctrl_args=None):
+        if state_args is None:
+            raise RuntimeError("state_args must be (dt, )")
+        if ctrl_args is None:
+            ctrl_args = ()
+
+        F = self.get_state_mat(timestep, *state_args,)
+        if u is None:
+            return F @ state + np.array(
+                [0, 0, 0, 0, state_args[0] * self.turn_rate]
+            ).reshape((5, 1))
+        G = self.get_input_mat(timestep, *ctrl_args)
+        return (
+            F @ state
+            + G @ u
+            + np.array([0, 0, 0, 0, state_args[0] * self.turn_rate]).reshape((5, 1))
+        )
+
+
+class CoordinatedTurnUnknown(NonlinearDynamicsBase):
+    """Implements the non-linear coordinated turn dynamics model."""
+
+    __slots__ = ("velocity", "turn_rate_cor_time")
+
+    state_names = ("x pos", "y pos", "x vel", "y vel", "turn rate")
+
+    def __init__(self, velocity=10, turn_rate_cor_time=None, **kwargs):
+        super().__init__(**kwargs)
+        self.velocity = velocity
+        self.turn_rate_cor_time = turn_rate_cor_time
+
+        self.control_model = [None] * len(self.state_names)
+
+    @property
+    def alpha(self):
+        if self.turn_rate_cor_time is None:
+            return 0
+        else:
+            return 1 / self.turn_rate_cor_time
+
+    @property
+    def beta(self):
+        if self.turn_rate_cor_time is None:
+            return 1
+        else:
+            return np.exp(-self.dt / self.turn_rate_cor_time)
+
+    @property
+    def cont_fnc_lst(self):
+        warn("Not used by this class")
+        return []
+
+    def get_state_mat(
+        self, timestep, state, *args, u=None, ctrl_args=None, use_continuous=False
+    ):
+        x = state.ravel()
+        ta = x[4] * self.dt
+        s_ta = np.sin(ta)
+        c_ta = np.cos(ta)
+
+        if use_continuous:
+            w2 = x[4] ** 2
+            return np.array(
+                [
+                    [
+                        1,
+                        0,
+                        s_ta / x[4],
+                        -(1 - c_ta) / x[4],
+                        (x[4] * self.dt * c_ta - s_ta) * x[2] / w2
+                        - (x[4] * self.dt * s_ta - 1 + c_ta) * x[3] / w2,
+                    ],
+                    [
+                        0,
+                        1,
+                        (1 - c_ta) / x[4],
+                        s_ta / x[4],
+                        (x[4] * self.dt * s_ta - 1 + c_ta) * x[2] / w2
+                        + (x[4] * self.dt * c_ta - s_ta) * x[3] / w2,
+                    ],
+                    [0, 0, c_ta, -s_ta, -self.dt * s_ta * x[2] - self.dt * c_ta * x[3]],
+                    [0, 0, s_ta, c_ta, self.dt * c_ta * x[2] - self.dt * s_ta * x[3]],
+                    [0, 0, 0, 0, self.beta],
+                ]
+            )
+
+        return np.array(
+            [
+                [1, 0, s_ta / x[4], -(1 - c_ta) / x[4], 0],
+                [0, 1, (1 - c_ta) / x[4], s_ta / x[4], 0],
+                [0, 0, c_ta, -s_ta, 0],
+                [0, 0, s_ta, c_ta, 0],
+                [0, 0, 0, 0, self.beta],
+            ]
+        )
+
+    def get_input_mat(self, timestep, state, u, state_args=None, ctrl_args=None):
+        return np.array(
+            [
+                [0.5 * self.dt ** 2, 0, 0],
+                [0, 0.5 * self.dt ** 2, 0],
+                [self.dt, 0, 0],
+                [0, self.dt, 0],
                 [0, 0, 1],
             ]
         )
-        Q = np.diag([posx_std ** 2, posy_std ** 2, turn_std ** 2])
-        return gamma @ Q @ gamma.T
+
+    def propagate_state(self, timestep, state, u=None, state_args=None, ctrl_args=None):
+        if state_args is None:
+            state_args = ()
+        if ctrl_args is None:
+            ctrl_args = ()
+
+        F = self.get_state_mat(
+            timestep, state, *state_args, u=u, ctrl_args=ctrl_args, use_continuous=False
+        )
+        if u is None:
+            return F @ state
+        G = self.get_input_mat(
+            timestep, state, u, state_args=state_args, ctrl_args=ctrl_args
+        )
+        return F @ state + G @ u
 
 
 class ClohessyWiltshireOrbit(LinearDynamicsBase):
