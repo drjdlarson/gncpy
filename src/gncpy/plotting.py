@@ -41,11 +41,22 @@ def calc_error_ellipse(cov, n_sig):
     return 2 * width, 2 * height, angle
 
 
-def init_plotting_opts(f_hndl=None, lgnd_loc=None, sig_bnd=1, time_vec=None,
-                       true_states=None, rng=rnd.default_rng(1), meas_inds=None,
-                       marker='o', ttl_fontsize=12, ttl_fontstyle='normal',
-                       ttl_fontfamily='sans-serif', ax_fontsize=10,
-                       ax_fontstyle='normal', ax_fontfamily='sans-serif'):
+def init_plotting_opts(
+    f_hndl=None,
+    lgnd_loc=None,
+    sig_bnd=1,
+    time_vec=None,
+    true_states=None,
+    rng=rnd.default_rng(1),
+    meas_inds=None,
+    marker="o",
+    ttl_fontsize=12,
+    ttl_fontstyle="normal",
+    ttl_fontfamily="sans-serif",
+    ax_fontsize=10,
+    ax_fontstyle="normal",
+    ax_fontfamily="sans-serif",
+):
     """Processes common plotting options in a common interface.
 
     Parameters
@@ -94,29 +105,31 @@ def init_plotting_opts(f_hndl=None, lgnd_loc=None, sig_bnd=1, time_vec=None,
     """
     opts = {}
 
-    opts['f_hndl'] = f_hndl
-    opts['lgnd_loc'] = lgnd_loc
+    opts["f_hndl"] = f_hndl
+    opts["lgnd_loc"] = lgnd_loc
 
-    opts['sig_bnd'] = sig_bnd
-    opts['time_vec'] = time_vec
-    opts['true_states'] = true_states
-    opts['rng'] = rng
-    opts['meas_inds'] = meas_inds
+    opts["sig_bnd"] = sig_bnd
+    opts["time_vec"] = time_vec
+    opts["true_states"] = true_states
+    opts["rng"] = rng
+    opts["meas_inds"] = meas_inds
 
-    opts['marker'] = marker
+    opts["marker"] = marker
 
-    opts['ttl_fontsize'] = ttl_fontsize
-    opts['ttl_fontstyle'] = ttl_fontstyle
-    opts['ttl_fontfamily'] = ttl_fontfamily
+    opts["ttl_fontsize"] = ttl_fontsize
+    opts["ttl_fontstyle"] = ttl_fontstyle
+    opts["ttl_fontfamily"] = ttl_fontfamily
 
-    opts['ax_fontsize'] = ax_fontsize
-    opts['ax_fontstyle'] = ax_fontstyle
-    opts['ax_fontfamily'] = ax_fontfamily
+    opts["ax_fontsize"] = ax_fontsize
+    opts["ax_fontstyle"] = ax_fontstyle
+    opts["ax_fontfamily"] = ax_fontfamily
 
     return opts
 
 
-def set_title_label(fig, ax_num, opts, ttl=None, x_lbl=None, y_lbl=None):
+def set_title_label(
+    fig, ax_num, opts, ttl=None, x_lbl=None, y_lbl=None, use_local=False
+):
     """Sets the figure/window title, and axis labels with the given options.
 
     Parameters
@@ -136,29 +149,49 @@ def set_title_label(fig, ax_num, opts, ttl=None, x_lbl=None, y_lbl=None):
     y_lbl : string, optional
         Label for the y-axis. This is set to the proper size, family, and
         style. The default is None.
+    use_local : bool, optional
+        Flag indicating if the local title or suptitle should be set. The
+        default is False.
 
     Returns
     -------
     None.
     """
     if ttl is not None:
-        fig.suptitle(ttl, fontsize=opts['ttl_fontsize'],
-                     fontstyle=opts['ttl_fontstyle'],
-                     fontfamily=opts['ttl_fontfamily'])
-        if fig.canvas.manager is not None:
-            fig.canvas.manager.set_window_title(ttl)
+        if use_local:
+            fig.axes[ax_num].set_title(
+                ttl,
+                fontsize=opts["ttl_fontsize"],
+                fontstyle=opts["ttl_fontstyle"],
+                fontfamily=opts["ttl_fontfamily"],
+            )
+        else:
+            fig.suptitle(
+                ttl,
+                fontsize=opts["ttl_fontsize"],
+                fontstyle=opts["ttl_fontstyle"],
+                fontfamily=opts["ttl_fontfamily"],
+            )
+            if fig.canvas.manager is not None:
+                fig.canvas.manager.set_window_title(ttl)
 
     if x_lbl is not None:
-        fig.axes[ax_num].set_xlabel(x_lbl, fontsize=opts['ax_fontsize'],
-                                    fontstyle=opts['ax_fontstyle'],
-                                    fontfamily=opts['ax_fontfamily'])
+        fig.axes[ax_num].set_xlabel(
+            x_lbl,
+            fontsize=opts["ax_fontsize"],
+            fontstyle=opts["ax_fontstyle"],
+            fontfamily=opts["ax_fontfamily"],
+        )
     if y_lbl is not None:
-        fig.axes[ax_num].set_ylabel(y_lbl, fontsize=opts['ax_fontsize'],
-                                    fontstyle=opts['ax_fontstyle'],
-                                    fontfamily=opts['ax_fontfamily'])
+        fig.axes[ax_num].set_ylabel(
+            y_lbl,
+            fontsize=opts["ax_fontsize"],
+            fontstyle=opts["ax_fontstyle"],
+            fontfamily=opts["ax_fontfamily"],
+        )
 
 
-def get_cmap(n, name='Dark2'):
+def get_cmap(n, name="Dark2"):
     """Returns a function that generates a color map.
 
     Returns a function thata maps each index in 0, 1, ..., n-1 to a distinct

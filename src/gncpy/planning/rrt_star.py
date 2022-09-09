@@ -80,7 +80,7 @@ class LQRRRTStar:
         Each row describes an obstacle; x pos, y pos, (z pos), radius.
     P : (2 or 3) x (2 or 3) x Nobs numpy array
         States of each obstacle for collision checking.
-    lqr : :class:`gncpy.control.LQR`
+    planner : :class:`gncpy.control.LQR`
         Planner class instance for predicting paths.
     S : N x N numpy array
         Solution to the discrete time algebraic riccatti equation.
@@ -88,14 +88,14 @@ class LQRRRTStar:
 
     def __init__(
         self,
-        lqr=None,
+        planner=None,
         goal_sample_rate=10,
         max_iter=300,
         connect_circle_dist=2,
         step_size=1,
         expand_dis=1,
         rng=None,
-        sampling_fun=None
+        sampling_fun=None,
     ):
 
         if rng is None:
@@ -124,19 +124,30 @@ class LQRRRTStar:
         self.P = np.zeros((self.numPos, self.numPos, self.Nobs))
 
         # setup LQR planner
-        self.lqr = lqr
+        self.planner = planner
         self.S = np.array([[]])
+        self.planner_args = {}
+
+        # plotting helpers
+        self._fig = None
+        self._plt_inds = None
+        self._show_planner = False
+        self._frame_list = []
+        self._fig_h = None
+        self._fig_w = None
+        self._plt_opts = gplot.init_plotting_opts()
 
     @property
     def numPos(self):
         return len(self.pos_inds)
 
-    def set_control_model(self, lqr, pos_inds):
-        if not isinstance(lqr, gcontrol.LQR):
+    def set_control_model(self, planner, pos_inds, controller_args=None):
+        if not isinstance(planner, gcontrol.LQR):
             raise TypeError("Must specify an LQR instance")
-        self.lqr = lqr
-        # self.lqr.time_horizon = float("inf")  # must generate trajecotries to end state
+        self.planner = planner
         self.pos_inds = pos_inds
+        if controller_args is not None:
+            self.planner_args = controller_args
 
     def set_environment(self, search_area=None, obstacles=None):
         if search_area is not None:
@@ -169,6 +180,47 @@ class LQRRRTStar:
 
         return x, y, z
 
+    def draw_obstacles(self, ax):
+        for obs in self.obstacle_list:
+            if self.numPos == 2:
+                c = Circle(obs[:2], radius=obs[-1], color="k", zorder=1000)
+                self._fig.axes[ax].add_patch(c)
+
+            elif self.numPos == 3:
+                self._fig.axes[ax].plot_surface(
+                    *self._make_sphere(*obs), rstride=3, cstride=3, color="k"
+                )
+
+    def draw_start(self, start, ax):
+        self._fig.axes[ax].scatter(
+            *start.ravel()[self._plt_inds], color="g", marker="o", zorder=1000,
+        )
+
+    def save_frame(self):
+        plt.pause(0.005)
+        with io.BytesIO() as buff:
+            self._fig.savefig(buff, format="raw")
+            buff.seek(0)
+            img = np.frombuffer(buff.getvalue(), dtype=np.uint8).reshape(
+                (self._fig_h, self._fig_w, -1)
+            )
+        self._frame_list.append(Image.fromarray(img))
+
+    def reset_controller_plot(self):
+        self._fig.axes[1].clear()
+
+        self._fig.axes[1].set_aspect("equal", adjustable="box")
+        self._fig.axes[1].set_xlim((self.min_rand[0], self.max_rand[0]))
+        self._fig.axes[1].set_ylim((self.min_rand[1], self.max_rand[1]))
+
+        gplot.set_title_label(
+            self._fig, 1, self._plt_opts, x_lbl="x pos", use_local=True,
+        )
+
+        self.draw_obstacles(1)
+
+        plt.pause(0.05)
+
     def plan(
         self,
         cur_time,
@@ -185,6 +237,7 @@ class LQRRRTStar:
         ttl=None,
         fig=None,
         plt_inds=None,
+        show_planner=True,
     ):
         if state_args is None:
             state_args = ()
@@ -193,69 +246,86 @@ class LQRRRTStar:
         if plt_inds is None:
             plt_inds = [0, 1]
 
+        self._plt_inds = plt_inds
+        self._fig = fig
+
         self.start = Node(cur_state.reshape((-1, 1)))
         self.end = Node(end_state.reshape((-1, 1)))
         self.node_list = [
             deepcopy(self.start),
         ]
 
-        frame_list = []
+        self._frame_list = []
+        self._show_planner = False
         if show_animation:
-            if fig is None:
-                fig = plt.figure()
+            self._show_planner = show_planner and isinstance(
+                self.planner, gcontrol.ELQR
+            )
+            if self._show_planner:
+                n_plts = 2
+            else:
+                n_plts = 1
+
+            if self._fig is None:
+                self._fig = plt.figure()
                 if self.numPos == 2:
-                    fig.add_subplot(1, 1, 1)
-                    fig.axes[0].set_aspect("equal", adjustable="box")
-                    fig.axes[0].set_xlim((self.min_rand[0], self.max_rand[0]))
-                    fig.axes[0].set_ylim((self.min_rand[1], self.max_rand[1]))
+                    for ii in range(n_plts):
+                        self._fig.add_subplot(1, n_plts, ii + 1)
+                    self._fig.axes[0].set_aspect("equal", adjustable="box")
+                    self._fig.axes[0].set_xlim((self.min_rand[0], self.max_rand[0]))
+                    self._fig.axes[0].set_ylim((self.min_rand[1], self.max_rand[1]))
                 elif self.numPos == 3:
-                    fig.add_subplot(1, 1, 1, projection="3d")
-                    fig.axes[0].set_xlim((self.min_rand[0], self.max_rand[0]))
-                    fig.axes[0].set_ylim((self.min_rand[1], self.max_rand[1]))
-                    fig.axes[0].set_zlim((self.min_rand[2], self.max_rand[2]))
+                    self._fig.add_subplot(1, 1, 1, projection="3d")
+                    self._fig.axes[0].set_xlim((self.min_rand[0], self.max_rand[0]))
+                    self._fig.axes[0].set_ylim((self.min_rand[1], self.max_rand[1]))
+                    self._fig.axes[0].set_zlim((self.min_rand[2], self.max_rand[2]))
 
                 if plt_opts is None:
-                    plt_opts = gplot.init_plotting_opts(f_hndl=fig)
+                    self._plt_opts = gplot.init_plotting_opts(f_hndl=self._fig)
                 if ttl is None:
                     ttl = "LQR-RRT*"
-                gplot.set_title_label(fig, 0, plt_opts, ttl=ttl)
-
-                fig.axes[0].scatter(
-                    *self.start.sv[plt_inds], color="g", marker="o", zorder=1000,
+                gplot.set_title_label(
+                    self._fig, 0, self._plt_opts, ttl=ttl, x_lbl="x pos", y_lbl="y pos"
                 )
 
-                for obs in self.obstacle_list:
-                    if self.numPos == 2:
-                        c = Circle(obs[:2], radius=obs[-1], color="k", zorder=1000)
-                        fig.axes[0].add_patch(c)
+                self.draw_start(self.start.sv, 0)
+                self.draw_obstacles(0)
 
-                    elif self.numPos == 3:
-                        fig.axes[0].plot_surface(
-                            *self._make_sphere(*obs), rstride=3, cstride=3, color="k"
-                        )
+                if self._show_planner:
+                    self.reset_controller_plot()
+                    gplot.set_title_label(
+                        self._fig, 0, self._plt_opts, ttl="Tree", use_local=True
+                    )
 
-            fig.axes[0].scatter(
+            self._fig.axes[0].scatter(
                 *self.end.sv[plt_inds], color="r", marker="x", zorder=1000,
             )
-            fig.tight_layout()
+
+            if self._show_planner:
+                self.planner_args.update(
+                    {
+                        "show_animation": True,
+                        "save_animation": save_animation,
+                        "ax_num": 1,
+                        "fig": self._fig,
+                        "plt_inds": plt_inds,
+                        "plt_opts": self._plt_opts,
+                    }
+                )
+
+            self._fig.tight_layout()
             plt.pause(0.1)
 
             # for stopping simulation with the esc key.
-            fig.canvas.mpl_connect(
+            self._fig.canvas.mpl_connect(
                 "key_release_event",
                 lambda event: [exit(0) if event.key == "escape" else None],
             )
-            fig_w, fig_h = fig.canvas.get_width_height()
+            self._fig_w, self._fig_h = self._fig.canvas.get_width_height()
 
             # save first frame of animation
             if save_animation:
-                with io.BytesIO() as buff:
-                    fig.savefig(buff, format="raw")
-                    buff.seek(0)
-                    img = np.frombuffer(buff.getvalue(), dtype=np.uint8).reshape(
-                        (fig_h, fig_w, -1)
-                    )
-                frame_list.append(Image.fromarray(img))
+                self.save_frame()
 
         if disp:
             print("Starting LQR-RRT* Planning...")
@@ -273,7 +343,8 @@ class LQRRRTStar:
                 cur_time, rnd, state_args, ctrl_args
             )
             new_node = self.steer(
-                cur_time, self.node_list[nearest_ind], rnd, state_args, ctrl_args
+                cur_time, self.node_list[nearest_ind], rnd, state_args, ctrl_args, show_controller=True,
+                planner_ttl="Searching",
             )
             if new_node is None:
                 continue
@@ -288,7 +359,7 @@ class LQRRRTStar:
 
                     if show_animation and new_node is not None:
                         if self.numPos == 2:
-                            fig.axes[0].plot(
+                            self._fig.axes[0].plot(
                                 new_node.path[plt_inds[0], :],
                                 new_node.path[plt_inds[1], :],
                                 color=(0.5, 0.5, 0.5),
@@ -296,7 +367,7 @@ class LQRRRTStar:
                                 zorder=-10,
                             )
                         elif self.numPos == 3:
-                            fig.axes[0].plot(
+                            self._fig.axes[0].plot(
                                 new_node.path[plt_inds[0], :],
                                 new_node.path[plt_inds[1], :],
                                 new_node.path[plt_inds[2], :],
@@ -305,15 +376,9 @@ class LQRRRTStar:
                                 zorder=-10,
                             )
 
-                        plt.pause(0.001)
+                        plt.pause(0.005)
                         if save_animation:
-                            with io.BytesIO() as buff:
-                                fig.savefig(buff, format="raw")
-                                buff.seek(0)
-                                img = np.frombuffer(buff.getvalue(), dtype=np.uint8).reshape(
-                                    (fig_h, fig_w, -1)
-                                )
-                            frame_list.append(Image.fromarray(img))
+                            self.save_frame()
 
             if (not search_until_max_iter) and new_node:
                 last_index = self.search_best_goal_node()
@@ -321,11 +386,11 @@ class LQRRRTStar:
                     traj, u_traj = self.generate_final_course(last_index)
                     if show_animation:
                         if self.numPos == 2:
-                            fig.axes[0].plot(
+                            self._fig.axes[0].plot(
                                 traj[plt_inds[0], :], traj[plt_inds[1], :], color="g",
                             )
                         elif self.numPos == 3:
-                            fig.axes[0].plot(
+                            self._fig.axes[0].plot(
                                 traj[plt_inds[0], :],
                                 traj[plt_inds[1], :],
                                 traj[plt_inds[2], :],
@@ -333,14 +398,9 @@ class LQRRRTStar:
                             )
                         plt.pause(0.01)
                         if save_animation:
-                            with io.BytesIO() as buff:
-                                fig.savefig(buff, format="raw")
-                                buff.seek(0)
-                                img = np.frombuffer(
-                                    buff.getvalue(), dtype=np.uint8
-                                ).reshape((fig_h, fig_w, -1))
-                            frame_list.append(Image.fromarray(img))
-                    details = (u_traj, fig, frame_list)
+                            self.save_frame()
+
+                    details = (u_traj, self._fig, self._frame_list)
                     return (traj, *details) if provide_details else traj
 
         if disp:
@@ -351,11 +411,11 @@ class LQRRRTStar:
             traj, u_traj = self.generate_final_course(last_index)
             if show_animation:
                 if self.numPos == 2:
-                    fig.axes[0].plot(
+                    self._fig.axes[0].plot(
                         traj[plt_inds[0], :], traj[plt_inds[1], :], color="g",
                     )
                 elif self.numPos == 3:
-                    fig.axes[0].plot(
+                    self._fig.axes[0].plot(
                         traj[plt_inds[0], :],
                         traj[plt_inds[1], :],
                         traj[plt_inds[2], :],
@@ -363,20 +423,14 @@ class LQRRRTStar:
                     )
                 plt.pause(0.01)
                 if save_animation:
-                    with io.BytesIO() as buff:
-                        fig.savefig(buff, format="raw")
-                        buff.seek(0)
-                        img = np.frombuffer(buff.getvalue(), dtype=np.uint8).reshape(
-                            (fig_h, fig_w, -1)
-                        )
-                    frame_list.append(Image.fromarray(img))
+                    self.save_frame()
         else:
             traj = np.array([[]])
             u_traj = np.array([[]])
             if disp:
                 print("\tCannot find path!!")  # Undo Print
 
-        details = (u_traj, fig, frame_list)
+        details = (u_traj, self._fig, self._frame_list)
         return (traj, *details) if provide_details else traj
 
     def generate_final_course(self, goal_index):  # Generate Final Course
@@ -425,7 +479,15 @@ class LQRRRTStar:
     ):  # Rewires the Nodes
         for i in near_inds:
             near_node = self.node_list[i]
-            edge_node = self.steer(cur_time, new_node, near_node, state_args, ctrl_args)
+            edge_node = self.steer(
+                cur_time,
+                new_node,
+                near_node,
+                state_args,
+                ctrl_args,
+                show_controller=True,
+                planner_ttl="Rewiring"
+            )
             if edge_node is None:
                 continue
             edge_node.cost = self.calc_new_cost(
@@ -455,47 +517,42 @@ class LQRRRTStar:
 
         if not near_inds:
             return None
-        costs = []
-        for i in near_inds:
+        costs = np.inf * np.ones(len(near_inds))
+        for kk, i in enumerate(near_inds):
             near_node = self.node_list[i]
             t_node = self.steer(cur_time, near_node, new_node, state_args, ctrl_args)
             if t_node and self.check_collision(t_node):
-                costs.append(
-                    self.calc_new_cost(
-                        cur_time, near_node, new_node, state_args, ctrl_args
-                    )
+                costs[kk] = self.calc_new_cost(
+                    cur_time, near_node, new_node, state_args, ctrl_args
                 )
-            else:
-                costs.append(float("inf"))
-        min_cost = min(costs)
 
-        if min_cost == float("inf"):
-            NoPathInf_str = "No Path - Infinite Cost"
-            # print(NoPathInf_str);#Undo Print
+        min_ind = np.argmin(costs)
+        min_cost = costs[min_ind]
 
+        if np.isinf(min_cost):
+            print("\t\tNo Path - Infinite Cost")
             return None
-        min_ind = near_inds[costs.index(min_cost)]
+
         new_node = self.steer(
-            cur_time, self.node_list[min_ind], new_node, state_args, ctrl_args
+            cur_time,
+            self.node_list[near_inds[min_ind]],
+            new_node,
+            state_args,
+            ctrl_args,
+            show_controller=True,
+            planner_ttl="Generating Node",
         )
-        new_node.parent = self.node_list[min_ind]
+        new_node.parent = self.node_list[near_inds[min_ind]]
         new_node.cost = min_cost
         return new_node
 
     def calc_new_cost(
         self, cur_time, from_node, to_node, state_args, ctrl_args
     ):  # Calculates cost of node
-        x_sim, u_sim = self.lqr.calculate_control(
-            cur_time,
-            from_node.sv.reshape((-1, 1)),
-            end_state=to_node.sv.reshape((-1, 1)),
-            provide_details=True,
-            state_args=state_args,
-            ctrl_args=ctrl_args,
-        )[2:4]
-        x_sim = x_sim.T
-        u_sim = u_sim.T
-        x_sim_sample, u_sim_sample, course_lens = self.sample_path(x_sim, u_sim)
+        x_sim, u_sim = self.call_planner(
+            cur_time, from_node.sv, to_node.sv, state_args, ctrl_args
+        )
+        x_sim_sample, u_sim_sample, course_lens = self.sample_path(x_sim.T, u_sim.T)
         if len(x_sim_sample) == 0:
             return float("inf")
         return from_node.cost + sum(course_lens)
@@ -531,7 +588,9 @@ class LQRRRTStar:
 
     def get_random_node(self):  # Find a random node from the state space
         if self.rng.integers(0, high=100) > self.goal_sample_rate:
-            rand_x = self.sampling_fun(self.rng, self.pos_inds, self.min_rand, self.max_rand)
+            rand_x = self.sampling_fun(
+                self.rng, self.pos_inds, self.min_rand, self.max_rand
+            )
             rnd = Node(rand_x)
         else:  # goal point sampling
             rnd = Node(self.end.sv.reshape((-1, 1)))
@@ -540,34 +599,78 @@ class LQRRRTStar:
     def get_nearest_node_index(
         self, cur_time, rnd_node, state_args, ctrl_args
     ):  # Get nearest node index in tree
-        self.S = self.lqr.solve_dare(
+        self.S = self.planner.solve_dare(
             cur_time,
             rnd_node.sv.reshape((-1, 1)),
             state_args=state_args,
             ctrl_args=ctrl_args,
         )[0]
-        # dlist=float('inf')*np.ones((len(self.node_list),1));
-        dlist = [
-            np.matmul(
-                np.matmul(self.dx(node.sv, rnd_node.sv).T, self.S),
-                self.dx(node.sv, rnd_node.sv),
-            )
-            for node in self.node_list
-        ]
-        minind = dlist.index(min(dlist))
-        return minind
+        dlist = np.array(
+            [
+                (
+                    self.dx(node.sv, rnd_node.sv).T
+                    @ self.S
+                    @ self.dx(node.sv, rnd_node.sv)
+                ).item()
+                for node in self.node_list
+            ]
+        )
+        return np.argmin(dlist)
 
-    def steer(
-        self, cur_time, from_node, to_node, state_args, ctrl_args,
-    ):  # Obtain trajectory between from_node to to_node using LQR and save trajectory
-        x_sim, u_sim = self.lqr.calculate_control(
+    def call_planner(
+        self, cur_time, from_state, to_state, state_args, ctrl_args, **kwargs
+    ):
+        extra_args = dict()
+        extra_args.update(**self.planner_args)
+        extra_args.update(**kwargs)
+
+        if self._show_planner and extra_args["show_animation"]:
+            self.reset_controller_plot()
+            self.draw_start(from_state, 1)
+            plt.pause(0.01)
+
+            _, _, x_traj, u_traj, _, f_lst = self.planner.calculate_control(
+                cur_time,
+                from_state.reshape((-1, 1)),
+                end_state=to_state.reshape((-1, 1)),
+                provide_details=True,
+                state_args=state_args,
+                ctrl_args=ctrl_args,
+                **extra_args,
+            )
+
+            self._frame_list.extend(f_lst)
+            return x_traj, u_traj
+
+        return self.planner.calculate_control(
             cur_time,
-            from_node.sv.reshape((-1, 1)),
-            end_state=to_node.sv.reshape((-1, 1)),
+            from_state.reshape((-1, 1)),
+            end_state=to_state.reshape((-1, 1)),
             provide_details=True,
             state_args=state_args,
             ctrl_args=ctrl_args,
+            **extra_args,
         )[2:4]
+
+    def steer(
+        self,
+        cur_time,
+        from_node,
+        to_node,
+        state_args,
+        ctrl_args,
+        show_controller=False,
+        planner_ttl=None,
+    ):  # Obtain trajectory between from_node to to_node using LQR and save trajectory
+        self.planner_args["show_animation"] = self._show_planner and show_controller
+        if self.planner_args["show_animation"]:
+            self.planner_args["ttl"] = (
+                planner_ttl if planner_ttl is not None else "Controller"
+            )
+
+        x_sim, u_sim = self.call_planner(
+            cur_time, from_node.sv, to_node.sv, state_args, ctrl_args
+        )
 
         x_sim_sample, u_sim_sample, course_lens = self.sample_path(x_sim.T, u_sim.T)
         if len(x_sim_sample) == 0:
@@ -607,3 +710,43 @@ class LQRRRTStar:
             return [], [], []
         clen = np.einsum("ij,ij->i", (diff_x_sim.T @ self.S), diff_x_sim.T)
         return x_sim_sample, u_sim_sample, clen
+
+
+class ExtendedLQRRRTStar(LQRRRTStar):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._inv_state_args = None
+        self._inv_ctrl_args = None
+        self._cost_args = None
+
+    def call_planner(
+        self, cur_time, from_state, to_state, state_args, ctrl_args, **kwargs
+    ):
+        extra_args = dict(disp=False)
+        extra_args.update(**self.planner_args)
+        extra_args.update(**kwargs)
+        extra_args.update(
+            dict(
+                cost_args=self._cost_args,
+                inv_state_args=self._inv_state_args,
+                inv_ctrl_args=self._inv_ctrl_args,
+            )
+        )
+        return super().call_planner(
+            cur_time, from_state, to_state, state_args, ctrl_args, **extra_args
+        )
+
+    def plan(
+        self,
+        cur_time,
+        cur_state,
+        end_state,
+        inv_state_args=None,
+        inv_ctrl_args=None,
+        cost_args=None,
+        **kwargs
+    ):
+        self._inv_state_args = inv_state_args
+        self._inv_ctrl_args = inv_ctrl_args
+        self._cost_args = cost_args
+        return super().plan(cur_time, cur_state, end_state, **kwargs)
