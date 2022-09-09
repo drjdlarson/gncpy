@@ -226,7 +226,9 @@ class LQRRRTStar:
         cur_time,
         cur_state,
         end_state,
-        search_until_max_iter=False,
+        use_first_traj=True,
+        use_convergence=False,
+        rtol=1e-3,
         state_args=None,
         ctrl_args=None,
         provide_details=False,
@@ -245,6 +247,9 @@ class LQRRRTStar:
             ctrl_args = ()
         if plt_inds is None:
             plt_inds = [0, 1]
+
+        if use_convergence:
+            use_first_traj = False
 
         self._plt_inds = plt_inds
         self._fig = fig
@@ -330,12 +335,13 @@ class LQRRRTStar:
         if disp:
             print("Starting LQR-RRT* Planning...")
 
+        last_cost = float("inf")
         for i in range(self.max_iter):
             rnd = self.get_random_node()
             if disp:
                 print(
-                    "\tIter: {:4d}, number of nodes: {:6d}".format(
-                        i, len(self.node_list)
+                    "\tIter: {:4d}, number of nodes: {:5d}, last cost: {:10.4f}".format(
+                        i, len(self.node_list), last_cost
                     )
                 )
 
@@ -380,28 +386,32 @@ class LQRRRTStar:
                         if save_animation:
                             self.save_frame()
 
-            if (not search_until_max_iter) and new_node:
+            if new_node:
                 last_index = self.search_best_goal_node()
                 if last_index:
                     traj, u_traj = self.generate_final_course(last_index)
-                    if show_animation:
-                        if self.numPos == 2:
-                            self._fig.axes[0].plot(
-                                traj[plt_inds[0], :], traj[plt_inds[1], :], color="g",
-                            )
-                        elif self.numPos == 3:
-                            self._fig.axes[0].plot(
-                                traj[plt_inds[0], :],
-                                traj[plt_inds[1], :],
-                                traj[plt_inds[2], :],
-                                color="g",
-                            )
-                        plt.pause(0.01)
-                        if save_animation:
-                            self.save_frame()
+                    cost = self.node_list[last_index].cost
+                    converged = use_convergence and np.abs(np.abs(last_cost - cost) / cost) < rtol
+                    last_cost = cost
+                    if use_first_traj or converged:
+                        if show_animation:
+                            if self.numPos == 2:
+                                self._fig.axes[0].plot(
+                                    traj[plt_inds[0], :], traj[plt_inds[1], :], color="g",
+                                )
+                            elif self.numPos == 3:
+                                self._fig.axes[0].plot(
+                                    traj[plt_inds[0], :],
+                                    traj[plt_inds[1], :],
+                                    traj[plt_inds[2], :],
+                                    color="g",
+                                )
+                            plt.pause(0.01)
+                            if save_animation:
+                                self.save_frame()
 
-                    details = (u_traj, self._fig, self._frame_list)
-                    return (traj, *details) if provide_details else traj
+                        details = (u_traj, self._fig, self._frame_list)
+                        return (traj, *details) if provide_details else traj
 
         if disp:
             print("\tReached Max Iteration!!")
@@ -662,8 +672,9 @@ class LQRRRTStar:
         show_controller=False,
         planner_ttl=None,
     ):  # Obtain trajectory between from_node to to_node using LQR and save trajectory
-        self.planner_args["show_animation"] = self._show_planner and show_controller
-        if self.planner_args["show_animation"]:
+        if self._show_planner:
+            self.planner_args["show_animation"] = show_controller
+        if self.planner_args.get("show_animation", False):
             self.planner_args["ttl"] = (
                 planner_ttl if planner_ttl is not None else "Controller"
             )
