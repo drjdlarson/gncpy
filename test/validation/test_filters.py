@@ -2732,6 +2732,120 @@ def test_EKF_GSM_gsm():
     ), "bounding failed"
 
 
+def test_IMM_dynObj():
+    m_noise = 0.02
+    p_noise = 0.2
+
+    dt = 0.01
+    t0, t1 = 0, 10 + dt
+
+    dyn_obj1 = gdyn.CoordinatedTurnKnown(turn_rate=0)
+    dyn_obj2 = gdyn.CoordinatedTurnKnown(turn_rate=5 * np.pi / 180)
+
+    rng = rnd.default_rng(global_seed)
+
+    in_filt1 = gfilts.KalmanFilter()
+    in_filt1.set_state_model(dynObj=dyn_obj1)
+    m_mat = np.array([[1, 0, 0, 0], [0, 1, 0, 0]])
+    in_filt1.set_measurement_model(meas_mat=m_mat)
+    in_filt1.cov = 0.25 * np.eye(4)
+    gamma = np.array([0, 0, 1, 1]).reshape((4, 1))
+    in_filt1.proc_noise = gamma @ np.array([[p_noise ** 2]]) @ gamma.T
+    in_filt1.meas_noise = m_noise ** 2 * np.eye(2)
+
+    in_filt2 = gfilts.KalmanFilter()
+    in_filt2.set_state_model(dynObj=dyn_obj2)
+    m_mat = np.array([[1, 0, 0, 0], [0, 1, 0, 0]])
+    in_filt2.set_measurement_model(meas_mat=m_mat)
+    in_filt2.cov = 0.25 * np.eye(4)
+    gamma = np.array([0, 0, 1, 1]).reshape((4, 1))
+    in_filt2.proc_noise = gamma @ np.array([[p_noise ** 2]]) @ gamma.T
+    in_filt2.meas_noise = m_noise ** 2 * np.eye(2)
+
+    vx0 = 2
+    vy0 = 1
+
+    filt_list = [in_filt1, in_filt2]
+
+    model_trans = np.array([[0.9, 0.1], [0.1, 0.9]])
+
+    init_means = np.array([[0, 0, vx0, vy0], [0, 0, vx0, vy0]])
+    init_covs = np.array([in_filt1.cov, in_filt2.cov])
+
+    filt = gfilts.InteractingMultipleModel()
+    filt.set_models(filt_list, model_trans, init_means, init_covs)
+
+    time = np.arange(t0, t1, dt)
+    states = np.nan * np.ones((time.size, 4))
+    stds = np.nan * np.ones(states.shape)
+    pre_stds = stds.copy()
+    states[0, :] = np.array([0, 0, vx0, vy0])
+    stds[0, :] = np.sqrt(np.diag(filt.cov))
+    pre_stds[0, :] = stds[0, :]
+
+    t_states = states.copy()
+
+    state_mat1 = dyn_obj1.get_state_mat(0, dt)
+    state_mat2 = dyn_obj2.get_state_mat(0, dt)
+    for kk, t in enumerate(time[:-1]):
+        states[kk + 1, :] = filt.predict(
+            t, states[kk, :].reshape((4, 1)), state_mat_args=(dt,)
+        ).flatten()
+        if t < 5:
+            t_states[kk + 1, :] = (
+                state_mat1 @ t_states[kk, :].reshape((4, 1))
+            ).flatten()
+        else:
+            t_states[kk + 1, :] = (
+                state_mat2 @ t_states[kk, :].reshape((4, 1))
+            ).flatten()
+        pre_stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
+
+        n_state = m_mat @ (
+            t_states[kk + 1, :].reshape((4, 1))
+            + gamma * p_noise * rng.standard_normal(1)
+        )
+        meas = n_state + m_noise * rng.standard_normal(n_state.size).reshape(
+            n_state.shape
+        )
+
+        states[kk + 1, :] = filt.correct(t, meas, states[kk + 1, :].reshape((4, 1)))[
+            0
+        ].flatten()
+        stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
+    errs = states - t_states
+
+    # plot states
+    if debug_figs:
+        fig = plt.figure()
+        for ii, s in enumerate(gdyn.DoubleIntegrator().state_names):
+            fig.add_subplot(4, 1, ii + 1)
+            fig.axes[ii].plot(time, states[:, ii], color="b")
+            fig.axes[ii].plot(time, t_states[:, ii], color="r")
+            fig.axes[ii].grid(True)
+            fig.axes[ii].set_ylabel(s)
+        fig.axes[-1].set_xlabel("time (s)")
+        fig.suptitle("States (mat)")
+        fig.tight_layout()
+
+        # plot stds
+        fig = plt.figure()
+        for ii, s in enumerate(gdyn.DoubleIntegrator().state_names):
+            fig.add_subplot(4, 1, ii + 1)
+            fig.axes[ii].plot(time, stds[:, ii], color="b")
+            fig.axes[ii].plot(time, pre_stds[:, ii], color="r")
+            fig.axes[ii].grid(True)
+            fig.axes[ii].set_ylabel(s + " std")
+        fig.axes[-1].set_xlabel("time (s)")
+        fig.suptitle("Filter standard deviations (mat)")
+        fig.tight_layout()
+    sig_num = 1
+    bounding = np.sum(np.abs(errs) < sig_num * stds, axis=0) / time.size
+    assert all(
+        bounding > (stats.norm.sf(-sig_num) - stats.norm.sf(sig_num))
+    ), "bounding failed"
+
+
 def test_IMM_mat():  # noqa
     m_noise = 0.02
     p_noise = 0.2
@@ -2755,19 +2869,19 @@ def test_IMM_mat():  # noqa
 
     in_filt1 = gfilts.KalmanFilter()
     in_filt1.set_state_model(state_mat=state_mat1)
-    m_mat = np.array([[1, 0, 0, 0], [0, 1, 0, 0]])
+    m_mat = np.array([[1, 0, 0, 0, 0], [0, 1, 0, 0, 0]])
     in_filt1.set_measurement_model(meas_mat=m_mat)
-    in_filt1.cov = 0.25 * np.eye(4)
-    gamma = np.array([0, 0, 1, 1]).reshape((4, 1))
+    in_filt1.cov = 0.25 * np.eye(5)
+    gamma = np.array([0, 0, 1, 1, 0]).reshape((4, 1))
     in_filt1.proc_noise = gamma @ np.array([[p_noise ** 2]]) @ gamma.T
     in_filt1.meas_noise = m_noise ** 2 * np.eye(2)
 
     in_filt2 = gfilts.KalmanFilter()
     in_filt2.set_state_model(state_mat=state_mat2)
-    m_mat = np.array([[1, 0, 0, 0], [0, 1, 0, 0]])
+    m_mat = np.array([[1, 0, 0, 0, 0], [0, 1, 0, 0, 0]])
     in_filt2.set_measurement_model(meas_mat=m_mat)
-    in_filt2.cov = 0.25 * np.eye(4)
-    gamma = np.array([0, 0, 1, 1]).reshape((4, 1))
+    in_filt2.cov = 0.25 * np.eye(5)
+    gamma = np.array([0, 0, 1, 1, 0]).reshape((4, 1))
     in_filt2.proc_noise = gamma @ np.array([[p_noise ** 2]]) @ gamma.T
     in_filt2.meas_noise = m_noise ** 2 * np.eye(2)
 
@@ -2778,7 +2892,7 @@ def test_IMM_mat():  # noqa
 
     model_trans = np.array([[0.9, 0.1], [0.1, 0.9]])
 
-    init_means = np.array([[0, 0, vx0, vy0], [0, 0, vx0, vy0]])
+    init_means = np.array([[0, 0, vx0, vy0, 0], [0, 0, vx0, vy0, 0]])
     init_covs = np.array([in_filt1.cov, in_filt2.cov])
 
     filt = gfilts.InteractingMultipleModel()
@@ -2890,10 +3004,12 @@ if __name__ == "__main__":
 
     # test_QKF_GSM_bootstrap()
     # test_QKF_GSM_gsm()
-    test_QKF_GSM_gsm_proc_est()
+    # test_QKF_GSM_gsm_proc_est()
     # test_SQKF_GSM_bootstrap()
     # test_UKF_GSM_bootstrap()
     # test_EKF_GSM_gsm()
+
+    test_IMM_dynObj()
 
     end = timer()
     print("{:.2f} s".format(end - start))
