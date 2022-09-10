@@ -410,7 +410,7 @@ class LQRRRTStar:
                             if save_animation:
                                 self.save_frame()
 
-                        details = (u_traj, self._fig, self._frame_list)
+                        details = (cost, u_traj, self._fig, self._frame_list)
                         return (traj, *details) if provide_details else traj
 
         if disp:
@@ -419,6 +419,7 @@ class LQRRRTStar:
         last_index = self.search_best_goal_node()
         if last_index:
             traj, u_traj = self.generate_final_course(last_index)
+            cost = self.node_list[last_index].cost
             if show_animation:
                 if self.numPos == 2:
                     self._fig.axes[0].plot(
@@ -437,10 +438,11 @@ class LQRRRTStar:
         else:
             traj = np.array([[]])
             u_traj = np.array([[]])
+            cost = float("inf")
             if disp:
                 print("\tCannot find path!!")  # Undo Print
 
-        details = (u_traj, self._fig, self._frame_list)
+        details = (cost, u_traj, self._fig, self._frame_list)
         return (traj, *details) if provide_details else traj
 
     def generate_final_course(self, goal_index):  # Generate Final Course

@@ -551,6 +551,8 @@ class CurvilinearMotion(NonlinearDynamicsBase):
             \dot{\psi} &= u_1
         \end{align}
 
+    See :cite:`Li2000_SurveyofManeuveringTargetTrackingDynamicModels` for
+    details.
     """
 
     __slots__ = ()
@@ -696,6 +698,11 @@ class CoordinatedTurnKnown(LinearDynamicsBase):
     to help with debugging and coding but is not strictly required by the
     dynamics.
 
+    Notes
+    -----
+    See :cite:`Li2000_SurveyofManeuveringTargetTrackingDynamicModels` and
+    :cite:`Blackman1999_DesignandAnalysisofModernTrackingSystems` for details.
+
     Attributes
     ----------
     turn_rate : float
@@ -727,6 +734,14 @@ class CoordinatedTurnKnown(LinearDynamicsBase):
         N x N numpy array
             state matrix.
         """
+        # avoid division by 0
+        if abs(self.turn_rate) < 1e-8:
+            return np.array([[1, 0, self.dt, 0, 0],
+                             [0, 1, 0, self.dt, 0],
+                             [0, 0, 1, 0, 0],
+                             [0, 0, 0, 1, 0],
+                             [0, 0, 0, 0, 1]])
+
         ta = self.turn_rate * dt
         s_ta = np.sin(ta)
         c_ta = np.cos(ta)
@@ -808,39 +823,40 @@ class CoordinatedTurnKnown(LinearDynamicsBase):
 
 
 class CoordinatedTurnUnknown(NonlinearDynamicsBase):
-    """Implements the non-linear coordinated turn with unknown turn rate model.
+    r"""Implements the non-linear coordinated turn with unknown turn rate model.
 
     Notes
     -----
-    This can use either a Wiener process or a first order Markov process model
-    for the turn rate.
+    This can use either a Wiener process (:math:`\alpha=1`) or a first order
+    Markov process model (:math:`\alpha \neq 1`) for the turn rate. This is
+    controlled by setting :attr:`.turn_rate_cor_time`. See
+    :cite:`Li2000_SurveyofManeuveringTargetTrackingDynamicModels` and
+    :cite:`Blackman1999_DesignandAnalysisofModernTrackingSystems` for details.
+
+    .. math::
+        \dot{\omega} = -\alpha w + w_{\omega}
 
     Attributes
     ----------
-    velocity : float
-        Speed the vehicle is moving at.
     turn_rate_cor_time : float
         Correlation time for the turn rate. If None then a Wiener process is used.
     """
 
-    __slots__ = ("velocity", "turn_rate_cor_time")
+    __slots__ = ("turn_rate_cor_time", )
 
     state_names = ("x pos", "y pos", "x vel", "y vel", "turn rate")
 
-    def __init__(self, velocity=10, turn_rate_cor_time=None, **kwargs):
+    def __init__(self, turn_rate_cor_time=None, **kwargs):
         """Initialize an object.
 
         Parameters
         ----------
-        velocity : float, optional
-            Speed of the vehicle. The default is 10.
         turn_rate_cor_time : float, optional
             Correlation time of the turn rate. The default is None.
         **kwargs : dict
             Additional arguments for the parent.
         """
         super().__init__(**kwargs)
-        self.velocity = velocity
         self.turn_rate_cor_time = turn_rate_cor_time
 
         self.control_model = [None] * len(self.state_names)
@@ -894,43 +910,44 @@ class CoordinatedTurnUnknown(NonlinearDynamicsBase):
         N x N numpy array
             state transition matrix.
         """
+
         x = state.ravel()
-        ta = x[4] * self.dt
+        w = x[4]
+
+        if use_continuous:
+            return np.array([[0, 0, 1, 0, 0],
+                             [0, 0, 0, 1, 0],
+                             [0, 0, 0, -w, 0],
+                             [0, 0, w, 0, 0],
+                             [0, 0, 0, 0, -self.alpha]])
+
+        # avoid division by 0
+        if abs(w) < 1e-8:
+            return np.array([[1, 0, self.dt, 0, 0],
+                             [0, 1, 0, self.dt, 0],
+                             [0, 0, 1, 0, 0],
+                             [0, 0, 0, 1, 0],
+                             [0, 0, 0, 0, self.beta]])
+
+        ta = w * self.dt
         s_ta = np.sin(ta)
         c_ta = np.cos(ta)
 
-        if use_continuous:
-            w2 = x[4] ** 2
-            return np.array(
-                [
-                    [
-                        1,
-                        0,
-                        s_ta / x[4],
-                        -(1 - c_ta) / x[4],
-                        (x[4] * self.dt * c_ta - s_ta) * x[2] / w2
-                        - (x[4] * self.dt * s_ta - 1 + c_ta) * x[3] / w2,
-                    ],
-                    [
-                        0,
-                        1,
-                        (1 - c_ta) / x[4],
-                        s_ta / x[4],
-                        (x[4] * self.dt * s_ta - 1 + c_ta) * x[2] / w2
-                        + (x[4] * self.dt * c_ta - s_ta) * x[3] / w2,
-                    ],
-                    [0, 0, c_ta, -s_ta, -self.dt * s_ta * x[2] - self.dt * c_ta * x[3]],
-                    [0, 0, s_ta, c_ta, self.dt * c_ta * x[2] - self.dt * s_ta * x[3]],
-                    [0, 0, 0, 0, self.beta],
-                ]
-            )
-
+        w2 = w ** 2
+        F04 = (w * self.dt * c_ta - s_ta) * x[2] / w2 - (
+            w * self.dt * s_ta - 1 + c_ta
+        ) * x[3] / w2
+        F14 = (w * self.dt * s_ta - 1 + c_ta) * x[2] / w2 + (
+            w * self.dt * c_ta - s_ta
+        ) * x[3] / w2
+        F24 = -self.dt * s_ta * x[2] - self.dt * c_ta * x[3]
+        F34 = self.dt * c_ta * x[2] - self.dt * s_ta * x[3]
         return np.array(
             [
-                [1, 0, s_ta / x[4], -(1 - c_ta) / x[4], 0],
-                [0, 1, (1 - c_ta) / x[4], s_ta / x[4], 0],
-                [0, 0, c_ta, -s_ta, 0],
-                [0, 0, s_ta, c_ta, 0],
+                [1, 0, s_ta / w, -(1 - c_ta) / w, F04],
+                [0, 1, (1 - c_ta) / x[4], s_ta / w, F14],
+                [0, 0, c_ta, -s_ta, F24],
+                [0, 0, s_ta, c_ta, F34],
                 [0, 0, 0, 0, self.beta],
             ]
         )
@@ -957,7 +974,7 @@ class CoordinatedTurnUnknown(NonlinearDynamicsBase):
 
         Returns
         -------
-        N x 2 numpy array
+        N x 3 numpy array
             Input matrix.
         """
         return np.array(

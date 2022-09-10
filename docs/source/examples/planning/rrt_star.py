@@ -65,7 +65,7 @@ def lin_lqrrrtstar():
     lqrRRTStar.set_control_model(lqr, pos_inds)
 
     # Run Planner
-    trajectory, u_traj, fig, frame_list = lqrRRTStar.plan(
+    trajectory, cost, u_traj, fig, frame_list = lqrRRTStar.plan(
         start_time,
         start_state,
         end_state,
@@ -165,7 +165,7 @@ def nonlin_lqrrrtstar():
     lqrRRTStar.set_control_model(lqr, pos_inds)
 
     # Run Planner
-    trajectory, u_traj, fig, frame_list = lqrRRTStar.plan(
+    trajectory, cost, u_traj, fig, frame_list = lqrRRTStar.plan(
         start_time,
         start_state,
         end_state,
@@ -313,7 +313,7 @@ def elqrrrtstar():
     elqrRRTStar.set_control_model(controller, pos_inds, controller_args=controller_args)
 
     # Run Planner
-    trajectory, u_traj, fig, frame_list = elqrRRTStar.plan(
+    trajectory, cost, u_traj, fig, frame_list = elqrRRTStar.plan(
         start_time,
         start_state,
         end_state,
