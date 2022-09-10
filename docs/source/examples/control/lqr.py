@@ -92,29 +92,16 @@ def nonlin_finite_hor():
 
     cur_time = 0
     dt = 0.1
-    cur_state = np.array([0.5, 0, 1, 0, 45 * d2r]).reshape((-1, 1))
-    end_state = np.array([2, 0, 4, 0, 0]).reshape((-1, 1))
+    cur_state = np.array([0.5, 0, 5, 45 * d2r]).reshape((-1, 1))
+    end_state = np.array([2, 0, 0, 0]).reshape((-1, 1))
     time_horizon = 50 * dt
 
-    def ctrl02(t, x, u, *args):
-        return 0
-
-    def ctrl1(t, x, u, *args):
-        return (2 * np.min([np.max([u[0, 0], -1]), 1]) * np.cos(x[4])).item()
-
-    def ctrl3(t, x, u, *args):
-        return (2 * np.min([np.max([u[0, 0], -1]), 1]) * np.sin(x[4])).item()
-
-    def ctrl4(t, x, u, *args):
-        return (5 * d2r * np.min([np.max([u[1, 0], -1]), 1])).item()
-
     # Create dynamics object
-    dynObj = gdyn.CoordinatedTurn()
-    dynObj.control_model = [ctrl02, ctrl1, ctrl02, ctrl3, ctrl4]
+    dynObj = gdyn.CurvilinearMotion()
 
     # Setup LQR Object
     u_nom = np.zeros((2, 1))
-    Q = np.diag([200, 0.0001, 2000, 0.0001, 2000])
+    Q = np.diag([200, 2000, 200, 2000])
     R = 0.01 * np.eye(u_nom.size)
     lqr = LQR(time_horizon=time_horizon)
     # need to set dt here so the controller can generate a state trajectory

@@ -160,6 +160,8 @@ def run():
     import os
 
     print("Generating A* examples")
+    fps = 10
+    duration = int(1 / fps * 1e3)
 
     fout = os.path.join(os.path.dirname(__file__), "a_star_normal.gif")
     if not os.path.isfile(fout):
@@ -168,7 +170,7 @@ def run():
             fout,
             save_all=True,
             append_images=frame_list[1:],
-            duration=10,  # convert s to ms
+            duration=duration,  # convert s to ms
             loop=0,
         )
 
@@ -179,7 +181,7 @@ def run():
             fout,
             save_all=True,
             append_images=frame_list[1:],
-            duration=10,  # convert s to ms
+            duration=duration,  # convert s to ms
             loop=0,
         )
 
@@ -190,6 +192,6 @@ def run():
             fout,
             save_all=True,
             append_images=frame_list[1:],
-            duration=10,  # convert s to ms
+            duration=duration,  # convert s to ms
             loop=0,
         )

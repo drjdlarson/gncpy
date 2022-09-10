@@ -763,6 +763,8 @@ class ELQR(LQR):
         self._quad_modifier = None
         self._cost_fun = None
 
+        self._ax = 0
+
     def set_cost_model(
         self,
         Q=None,
@@ -1207,6 +1209,59 @@ class ELQR(LQR):
 
         return traj
 
+    def draw_traj(
+        self,
+        fig,
+        plt_inds,
+        fig_h,
+        fig_w,
+        save_animation,
+        num_timesteps,
+        time_vec,
+        state_args,
+        ctrl_args,
+        inv_state_args,
+        inv_ctrl_args,
+    ):
+        state_traj = np.nan * np.ones((num_timesteps + 1, self._init_state.size))
+        state_traj[0, :] = self._init_state.flatten()
+        for kk, tt in enumerate(time_vec[:-1]):
+            u = (
+                self.feedback_gain[kk] @ state_traj[kk, :].reshape((-1, 1))
+                + self.feedthrough_gain[kk]
+            )
+            state_traj[kk + 1, :] = self.prop_state(
+                tt,
+                state_traj[kk, :].reshape((-1, 1)),
+                u,
+                state_args,
+                ctrl_args,
+                True,
+                inv_state_args,
+                inv_ctrl_args,
+            ).ravel()
+
+        # plot backward pass trajectory
+        fig.axes[self._ax].plot(
+            state_traj[:, plt_inds[0]],
+            state_traj[:, plt_inds[1]],
+            color=(0.5, 0.5, 0.5),
+            alpha=0.2,
+            zorder=-10,
+        )
+
+        plt.pause(0.005)
+        if save_animation:
+            with io.BytesIO() as buff:
+                fig.savefig(buff, format="raw")
+                buff.seek(0)
+                img = np.frombuffer(buff.getvalue(), dtype=np.uint8).reshape(
+                    (fig_h, fig_w, -1)
+                )
+            return Image.fromarray(img)
+
+        return []
+
     def reset(self, tt, cur_state, end_state):
         """Reset values for calculating the control parameters.
 
@@ -1278,6 +1333,7 @@ class ELQR(LQR):
         ttl=None,
         fig=None,
         plt_inds=None,
+        ax_num=0,
     ):
         """Calculate the control parameters and state trajectory.
 
@@ -1321,8 +1377,9 @@ class ELQR(LQR):
             Title for the plot. The default is None.
         fig : matplotlib figure, optional
             Figure to draw on. If supplied only the end point and paths are
-            drawn, the rest of the figure remains unchanged. The default is None
-            which creates a new figure and adds a title.
+            drawn, and the title is updated if supplied; the rest of the figure
+            remains unchanged. The default is None which creates a new figure
+            and adds a title. If no title is supplied a default is used.
         plt_inds : list, optional
             2 element list of state indices for plotting. The default is None
             which assumes [0, 1].
@@ -1355,6 +1412,7 @@ class ELQR(LQR):
 
         if plt_inds is None:
             plt_inds = [0, 1]
+        self._ax = ax_num
 
         old_cost, num_timesteps, traj, time_vec = self.reset(tt, cur_state, end_state)
 
@@ -1363,7 +1421,7 @@ class ELQR(LQR):
             if fig is None:
                 fig = plt.figure()
                 fig.add_subplot(1, 1, 1)
-                fig.axes[0].set_aspect("equal", adjustable="box")
+                fig.axes[self._ax].set_aspect("equal", adjustable="box")
 
                 if plt_opts is None:
                     plt_opts = gplot.init_plotting_opts(f_hndl=fig)
@@ -1371,10 +1429,12 @@ class ELQR(LQR):
                 if ttl is None:
                     ttl = "ELQR"
 
-                gplot.set_title_label(fig, 0, plt_opts, ttl=ttl)
+                gplot.set_title_label(
+                    fig, self._ax, plt_opts, ttl=ttl, use_local=(self._ax != 0)
+                )
 
                 # draw start
-                fig.axes[0].scatter(
+                fig.axes[self._ax].scatter(
                     self._init_state[plt_inds[0], 0],
                     self._init_state[plt_inds[1], 0],
                     marker="o",
@@ -1382,8 +1442,13 @@ class ELQR(LQR):
                     zorder=1000,
                 )
                 fig.tight_layout()
+            else:
+                if ttl is not None:
+                    gplot.set_title_label(
+                        fig, self._ax, plt_opts, ttl=ttl, use_local=(self._ax != 0)
+                    )
 
-            fig.axes[0].scatter(
+            fig.axes[self._ax].scatter(
                 self.end_state[plt_inds[0], 0],
                 self.end_state[plt_inds[1], 0],
                 marker="x",
@@ -1431,17 +1496,6 @@ class ELQR(LQR):
                 ii, num_timesteps, traj, time_vec, cost_args
             )
 
-            if show_animation:
-                # plot forward pass trajectory
-                fig.axes[0].plot(
-                    traj[:, plt_inds[0]],
-                    traj[:, plt_inds[1]],
-                    color=(0.5, 0.5, 0.5),
-                    alpha=0.2,
-                    zorder=-10,
-                )
-                plt.pause(0.005)
-
             # backward pass
             traj = self.backward_pass(
                 ii,
@@ -1454,26 +1508,6 @@ class ELQR(LQR):
                 inv_state_args,
                 inv_ctrl_args,
             )
-
-            if show_animation:
-                # plot backward pass trajectory
-                fig.axes[0].plot(
-                    traj[:, plt_inds[0]],
-                    traj[:, plt_inds[1]],
-                    color=(0.5, 0.5, 0.5),
-                    alpha=0.2,
-                    zorder=-10,
-                )
-
-                plt.pause(0.005)
-                if save_animation:
-                    with io.BytesIO() as buff:
-                        fig.savefig(buff, format="raw")
-                        buff.seek(0)
-                        img = np.frombuffer(buff.getvalue(), dtype=np.uint8).reshape(
-                            (fig_h, fig_w, -1)
-                        )
-                    frame_list.append(Image.fromarray(img))
 
             # get cost
             cost = 0
@@ -1489,6 +1523,23 @@ class ELQR(LQR):
             cost += self.cost_function(
                 time_vec[-1], x, u, cost_args, is_initial=False, is_final=True,
             )
+
+            if show_animation:
+                img = self.draw_traj(
+                    fig,
+                    plt_inds,
+                    fig_h,
+                    fig_w,
+                    save_animation,
+                    num_timesteps,
+                    time_vec,
+                    state_args,
+                    ctrl_args,
+                    inv_state_args,
+                    inv_ctrl_args,
+                )
+                if save_animation:
+                    frame_list.append(img)
 
             if disp:
                 print("\tIteration: {:3d} Cost: {:10.4f}".format(ii, cost))
@@ -1537,7 +1588,7 @@ class ELQR(LQR):
         )
 
         if show_animation:
-            fig.axes[0].plot(
+            fig.axes[self._ax].plot(
                 state_traj[:, plt_inds[0]],
                 state_traj[:, plt_inds[1]],
                 linestyle="-",
