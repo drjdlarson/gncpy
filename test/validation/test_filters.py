@@ -6,7 +6,7 @@ import scipy.linalg as la
 import matplotlib.pyplot as plt
 
 import gncpy.filters as gfilts
-import gncpy.dynamics as gdyn
+import gncpy.dynamics.basic as gdyn
 import gncpy.distributions as gdistrib
 from serums.enums import GSMTypes
 from serums.models import GaussianScaleMixture
@@ -2739,26 +2739,26 @@ def test_IMM_dynObj():
     dt = 0.01
     t0, t1 = 0, 10 + dt
 
-    dyn_obj1 = gdyn.CoordinatedTurnKnown(turn_rate=0)
+    dyn_obj1 = gdyn.CoordinatedTurnKnown(turn_rate=10 * np.pi / 180)
     dyn_obj2 = gdyn.CoordinatedTurnKnown(turn_rate=5 * np.pi / 180)
 
     rng = rnd.default_rng(global_seed)
 
     in_filt1 = gfilts.KalmanFilter()
-    in_filt1.set_state_model(dynObj=dyn_obj1)
-    m_mat = np.array([[1, 0, 0, 0], [0, 1, 0, 0]])
+    in_filt1.set_state_model(dyn_obj=dyn_obj1)
+    m_mat = np.array([[1, 0, 0, 0, 0], [0, 1, 0, 0, 0]])
     in_filt1.set_measurement_model(meas_mat=m_mat)
-    in_filt1.cov = 0.25 * np.eye(4)
-    gamma = np.array([0, 0, 1, 1]).reshape((4, 1))
+    in_filt1.cov = 0.25 * np.eye(5)
+    gamma = np.array([0, 0, 1, 1, 0]).reshape((5, 1))
     in_filt1.proc_noise = gamma @ np.array([[p_noise ** 2]]) @ gamma.T
     in_filt1.meas_noise = m_noise ** 2 * np.eye(2)
 
     in_filt2 = gfilts.KalmanFilter()
-    in_filt2.set_state_model(dynObj=dyn_obj2)
-    m_mat = np.array([[1, 0, 0, 0], [0, 1, 0, 0]])
+    in_filt2.set_state_model(dyn_obj=dyn_obj2)
+    m_mat = np.array([[1, 0, 0, 0, 0], [0, 1, 0, 0, 0]])
     in_filt2.set_measurement_model(meas_mat=m_mat)
-    in_filt2.cov = 0.25 * np.eye(4)
-    gamma = np.array([0, 0, 1, 1]).reshape((4, 1))
+    in_filt2.cov = 0.25 * np.eye(5)
+    gamma = np.array([0, 0, 1, 1, 0]).reshape((5, 1))
     in_filt2.proc_noise = gamma @ np.array([[p_noise ** 2]]) @ gamma.T
     in_filt2.meas_noise = m_noise ** 2 * np.eye(2)
 
@@ -2769,17 +2769,17 @@ def test_IMM_dynObj():
 
     model_trans = np.array([[0.9, 0.1], [0.1, 0.9]])
 
-    init_means = np.array([[0, 0, vx0, vy0], [0, 0, vx0, vy0]])
+    init_means = np.array([[0, 0, vx0, vy0, 0], [0, 0, vx0, vy0, 0]])
     init_covs = np.array([in_filt1.cov, in_filt2.cov])
 
     filt = gfilts.InteractingMultipleModel()
     filt.set_models(filt_list, model_trans, init_means, init_covs)
 
     time = np.arange(t0, t1, dt)
-    states = np.nan * np.ones((time.size, 4))
+    states = np.nan * np.ones((time.size, 5))
     stds = np.nan * np.ones(states.shape)
     pre_stds = stds.copy()
-    states[0, :] = np.array([0, 0, vx0, vy0])
+    states[0, :] = np.array([0, 0, vx0, vy0, 0])
     stds[0, :] = np.sqrt(np.diag(filt.cov))
     pre_stds[0, :] = stds[0, :]
 
@@ -2788,30 +2788,26 @@ def test_IMM_dynObj():
     state_mat1 = dyn_obj1.get_state_mat(0, dt)
     state_mat2 = dyn_obj2.get_state_mat(0, dt)
     for kk, t in enumerate(time[:-1]):
-        states[kk + 1, :] = filt.predict(
-            t, states[kk, :].reshape((4, 1)), state_mat_args=(dt,)
-        ).flatten()
+        states[kk + 1, :] = filt.predict(t, state_mat_args=(dt,)).flatten()
         if t < 5:
             t_states[kk + 1, :] = (
-                state_mat1 @ t_states[kk, :].reshape((4, 1))
+                state_mat1 @ t_states[kk, :].reshape((5, 1))
             ).flatten()
         else:
             t_states[kk + 1, :] = (
-                state_mat2 @ t_states[kk, :].reshape((4, 1))
+                state_mat2 @ t_states[kk, :].reshape((5, 1))
             ).flatten()
         pre_stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
 
         n_state = m_mat @ (
-            t_states[kk + 1, :].reshape((4, 1))
+            t_states[kk + 1, :].reshape((5, 1))
             + gamma * p_noise * rng.standard_normal(1)
         )
         meas = n_state + m_noise * rng.standard_normal(n_state.size).reshape(
             n_state.shape
         )
 
-        states[kk + 1, :] = filt.correct(t, meas, states[kk + 1, :].reshape((4, 1)))[
-            0
-        ].flatten()
+        states[kk + 1, :] = filt.correct(t, meas)[0].flatten()
         stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
     errs = states - t_states
 
@@ -2872,7 +2868,7 @@ def test_IMM_mat():  # noqa
     m_mat = np.array([[1, 0, 0, 0, 0], [0, 1, 0, 0, 0]])
     in_filt1.set_measurement_model(meas_mat=m_mat)
     in_filt1.cov = 0.25 * np.eye(5)
-    gamma = np.array([0, 0, 1, 1, 0]).reshape((4, 1))
+    gamma = np.array([0, 0, 1, 1, 0]).reshape((5, 1))
     in_filt1.proc_noise = gamma @ np.array([[p_noise ** 2]]) @ gamma.T
     in_filt1.meas_noise = m_noise ** 2 * np.eye(2)
 
@@ -2881,7 +2877,7 @@ def test_IMM_mat():  # noqa
     m_mat = np.array([[1, 0, 0, 0, 0], [0, 1, 0, 0, 0]])
     in_filt2.set_measurement_model(meas_mat=m_mat)
     in_filt2.cov = 0.25 * np.eye(5)
-    gamma = np.array([0, 0, 1, 1, 0]).reshape((4, 1))
+    gamma = np.array([0, 0, 1, 1, 0]).reshape((5, 1))
     in_filt2.proc_noise = gamma @ np.array([[p_noise ** 2]]) @ gamma.T
     in_filt2.meas_noise = m_noise ** 2 * np.eye(2)
 
@@ -2899,10 +2895,10 @@ def test_IMM_mat():  # noqa
     filt.set_models(filt_list, model_trans, init_means, init_covs)
 
     time = np.arange(t0, t1, dt)
-    states = np.nan * np.ones((time.size, 4))
+    states = np.nan * np.ones((time.size, 5))
     stds = np.nan * np.ones(states.shape)
     pre_stds = stds.copy()
-    states[0, :] = np.array([0, 0, vx0, vy0])
+    states[0, :] = np.array([0, 0, vx0, vy0, 0])
     stds[0, :] = np.sqrt(np.diag(filt.cov))
     pre_stds[0, :] = stds[0, :]
 
@@ -2910,27 +2906,27 @@ def test_IMM_mat():  # noqa
 
     for kk, t in enumerate(time[:-1]):
         states[kk + 1, :] = filt.predict(
-            t, states[kk, :].reshape((4, 1)), state_mat_args=(dt,)
+            t, states[kk, :].reshape((5, 1)), state_mat_args=(dt,)
         ).flatten()
         if t < 5:
             t_states[kk + 1, :] = (
-                state_mat1 @ t_states[kk, :].reshape((4, 1))
+                state_mat1 @ t_states[kk, :].reshape((5, 1))
             ).flatten()
         else:
             t_states[kk + 1, :] = (
-                state_mat2 @ t_states[kk, :].reshape((4, 1))
+                state_mat2 @ t_states[kk, :].reshape((5, 1))
             ).flatten()
         pre_stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
 
         n_state = m_mat @ (
-            t_states[kk + 1, :].reshape((4, 1))
+            t_states[kk + 1, :].reshape((5, 1))
             + gamma * p_noise * rng.standard_normal(1)
         )
         meas = n_state + m_noise * rng.standard_normal(n_state.size).reshape(
             n_state.shape
         )
 
-        states[kk + 1, :] = filt.correct(t, meas, states[kk + 1, :].reshape((4, 1)))[
+        states[kk + 1, :] = filt.correct(t, meas, states[kk + 1, :].reshape((5, 1)))[
             0
         ].flatten()
         stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))

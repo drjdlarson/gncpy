@@ -15,7 +15,7 @@ import gncpy.math as gmath
 import gncpy.plotting as pltUtil
 import gncpy.distributions as gdistrib
 from serums.enums import GSMTypes
-import gncpy.dynamics as gdyn
+import gncpy.dynamics.basic as gdyn
 import gncpy.errors as gerr
 
 
@@ -4277,14 +4277,14 @@ class InteractingMultipleModel:
     @property
     def cov(self):
         """Covariance for the IMM Filter."""
-        cur_cov = np.zeros((np.shape(init_covs[0, :, :])))
+        cur_cov = np.zeros((np.shape(self.cov_list[0, :, :])))
         for ii in range(0, np.shape(self.cov_list)[0]):
             sur_cov = cur_cov + self.filt_weights[ii] * self.cov_list[ii, :, :]
         return cur_cov
 
     @cov.setter
     def cov(self, val):
-        warnings.warn("Covariance is read only. SKIPPING")
+        warn("Covariance is read only. SKIPPING")
 
     def set_models(
         self, filter_lst, model_trans, init_means, init_covs, init_weights=None
@@ -4301,6 +4301,7 @@ class InteractingMultipleModel:
         self.in_filt_list = filter_lst
         self.model_trans_mat = model_trans
         self.mean_list = init_means
+        # TODO
         self.cov_list = init_covs
         if init_weights is not None:
             self.filt_weights = init_weights
@@ -4320,14 +4321,14 @@ class InteractingMultipleModel:
             )
             # Calculate weighted input states and new weights
             for jj in range(0, len(self.in_filt_list)):
-                if self.model_trans[ii][jj] == 0:
+                if self.model_trans_mat[ii][jj] == 0:
                     continue
                 new_weight = (
-                    new_weight + self.model_trans[ii][jj] * self.filt_weights[jj]
+                    new_weight + self.model_trans_mat[ii][jj] * self.filt_weights[jj]
                 )
                 weighted_state = (
                     weighted_state
-                    + self.model_trans[ii][jj]
+                    + self.model_trans_mat[ii][jj]
                     * self.filt_weights[jj]
                     * self.mean_list[jj]
                 )
@@ -4336,7 +4337,7 @@ class InteractingMultipleModel:
 
             # Iterate through all means/weights to compile weighted covariance
             for jj in range(0, len(self.in_filt_list)):
-                weighted_cov = weighted_cov + self.model_trans[ii][
+                weighted_cov = weighted_cov + self.model_trans_mat[ii][
                     jj
                 ] * self.filt_weights[jj] * (
                     self.cov_list[jj]
@@ -4348,7 +4349,10 @@ class InteractingMultipleModel:
             # Perform inner filter prediction
             if not isinstance(filt, ParticleFilter):
                 self.mean_list[ii, :] = filt.predict(
-                    timestep, weighted_state, *args, **kwargs
+                    timestep,
+                    weighted_state.reshape((np.shape(self.mean_list[0]), 1)),
+                    *args,
+                    **kwargs
                 )
                 self.cov_list[ii, :, :] = filt.cov.copy()
             else:
