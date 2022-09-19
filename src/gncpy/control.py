@@ -1222,7 +1222,12 @@ class ELQR(LQR):
         ctrl_args,
         inv_state_args,
         inv_ctrl_args,
+        color=None,
+        alpha=0.2,
+        zorder=-10
     ):
+        if color is None:
+            color = (0.5, 0.5, 0.5)
         state_traj = np.nan * np.ones((num_timesteps + 1, self._init_state.size))
         state_traj[0, :] = self._init_state.flatten()
         for kk, tt in enumerate(time_vec[:-1]):
@@ -1245,9 +1250,9 @@ class ELQR(LQR):
         fig.axes[self._ax].plot(
             state_traj[:, plt_inds[0]],
             state_traj[:, plt_inds[1]],
-            color=(0.5, 0.5, 0.5),
-            alpha=0.2,
-            zorder=-10,
+            color=color,
+            alpha=alpha,
+            zorder=zorder,
         )
 
         plt.pause(0.005)

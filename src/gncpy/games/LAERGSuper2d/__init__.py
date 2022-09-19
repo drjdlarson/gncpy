@@ -46,7 +46,9 @@ class DynamicsParams:
         self.terrain_alt_wgs84 = 0.0
         self.wp_radius = 0.0
         self.fly_height = 0.0
+        self.init_height = 0.0
         self.ned_mag_field = np.array([])
+        self.init_eul_angs = np.array([])
 
 
 class Physics2dParams(BasePhysicsParams):
@@ -163,15 +165,18 @@ class SimpleLagerSUPER2d(SimpleUAV2d):
         dynObj = gaircraft.SimpleLAGERSuper()
         body_vel = np.zeros(3)
         body_rot_rate = np.zeros(3)
-        init_eul_deg = np.array(
-            [
-                self.rng.uniform(low=-180, high=180),
-                self.rng.uniform(low=-90, high=90),
-                self.rng.uniform(low=-180, high=180),
-            ]
-        )
+        init_eul_deg = np.zeros(3)
+        for ii, ang in enumerate(params.init_eul_angs):
+            if np.isinf(ang):
+                if ii == 0:
+                    init_eul_deg[ii] = self.rng.uniform(low=-180, high=180)
+                elif ii == 1:
+                    init_eul_deg[ii] = self.rng.uniform(low=-5, high=5)
+                elif ii == 2:
+                    init_eul_deg[ii] = self.rng.uniform(low=-10, high=10)
+
         init_xy = cBirth.sample().reshape(-1)
-        init_ned_pos = np.concatenate((init_xy[1::-1], np.array([-params.fly_height])))
+        init_ned_pos = np.concatenate((init_xy[1::-1], np.array([-params.init_height])))
         dynObj.set_initial_conditions(
             init_ned_pos,
             body_vel,
@@ -543,7 +548,7 @@ class SimpleLagerSUPER2d(SimpleUAV2d):
                 continue
 
             # check if they reached the waypoint this step
-            if pDyn.dynObj.waypoint_reached_rising_edge:
+            if pDyn.dynObj.waypoint_reached:
                 self.waypoints[p.id][0].destroy()
                 del self.waypoints[p.id][0]
                 if len(self.waypoints) == 0:

@@ -1,24 +1,10 @@
-//
-// Academic License - for use in teaching, academic research, and meeting
-// course requirements at degree granting institutions only.  Not for
-// government, commercial, or other organizational use.
-//
-// File: rtmodel.h
-//
-// Code generated for Simulink model 'baseline_super'.
-//
-// Model version                  : 2.29
-// Simulink Coder version         : 9.5 (R2021a) 14-Nov-2020
-// C/C++ source code generated on : Sun May 15 14:35:12 2022
-//
-// Target selection: ert.tlc
-// Embedded hardware selection: Intel->x86-64 (Linux 64)
-// Code generation objective: Execution efficiency
-// Validation result: Not run
+// Model version                  : 4.101
+// Simulink Coder version         : 9.7 (R2022a) 13-Nov-2021
+// C/C++ source code generated on : Sun Sep 18 13:49:41 2022
 //
 #ifndef RTW_HEADER_rtmodel_h_
 #define RTW_HEADER_rtmodel_h_
-#include "baseline_super.h"
+#include "super.h"
 #define MODEL_CLASSNAME                bfs::Autocode
 #define MODEL_STEPNAME                 Run
 #define MODEL_STEP_FCN_CONTROL_USED    1

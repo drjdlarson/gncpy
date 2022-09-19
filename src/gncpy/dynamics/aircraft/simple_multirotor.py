@@ -308,9 +308,11 @@ class Vehicle:
         Reference lattiude in radians (for converting to NED)
     ref_lon : float
         Reference longitude in radians (for converting to NED)
+    takenoff : bool
+        Flag indicating if the vehicle has taken off yet.
     """
 
-    __slots__ = ("state", "params", "ref_lat", "ref_lon")
+    __slots__ = ("state", "params", "ref_lat", "ref_lon", "takenoff")
 
     def __init__(self, params):
         """Initialize an object.
@@ -325,6 +327,7 @@ class Vehicle:
 
         self.ref_lat = np.nan
         self.ref_lon = np.nan
+        self.takenoff = False
 
     def _get_dcm_earth2body(self):
         return self.state[v_smap.dcm_earth2body].reshape((3, 3))
@@ -400,7 +403,14 @@ class Vehicle:
         )
         g_f, g_m = self._calc_grav_force_mom(gravity, self._get_dcm_earth2body())
         p_f, p_m = self._calc_prop_force_mom(motor_cmds)
-        return (a_f + g_f + p_f, a_m + g_m + p_m)
+
+        if not self.takenoff:
+            self.takenoff = -p_f[2] > g_f[2]
+
+        if self.takenoff:
+            return (a_f + g_f + p_f, a_m + g_m + p_m)
+        else:
+            return np.zeros(a_f.shape), np.zeros(a_m.shape)
 
     def _calc_pqr_dot(self, pqr, inertia, inertia_dot, moments):
         term0 = (inertia_dot @ pqr).ravel()
@@ -995,10 +1005,10 @@ class SimpleMultirotor(DynamicsBase):
         self.vehicle.state[v_smap.ned_pos] = ned_pos.flatten()
         self.vehicle.state[v_smap.body_vel] = body_vel.flatten()
         eul_rad = eul_deg * d2r
-        self.vehicle.state[v_smap.roll] = eul_rad[0]
+        self.vehicle.state[v_smap.roll] = eul_rad[2]
         self.vehicle.state[v_smap.pitch] = eul_rad[1]
-        self.vehicle.state[v_smap.yaw] = eul_rad[2]
-        dcm_earth2body = self.vehicle.eul_to_dcm(eul_rad[2], eul_rad[1], eul_rad[0])
+        self.vehicle.state[v_smap.yaw] = eul_rad[0]
+        dcm_earth2body = self.vehicle.eul_to_dcm(eul_rad[0], eul_rad[1], eul_rad[2])
         self.vehicle.state[v_smap.ned_vel] = (
             dcm_earth2body.T @ body_vel.reshape((3, 1))
         ).flatten()
@@ -1006,7 +1016,7 @@ class SimpleMultirotor(DynamicsBase):
         self.vehicle.state[v_smap.body_rot_rate] = body_rot_rate.flatten()
         self.vehicle.state[v_smap.body_rot_accel] = 0
         self.vehicle.state[v_smap.body_accel] = 0
-        self.vehicle.state[v_smap.body_accel[2]] = 9.81
+        # self.vehicle.state[v_smap.body_accel[2]] = 9.81
         self.vehicle.state[v_smap.ned_accel] = 0
         self.vehicle.ref_lat = ref_lat_deg * d2r
         self.vehicle.ref_lon = ref_lon_deg * d2r
@@ -1072,6 +1082,44 @@ class SimpleMultirotor(DynamicsBase):
         self.vehicle.state[v_smap.mach] = mach
         self.vehicle.state[v_smap.alt_agl] = alt_agl
 
+    def get_state_mat(self, timestep, *args, **kwargs):
+        """Gets the state matrix, should not be used.
+
+        Parameters
+        ----------
+        timestep : float
+            Current time.
+        *args : tuple
+            Additional arguments.
+        **kwargs : dict
+            Additional arguments.
+
+        Raises
+        ------
+        RuntimeError
+            This function should not be used.
+        """
+        raise RuntimeError("get_state_mat should not be used by this class!")
+
+    def get_input_mat(self, timestep, *args, **kwargs):
+        """Gets the input matrix, should not be used.
+
+        Parameters
+        ----------
+        timestep : float
+            Current time.
+        *args : tuple
+            Additional arguments.
+        **kwargs : dict
+            Additional arguments.
+
+        Raises
+        ------
+        RuntimeError
+            This function should not be used.
+        """
+        raise RuntimeError("get_input_mat should not be used by this class!")
+
 
 class SimpleLAGERSuper(SimpleMultirotor):
     """Extends the :class:`.SimpleMultirotor` to use LAGER's SUPER UAV's control system.
@@ -1114,6 +1162,10 @@ class SimpleLAGERSuper(SimpleMultirotor):
         self._last_gps_upd_time = -np.inf
         self._gps_update_rate_hz = 5
 
+        self._sensorData.inceptor.ch[0] = 172  # throttle must be low for arm
+        self._sensorData.inceptor.ch[1] = 991
+        self._sensorData.inceptor.ch[2] = 991
+        self._sensorData.inceptor.ch[3] = 1811
         self._sensorData.inceptor.ch[4] = 990  # pos hold mode
 
         super().__init__(params_file, **kwargs)
@@ -1241,6 +1293,8 @@ class SimpleLAGERSuper(SimpleMultirotor):
                 missionItem.param4 = float(cols[7])
                 if missionItem.cmd == 16:
                     mult = self.wp_xy_scale
+                else:
+                    mult = 1
                 missionItem.x = int(float(cols[8]) * mult)
                 missionItem.y = int(float(cols[9]) * mult)
                 missionItem.z = float(cols[10])
@@ -1463,12 +1517,6 @@ class SimpleLAGERSuper(SimpleMultirotor):
         self._sensorData.inceptor.ch17 = False
         self._sensorData.inceptor.ch18 = False
 
-        self._sensorData.inceptor.ch[0] = 991
-        self._sensorData.inceptor.ch[1] = 991
-        self._sensorData.inceptor.ch[2] = 991
-        self._sensorData.inceptor.ch[3] = 991
-        self._sensorData.inceptor.ch[6] = 1811
-
         # update imu
         self._sensorData.imu.accel_mps2 = self.emulate_accel()
         self._sensorData.imu.gyro_radps = self.vehicle.state[
@@ -1520,10 +1568,10 @@ class SimpleLAGERSuper(SimpleMultirotor):
     def desired_motor_cmds(self, val):
         raise RuntimeError("desired_motor_cmds is readonly")
 
-    @property
-    def waypoint_reached_rising_edge(self):
-        """Rising edge of waypoint reached signal."""
-        return self._vmsData.waypoint_reached and not self._reached_wp_on_prev
+    # @property
+    # def waypoint_reached_rising_edge(self):
+    #     """Rising edge of waypoint reached signal."""
+    #     return self._vmsData.waypoint_reached and not self._reached_wp_on_prev
 
     def update_fmu_states(self, tt):
         """Update the flight management unit for the control system.
@@ -1537,11 +1585,6 @@ class SimpleLAGERSuper(SimpleMultirotor):
         self.update_sensor_data(tt)
         self.update_nav_data()
 
-        # rising edge trigger
-        if self.waypoint_reached_rising_edge:
-            self._telemData.current_waypoint += 1
-        self._reached_wp_on_prev = self._vmsData.waypoint_reached
-
     def propagate_state(self, tt):
         """Propagate the state forward one timestep.
 
@@ -1552,12 +1595,12 @@ class SimpleLAGERSuper(SimpleMultirotor):
 
         Returns
         -------
-        numpy array
+        state : numpy array
             Copy of the internal vehicle state.
         """
         self.update_fmu_states(tt)
 
-        self._control_model.step(
+        self.control_model.step(
             self._sysData,
             self._sensorData,
             self._navData,
@@ -1565,8 +1608,10 @@ class SimpleLAGERSuper(SimpleMultirotor):
             self._vmsData,
         )
 
+        if self._vmsData.waypoint_reached:
+            self._telemData.current_waypoint += 1
         self._telemData.waypoints_updated = False
 
         return super().propagate_state(
-            self._vmsData.pwm.cmd[0 : self.vehicle.params.motor.num_motors], self.dt
+            self.desired_motor_cmds, self.dt
         )
