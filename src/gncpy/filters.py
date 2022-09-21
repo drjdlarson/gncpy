@@ -4303,7 +4303,8 @@ class InteractingMultipleModel:
         filt_state = {}
         filt_tup_list = []
         for filt in self.in_filt_list:
-            filt_tup_list = filt_tup_list.append((type(filt), filt.save_filter_state))
+            filt_dict = filt.save_filter_state()
+            filt_tup_list.append((type(filt), filt_dict))
 
         filt_state["in_filt_list"] = filt_tup_list.copy()
         filt_state["model_trans_mat"] = self.model_trans_mat.copy()
@@ -4324,7 +4325,12 @@ class InteractingMultipleModel:
         """
         filt_tup_list = filt_state["in_filt_list"]
         for tup in filt_tup_list:
-            filt = tup[0].load_filter_state(tup[1])
+            cls_type = tup[0]
+            if cls_type is not None:
+                filt = cls_type()
+                filt.load_filter_state(tup[1])
+            else:
+                filt = None
             self.in_filt_list.append(filt)
         self.model_trans_mat = filt_state["model_trans_mat"]
         self.filt_weights = filt_state["filt_weights"]

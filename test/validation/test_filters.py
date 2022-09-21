@@ -2816,6 +2816,8 @@ def test_IMM_dynObj():
         stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
     errs = states - t_states
 
+    filt_state = filt.save_filter_state()
+    filt.load_filter_state(filt_state)
     # plot states
     if debug_figs:
         fig = plt.figure()
