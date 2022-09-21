@@ -161,7 +161,6 @@ class LinearDynamicsBase(DynamicsBase):
         """
         if self.control_model is None:
             raise RuntimeWarning("Control model is not set.")
-
         return self.control_model(timestep, *ctrl_args)
 
     def get_dis_process_noise_mat(self, dt, *f_args):
@@ -222,7 +221,6 @@ class LinearDynamicsBase(DynamicsBase):
             state_args = ()
         if ctrl_args is None:
             ctrl_args = ()
-
         state_trans_mat = self.get_state_mat(timestep, *state_args)
         next_state = state_trans_mat @ state
 
@@ -230,10 +228,8 @@ class LinearDynamicsBase(DynamicsBase):
             input_mat = self.control_model(timestep, state, *ctrl_args)
             ctrl = input_mat @ u
             next_state += ctrl
-
         if self.state_constraint is not None:
             next_state = self.state_constraint(timestep, next_state)
-
         return next_state
 
 
@@ -322,11 +318,9 @@ class NonlinearDynamicsBase(DynamicsBase):
         out = np.zeros((len(self.state_names), 1))
         for ii, f in enumerate(self.cont_fnc_lst):
             out[ii] = f(t, x, *state_args)
-
         if self.control_model is not None:
             for ii, g in enumerate(self.control_model):
                 out[ii] += g(t, x, u, *ctrl_args)
-
         return out
 
     def get_state_mat(
@@ -365,9 +359,7 @@ class NonlinearDynamicsBase(DynamicsBase):
                     f_args,
                     u=u,
                 )
-
             return gmath.get_state_jacobian(timestep, state, self.cont_fnc_lst, f_args)
-
         else:
 
             def factory(ii):
@@ -404,7 +396,6 @@ class NonlinearDynamicsBase(DynamicsBase):
         if self.control_model is None:
             warn("Control model is None")
             return np.zeros((state.size, u.size))
-
         if state_args is None:
             state_args = ()
         if ctrl_args is None:
@@ -455,7 +446,6 @@ class NonlinearDynamicsBase(DynamicsBase):
             state_args = ()
         if ctrl_args is None:
             ctrl_args = ()
-
         self._integrator = s_integrate.ode(
             lambda t, y, *f_args: self._cont_dyn(t, y, u, f_args, ctrl_args).flatten()
         )
@@ -465,17 +455,14 @@ class NonlinearDynamicsBase(DynamicsBase):
 
         if np.isnan(self.dt) or np.isinf(self.dt):
             raise RuntimeError("Invalid value for dt ({}).".format(self.dt))
-
         next_time = timestep + self.dt
         next_state = self._integrator.integrate(next_time)
         next_state = next_state.reshape((next_state.size, 1))
         if not self._integrator.successful():
             msg = "Integration failed at time {}".format(timestep)
             raise RuntimeError(msg)
-
         if self.state_constraint is not None:
             next_state = self.state_constraint(timestep, next_state)
-
         return next_state
 
 
@@ -677,7 +664,6 @@ class CurvilinearMotion(NonlinearDynamicsBase):
             state_args = ()
         if ctrl_args is None:
             ctrl_args = ()
-
         F = self.get_state_mat(
             timestep, state, *state_args, u=u, ctrl_args=ctrl_args, use_continuous=False
         )
@@ -716,7 +702,6 @@ class CoordinatedTurnKnown(LinearDynamicsBase):
     def __init__(self, turn_rate=5 * np.pi / 180, **kwargs):
         super().__init__(**kwargs)
         self.turn_rate = turn_rate
-
         self.control_model = None
 
     def get_state_mat(self, timestep, dt):
@@ -736,12 +721,15 @@ class CoordinatedTurnKnown(LinearDynamicsBase):
         """
         # avoid division by 0
         if abs(self.turn_rate) < 1e-8:
-            return np.array([[1, 0, self.dt, 0, 0],
-                             [0, 1, 0, self.dt, 0],
-                             [0, 0, 1, 0, 0],
-                             [0, 0, 0, 1, 0],
-                             [0, 0, 0, 0, 1]])
-
+            return np.array(
+                [
+                    [1, 0, dt, 0, 0],
+                    [0, 1, 0, dt, 0],
+                    [0, 0, 1, 0, 0],
+                    [0, 0, 0, 1, 0],
+                    [0, 0, 0, 0, 1],
+                ]
+            )
         ta = self.turn_rate * dt
         s_ta = np.sin(ta)
         c_ta = np.cos(ta)
@@ -808,7 +796,6 @@ class CoordinatedTurnKnown(LinearDynamicsBase):
             raise RuntimeError("state_args must be (dt, )")
         if ctrl_args is None:
             ctrl_args = ()
-
         F = self.get_state_mat(timestep, *state_args,)
         if u is None:
             return F @ state + np.array(
@@ -842,7 +829,7 @@ class CoordinatedTurnUnknown(NonlinearDynamicsBase):
         Correlation time for the turn rate. If None then a Wiener process is used.
     """
 
-    __slots__ = ("turn_rate_cor_time", )
+    __slots__ = ("turn_rate_cor_time",)
 
     state_names = ("x pos", "y pos", "x vel", "y vel", "turn rate")
 
@@ -910,25 +897,30 @@ class CoordinatedTurnUnknown(NonlinearDynamicsBase):
         N x N numpy array
             state transition matrix.
         """
-
         x = state.ravel()
         w = x[4]
 
         if use_continuous:
-            return np.array([[0, 0, 1, 0, 0],
-                             [0, 0, 0, 1, 0],
-                             [0, 0, 0, -w, 0],
-                             [0, 0, w, 0, 0],
-                             [0, 0, 0, 0, -self.alpha]])
-
+            return np.array(
+                [
+                    [0, 0, 1, 0, 0],
+                    [0, 0, 0, 1, 0],
+                    [0, 0, 0, -w, 0],
+                    [0, 0, w, 0, 0],
+                    [0, 0, 0, 0, -self.alpha],
+                ]
+            )
         # avoid division by 0
         if abs(w) < 1e-8:
-            return np.array([[1, 0, self.dt, 0, 0],
-                             [0, 1, 0, self.dt, 0],
-                             [0, 0, 1, 0, 0],
-                             [0, 0, 0, 1, 0],
-                             [0, 0, 0, 0, self.beta]])
-
+            return np.array(
+                [
+                    [1, 0, self.dt, 0, 0],
+                    [0, 1, 0, self.dt, 0],
+                    [0, 0, 1, 0, 0],
+                    [0, 0, 0, 1, 0],
+                    [0, 0, 0, 0, self.beta],
+                ]
+            )
         ta = w * self.dt
         s_ta = np.sin(ta)
         c_ta = np.cos(ta)
@@ -945,7 +937,7 @@ class CoordinatedTurnUnknown(NonlinearDynamicsBase):
         return np.array(
             [
                 [1, 0, s_ta / w, -(1 - c_ta) / w, F04],
-                [0, 1, (1 - c_ta) / x[4], s_ta / w, F14],
+                [0, 1, (1 - c_ta) / x[4], s_ta / w, F14],  # shouldn't the x[4] be w?
                 [0, 0, c_ta, -s_ta, F24],
                 [0, 0, s_ta, c_ta, F34],
                 [0, 0, 0, 0, self.beta],
@@ -1018,7 +1010,6 @@ class CoordinatedTurnUnknown(NonlinearDynamicsBase):
             state_args = ()
         if ctrl_args is None:
             ctrl_args = ()
-
         F = self.get_state_mat(
             timestep, state, *state_args, u=u, ctrl_args=ctrl_args, use_continuous=False
         )
