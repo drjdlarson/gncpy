@@ -4277,6 +4277,8 @@ class InteractingMultipleModel:
         self.filt_weights = np.array([])
         self.cur_out_state = np.array([])
         self.filt_weight_history = np.array([[]])
+        self.mean_list = []
+        self.cov_list = []
 
     @property
     def cov(self):
@@ -4312,6 +4314,7 @@ class InteractingMultipleModel:
         filt_state["cur_out_state"] = self.cur_out_state.copy()
         filt_state["filt_weight_history"] = self.filt_weight_history.copy()
         filt_state["mean_list"] = self.mean_list
+        filt_state["cov_list"] = self.cov_list
 
         return filt_state
 
@@ -4337,6 +4340,7 @@ class InteractingMultipleModel:
         self.cur_out_state = filt_state["cur_out_state"]
         self.filt_weight_history = filt_state["filt_weight_history"]
         self.mean_list = filt_state["mean_list"]
+        self.cov_list = filt_state["cov_list"]
 
     def set_models(
         self, filter_lst, model_trans, init_means, init_covs, init_weights=None
