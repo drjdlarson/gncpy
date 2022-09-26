@@ -4287,8 +4287,8 @@ class InteractingMultipleModel:
         for ii in range(0, np.shape(self.cov_list)[0]):
             cur_cov = cur_cov + self.filt_weights[ii] * (
                 self.cov_list[ii, :, :]
-                + (self.mean_list[:, ii] - self.cur_out_state)
-                @ (self.mean_list[:, ii] - self.cur_out_state).T
+                + (self.mean_list[:, ii].reshape(np.shape(self.mean_list)[0], 1) - self.cur_out_state.reshape(np.shape(self.mean_list)[0], 1))
+                @ (self.mean_list[:, ii].reshape(np.shape(self.mean_list)[0], 1) - self.cur_out_state.reshape(np.shape(self.mean_list)[0], 1)).T
             )
         return cur_cov
 
@@ -4383,7 +4383,7 @@ class InteractingMultipleModel:
             new_weight = 0
             weighted_state = np.zeros((np.shape(self.mean_list)[0], 1))
             weighted_cov = np.zeros(
-                (np.shape(self.mean_list)[0], np.shape(self.mean_list)[0])
+                np.shape(self.cov_list[0])
             )
             # Calculate weighted input states and new weights
             for jj in range(0, len(self.in_filt_list)):
@@ -4406,8 +4406,7 @@ class InteractingMultipleModel:
                     jj
                 ] * self.filt_weights[jj] * (
                     self.cov_list[jj, :, :]
-                    + (self.mean_list[:, jj] - weighted_state)
-                    @ (self.mean_list[:, jj] - weighted_state).T
+                    + (self.mean_list[:, jj].reshape(np.shape(self.mean_list)[0], 1) - weighted_state) @ (self.mean_list[:, jj].reshape(np.shape(self.mean_list)[0], 1) - weighted_state).T
                 )
             weighted_cov = weighted_cov / new_weight
 
