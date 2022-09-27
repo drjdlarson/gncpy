@@ -4457,6 +4457,7 @@ class InteractingMultipleModel:
         out_state = np.zeros(np.shape(self.mean_list)[0])
         for ii in range(0, len(self.in_filt_list)):
             out_state = out_state + new_weight_list[ii] * self.mean_list[:, ii]
+        out_state = out_state.reshape((np.shape(out_state)[0], 1))
         # Two options for outputting measurement fit probability, averaging all a-la the mean, or only outputting the maximum. Starting with maximum.
         out_meas_fit_prob = np.max(meas_fit_prob_list)
         self.cur_out_state = out_state
