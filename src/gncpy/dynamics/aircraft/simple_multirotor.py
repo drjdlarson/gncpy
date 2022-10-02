@@ -357,8 +357,8 @@ class Vehicle:
             self.params.geo.front_area_m2,
         )
 
-        vel_mag = np.linalg.norm(body_vel)
-        if np.abs(vel_mag) < 1e-6:
+        vel_mag = np.linalg.norm(-body_vel)
+        if np.abs(vel_mag) < np.finfo(float).eps:
             force = np.zeros(3)
         else:
             force = -body_vel / vel_mag * front_area * dyn_pres * self.params.aero.cd
@@ -412,32 +412,6 @@ class Vehicle:
         else:
             return np.zeros(a_f.shape), np.zeros(a_m.shape)
 
-    def _calc_pqr_dot(self, pqr, inertia, inertia_dot, moments):
-        term0 = (inertia_dot @ pqr).ravel()
-        term1 = np.cross(pqr.ravel(), (inertia @ pqr).ravel())
-
-        term2 = moments - term0 - term1
-        pqr_dot = term2.reshape((1, 3)) @ np.linalg.inv(inertia).T
-
-        return pqr_dot.ravel()
-
-    def _calc_uvw_dot(self, uvw, pqr, ned_accel):
-        return ned_accel - np.cross(pqr, uvw)
-
-    def _calc_eul_dot(self, eul, pqr):
-        s_roll = np.sin(eul[0])
-        c_roll = np.cos(eul[0])
-        t_pitch = np.tan(eul[1])
-        sc_pitch = 1 / np.cos(eul[1])
-        R = np.array(
-            [
-                [1, s_roll * t_pitch, c_roll * t_pitch],
-                [0, c_roll, -s_roll],
-                [0, s_roll * sc_pitch, c_roll * sc_pitch],
-            ]
-        )
-        return R @ pqr
-
     def eul_to_dcm(self, r1, r2, r3):
         """Convert euler angles to a DCM.
 
@@ -455,74 +429,91 @@ class Vehicle:
         3x3 numpy array
             3-2-1 DCM.
         """
-        c1 = np.cos(r1)
-        s1 = np.sin(r1)
-        R1 = np.array([[c1, s1, 0], [-s1, c1, 0], [0, 0, 1]])
-        c2 = np.cos(r2)
-        s2 = np.sin(r2)
-        R2 = np.array([[c2, 0, -s2], [0, 1, 0], [s2, 0, c2]])
-        c3 = np.cos(r3)
-        s3 = np.sin(r3)
-        R3 = np.array([[1, 0, 0], [0, c3, s3], [0, -s3, c3]])
+        cx = np.cos(r3)
+        cy = np.cos(r2)
+        cz = np.cos(r1)
+        sx = np.sin(r3)
+        sy = np.sin(r2)
+        sz = np.sin(r1)
 
-        return R3 @ R2 @ R1
+        return np.array(
+            [
+                [cy * cz, cy * sz, -sy],
+                [sx * sy * cz - cx * sz, sx * sy * sz + cx * cz, sx * cy],
+                [cx * sy * cz + sx * sz, cx * sy * sz - sx * cz, cx * cy],
+            ]
+        )
 
     def _six_dof_model(self, force, mom, dt):
-        ned_accel = force / self.params.mass.mass_kg
+        def ode_ang(t, x, m):
+            s_phi = np.sin(x[0])
+            c_phi = np.cos(x[0])
+            t_theta = np.tan(x[1])
+            c_theta = np.cos(x[1])
+            if np.abs(c_theta) < np.finfo(float).eps:
+                c_theta = np.finfo(float).eps * np.sign(c_theta)
+            eul_dot_mat = np.array(
+                [
+                    [1, s_phi * t_theta, c_phi * t_theta],
+                    [0, c_phi, -s_phi],
+                    [0, s_phi / c_theta, c_phi / c_theta],
+                ]
+            )
 
-        body_rot_accel = self._calc_pqr_dot(
-            self.state[v_smap.body_rot_rate].reshape((3, 1)),
-            np.array(self.params.mass.inertia_kgm2),
-            np.zeros((3, 3)),
-            mom,
-        )
+            xdot = np.zeros(6)
+            xdot[0:3] = eul_dot_mat @ x[3:6]
+            xdot[3:6] = np.linalg.inv(self.params.mass.inertia_kgm2) @ (
+                m - np.cross(x[3:6], self.params.mass.inertia_kgm2 @ x[3:6])
+            )
 
-        # integrator to get body rotation rate
-        r = integrate.ode(
-            lambda t, x: self._calc_pqr_dot(
-                x.reshape((3, 1)),
-                np.array(self.params.mass.inertia_kgm2),
-                np.zeros((3, 3)),
-                mom,
+            return xdot
+
+        def ode(t, x, f, m):
+            # x is NED pos x/y/z, body vel x/y/z, phi, theta, psi, body omega x/y/z
+            dcm_e2b = self.eul_to_dcm(x[8], x[7], x[6])
+            # uvw = x[3:6]
+            # eul = x[6:9]
+            # pqr = x[9:12]
+
+            xdot = np.zeros(12)
+            xdot[0:3] = dcm_e2b.T @ x[3:6]
+            xdot[3:6] = f / self.params.mass.mass_kg + np.cross(x[3:6], x[9:12])
+            xdot[6:12] = ode_ang(t, x[6:12], m)
+
+            return xdot
+
+        r = integrate.ode(ode).set_integrator("dopri5").set_f_params(force, mom)
+        eul_inds = v_smap.roll + v_smap.pitch + v_smap.yaw
+        x0 = np.concatenate(
+            (
+                self.state[v_smap.ned_pos].flatten(),
+                self.state[v_smap.body_vel].flatten(),
+                self.state[eul_inds].flatten(),
+                self.state[v_smap.body_rot_rate].flatten(),
             )
         )
-        r.set_integrator("dopri5")
-        r.set_initial_value(self.state[v_smap.body_rot_rate])
-        r.integrate(dt)
-        if not r.successful():
-            raise RuntimeError("Integration of body rotation rate failed.")
-        body_rot_rate = r.y
+        r.set_initial_value(x0, 0)
+        y = r.integrate(dt)
 
-        body_accel = self._calc_uvw_dot(
-            self.state[v_smap.body_vel], body_rot_rate, ned_accel
-        )
-        # integrator to get body velocity
-        r = integrate.ode(lambda t, x: self._calc_uvw_dot(x, body_rot_rate, ned_accel))
-        r.set_integrator("dopri5")
-        r.set_initial_value(self.state[v_smap.body_vel])
-        r.integrate(dt)
         if not r.successful():
-            raise RuntimeError("Integration of body acceleration failed.")
-        body_vel = r.y
+            raise RuntimeError("Integration failed.")
 
-        # integration to get euler angles
-        r = integrate.ode(lambda t, x: self._calc_eul_dot(x, body_rot_rate))
-        r.set_integrator("dopri5")
-        eul_inds = v_smap.roll + v_smap.pitch + v_smap.yaw
-        r.set_initial_value(self.state[eul_inds])
-        r.integrate(dt)
-        if not r.successful():
-            raise RuntimeError("Integration of body rotation rate failed.")
-        roll = r.y[0]
-        pitch = r.y[1]
-        yaw = r.y[2]
+        ned_pos = y[0:3]
+        body_vel = y[3:6]
+        roll = y[6]
+        pitch = y[7]
+        yaw = y[8]
+        body_rot_rate = y[9:12]
 
         # get dcm
-        dcm_earth2body = self.eul_to_dcm(yaw, pitch, roll)
+        dcm_earth2body = self.eul_to_dcm(x0[8], x0[7], x0[6])
 
-        # get ned vel and pos
-        ned_vel = (dcm_earth2body.T @ body_vel).ravel()
-        ned_pos = self.state[v_smap.ned_pos] + dt * ned_vel
+        ned_vel = dcm_earth2body.T @ body_vel
+
+        xdot = ode(dt, x0, force, mom)
+        body_accel = xdot[3:6]
+        body_rot_accel = xdot[9:12]
+        ned_accel = body_accel - np.cross(x0[3:6], x0[9:12])
 
         return (
             ned_vel,
@@ -1158,7 +1149,6 @@ class SimpleLAGERSuper(SimpleMultirotor):
         self._navData = super_bind.NavData()
         self._telemData = super_bind.TelemData()
         self._vmsData = super_bind.VmsData()
-        self._reached_wp_on_prev = False
         self._last_gps_upd_time = -np.inf
         self._gps_update_rate_hz = 5
 
@@ -1568,11 +1558,6 @@ class SimpleLAGERSuper(SimpleMultirotor):
     def desired_motor_cmds(self, val):
         raise RuntimeError("desired_motor_cmds is readonly")
 
-    # @property
-    # def waypoint_reached_rising_edge(self):
-    #     """Rising edge of waypoint reached signal."""
-    #     return self._vmsData.waypoint_reached and not self._reached_wp_on_prev
-
     def update_fmu_states(self, tt):
         """Update the flight management unit for the control system.
 
@@ -1612,6 +1597,4 @@ class SimpleLAGERSuper(SimpleMultirotor):
             self._telemData.current_waypoint += 1
         self._telemData.waypoints_updated = False
 
-        return super().propagate_state(
-            self.desired_motor_cmds, self.dt
-        )
+        return super().propagate_state(self.desired_motor_cmds, self.dt)
