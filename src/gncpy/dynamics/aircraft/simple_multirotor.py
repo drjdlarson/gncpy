@@ -345,15 +345,15 @@ class Vehicle:
     def _calc_aero_force_mom(self, dyn_pres, body_vel):
         mom = np.zeros(3)
         xy_spd = np.linalg.norm(body_vel[0:2])
-        if xy_spd < 1e-6:
+        if xy_spd < np.finfo(float).eps:
             inc_ang = 0
         else:
-            inc_ang = np.arctan(body_vel[2] / xy_spd)
+            inc_ang = np.arctan(xy_spd / body_vel[2])
 
         lut_npts = len(self.params.geo.front_area_m2)
         front_area = np.interp(
-            inc_ang,
-            np.linspace(-np.pi / 2, np.pi / 2, lut_npts),
+            inc_ang*180/np.pi,
+            np.linspace(-180, 180, lut_npts),
             self.params.geo.front_area_m2,
         )
 
