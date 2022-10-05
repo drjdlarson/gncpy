@@ -463,8 +463,11 @@ class KalmanFilter(BayesFilter):
         return est_meas, meas_mat
 
     def _meas_fit_pdf(self, meas, est_meas, meas_cov):
+        extra_args = {}
+        if np.abs(np.linalg.det(meas_cov)) > np.finfo(float).eps:
+            extra_args['allow_singular'] = True
         return stats.multivariate_normal.pdf(
-            meas.ravel(), mean=est_meas.ravel(), cov=meas_cov
+            meas.ravel(), mean=est_meas.ravel(), cov=meas_cov, **extra_args
         )
 
     def _calc_meas_fit(self, meas, est_meas, meas_cov):
