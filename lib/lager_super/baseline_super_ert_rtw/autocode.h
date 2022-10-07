@@ -1,6 +1,15 @@
-// Model version                  : 4.118
+//
+// Academic License - for use in teaching, academic research, and meeting
+// course requirements at degree granting institutions only.  Not for
+// government, commercial, or other organizational use.
+//
+// File: autocode.h
+//
+// Code generated for Simulink model 'super'.
+//
+// Model version                  : 4.129
 // Simulink Coder version         : 9.7 (R2022a) 13-Nov-2021
-// C/C++ source code generated on : Sun Sep 18 18:11:46 2022
+// C/C++ source code generated on : Fri Oct  7 08:30:17 2022
 //
 #ifndef RTW_HEADER_autocode_h_
 #define RTW_HEADER_autocode_h_
@@ -102,7 +111,7 @@ extern "C" {
       public:
         // Block signals and states (default storage) for system '<Root>'
         struct D_Work {
-            real_T motor_arm_ramp_integrator_DSTAT;// '<S23>/motor_arm_ramp_integrator'
+            real_T motor_arm_ramp_integrator_DSTAT;// '<S23>/motor_arm_ramp_integrator' 
             real_T UnitDelay_DSTATE;   // '<S692>/Unit Delay'
             real_T UnitDelay_DSTATE_m; // '<S685>/Unit Delay'
             real32_T cur_target_pos_m[3];
@@ -110,7 +119,7 @@ extern "C" {
             real32_T prev_target_pos[3];// '<S647>/determine_prev_tar_pos'
             real32_T vb_xy[2];         // '<S484>/Product'
             real32_T Switch[2];        // '<S8>/Switch'
-            real32_T DiscreteTimeIntegrator;// '<S705>/Discrete-Time Integrator'
+            real32_T DiscreteTimeIntegrator;// '<S705>/Discrete-Time Integrator' 
             real32_T cur_target_heading_rad;// '<S474>/determine_target'
             real32_T max_v_z_mps;      // '<S474>/determine_target'
             real32_T max_v_hor_mps;    // '<S474>/determine_target'
@@ -146,8 +155,8 @@ extern "C" {
             real32_T Integrator_DSTATE_l;// '<S64>/Integrator'
             real32_T Integrator_DSTATE_b;// '<S173>/Integrator'
             real32_T UD_DSTATE;        // '<S135>/UD'
-            real32_T DiscreteTimeIntegrator_DSTATE;// '<S2>/Discrete-Time Integrator'
-            real32_T DiscreteTimeIntegrator_DSTATE_k;// '<S705>/Discrete-Time Integrator'
+            real32_T DiscreteTimeIntegrator_DSTATE;// '<S2>/Discrete-Time Integrator' 
+            real32_T DiscreteTimeIntegrator_DSTATE_k;// '<S705>/Discrete-Time Integrator' 
             real32_T Integrator_DSTATE_e;// '<S572>/Integrator'
             real32_T UD_DSTATE_h;      // '<S591>/UD'
             real32_T Integrator_DSTATE_bm;// '<S627>/Integrator'
@@ -181,7 +190,7 @@ extern "C" {
         // Invariant block signals (default storage)
         struct ConstBlockIO {
             real32_T Transpose[32];    // '<S4>/Transpose'
-            real32_T ramp_time_intergratorsignal;// '<S23>/ramp_time_intergrator signal'
+            real32_T ramp_time_intergratorsignal;// '<S23>/ramp_time_intergrator signal' 
             real32_T Gain1;            // '<S23>/Gain1'
             real32_T Gain;             // '<S366>/Gain'
         };
@@ -191,7 +200,7 @@ extern "C" {
             // Expression: [172, 172, 172, 172, 172, 172]
             //  Referenced by: '<S13>/Constant'
 
-            real_T Constant_Value_fw[6];
+            real_T Constant_Value_f[6];
 
             // Computed Parameter: Constant_Value_i
             //  Referenced by: '<S22>/Constant'
@@ -266,7 +275,6 @@ extern const bfs::Autocode::ConstParam rtConstP;
 //  Block '<S365>/y_pos_tracking' : Unused code path elimination
 //  Block '<S461>/Data Type Duplicate' : Unused code path elimination
 //  Block '<S461>/Data Type Propagation' : Unused code path elimination
-//  Block '<S11>/Scope' : Unused code path elimination
 //  Block '<S479>/Abs' : Unused code path elimination
 //  Block '<S479>/Constant4' : Unused code path elimination
 //  Block '<S479>/Constant5' : Unused code path elimination

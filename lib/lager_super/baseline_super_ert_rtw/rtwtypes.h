@@ -1,6 +1,15 @@
-// Model version                  : 4.101
+//
+// Academic License - for use in teaching, academic research, and meeting
+// course requirements at degree granting institutions only.  Not for
+// government, commercial, or other organizational use.
+//
+// File: rtwtypes.h
+//
+// Code generated for Simulink model 'super'.
+//
+// Model version                  : 4.128
 // Simulink Coder version         : 9.7 (R2022a) 13-Nov-2021
-// C/C++ source code generated on : Sun Sep 18 13:49:41 2022
+// C/C++ source code generated on : Thu Oct  6 16:53:14 2022
 //
 
 #ifndef RTWTYPES_H

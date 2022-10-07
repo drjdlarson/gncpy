@@ -1,10 +1,20 @@
-// Model version                  : 4.118
+//
+// Academic License - for use in teaching, academic research, and meeting
+// course requirements at degree granting institutions only.  Not for
+// government, commercial, or other organizational use.
+//
+// File: autocode.cpp
+//
+// Code generated for Simulink model 'super'.
+//
+// Model version                  : 4.129
 // Simulink Coder version         : 9.7 (R2022a) 13-Nov-2021
-// C/C++ source code generated on : Sun Sep 18 18:11:46 2022
+// C/C++ source code generated on : Fri Oct  7 08:30:17 2022
 //
 
 #include "autocode.h"
 #include "rtwtypes.h"
+#include "flight/global_defs.h"
 #include <cmath>
 #include <cstring>
 #include <cfloat>
@@ -141,10 +151,6 @@ const bfs::Autocode::ConstParam rtConstP = {
 //    '<S685>/Constant'
 #define rtCP_pooled8                   (0.01)
 
-// Expression: Aircraft.Control.wp_radius
-//  Referenced by: '<S696>/Constant'
-#define rtCP_Constant_Value_f          (1.5)
-
 // Expression: Aircraft.Control.motor_spin_min
 //  Referenced by: '<S4>/Constant1'
 #define rtCP_Constant1_Value           (0.15)
@@ -158,6 +164,7 @@ const bfs::Autocode::ConstParam rtConstP = {
 //    '<S363>/Constant'
 //    '<S191>/Constant'
 //    '<S690>/Constant'
+//    '<S696>/Constant2'
 //    '<S697>/Constant'
 #define rtCP_pooled9                   (10.0F)
 
@@ -1571,8 +1578,12 @@ namespace bfs
         // Outputs for Enabled SubSystem: '<S679>/rtl submodes' incorporates:
         //   EnablePort: '<S696>/Enable'
         if (rtb_Compare_i) {
+            // Selector: '<S696>/Selector1' incorporates:
+            //   Constant: '<S696>/Constant2'
+            //   Inport: '<Root>/Telemetry Data'
+            in_deadband_range = telem.param[static_cast<int32_T>(rtCP_pooled9)];
+
             // MATLAB Function: '<S696>/determine_fast_rtl_mode' incorporates:
-            //   Constant: '<S696>/Constant'
             //   Constant: '<S696>/Constant1'
             //   Inport: '<Root>/Navigation Filter Data'
             rtDWork.sub_mode_d = rtb_Switch2_c;
@@ -1615,7 +1626,7 @@ namespace bfs
             }
 
             in_avg = in_deadband_low * std::sqrt(in_avg);
-            if (static_cast<real_T>(in_avg) <= rtCP_Constant_Value_f) {
+            if (in_avg <= in_deadband_range) {
                 // '<S698>:1:6' sub_mode = int8(4);
                 rtDWork.sub_mode_d = 4;
 
@@ -3944,7 +3955,7 @@ namespace bfs
             //   Constant: '<S13>/Constant'
             if (rtb_Compare_hs) {
             } else {
-                c_lon = static_cast<real32_T>(rtConstP.Constant_Value_fw[i]);
+                c_lon = static_cast<real32_T>(rtConstP.Constant_Value_f[i]);
             }
 
             // End of Switch: '<S13>/Switch'
