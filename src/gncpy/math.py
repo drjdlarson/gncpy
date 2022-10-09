@@ -29,8 +29,8 @@ def get_jacobian(x, fnc, f_args=(), step_size=10**-7):
     n_vars = x.size
     J = np.zeros((n_vars, 1))
     for ii in range(n_vars):
-        x_r = x.copy()
-        x_l = x.copy()
+        x_r = x.copy().astype(float)
+        x_l = x.copy().astype(float)
         x_r[ii] += step_size
         x_l[ii] -= step_size
         J[ii] = (fnc(x_r, *f_args) - fnc(x_l, *f_args))
@@ -66,8 +66,8 @@ def get_hessian(x, fnc, f_args=(), step_size=np.finfo(float).eps**(1 / 4)):
         delta_i = np.zeros(x.shape)
         delta_i[ii] = step_size
 
-        x_ip = x + delta_i
-        x_im = x - delta_i
+        x_ip = x.astype(float) + delta_i
+        x_im = x.astype(float) - delta_i
         for jj in range(n_vars):
             # only get upper triangle since hessian is symmetric
             if jj < ii:
