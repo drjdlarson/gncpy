@@ -39,7 +39,9 @@ players:
             terrain_alt_wgs84: 67.117600
             wp_radius: 0.75       # m
             fly_height: 50      # m
+            init_height: 5
             ned_mag_field: [22.9383, -0.0337, -0.1326]
+            init_eul_angs: [inf, 0, 0]
         shape: !Shape2dParams
             type: 'sprite'
             width: 1

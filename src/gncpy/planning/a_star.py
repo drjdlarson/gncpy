@@ -146,10 +146,11 @@ class AStar:
         2 numpy array
             grid row/column index.
         """
-        # NOTE: x is column, y is row
+        # NOTE: x is column, y is row, bound to given area
+        p = np.max(np.vstack((pos.ravel(), self.min.ravel())), axis=0)
+        p = np.min(np.vstack((p, self.max.ravel())), axis=0)
         inds = np.floor(
-            (pos.ravel() - self.min.ravel() + self.resolution / 2)
-            / self.resolution.ravel()
+            (p - self.min.ravel() + self.resolution / 2) / self.resolution.ravel()
         )[[1, 0]]
 
         return inds.astype(int)
@@ -196,6 +197,9 @@ class AStar:
             path[p_ind, :] = self.ind_to_pos(curNode.indices)
             p_ind += 1
             parent_idx = curNode.parent_idx
+
+        # remove all the extras
+        path = path[:p_ind, :]
 
         # flip so first row is starting point
         return path[::-1, :], endNode.cost
@@ -362,7 +366,7 @@ class AStar:
         self._hazards = hazards
 
         max_inds = self.pos_to_ind(self.max)
-        self._map = np.zeros(max_inds.tolist())
+        self._map = np.zeros([ii + 1 for ii in max_inds.tolist()])
 
         if self._obstacles is not None:
             for obs in self._obstacles:
@@ -415,7 +419,7 @@ class AStar:
         save_animation=False,
         plt_opts=None,
         ttl=None,
-        fig=None
+        fig=None,
     ):
         """Runs the search algorithm.
 
@@ -532,7 +536,7 @@ class AStar:
             c_ind = keys[s_inds[0]]
             curNode = open_set[c_ind]
             if self.use_beam_search and s_inds.size > self.beam_search_max_nodes:
-                for ii in s_inds[:self.beam_search_max_nodes - 1:-1]:
+                for ii in s_inds[: self.beam_search_max_nodes - 1 : -1]:
                     del open_set[keys[ii]]
 
             del open_set[c_ind]

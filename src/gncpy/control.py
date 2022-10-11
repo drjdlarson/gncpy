@@ -182,18 +182,26 @@ class LQR:
                 elif not forward and self.dynObj.dt > 0:
                     self.dynObj.dt *= -1
 
-            if forward:
-                return self.dynObj.propagate_state(
-                    tt, x_hat, u=u_hat, state_args=state_args, ctrl_args=ctrl_args
-                )
+                if forward:
+                    return self.dynObj.propagate_state(
+                        tt, x_hat, u=u_hat, state_args=state_args, ctrl_args=ctrl_args
+                    )
+                else:
+                    return self.dynObj.propagate_state(
+                        tt,
+                        x_hat,
+                        u=u_hat,
+                        state_args=inv_state_args,
+                        ctrl_args=inv_ctrl_args,
+                    )
             else:
-                return self.dynObj.propagate_state(
-                    tt,
-                    x_hat,
-                    u=u_hat,
-                    state_args=inv_state_args,
-                    ctrl_args=inv_ctrl_args,
-                )
+                if forward:
+                    return self.dynObj.propagate_state(
+                        tt, x_hat, u=u_hat, state_args=state_args, ctrl_args=ctrl_args
+                    )
+                else:
+                    A, B = self.get_state_space(tt, x_hat, u_hat, state_args, ctrl_args)
+                    return la.inv(A) @ (x_hat - B @ u_hat)
 
         else:
             raise NotImplementedError()
@@ -934,15 +942,18 @@ class ELQR(LQR):
                     self.dynObj.dt *= -1  # set to inverse dynamics
 
                 ABar = self.dynObj.get_state_mat(
-                    tt, x_hat_p, *state_args, u=u_hat, ctrl_args=ctrl_args
+                    tt, x_hat_p, *inv_state_args, u=u_hat, ctrl_args=ctrl_args
                 )
-                BBar = self.dynObj.get_input_mat(tt, x_hat_p, u_hat, *ctrl_args)
+                BBar = self.dynObj.get_input_mat(tt, x_hat_p, u_hat, *inv_ctrl_args)
 
             else:
-                raise NotImplementedError("Need to implement this")
+                A, B = self.get_state_space(tt, x_hat_p, u_hat, state_args, ctrl_args)
+                ABar = la.inv(A)
+                BBar = -ABar @ B
 
         else:
             raise NotImplementedError("Need to implement this")
+
         cBar = x_hat - ABar @ x_hat_p - BBar @ u_hat
 
         return x_hat_p, ABar, BBar, cBar
@@ -1222,7 +1233,12 @@ class ELQR(LQR):
         ctrl_args,
         inv_state_args,
         inv_ctrl_args,
+        color=None,
+        alpha=0.2,
+        zorder=-10
     ):
+        if color is None:
+            color = (0.5, 0.5, 0.5)
         state_traj = np.nan * np.ones((num_timesteps + 1, self._init_state.size))
         state_traj[0, :] = self._init_state.flatten()
         for kk, tt in enumerate(time_vec[:-1]):
@@ -1245,9 +1261,9 @@ class ELQR(LQR):
         fig.axes[self._ax].plot(
             state_traj[:, plt_inds[0]],
             state_traj[:, plt_inds[1]],
-            color=(0.5, 0.5, 0.5),
-            alpha=0.2,
-            zorder=-10,
+            color=color,
+            alpha=alpha,
+            zorder=zorder,
         )
 
         plt.pause(0.005)
