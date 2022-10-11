@@ -1,3 +1,6 @@
+#ifndef FLIGHT_CODE_INCLUDE_FLIGHT_GLOBAL_DEFS_H_
+#define FLIGHT_CODE_INCLUDE_FLIGHT_GLOBAL_DEFS_H_
+
 #include <cstddef>
 #include <cstdint>
 #include <array>
@@ -152,3 +155,5 @@ struct TelemData {
   std::array<bfs::MissionItem, NUM_FENCE_POINTS> fence;
   std::array<bfs::MissionItem, NUM_RALLY_POINTS> rally;
 };
+
+#endif  // FLIGHT_CODE_INCLUDE_FLIGHT_GLOBAL_DEFS_H_
