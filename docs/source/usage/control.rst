@@ -81,3 +81,20 @@ which gives this as output.
 
 .. image:: /examples/control/elqr_modify_quadratize.gif
    :align: center
+
+
+ELQR Linear Dynamics
+--------------------
+The ELQR algorithm can be run for a finite horizon with linear dynamics and
+a non-quadratic cost with the following. Note the state trajectory output can be
+used as a motion plan. This version uses dynamics with a constraint on the states
+in addition to the obstacles in the environment.
+
+.. literalinclude:: /examples/control/elqr.py
+   :linenos:
+   :pyobject: linear
+
+which gives this as output.
+
+.. image:: /examples/control/elqr_linear.gif
+   :align: center
