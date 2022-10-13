@@ -18,14 +18,10 @@ from gncpy.game_engine.entities import EntityManager
 yaml = YAML()
 """Global yaml interpretter, should be used when parsing any came configs."""
 
-library_config_dir = os.path.join(
-    pathlib.Path(__file__).parent.parent.resolve(), "games", "configs"
-)
-"""Directory of the libraries game configs where the default yaml files live."""
-
 
 def ndarray_representer(dumper, data):
     return dumper.represent_list(data.tolist())
+
 
 class WindowParams:
     """Parameters of the game window to be parsed by the yaml parser.
@@ -110,6 +106,11 @@ class BaseGame(ABC):
         Random number generator.
     seed_val : int
         Optional seed used in the random generator.
+    library_dir : string
+        Default directory to look for config files defined by the package.
+        This is useful when extending this class outside of the gncpy
+        package to provide a new default search location. The default of
+        None is good for most other cases.
     """
 
     def __init__(
@@ -120,6 +121,7 @@ class BaseGame(ABC):
         use_library_config=False,
         seed=None,
         rng=None,
+        library_dir=None,
     ):
         """Initialize the object.
 
@@ -141,8 +143,19 @@ class BaseGame(ABC):
         rng : numpy random generator, optional
             Instance of the random generator to use. The default is None and will
             cause one to be created.
+        library_dir : string, optional
+            Default directory to look for config files defined by the package.
+            This is useful when extending this class outside of the gncpy
+            package to provide a new default search location. The default of
+            None is good for most other cases.
         """
         super().__init__()
+        if library_dir is None:
+            self.library_config_dir = os.path.join(
+                pathlib.Path(__file__).parent.parent.resolve(), "games", "configs"
+            )
+        else:
+            self.library_config_dir = library_dir
 
         self.config_file = self.validate_config_file(
             config_file, use_library=use_library_config
@@ -218,7 +231,7 @@ class BaseGame(ABC):
         """
         succ = os.path.isfile(config_file)
         if use_library or not succ:
-            cf = os.path.join(library_config_dir, config_file)
+            cf = os.path.join(self.library_config_dir, config_file)
             succ = os.path.isfile(cf)
         else:
             cf = config_file
@@ -255,7 +268,7 @@ class BaseGame(ABC):
                     setattr(true_item, field, val)
                 elif val_type == list:
                     if not isinstance(val, list):
-                        val = list([val,])
+                        val = list([val,])  # noqa
                     lst = []
                     for lst_item in val:
                         lst.append(helper(lst_item))
@@ -267,7 +280,7 @@ class BaseGame(ABC):
                 elif val_type == np.ndarray:
                     try:
                         if not isinstance(val, list):
-                            val = list([val,])
+                            val = list([val,])  # noqa
                         arr_val = np.array(val, dtype=float)
                     except ValueError:
                         raise RuntimeError(
