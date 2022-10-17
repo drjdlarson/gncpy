@@ -1021,12 +1021,68 @@ class CoordinatedTurnUnknown(NonlinearDynamicsBase):
         return F @ state + G @ u
 
 
-class ClohessyWiltshireOrbit(LinearDynamicsBase):
+class ClohessyWiltshireOrbit2d(LinearDynamicsBase):
     """Implements the Clohessy Wiltshire orbit model.
 
-    This must be instantiated so individual attributes can be assigned. This
-    based on :cite:`Clohessy1960_TerminalGuidanceSystemforSatelliteRendezvous`
+    Notes
+    -----
+    This is based on
+    :cite:`Clohessy1960_TerminalGuidanceSystemforSatelliteRendezvous`
     and :cite:`Desai2013_AComparativeStudyofEstimationModelsforSatelliteRelativeMotion`
+    but only implements the 2D case
+
+    Attributes
+    ----------
+    mean_motion :float
+        mean motion of reference spacecraft
+    """
+
+    state_names = ("x pos", "y pos", "x vel", "y vel")
+
+    def __init__(self, mean_motion=None, **kwargs):
+        self.mean_motion = mean_motion
+
+        super().__init__(**kwargs)
+
+    def get_state_mat(self, timestep, dt):
+        """Calculates the state transition matrix.
+
+        Parameters
+        ----------
+        timestep : float
+            current timestep.
+        dt : float
+            time difference.
+
+        Returns
+        -------
+        F : 4 x 4 numpy array
+            state transition matrix.
+
+        """
+        n = self.mean_motion
+        c_dtn = np.cos(dt * n)
+        s_dtn = np.sin(dt * n)
+        F = np.array(
+            [
+                [4 - 3 * c_dtn, 0, s_dtn / n, -(2 * c_dtn - 2) / n],
+                [
+                    6 * s_dtn - 6 * dt * n,
+                    1,
+                    (2 * c_dtn - 2) / n,
+                    (4 * s_dtn - 3 * dt * n) / n,
+                ],
+                [3 * n * s_dtn, 0, c_dtn, 2 * s_dtn],
+                [6 * n * (c_dtn - 1), 0, -2 * s_dtn, 4 * c_dtn - 3],
+            ]
+        )
+        return F
+
+
+class ClohessyWiltshireOrbit(ClohessyWiltshireOrbit2d):
+    """Implements the Clohessy Wiltshire orbit model.
+
+    This adds on the z component to make the model 3d.
 
     Attributes
     ----------
@@ -1036,9 +1092,7 @@ class ClohessyWiltshireOrbit(LinearDynamicsBase):
 
     state_names = ("x pos", "y pos", "z pos", "x vel", "y vel", "z vel")
 
-    def __init__(self, mean_motion=None, **kwargs):
-        self.mean_motion = mean_motion
-
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
     def get_dis_process_noise_mat(self, dt):
@@ -1075,23 +1129,16 @@ class ClohessyWiltshireOrbit(LinearDynamicsBase):
         n = self.mean_motion
         c_dtn = np.cos(dt * n)
         s_dtn = np.sin(dt * n)
-        F = np.array(
-            [
-                [4 - 3 * c_dtn, 0, 0, s_dtn / n, -(2 * c_dtn - 2) / n, 0],
-                [
-                    6 * s_dtn - 6 * dt * n,
-                    1,
-                    0,
-                    (2 * c_dtn - 2) / n,
-                    (4 * s_dtn - 3 * dt * n) / n,
-                    0,
-                ],
-                [0, 0, c_dtn, 0, 0, s_dtn / n],
-                [3 * n * s_dtn, 0, 0, c_dtn, 2 * s_dtn, 0],
-                [6 * n * (c_dtn - 1), 0, 0, -2 * s_dtn, 4 * c_dtn - 3, 0],
-                [0, 0, -n * s_dtn, 0, 0, c_dtn],
-            ]
-        )
+        F = np.zeros((6, 6))
+        F2d = super().get_state_mat(timestep, dt)
+        F[:2, :2] = F2d[:2, :2]
+        F[:2, 3:5] = F2d[:2, 2:]
+        F[3:5, :2] = F2d[2:, :2]
+        F[3:5, 3:5] = F2d[2:, 2:]
+        F[2, 2] = c_dtn
+        F[2, 5] = s_dtn / n
+        F[5, 2] = -n * s_dtn
+        F[5, 5] = c_dtn
         return F
 
 
