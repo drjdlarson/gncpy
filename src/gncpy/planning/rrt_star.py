@@ -410,8 +410,8 @@ class LQRRRTStar:
                             if save_animation:
                                 self.save_frame()
 
-                        details = (cost, u_traj, self._fig, self._frame_list)
-                        return (traj, *details) if provide_details else traj
+                        details = (cost, u_traj.T, self._fig, self._frame_list)
+                        return (traj.T, *details) if provide_details else traj.T
 
         if disp:
             print("\tReached Max Iteration!!")
@@ -442,8 +442,8 @@ class LQRRRTStar:
             if disp:
                 print("\tCannot find path!!")  # Undo Print
 
-        details = (cost, u_traj, self._fig, self._frame_list)
-        return (traj, *details) if provide_details else traj
+        details = (cost, u_traj.T, self._fig, self._frame_list)
+        return (traj.T, *details) if provide_details else traj.T
 
     def generate_final_course(self, goal_index):  # Generate Final Course
         path = self.end.sv.reshape(-1, 1)

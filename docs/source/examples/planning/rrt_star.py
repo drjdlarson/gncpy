@@ -234,7 +234,7 @@ def elqrrrtstar():
     # define the LQR controller
     controller = gcontrol.ELQR(time_horizon=time_horizon, max_iters=300, tol=1e-2)
     controller_args = dict()
-    Q = np.diag([50, 50, 5, 2])
+    Q = np.diag([50, 50, 4, 2])
     R = np.diag([0.05, 0.001])
 
     obs_factor = 1

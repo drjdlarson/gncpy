@@ -448,7 +448,9 @@ class SimpleUAV2d(BaseGame2d):
             if params.collision.height > 0 and params.collision.width > 0:
                 e.add_component(
                     gcomp.CCollision,
-                    w=gphysics.dist_to_pixels(params.collision.width, self.dist_per_pix[0]),
+                    w=gphysics.dist_to_pixels(
+                        params.collision.width, self.dist_per_pix[0]
+                    ),
                     h=gphysics.dist_to_pixels(
                         params.collision.height, self.dist_per_pix[1]
                     ),
@@ -487,7 +489,9 @@ class SimpleUAV2d(BaseGame2d):
             if params.collision.height > 0 and params.collision.width > 0:
                 e.add_component(
                     gcomp.CCollision,
-                    w=gphysics.dist_to_pixels(params.collision.width, self.dist_per_pix[0]),
+                    w=gphysics.dist_to_pixels(
+                        params.collision.width, self.dist_per_pix[0]
+                    ),
                     h=gphysics.dist_to_pixels(
                         params.collision.height, self.dist_per_pix[1]
                     ),
@@ -553,7 +557,9 @@ class SimpleUAV2d(BaseGame2d):
             if params.collision.height > 0 and params.collision.width > 0:
                 e.add_component(
                     gcomp.CCollision,
-                    w=gphysics.dist_to_pixels(params.collision.width, self.dist_per_pix[0]),
+                    w=gphysics.dist_to_pixels(
+                        params.collision.width, self.dist_per_pix[0]
+                    ),
                     h=gphysics.dist_to_pixels(
                         params.collision.height, self.dist_per_pix[1]
                     ),
@@ -912,9 +918,7 @@ class SimpleUAV2d(BaseGame2d):
             cDyn.state[p_ii], self.dist_per_pix, min_pos=self.params.physics.min_pos
         )
         if v_ii is not None:
-            cTrans.vel = gphysics.dist_to_pixels(
-                cDyn.state[v_ii], self.dist_per_pix
-            )
+            cTrans.vel = gphysics.dist_to_pixels(cDyn.state[v_ii], self.dist_per_pix)
 
         e.add_component(gcomp.CEvents)
 
@@ -931,9 +935,7 @@ class SimpleUAV2d(BaseGame2d):
         e.add_component(
             gcomp.CCollision,
             w=gphysics.dist_to_pixels(params.collision.width, self.dist_per_pix[0]),
-            h=gphysics.dist_to_pixels(
-                params.collision.height, self.dist_per_pix[1]
-            ),
+            h=gphysics.dist_to_pixels(params.collision.height, self.dist_per_pix[1]),
         )
 
         e.add_component(gcomp.CCapabilities, capabilities=params.capabilities)
