@@ -2,7 +2,7 @@
 import io
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.patches import Circle
+from matplotlib.patches import Circle, Rectangle
 from copy import deepcopy
 from PIL import Image
 from sys import exit
@@ -116,6 +116,7 @@ class LQRRRTStar:
         self.connect_circle_dist = connect_circle_dist
         self.step_size = step_size
         self.expand_dis = expand_dis
+        self.gif_frame_skip = 1
 
         # Obstacles
         self.ell_con = None
@@ -127,6 +128,8 @@ class LQRRRTStar:
         self.planner = planner
         self.S = np.array([[]])
         self.planner_args = {}
+
+        self._disp = False
 
         # plotting helpers
         self._fig = None
@@ -165,6 +168,10 @@ class LQRRRTStar:
             for k, r in enumerate(self.obstacle_list[:, -1]):
                 self.P[:, :, k] = r ** (-2) * np.eye(dim)
 
+    @property
+    def use_box(self):
+        return self.numPos == 2 and self.obstacle_list.shape[1] == 4
+
     def dx(
         self, x1, x2
     ):  # x1 goes to x2. Difference between current state to Reference State
@@ -183,8 +190,12 @@ class LQRRRTStar:
     def draw_obstacles(self, ax):
         for obs in self.obstacle_list:
             if self.numPos == 2:
-                c = Circle(obs[:2], radius=obs[-1], color="k", zorder=1000)
-                self._fig.axes[ax].add_patch(c)
+                if self.use_box:
+                    xy = obs[:2] - obs[2:4] / 2
+                    p = Rectangle(xy, obs[2], obs[3], color="k", zorder=1000)
+                else:
+                    p = Circle(obs[:2], radius=obs[-1], color="k", zorder=1000)
+                self._fig.axes[ax].add_patch(p)
 
             elif self.numPos == 3:
                 self._fig.axes[ax].plot_surface(
@@ -194,6 +205,11 @@ class LQRRRTStar:
     def draw_start(self, start, ax):
         self._fig.axes[ax].scatter(
             *start.ravel()[self._plt_inds], color="g", marker="o", zorder=1000,
+        )
+
+    def draw_end(self, es):
+        self._fig.axes[0].scatter(
+            *es[self._plt_inds], color="r", marker="x", zorder=1000,
         )
 
     def save_frame(self):
@@ -219,7 +235,141 @@ class LQRRRTStar:
 
         self.draw_obstacles(1)
 
-        plt.pause(0.05)
+        plt.pause(0.01)
+
+    def plan_helper(
+        self,
+        cur_time,
+        state_args,
+        ctrl_args,
+        use_convergence,
+        use_first_traj,
+        rtol,
+        show_animation,
+        save_animation,
+    ):
+        last_cost = float("inf")
+        for i in range(self.max_iter):
+            rnd = self.get_random_node()
+            if self._disp:
+                print(
+                    "\tIter: {:4d}, number of nodes: {:5d}, last cost: {:10.4f}".format(
+                        i, len(self.node_list), last_cost
+                    )
+                )
+
+            nearest_ind = self.get_nearest_node_index(
+                cur_time, rnd, state_args, ctrl_args
+            )
+            new_node = self.steer(
+                cur_time,
+                self.node_list[nearest_ind],
+                rnd,
+                state_args,
+                ctrl_args,
+                show_controller=True,
+                planner_ttl="Searching",
+            )
+            if new_node is None:
+                continue
+            if self.not_colliding(new_node):
+                near_indices = self.find_near_nodes(new_node, nearest_ind)
+                new_node = self.choose_parent(
+                    cur_time, new_node, near_indices, state_args, ctrl_args
+                )
+                if new_node:
+                    self.node_list.append(new_node)
+                    self.rewire(cur_time, new_node, near_indices, state_args, ctrl_args)
+
+                    if show_animation and new_node is not None:
+                        if self.numPos == 2:
+                            self._fig.axes[0].plot(
+                                new_node.path[self._plt_inds[0], :],
+                                new_node.path[self._plt_inds[1], :],
+                                color=(0.5, 0.5, 0.5),
+                                alpha=0.15,
+                                zorder=-10,
+                            )
+                        elif self.numPos == 3:
+                            self._fig.axes[0].plot(
+                                new_node.path[self._plt_inds[0], :],
+                                new_node.path[self._plt_inds[1], :],
+                                new_node.path[self._plt_inds[2], :],
+                                color=(0.5, 0.5, 0.5),
+                                alpha=0.1,
+                                zorder=-10,
+                            )
+
+                        plt.pause(0.005)
+                        if save_animation and i % self.gif_frame_skip == 0:
+                            self.save_frame()
+
+            if new_node:
+                last_index = self.search_best_goal_node()
+                if last_index:
+                    traj, u_traj = self.generate_final_course(last_index)
+                    cost = self.node_list[last_index].cost
+                    converged = (
+                        use_convergence
+                        and np.abs(np.abs(last_cost - cost) / cost) < rtol
+                    )
+                    last_cost = cost
+                    if use_first_traj or converged:
+                        if show_animation:
+                            if self.numPos == 2:
+                                self._fig.axes[0].plot(
+                                    traj[self._plt_inds[0], :],
+                                    traj[self._plt_inds[1], :],
+                                    color="g",
+                                )
+                            elif self.numPos == 3:
+                                self._fig.axes[0].plot(
+                                    traj[self._plt_inds[0], :],
+                                    traj[self._plt_inds[1], :],
+                                    traj[self._plt_inds[2], :],
+                                    color="g",
+                                )
+                            plt.pause(0.005)
+
+                            # save final frame
+                            if save_animation:
+                                self.save_frame()
+
+                        details = (cost, u_traj.T, self._fig, self._frame_list)
+                        return traj.T, cost, u_traj.T
+
+        if self._disp:
+            print("\tReached Max Iteration!!")
+
+        last_index = self.search_best_goal_node()
+        if last_index:
+            traj, u_traj = self.generate_final_course(last_index)
+            cost = self.node_list[last_index].cost
+            if show_animation:
+                if self.numPos == 2:
+                    self._fig.axes[0].plot(
+                        traj[self._plt_inds[0], :],
+                        traj[self._plt_inds[1], :],
+                        color="g",
+                    )
+                elif self.numPos == 3:
+                    self._fig.axes[0].plot(
+                        traj[self._plt_inds[0], :],
+                        traj[self._plt_inds[1], :],
+                        traj[self._plt_inds[2], :],
+                        color="g",
+                    )
+                plt.pause(0.005)
+                if save_animation:
+                    self.save_frame()
+        else:
+            traj = np.array([[]])
+            u_traj = np.array([[]])
+            cost = float("inf")
+            if self._disp:
+                print("\tCannot find path!!")
+
+        return traj.T, cost, u_traj.T
 
     def plan(
         self,
@@ -251,14 +401,21 @@ class LQRRRTStar:
         if use_convergence:
             use_first_traj = False
 
+        self._disp = disp
+
         self._plt_inds = plt_inds
         self._fig = fig
 
+        if len(end_state.shape) == 1:
+            _end_arr = end_state.copy().reshape((1, -1))
+        else:
+            _end_arr = end_state.copy().T  # flip so each row is an ending state
+
         self.start = Node(cur_state.reshape((-1, 1)))
-        self.end = Node(end_state.reshape((-1, 1)))
-        self.node_list = [
-            deepcopy(self.start),
-        ]
+        # self.end = Node(end_state.reshape((-1, 1)))
+        # self.node_list = [
+        #     deepcopy(self.start),
+        # ]
 
         self._frame_list = []
         self._show_planner = False
@@ -302,9 +459,7 @@ class LQRRRTStar:
                         self._fig, 0, self._plt_opts, ttl="Tree", use_local=True
                     )
 
-            self._fig.axes[0].scatter(
-                *self.end.sv[plt_inds], color="r", marker="x", zorder=1000,
-            )
+            self.draw_end(_end_arr[0, :])
 
             if self._show_planner:
                 self.planner_args.update(
@@ -313,7 +468,7 @@ class LQRRRTStar:
                         "save_animation": save_animation,
                         "ax_num": 1,
                         "fig": self._fig,
-                        "plt_inds": plt_inds,
+                        "plt_inds": self._plt_inds,
                         "plt_opts": self._plt_opts,
                     }
                 )
@@ -332,118 +487,46 @@ class LQRRRTStar:
             if save_animation:
                 self.save_frame()
 
-        if disp:
+        if self._disp:
             print("Starting LQR-RRT* Planning...")
 
-        last_cost = float("inf")
-        for i in range(self.max_iter):
-            rnd = self.get_random_node()
-            if disp:
-                print(
-                    "\tIter: {:4d}, number of nodes: {:5d}, last cost: {:10.4f}".format(
-                        i, len(self.node_list), last_cost
-                    )
-                )
+        cost = 0
+        for kk, es in enumerate(_end_arr):
+            if kk == 0:
+                self.start = Node(cur_state.reshape((-1, 1)))
+                self.end = Node(es.reshape((-1, 1)))
+                self.node_list = [
+                    deepcopy(self.start),
+                ]
+            else:
+                self.start = Node(_end_arr[kk-1].reshape((-1, 1)))
+                self.end = Node(es.reshape((-1, 1)))
 
-            nearest_ind = self.get_nearest_node_index(
-                cur_time, rnd, state_args, ctrl_args
+                if show_animation:
+                    self.draw_end(es)
+
+            t, c, u = self.plan_helper(
+                cur_time,
+                state_args,
+                ctrl_args,
+                use_convergence,
+                use_first_traj,
+                rtol,
+                show_animation,
+                save_animation,
             )
-            new_node = self.steer(
-                cur_time, self.node_list[nearest_ind], rnd, state_args, ctrl_args, show_controller=True,
-                planner_ttl="Searching",
-            )
-            if new_node is None:
-                continue
-            if self.check_collision(new_node):
-                near_indices = self.find_near_nodes(new_node, nearest_ind)
-                new_node = self.choose_parent(
-                    cur_time, new_node, near_indices, state_args, ctrl_args
-                )
-                if new_node:
-                    self.node_list.append(new_node)
-                    self.rewire(cur_time, new_node, near_indices, state_args, ctrl_args)
+            if t.size == 0:
+                break
+            if kk == 0:
+                traj = t
+                u_traj = u
+            else:
+                traj = np.vstack((traj, t))
+                u_traj = np.vstack((u_traj, u))
+            cost += c
 
-                    if show_animation and new_node is not None:
-                        if self.numPos == 2:
-                            self._fig.axes[0].plot(
-                                new_node.path[plt_inds[0], :],
-                                new_node.path[plt_inds[1], :],
-                                color=(0.5, 0.5, 0.5),
-                                alpha=0.15,
-                                zorder=-10,
-                            )
-                        elif self.numPos == 3:
-                            self._fig.axes[0].plot(
-                                new_node.path[plt_inds[0], :],
-                                new_node.path[plt_inds[1], :],
-                                new_node.path[plt_inds[2], :],
-                                color=(0.5, 0.5, 0.5),
-                                alpha=0.1,
-                                zorder=-10,
-                            )
-
-                        plt.pause(0.005)
-                        if save_animation:
-                            self.save_frame()
-
-            if new_node:
-                last_index = self.search_best_goal_node()
-                if last_index:
-                    traj, u_traj = self.generate_final_course(last_index)
-                    cost = self.node_list[last_index].cost
-                    converged = use_convergence and np.abs(np.abs(last_cost - cost) / cost) < rtol
-                    last_cost = cost
-                    if use_first_traj or converged:
-                        if show_animation:
-                            if self.numPos == 2:
-                                self._fig.axes[0].plot(
-                                    traj[plt_inds[0], :], traj[plt_inds[1], :], color="g",
-                                )
-                            elif self.numPos == 3:
-                                self._fig.axes[0].plot(
-                                    traj[plt_inds[0], :],
-                                    traj[plt_inds[1], :],
-                                    traj[plt_inds[2], :],
-                                    color="g",
-                                )
-                            plt.pause(0.01)
-                            if save_animation:
-                                self.save_frame()
-
-                        details = (cost, u_traj.T, self._fig, self._frame_list)
-                        return (traj.T, *details) if provide_details else traj.T
-
-        if disp:
-            print("\tReached Max Iteration!!")
-
-        last_index = self.search_best_goal_node()
-        if last_index:
-            traj, u_traj = self.generate_final_course(last_index)
-            cost = self.node_list[last_index].cost
-            if show_animation:
-                if self.numPos == 2:
-                    self._fig.axes[0].plot(
-                        traj[plt_inds[0], :], traj[plt_inds[1], :], color="g",
-                    )
-                elif self.numPos == 3:
-                    self._fig.axes[0].plot(
-                        traj[plt_inds[0], :],
-                        traj[plt_inds[1], :],
-                        traj[plt_inds[2], :],
-                        color="g",
-                    )
-                plt.pause(0.01)
-                if save_animation:
-                    self.save_frame()
-        else:
-            traj = np.array([[]])
-            u_traj = np.array([[]])
-            cost = float("inf")
-            if disp:
-                print("\tCannot find path!!")  # Undo Print
-
-        details = (cost, u_traj.T, self._fig, self._frame_list)
-        return (traj.T, *details) if provide_details else traj.T
+        details = (cost, u_traj, self._fig, self._frame_list)
+        return (traj, *details) if provide_details else traj
 
     def generate_final_course(self, goal_index):  # Generate Final Course
         path = self.end.sv.reshape(-1, 1)
@@ -480,11 +563,7 @@ class LQRRRTStar:
         return None
 
     def calc_dist_to_goal(self, sv):  # Calculate distance between Node and the Goal
-        dist = np.sqrt(
-            self.dx(sv, self.end.sv)[self.pos_inds].T
-            @ self.dx(sv, self.end.sv)[self.pos_inds]
-        )
-        return dist
+        return np.linalg.norm(self.dx(sv, self.end.sv))
 
     def rewire(
         self, cur_time, new_node, near_inds, state_args, ctrl_args
@@ -498,14 +577,14 @@ class LQRRRTStar:
                 state_args,
                 ctrl_args,
                 show_controller=True,
-                planner_ttl="Rewiring"
+                planner_ttl="Rewiring",
             )
             if edge_node is None:
                 continue
             edge_node.cost = self.calc_new_cost(
                 cur_time, new_node, near_node, state_args, ctrl_args
             )
-            no_collision = self.check_collision(edge_node)
+            no_collision = self.not_colliding(edge_node)
             improved_cost = near_node.cost > edge_node.cost
 
             if no_collision and improved_cost:
@@ -533,7 +612,7 @@ class LQRRRTStar:
         for kk, i in enumerate(near_inds):
             near_node = self.node_list[i]
             t_node = self.steer(cur_time, near_node, new_node, state_args, ctrl_args)
-            if t_node and self.check_collision(t_node):
+            if t_node and self.not_colliding(t_node):
                 costs[kk] = self.calc_new_cost(
                     cur_time, near_node, new_node, state_args, ctrl_args
                 )
@@ -542,7 +621,8 @@ class LQRRRTStar:
         min_cost = costs[min_ind]
 
         if np.isinf(min_cost):
-            print("\t\tNo Path - Infinite Cost")
+            if self._disp:
+                print("\t\tNo Path - Infinite Cost")
             return None
 
         new_node = self.steer(
@@ -587,15 +667,28 @@ class LQRRRTStar:
             ind = [nearest_ind]
         return ind
 
-    def check_collision(self, node):  # Check for collisions with Ellipsoids
+    def not_colliding(self, node):  # Check for collisions with Ellipsoids/circle/box
         if len(self.obstacle_list) == 0:
-            return False
+            return True
 
+        if self.use_box:
+            x = node.path[self.pos_inds[0], :]
+            y = node.path[self.pos_inds[1], :]
         for k, xobs in enumerate(self.obstacle_list):
-            distxyz = (node.path[self.pos_inds, :].T - xobs[:-1].reshape((1, -1))).T
-            d_list = np.einsum("ij,ij->i", (distxyz.T @ self.P[:, :, k]), distxyz.T)
-            if -min(d_list) + self.ell_con >= 0.0:
-                return False
+            if self.use_box:
+                left = xobs[0] - xobs[2] / 2
+                right = xobs[0] + xobs[2] / 2
+                top = xobs[1] + xobs[3] / 2
+                bot = xobs[1] - xobs[3] / 2
+                over_x = np.logical_and(x >= left, x <= right)
+                over_y = np.logical_and(y >= bot, y <= top)
+                if np.any(np.logical_and(over_x, over_y)):
+                    return False
+            else:
+                distxyz = (node.path[self.pos_inds, :].T - xobs[:-1].reshape((1, -1))).T
+                d_list = np.einsum("ij,ij->i", (distxyz.T @ self.P[:, :, k]), distxyz.T)
+                if -min(d_list) + self.ell_con >= 0.0:
+                    return False
         return True
 
     def get_random_node(self):  # Find a random node from the state space
@@ -762,4 +855,6 @@ class ExtendedLQRRRTStar(LQRRRTStar):
         self._inv_state_args = inv_state_args
         self._inv_ctrl_args = inv_ctrl_args
         self._cost_args = cost_args
+        if "ttl" not in kwargs:
+            kwargs["ttl"] = "ELQR-RRT*"
         return super().plan(cur_time, cur_state, end_state, **kwargs)
