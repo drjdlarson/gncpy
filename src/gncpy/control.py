@@ -155,6 +155,10 @@ class LQR:
             State and control correlation cost matrix. The default is None which
             gives a zero matrix.
         """
+        if Q.shape[0] != Q.shape[1]:
+            raise RuntimeError("Q must b a square matrix!")
+        if R.shape[0] != R.shape[1]:
+            raise RuntimeError("R must b a square matrix!")
         self._Q = Q
         self._R = R
 

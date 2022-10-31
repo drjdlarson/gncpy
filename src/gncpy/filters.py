@@ -346,8 +346,10 @@ class KalmanFilter(BayesFilter):
         """
         if meas_mat is not None:
             self._meas_mat = meas_mat
+            self._meas_fnc = None
         elif meas_fun is not None:
             self._meas_fnc = meas_fun
+            self._meas_mat = None
         else:
             raise RuntimeError("Invalid combination of inputs")
 

@@ -128,7 +128,7 @@ def init_plotting_opts(
 
 
 def set_title_label(
-    fig, ax_num, opts, ttl=None, x_lbl=None, y_lbl=None, use_local=False
+    fig, ax_num, opts, ttl=None, x_lbl=None, y_lbl=None, z_lbl=None, use_local=False
 ):
     """Sets the figure/window title, and axis labels with the given options.
 
@@ -148,6 +148,9 @@ def set_title_label(
         style. The default is None.
     y_lbl : string, optional
         Label for the y-axis. This is set to the proper size, family, and
+        style. The default is None.
+    z_lbl : string, optional
+        Label for the z-axis. This is set to the proper size, family, and
         style. The default is None.
     use_local : bool, optional
         Flag indicating if the local title or suptitle should be set. The
@@ -185,6 +188,13 @@ def set_title_label(
     if y_lbl is not None:
         fig.axes[ax_num].set_ylabel(
             y_lbl,
+            fontsize=opts["ax_fontsize"],
+            fontstyle=opts["ax_fontstyle"],
+            fontfamily=opts["ax_fontfamily"],
+        )
+    if z_lbl is not None:
+        fig.axes[ax_num].set_zlabel(
+            z_lbl,
             fontsize=opts["ax_fontsize"],
             fontstyle=opts["ax_fontstyle"],
             fontfamily=opts["ax_fontfamily"],
