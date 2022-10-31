@@ -155,6 +155,10 @@ class LQR:
             State and control correlation cost matrix. The default is None which
             gives a zero matrix.
         """
+        if Q.shape[0] != Q.shape[1]:
+            raise RuntimeError("Q must b a square matrix!")
+        if R.shape[0] != R.shape[1]:
+            raise RuntimeError("R must b a square matrix!")
         self._Q = Q
         self._R = R
 
@@ -740,6 +744,9 @@ class ELQR(LQR):
         Cost-to-come vectors, 1 per step in the time horizon.
     use_custom_cost : bool
         Flag indicating if a custom cost function should be used.
+    gif_frame_skip : int
+        Number of frames to skip when saving the gif. Set to 1 to take every
+        frame.
     """
 
     def __init__(self, max_iters=1e3, tol=1e-4, **kwargs):
@@ -767,6 +774,7 @@ class ELQR(LQR):
         self.ct_come_vecs = np.array([])
 
         self.use_custom_cost = False
+        self.gif_frame_skip = 1
         self._non_quad_fun = None
         self._quad_modifier = None
         self._cost_fun = None
@@ -1546,7 +1554,7 @@ class ELQR(LQR):
                     plt_inds,
                     fig_h,
                     fig_w,
-                    save_animation,
+                    (save_animation and ii % self.gif_frame_skip == 0),
                     num_timesteps,
                     time_vec,
                     state_args,
@@ -1554,7 +1562,7 @@ class ELQR(LQR):
                     inv_state_args,
                     inv_ctrl_args,
                 )
-                if save_animation:
+                if save_animation and ii % self.gif_frame_skip == 0:
                     frame_list.append(img)
 
             if disp:

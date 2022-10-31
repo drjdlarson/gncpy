@@ -447,11 +447,10 @@ class NonlinearDynamicsBase(DynamicsBase):
         if ctrl_args is None:
             ctrl_args = ()
         self._integrator = s_integrate.ode(
-            lambda t, y, *f_args: self._cont_dyn(t, y, u, f_args, ctrl_args).flatten()
+            lambda t, y: self._cont_dyn(t, y, u, state_args, ctrl_args).flatten()
         )
         self._integrator.set_integrator(self.integrator_type, **self.integrator_params)
         self._integrator.set_initial_value(state, timestep)
-        self._integrator.set_f_params(*state_args)
 
         if np.isnan(self.dt) or np.isinf(self.dt):
             raise RuntimeError("Invalid value for dt ({}).".format(self.dt))
