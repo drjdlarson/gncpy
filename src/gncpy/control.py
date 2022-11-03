@@ -1266,13 +1266,22 @@ class ELQR(LQR):
             ).ravel()
 
         # plot backward pass trajectory
-        fig.axes[self._ax].plot(
-            state_traj[:, plt_inds[0]],
-            state_traj[:, plt_inds[1]],
-            color=color,
+        extra_args = dict(color=color,
             alpha=alpha,
-            zorder=zorder,
-        )
+            zorder=zorder,)
+        if len(plt_inds) == 3:
+            fig.axes[self._ax].plot(
+                state_traj[:, plt_inds[0]],
+                state_traj[:, plt_inds[1]],
+                state_traj[:, plt_inds[2]],
+                **extra_args,
+            )
+        else:
+            fig.axes[self._ax].plot(
+                state_traj[:, plt_inds[0]],
+                state_traj[:, plt_inds[1]],
+                **extra_args,
+            )
 
         plt.pause(0.005)
         if save_animation:
@@ -1444,8 +1453,15 @@ class ELQR(LQR):
         if show_animation:
             if fig is None:
                 fig = plt.figure()
-                fig.add_subplot(1, 1, 1)
-                fig.axes[self._ax].set_aspect("equal", adjustable="box")
+                if len(plt_inds) == 3:
+                    extra_args = {"projection": '3d'}
+                else:
+                    extra_args = {}
+                fig.add_subplot(1, 1, 1, **extra_args)
+                try:
+                    fig.axes[self._ax].set_aspect("equal", adjustable="box")
+                except Exception:
+                    pass
 
                 if plt_opts is None:
                     plt_opts = gplot.init_plotting_opts(f_hndl=fig)
@@ -1459,8 +1475,7 @@ class ELQR(LQR):
 
                 # draw start
                 fig.axes[self._ax].scatter(
-                    self._init_state[plt_inds[0], 0],
-                    self._init_state[plt_inds[1], 0],
+                    *self._init_state.ravel()[plt_inds],
                     marker="o",
                     color="g",
                     zorder=1000,
@@ -1473,8 +1488,7 @@ class ELQR(LQR):
                     )
 
             fig.axes[self._ax].scatter(
-                self.end_state[plt_inds[0], 0],
-                self.end_state[plt_inds[1], 0],
+                *self.end_state.ravel()[plt_inds],
                 marker="x",
                 color="r",
                 zorder=1000,
