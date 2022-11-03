@@ -1288,10 +1288,13 @@ class ELQR(LQR):
             with io.BytesIO() as buff:
                 fig.savefig(buff, format="raw")
                 buff.seek(0)
-                img = np.frombuffer(buff.getvalue(), dtype=np.uint8).reshape(
-                    (fig_h, fig_w, -1)
-                )
-            return Image.fromarray(img)
+                arr = np.frombuffer(buff.getvalue(), dtype=np.uint8).reshape(
+                    (*(fig.canvas.get_width_height()[1::-1]), -1))
+                if arr.shape[0] != fig_w or arr.shape[1] != fig_h:
+                    img = Image.fromarray(arr).resize((fig_w, fig_h), Image.BICUBIC)
+                else:
+                    img = Image.fromarray(arr)
+            return img
 
         return []
 
@@ -1507,10 +1510,13 @@ class ELQR(LQR):
                 with io.BytesIO() as buff:
                     fig.savefig(buff, format="raw")
                     buff.seek(0)
-                    img = np.frombuffer(buff.getvalue(), dtype=np.uint8).reshape(
-                        (fig_h, fig_w, -1)
-                    )
-                frame_list.append(Image.fromarray(img))
+                    arr = np.frombuffer(buff.getvalue(), dtype=np.uint8).reshape(
+                        (*(fig.canvas.get_width_height()[1::-1]), -1))
+                    if arr.shape[0] != fig_w or arr.shape[1] != fig_h:
+                        img = Image.fromarray(arr).resize((fig_w, fig_h), Image.BICUBIC)
+                    else:
+                        img = Image.fromarray(arr)
+                frame_list.append(img)
 
         if disp:
             print("Starting ELQR optimization loop...")
@@ -1626,21 +1632,33 @@ class ELQR(LQR):
         )
 
         if show_animation:
-            fig.axes[self._ax].plot(
-                state_traj[:, plt_inds[0]],
-                state_traj[:, plt_inds[1]],
-                linestyle="-",
-                color="g",
-            )
+            extra_args = dict(linestyle="-",
+                color="g",)
+            if len(plt_inds) == 3:
+                fig.axes[self._ax].plot(
+                    state_traj[:, plt_inds[0]],
+                    state_traj[:, plt_inds[1]],
+                    state_traj[:, plt_inds[2]],
+                    **extra_args
+                )
+            else:
+                fig.axes[self._ax].plot(
+                    state_traj[:, plt_inds[0]],
+                    state_traj[:, plt_inds[1]],
+                    **extra_args
+                )
             plt.pause(0.001)
             if save_animation:
                 with io.BytesIO() as buff:
                     fig.savefig(buff, format="raw")
                     buff.seek(0)
-                    img = np.frombuffer(buff.getvalue(), dtype=np.uint8).reshape(
-                        (fig_h, fig_w, -1)
-                    )
-                frame_list.append(Image.fromarray(img))
+                    arr = np.frombuffer(buff.getvalue(), dtype=np.uint8).reshape(
+                        (*(fig.canvas.get_width_height()[1::-1]), -1))
+                    if arr.shape[0] != fig_w or arr.shape[1] != fig_h:
+                        img = Image.fromarray(arr).resize((fig_w, fig_h), Image.BICUBIC)
+                    else:
+                        img = Image.fromarray(arr)
+                frame_list.append(img)
 
         u = ctrl_signal[0, :].reshape((-1, 1))
         details = (cost, state_traj, ctrl_signal, fig, frame_list)
