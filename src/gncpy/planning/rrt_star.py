@@ -501,6 +501,10 @@ class LQRRRTStar:
             else:
                 self.start = Node(_end_arr[kk-1].reshape((-1, 1)))
                 self.end = Node(es.reshape((-1, 1)))
+                # NOTE: in order to resuse the tree, need to recacluate costs and flip paths, for now just create new tree
+                self.node_list = [
+                    deepcopy(self.start),
+                ]
 
                 if show_animation:
                     self.draw_end(es)
