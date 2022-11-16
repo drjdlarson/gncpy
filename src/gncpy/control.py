@@ -5,6 +5,7 @@ Some algorithms may also be used for path planning.
 import io
 import numpy as np
 import scipy.linalg as la
+import matplotlib
 import matplotlib.pyplot as plt
 from PIL import Image
 from sys import exit
@@ -205,7 +206,10 @@ class LQR:
                     )
                 else:
                     A, B = self.get_state_space(tt, x_hat, u_hat, state_args, ctrl_args)
-                    return la.inv(A) @ (x_hat - B @ u_hat)
+                    prev_state = la.inv(A) @ (x_hat - B @ u_hat)
+                    if self.dynObj.state_constraint is not None:
+                        prev_state = self.dynObj.state_constraint(tt, prev_state)
+                    return prev_state
 
         else:
             raise NotImplementedError()
@@ -381,7 +385,10 @@ class LQR:
         self.ct_go_mats[kk] = D + C.T @ self.feedback_gain[kk]
         self.ct_go_vecs[kk] = d + C.T @ self.feedthrough_gain[kk]
 
-        return self._back_pass_update_traj(x_hat_p, kk)
+        out = self._back_pass_update_traj(x_hat_p, kk)
+        if self.dynObj is not None and self.dynObj.state_constraint is not None:
+            out = self.dynObj.state_constraint(time_vec[kk], out.reshape((-1, 1)))
+        return out.ravel()
 
     def backward_pass(
         self,
@@ -899,7 +906,7 @@ class ELQR(LQR):
                     self.end_state,
                     is_initial,
                     is_final,
-                    *cost_args
+                    *cost_args,
                 )
             )
 
@@ -1029,7 +1036,7 @@ class ELQR(LQR):
                         self.end_state,
                         is_initial,
                         is_final,
-                        *cost_args
+                        *cost_args,
                     ),
                 )
 
@@ -1053,7 +1060,7 @@ class ELQR(LQR):
                         self.end_state,
                         is_initial,
                         is_final,
-                        *cost_args
+                        *cost_args,
                     ),
                 )
 
@@ -1103,6 +1110,11 @@ class ELQR(LQR):
             )
             @ (self.ct_go_vecs[num_timesteps] + self.ct_come_vecs[num_timesteps])
         ).ravel()
+
+        if self.dynObj is not None and self.dynObj.state_constraint is not None:
+            traj[num_timesteps, :] = self.dynObj.state_constraint(
+                time_vec[num_timesteps], traj[num_timesteps, :].reshape((-1, 1))
+            ).ravel()
 
         return traj
 
@@ -1168,10 +1180,13 @@ class ELQR(LQR):
         self.ct_come_mats[kk + 1] = DBar + CBar.T @ self.feedback_gain[kk]
         self.ct_come_vecs[kk + 1] = dBar + CBar.T @ self.feedthrough_gain[kk]
 
-        return -(
+        out = -(
             np.linalg.inv(self.ct_go_mats[kk + 1] + self.ct_come_mats[kk + 1])
             @ (self.ct_go_vecs[kk + 1] + self.ct_come_vecs[kk + 1])
-        ).ravel()
+        )
+        if self.dynObj is not None and self.dynObj.state_constraint is not None:
+            out = self.dynObj.state_constraint(time_vec[kk + 1], out)
+        return out.ravel()
 
     def forward_pass(
         self,
@@ -1243,7 +1258,7 @@ class ELQR(LQR):
         inv_ctrl_args,
         color=None,
         alpha=0.2,
-        zorder=-10
+        zorder=-10,
     ):
         if color is None:
             color = (0.5, 0.5, 0.5)
@@ -1266,9 +1281,11 @@ class ELQR(LQR):
             ).ravel()
 
         # plot backward pass trajectory
-        extra_args = dict(color=color,
+        extra_args = dict(
+            color=color,
             alpha=alpha,
-            zorder=zorder,)
+            zorder=zorder,
+        )
         if len(plt_inds) == 3:
             fig.axes[self._ax].plot(
                 state_traj[:, plt_inds[0]],
@@ -1283,13 +1300,15 @@ class ELQR(LQR):
                 **extra_args,
             )
 
-        plt.pause(0.005)
+        if matplotlib.get_backend() != "Agg":
+            plt.pause(0.005)
         if save_animation:
             with io.BytesIO() as buff:
                 fig.savefig(buff, format="raw")
                 buff.seek(0)
                 arr = np.frombuffer(buff.getvalue(), dtype=np.uint8).reshape(
-                    (*(fig.canvas.get_width_height()[1::-1]), -1))
+                    (*(fig.canvas.get_width_height()[1::-1]), -1)
+                )
                 if arr.shape[0] != fig_w or arr.shape[1] != fig_h:
                     img = Image.fromarray(arr).resize((fig_w, fig_h), Image.BICUBIC)
                 else:
@@ -1457,7 +1476,7 @@ class ELQR(LQR):
             if fig is None:
                 fig = plt.figure()
                 if len(plt_inds) == 3:
-                    extra_args = {"projection": '3d'}
+                    extra_args = {"projection": "3d"}
                 else:
                     extra_args = {}
                 fig.add_subplot(1, 1, 1, **extra_args)
@@ -1496,7 +1515,8 @@ class ELQR(LQR):
                 color="r",
                 zorder=1000,
             )
-            plt.pause(0.01)
+            if matplotlib.get_backend() != "Agg":
+                plt.pause(0.01)
 
             # for stopping simulation with the esc key.
             fig.canvas.mpl_connect(
@@ -1511,7 +1531,8 @@ class ELQR(LQR):
                     fig.savefig(buff, format="raw")
                     buff.seek(0)
                     arr = np.frombuffer(buff.getvalue(), dtype=np.uint8).reshape(
-                        (*(fig.canvas.get_width_height()[1::-1]), -1))
+                        (*(fig.canvas.get_width_height()[1::-1]), -1)
+                    )
                     if arr.shape[0] != fig_w or arr.shape[1] != fig_h:
                         img = Image.fromarray(arr).resize((fig_w, fig_h), Image.BICUBIC)
                     else:
@@ -1559,13 +1580,23 @@ class ELQR(LQR):
             for kk, tt in enumerate(time_vec[:-1]):
                 u = self.feedback_gain[kk] @ x + self.feedthrough_gain[kk]
                 cost += self.cost_function(
-                    tt, x, u, cost_args, is_initial=(kk == 0), is_final=False,
+                    tt,
+                    x,
+                    u,
+                    cost_args,
+                    is_initial=(kk == 0),
+                    is_final=False,
                 )
                 x = self.prop_state(
                     tt, x, u, state_args, ctrl_args, True, inv_state_args, inv_ctrl_args
                 )
             cost += self.cost_function(
-                time_vec[-1], x, u, cost_args, is_initial=False, is_final=True,
+                time_vec[-1],
+                x,
+                u,
+                cost_args,
+                is_initial=False,
+                is_final=True,
             )
 
             if show_animation:
@@ -1632,28 +1663,30 @@ class ELQR(LQR):
         )
 
         if show_animation:
-            extra_args = dict(linestyle="-",
-                color="g",)
+            extra_args = dict(
+                linestyle="-",
+                color="g",
+            )
             if len(plt_inds) == 3:
                 fig.axes[self._ax].plot(
                     state_traj[:, plt_inds[0]],
                     state_traj[:, plt_inds[1]],
                     state_traj[:, plt_inds[2]],
-                    **extra_args
+                    **extra_args,
                 )
             else:
                 fig.axes[self._ax].plot(
-                    state_traj[:, plt_inds[0]],
-                    state_traj[:, plt_inds[1]],
-                    **extra_args
+                    state_traj[:, plt_inds[0]], state_traj[:, plt_inds[1]], **extra_args
                 )
-            plt.pause(0.001)
+            if matplotlib.get_backend() != "Agg":
+                plt.pause(0.001)
             if save_animation:
                 with io.BytesIO() as buff:
                     fig.savefig(buff, format="raw")
                     buff.seek(0)
                     arr = np.frombuffer(buff.getvalue(), dtype=np.uint8).reshape(
-                        (*(fig.canvas.get_width_height()[1::-1]), -1))
+                        (*(fig.canvas.get_width_height()[1::-1]), -1)
+                    )
                     if arr.shape[0] != fig_w or arr.shape[1] != fig_h:
                         img = Image.fromarray(arr).resize((fig_w, fig_h), Image.BICUBIC)
                     else:
