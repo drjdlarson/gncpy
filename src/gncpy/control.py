@@ -58,15 +58,19 @@ class LQR:
         Feedthrough gain vector. If finite horizon there is 1 per timestep.
     end_state : N x 1
         Ending state. This generally does not need to be set directly.
+    hard_constraints : bool
+            Flag indicating that state constraints should be enforced during value propagation.
     """
 
-    def __init__(self, time_horizon=float("inf")):
+    def __init__(self, time_horizon=float("inf"), hard_constraints: bool=False):
         """Initialize an object.
 
         Parameters
         ----------
         time_horizon : float, optional
             Time horizon for the controller. The default is float("inf").
+        hard_constraints : bool, optional
+            Flag indicating that state constraints should be enforced during value propagation.
         """
         super().__init__()
 
@@ -87,6 +91,7 @@ class LQR:
 
         self._init_state = np.array([])
         self.end_state = np.array([])
+        self.hard_constraints = hard_constraints
 
     @property
     def dt(self):
@@ -386,7 +391,7 @@ class LQR:
         self.ct_go_vecs[kk] = d + C.T @ self.feedthrough_gain[kk]
 
         out = self._back_pass_update_traj(x_hat_p, kk)
-        if self.dynObj is not None and self.dynObj.state_constraint is not None:
+        if self.hard_constraints and self.dynObj is not None and self.dynObj.state_constraint is not None:
             out = self.dynObj.state_constraint(time_vec[kk], out.reshape((-1, 1)))
         return out.ravel()
 
@@ -1111,7 +1116,7 @@ class ELQR(LQR):
             @ (self.ct_go_vecs[num_timesteps] + self.ct_come_vecs[num_timesteps])
         ).ravel()
 
-        if self.dynObj is not None and self.dynObj.state_constraint is not None:
+        if self.hard_constraints and self.dynObj is not None and self.dynObj.state_constraint is not None:
             traj[num_timesteps, :] = self.dynObj.state_constraint(
                 time_vec[num_timesteps], traj[num_timesteps, :].reshape((-1, 1))
             ).ravel()
@@ -1184,7 +1189,7 @@ class ELQR(LQR):
             np.linalg.inv(self.ct_go_mats[kk + 1] + self.ct_come_mats[kk + 1])
             @ (self.ct_go_vecs[kk + 1] + self.ct_come_vecs[kk + 1])
         )
-        if self.dynObj is not None and self.dynObj.state_constraint is not None:
+        if self.hard_constraints and self.dynObj is not None and self.dynObj.state_constraint is not None:
             out = self.dynObj.state_constraint(time_vec[kk + 1], out)
         return out.ravel()
 
