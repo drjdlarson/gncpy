@@ -522,7 +522,8 @@ class CurvilinearMotion(NonlinearDynamicsBase):
     because it does not use a list of continuous functions but instead has
     the state and input matrices coded directly. As a result, it also does not
     use the control model attribute because it is hardcoded in the
-    :meth:`.get_input_mat` function.
+    :meth:`.get_input_mat` function. Also, the angle state should be kept between 0-360
+    degrees.
 
     Notes
     -----
@@ -541,7 +542,7 @@ class CurvilinearMotion(NonlinearDynamicsBase):
     details.
     """
 
-    __slots__ = ()
+    __slots__ = "control_constraint"
 
     state_names = (
         "x pos",
@@ -560,6 +561,7 @@ class CurvilinearMotion(NonlinearDynamicsBase):
         """
         super().__init__(**kwargs)
         self.control_model = [None] * len(self.state_names)
+        self.control_constraint = None
 
     @property
     def cont_fnc_lst(self):
@@ -666,12 +668,25 @@ class CurvilinearMotion(NonlinearDynamicsBase):
         F = self.get_state_mat(
             timestep, state, *state_args, u=u, ctrl_args=ctrl_args, use_continuous=False
         )
+        _state = state.copy()
+        _state[3] = np.mod(_state[3], 2 * np.pi)
+        next_state = F @ _state
         if u is None:
-            return F @ state
+            if self.state_constraint is not None:
+                next_state = self.state_constraint(timestep, next_state)
+            next_state[3] = np.mod(next_state[3], 2 * np.pi)
+            return next_state
         G = self.get_input_mat(
             timestep, state, u, state_args=state_args, ctrl_args=ctrl_args
         )
-        return F @ state + G @ u
+        if self.control_constraint is not None:
+            next_state += G @ self.control_constraint(timestep, u.copy())
+        else:
+            next_state += G @ u
+        if self.state_constraint is not None:
+            next_state = self.state_constraint(timestep, next_state)
+        next_state[3] = np.mod(next_state[3], 2 * np.pi)
+        return next_state
 
 
 class CoordinatedTurnKnown(LinearDynamicsBase):
