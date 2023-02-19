@@ -2773,9 +2773,11 @@ def test_IMM_dynObj():
 
     model_trans = np.array([[1 - 1 / 200, 1 / 200], [1 / 200, 1 - 1 / 200]])
 
-    init_means = np.array([[0, 0, vx0, vy0, 0], [0, 0, vx0, vy0, 0]]).T
-    init_covs = np.array([in_filt1.cov, in_filt2.cov])
+    # init_means = np.array([[0, 0, vx0, vy0, 0], [0, 0, vx0, vy0, 0]]).T
+    # init_covs = np.array([in_filt1.cov, in_filt2.cov])
 
+    init_means = [np.array([0, 0, vx0, vy0, 0]).reshape(-1, 1), np.array([0, 0, vx0, vy0, 0]).reshape(-1, 1)]
+    init_covs = [in_filt1.cov, in_filt2.cov]
     filt = gfilts.InteractingMultipleModel()
     filt.set_models(
         filt_list, model_trans, init_means, init_covs, init_weights=[0.5, 0.5]

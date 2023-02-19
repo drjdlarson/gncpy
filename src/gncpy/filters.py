@@ -4361,12 +4361,12 @@ class InteractingMultipleModel:
     @property
     def cov(self):
         """Covariance for the IMM Filter."""
-        cur_cov = np.zeros((np.shape(self.cov_list[0, :, :])))
+        cur_cov = np.zeros((np.shape(self.cov_list[0])))
         for ii in range(0, np.shape(self.cov_list)[0]):
             cur_cov = cur_cov + self.filt_weights[ii] * (
-                self.cov_list[ii, :, :]
-                + (self.mean_list[:, ii].reshape(np.shape(self.mean_list)[0], 1) - self.cur_out_state.reshape(np.shape(self.mean_list)[0], 1))
-                @ (self.mean_list[:, ii].reshape(np.shape(self.mean_list)[0], 1) - self.cur_out_state.reshape(np.shape(self.mean_list)[0], 1)).T
+                self.cov_list[ii]
+                + (self.mean_list[ii].reshape(np.shape(self.mean_list[0])) - self.cur_out_state.reshape(np.shape(self.mean_list[0])))
+                @ (self.mean_list[ii].reshape(np.shape(self.mean_list[0])) - self.cur_out_state.reshape(np.shape(self.mean_list[0]))).T
             )
         return cur_cov
 
@@ -4391,8 +4391,8 @@ class InteractingMultipleModel:
         filt_state["filt_weights"] = self.filt_weights.copy()
         filt_state["cur_out_state"] = self.cur_out_state.copy()
         filt_state["filt_weight_history"] = self.filt_weight_history.copy()
-        filt_state["mean_list"] = self.mean_list
-        filt_state["cov_list"] = self.cov_list
+        filt_state["mean_list"] = deepcopy(self.mean_list)
+        filt_state["cov_list"] = deepcopy(self.cov_list)
 
         return filt_state
 
@@ -4421,10 +4421,34 @@ class InteractingMultipleModel:
         self.mean_list = filt_state["mean_list"]
         self.cov_list = filt_state["cov_list"]
 
-    def set_models(
-        self, filter_lst, model_trans, init_means, init_covs, init_weights=None
-    ):
-        """Set different filters and dynamics models for an IMM filter."""
+    def initialize_states(self, init_means, init_covs, init_weights=None):
+        # if isinstance(self._baseFilter, gfilts.UnscentedKalmanFilter) or isinstance(
+        #         self._baseFilter, gfilts.UKFGaussianScaleMixtureFilter
+        # ):
+        #     self._baseFilter.init_sigma_points(m)
+        self.mean_list = init_means
+        self.cov_list = init_covs
+        if len(init_means) != len(self.in_filt_list) or len(init_covs) != len(self.in_filt_list):
+            raise ValueError("Number of means or covariances does not match number of inner filters")
+        for ii in range(0, len(self.in_filt_list)):
+            self.in_filt_list[ii].mean = self.mean_list[ii]
+            self.in_filt_list[ii].cov = self.cov_list[ii]
+
+        if init_weights is not None:
+            self.filt_weights = init_weights
+        else:
+            self.filt_weights = np.ones(len(self.in_filt_list)) / len(self.in_filt_list)
+        self.filt_weight_history = np.array(self.filt_weights)
+        # if self.filt_weight_history.size == 0:
+        #     self.filt_weight_history = np.array(self.filt_weights)
+        # else:
+        #     self.filt_weight_history = np.vstack((self.filt_weight_history, self.filt_weights))
+        out_state = np.zeros(np.shape(self.mean_list[0]))
+        for ii in range(0, len(self.in_filt_list)):
+            out_state = out_state + self.filt_weights[ii] * self.mean_list[0]
+        self.cur_out_state = out_state
+
+    def initialize_filters(self, filter_lst, model_trans):
         if (
             len(filter_lst) != np.shape(model_trans)[0]
             or len(filter_lst) != np.shape(model_trans)[1]
@@ -4433,33 +4457,27 @@ class InteractingMultipleModel:
             raise ValueError(
                 "filter list must be same size as square matrix model_trans"
             )
-        self.in_filt_list = filter_lst
         self.model_trans_mat = model_trans
-        self.mean_list = init_means
-        self.cov_list = init_covs
-        if init_weights is not None:
-            self.filt_weights = init_weights
-        else:
-            self.filt_weights = np.ones(len(self.in_filt_list)) / len(self.in_filt_list)
-        out_state = np.zeros(np.shape(self.mean_list)[0])
-        for ii in range(0, len(self.in_filt_list)):
-            out_state = out_state + self.filt_weights[ii] * self.mean_list[:, ii]
-        self.cur_out_state = out_state
-        if self.filt_weight_history.size == 0:
-            self.filt_weight_history = init_weights
-        else:
-            self.filt_weight_history = np.vstack((self.filt_weight_history, init_weights))
+        self.in_filt_list = filter_lst
+        
+    def set_models(
+        self, filter_lst, model_trans, init_means, init_covs, init_weights=None
+    ):
+        """Set different filters and dynamics models for an IMM filter."""
+
+        self.initialize_filters(filter_lst, model_trans)
+        self.initialize_states(init_means, init_covs, init_weights=init_weights)
 
     def predict(self, timestep, *args, **kwargs):
         """Prediction step for the IMM filter."""
         new_weight_list = []
-        new_mean_list = np.zeros(np.shape(self.mean_list))
-        new_cov_list = np.zeros(np.shape(self.cov_list))
+        new_mean_list = []
+        new_cov_list = []
 
         # Perform inner filter predictions
         for ii, filt in enumerate(self.in_filt_list):
             new_weight = 0
-            weighted_state = np.zeros((np.shape(self.mean_list)[0], 1))
+            weighted_state = np.zeros((np.shape(self.mean_list[0])))
             weighted_cov = np.zeros(
                 np.shape(self.cov_list[0])
             )
@@ -4473,7 +4491,7 @@ class InteractingMultipleModel:
                 weighted_state = weighted_state + (
                     self.model_trans_mat[ii][jj]
                     * self.filt_weights[jj]
-                    * self.mean_list[:, jj]
+                    * self.mean_list[jj]
                 ).reshape(np.shape(weighted_state))
             # Normalize weighted state
             weighted_state = weighted_state / new_weight
@@ -4483,35 +4501,36 @@ class InteractingMultipleModel:
                 weighted_cov = weighted_cov + self.model_trans_mat[ii][
                     jj
                 ] * self.filt_weights[jj] * (
-                    self.cov_list[jj, :, :]
-                    + (self.mean_list[:, jj].reshape(np.shape(self.mean_list)[0], 1) - weighted_state) @ (self.mean_list[:, jj].reshape(np.shape(self.mean_list)[0], 1) - weighted_state).T
+                    self.cov_list[jj]
+                    + (self.mean_list[jj].reshape(np.shape(self.mean_list[0])) - weighted_state)
+                    @ (self.mean_list[jj].reshape(np.shape(self.mean_list[0])) - weighted_state).T
                 )
             weighted_cov = weighted_cov / new_weight
 
             # Perform inner filter prediction
             if not isinstance(filt, ParticleFilter):
                 filt.cov = weighted_cov.copy()
-                new_mean_list[:, ii] = filt.predict(
+                new_mean_list.append(filt.predict(
                     timestep,
-                    weighted_state.reshape((np.shape(self.mean_list)[0], 1)),
+                    weighted_state.reshape((np.shape(self.mean_list[0]))),
                     *args,
                     **kwargs
-                ).reshape(np.shape(self.mean_list[:, ii]))
-                new_cov_list[ii, :, :] = filt.cov.copy()
+                ).reshape(np.shape(self.mean_list[ii])))
+                new_cov_list.append(filt.cov.copy())
             else:
                 raise ValueError("Particle Filters not enabled with IMM")
             new_weight_list.append(new_weight)
         self.mean_list = new_mean_list
         self.cov_list = new_cov_list
-        self.filt_weights = new_weight_list
+        self.filt_weights = np.array(new_weight_list)
         self.filt_weight_history = np.vstack((self.filt_weight_history, new_weight_list))
         # Normalize weights
         if np.sum(new_weight_list) != 1:
             new_weight_list = new_weight_list / np.sum(new_weight_list)
         # Output predicted state
-        out_state = np.zeros(np.shape(self.mean_list)[0])
+        out_state = np.zeros(np.shape(self.mean_list[0]))
         for ii in range(0, len(self.in_filt_list)):
-            out_state = out_state + new_weight_list[ii] * self.mean_list[:, ii]
+            out_state = out_state + new_weight_list[ii] * self.mean_list[ii]
         self.cur_out_state = out_state
         return out_state
 
@@ -4521,22 +4540,29 @@ class InteractingMultipleModel:
         meas_fit_prob_list = np.zeros(len(self.in_filt_list))
         for ii, filt in enumerate(self.in_filt_list):
             if not isinstance(filt, ParticleFilter):
-                (self.mean_list[:, [ii]], meas_fit_prob_list[ii]) = filt.correct(
-                    timestep, meas, self.mean_list[:, ii].reshape((-1, 1))
+                (self.mean_list[ii], meas_fit_prob_list[ii]) = filt.correct(
+                    timestep, meas, self.mean_list[ii].reshape((-1, 1))
                 )
-                self.cov_list[ii, :, :] = filt.cov.copy()
+                self.cov_list[ii] = filt.cov.copy()
             new_weight_list[ii] = meas_fit_prob_list[ii] * self.filt_weights[ii]
-        new_weight_list = new_weight_list / np.sum(new_weight_list)
+        out_meas_fit_prob = np.sum(new_weight_list)
+        if np.sum(new_weight_list) == 0:
+            new_weight_list = new_weight_list * 0
+        else:
+            new_weight_list = new_weight_list / np.sum(new_weight_list)
         self.filt_weights = new_weight_list
 
         # self.cov = np.zeros((np.shape(self.cov_list[0, :, :])))
         # for ii in range(0, len(self.in_filt_list)):
         #     self.cov = self.cov + self.filt_weights[ii] * self.cov_list[ii, :, :]
-        out_state = np.zeros(np.shape(self.mean_list)[0])
+        out_state = np.zeros(np.shape(self.mean_list[0]))
+        # out_meas_fit_prob = 0
         for ii in range(0, len(self.in_filt_list)):
-            out_state = out_state + new_weight_list[ii] * self.mean_list[:, ii]
+            out_state = out_state + new_weight_list[ii] * self.mean_list[ii]
+            # out_meas_fit_prob = out_meas_fit_prob + new_weight_list[ii] * meas_fit_prob_list[ii]
         out_state = out_state.reshape((np.shape(out_state)[0], 1))
         # Two options for outputting measurement fit probability, averaging all a-la the mean, or only outputting the maximum. Starting with maximum.
-        out_meas_fit_prob = np.max(meas_fit_prob_list)
+        # out_meas_fit_prob = np.max(meas_fit_prob_list)
+
         self.cur_out_state = out_state
         return (out_state, out_meas_fit_prob)
