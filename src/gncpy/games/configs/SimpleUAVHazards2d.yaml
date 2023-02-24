@@ -154,7 +154,7 @@ hazards:
         collision: !Collision2dParams
             width: 10
             height: 2.5
-        prob_of_death:0.05
+        prob_of_death: 0.05
     - !HazardParams
         loc_x: 5
         loc_y: 19
