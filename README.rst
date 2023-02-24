@@ -3,6 +3,13 @@ gncpy
 
 A python package for Guidance, Navigation, and Control (GNC) algorithms developed by the Laboratory for Autonomy, GNC, and Estimation Research (LAGER) at the University of Alabama (UA).
 
+For using this package, simply clone the repository and then pip install the top level folder. It is recommended to install with the `-e` flag such that new updates can be applied automatically. For setting up a development environment to extend the package see the following sections.
+
+.. contents:: Table of Contents
+    :local:
+    :backlinks: entry
+
+
 ..
     BEGIN TOOLCHAIN INCLUDE
 
@@ -12,24 +19,55 @@ A python package for Guidance, Navigation, and Control (GNC) algorithms develope
 .. _SUBMODULE: https://git-scm.com/book/en/v2/Git-Tools-Submodules
 
 
-Setup
------
-Currently this package is not available via pip, this provides a guide on installation from the git repository. Note that Python 3 is required, pytest is used for managing the built-in tests, and tox is used for automating the testing and documentation generation. It is recommended to use Anaconda and the Spyder IDE, but this is not necessary. The general process follows the following order with more details in the corresponding subsections.
+General Development Environment Setup
+-------------------------------------
+Currently this package is not available via pip, this provides a guide on installation from the git repository. Note that Python 3 is required, pytest is used for managing the built-in tests, and tox is used for automating the testing and documentation generation. It is recommended to use Anaconda to manage virtual python environments to avoid dependency conflicts, but this is not necessary. The general process follows the following order with more details in the corresponding subsections.
+
+#. Install Anaconda *[Optional]*. See the first step of `Installing and Updating Spyder`_. Note Spyder comes with Anaconda but is not needed.
+#. Decide if serums is needed as a seperate repository outside of gncpy. This makes it easier to develop for serums in addition to gncpy.
+
+   * **If serums is installed outside, tox will still use the version within gncpy for running automated tests.**
+
+#. Setup git for submodules if tox will be used to automate running all test cases or if serums is not being installed outside caser *[Optional]*. See `Using git with Submodules`_.
+#. Clone gncpy.
+#. Clone serums outside gncpy *[Optional]*.
+#. Create a virtual environment *[Optional but recommended]*
+#. Install gncpy and serums. See `Installing gncpy, and serums`_
+#. Setup the IDE *[Optional]*. See `Pycharm Setup`_
+
+
+Pycharm Setup
+-------------
+This should be done after te `General Development Environment Setup`_. Pycharm can be used as the IDE and setup to use the conda environements, this is the reccommended IDE to use and the documentation should be kept up to date.
+
+#. Install `Pycharm <https://www.jetbrains.com/pycharm/download/#section=linux>`_
+#. Install the BlackConnect plugin for autoformatting code *[Optional]*
+   * Go to File->Settings->Plugins and use the search bar
+   * This will require you to `pip install black` in your environment.
+   * Once it is installed, reopen the settings dialog and go to File->Settings->Tools->BlackConnect and configre it to run a startup. This is also where you can restart a blackd instance if one is not started/connected.
+   * You may need to restart Pycharm to have it take effect.
+#. Configure your virtual environment
+   * In the bottom right corner, click on where it says python and go to add new interpreter and add local interpreter.
+   * Select the conda environemnt tab (if using Anaconda) and the drop down should prepopulate with the available conda environements. Select the one you want to use and click ok.
+   * Now the bottom right should show the environement name and python version.
+
+Sypder Setup (not recommended)
+------------------------------
+The Spyder IDE that comes with Anaconda may be used for development, but this is not necessary and not recommended. This section may be out of date but should provide enough of a starting point.
 
 #. Install Anaconda and Spyder and update to the latest version *[Optional]*. See `Installing and Updating Spyder`_.
 #. Decide if serums is needed as a seperate repository outside of gncpy. This makes it easier to develop for serums in addition to gncpy.
 
-    * **If serums is installed outside, tox will still use the version within caser for running automated tests.**
+   * **If serums is installed outside, tox will still use the version within gncpy for running automated tests.**
 
 #. Setup git for submodules if tox will be used to automate running all test cases or if serums is not being installed outside caser *[Optional]*. See `Using git with Submodules`_.
-#. Clone caser.
 #. Clone gncpy.
 #. Clone serums outside gncpy *[Optional]*.
 #. Install gncpy and serums to the base conda environment. See `Installing gncpy, and serums`_.
 
-    * Other virtual environments can be used for development/projects but it seems gncpy/serums are needed in the base to get Spyder's variable explorer to work with their custom types.
+   * Other virtual environments can be used for development/projects but it seems gncpy/serums are needed in the base to get Spyder's variable explorer to work with their custom types.
 
-If using Anaconda and Spyder and all optional steps where followed you should be able to run tests with tox, generate documentation with tox, and run tests as standalone scripts from within Spyder (See `Testing`_ and `Building Documentation`_). Also the Spyder IDE variable explorer should recognize gncpy and serums data types for debugging. It is also possible to create conda environments and tell Spyder to use that as the interpreter for running code. Note that the proper version of :code:`spyder-kernels` must be installed in the environment but Spyder will tell you the command to run when it fails to start the interpreter. This can be useful if you need additional libraries for certain projects. Information on conda environments can be found `here <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`_ and setting up Spyder with a custom interpreter can be done through Spyder's settings.
+If using Anaconda and Spyder and all optional steps were followed then you should be able to run tests with tox, generate documentation with tox, and run tests as standalone scripts from within Spyder (See `Testing`_ and `Building Documentation`_). Also the Spyder IDE variable explorer should recognize gncpy and serums data types for debugging. It is also possible to create conda environments and tell Spyder to use that as the interpreter for running code. Note that the proper version of :code:`spyder-kernels` must be installed in the environment but Spyder will tell you the command to run when it fails to start the interpreter. This can be useful if you need additional libraries for certain projects. Information on conda environments can be found `here <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`_ and setting up Spyder with a custom interpreter can be done through Spyder's settings.
 
 
 Installing and Updating Spyder
@@ -37,91 +75,91 @@ Installing and Updating Spyder
 #. Download and install `Anaconda <https://www.anaconda.com/>`_. This should also install Spyder, numpy, matplotlib, and some other common libraries to a base conda (virtual) environment.
 #. Open Spyder and check the version by going to about spyder from the help menu.
 
-    * If it is not version >= 5.1.5 and you want to update to the version 5.1.5 (recommended), close Spyder and run the following commands from a terminal (Anaconda prompt on windows) the second and third commands may give errors but they can be ignored. See here on `stackoverflow`_.
+   * If it is not version >= 5.1.5 and you want to update to the version 5.1.5 (recommended), close Spyder and run the following commands from a terminal (Anaconda prompt on windows) the second and third commands may give errors but they can be ignored. See here on `stackoverflow`_.
 
-        .. code-block:: bash
+     .. code-block:: bash
 
-            conda remove spyder
-            conda remove python-language-server
-            conda update anaconda
-            conda install spyder=5.1.5
+         conda remove spyder
+         conda remove python-language-server
+         conda update anaconda
+         conda install spyder=5.1.5
 
 
 Installing gncpy, and serums
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+----------------------------
 #. Download/clone the `gncpy`_ repository and save it somewhere on your system (remember the location).
 #. Download/clone the `serums`_ repository and save it somewhere on your system (remember the location) *[Optional]*.
 
-    * Only do this if you need/want serums outside of gncpy.
+   * Only do this if you need/want serums outside of gncpy.
 
 #. Open the terminal that has the base Anaconda environment activated (normal terminal for linux, Anaconda prompt on windows).
 #. Navigate to the directory where you saved the repositories.
 
-    * The directory structure should look like the following. Where you only have two serums folders if you are installing them outside, and cloned both repositories to the same top level directory.
+   * The directory structure should look like the following. Where you only have two serums folders if you are installing them outside, and cloned both repositories to the same top level directory.
 
-        ::
+     ::
 
-            . (YOU ARE HERE)
-            ├── gncpy/
-            │   ├── serums/
-            │   │   └── setup.py
-            │   └── setup.py
-            └── serums/
-                └── setup.py
+         . (YOU ARE HERE)
+         ├── gncpy/
+         │   ├── serums/
+         │   │   └── setup.py
+         │   └── setup.py
+         └── serums/
+             └── setup.py
 
 #. Install serums.
 
-    * If using anaconda then install without dependencies to allow conda to manage dependencies. Note, :code:`PATH_TO_SERUMS` is either :code:`./serums/` if installing serums outside caser, or :code:`./gncpy/serums/` otherwise.
+   * If using anaconda then install without dependencies to allow conda to manage dependencies. Note, :code:`PATH_TO_SERUMS` is either :code:`./serums/` if installing serums outside caser, or :code:`./gncpy/serums/` otherwise.
 
-        .. code-block:: bash
+     .. code-block:: bash
 
-            conda install numpy scipy matplotlib
-            pip install --no-dependencies -e PATH_TO_SERUMS
+         conda install numpy scipy matplotlib
+         pip install --no-dependencies -e PATH_TO_SERUMS
 
-    * If not using anaconda then serums can be installed with the dependencies. Note, :code:`PATH_TO_SERUMS` follows the format in the above bullet.
+   * If not using anaconda then serums can be installed with the dependencies. Note, :code:`PATH_TO_SERUMS` follows the format in the above bullet.
 
-        .. code-block:: bash
+     .. code-block:: bash
 
-            pip install -e PATH_TO_SERUMS
+         pip install -e PATH_TO_SERUMS
 
 #. Install gncpy.
 
-    * If using anaconda then install without dependencies to allow conda to manage dependencies. Note, :code:`PATH_TO_GNCPY` is either :code:`./gncpy/` if saving in the recomended directory structure.
+   * If using anaconda then install without dependencies to allow conda to manage dependencies. Note, :code:`PATH_TO_GNCPY` is either :code:`./gncpy/` if saving in the recomended directory structure.
 
-        .. code-block:: bash
+     .. code-block:: bash
 
-            conda install numpy scipy matplotlib
-            pip install --no-dependencies -e PATH_TO_GNCPY
+         conda install numpy scipy matplotlib
+         pip install --no-dependencies -e PATH_TO_GNCPY
 
-    * If not using anaconda then gncpy can be installed with the dependencies. Note, :code:`PATH_TO_GNCPY` follows the format in the above bullet.
+   * If not using anaconda then gncpy can be installed with the dependencies. Note, :code:`PATH_TO_GNCPY` follows the format in the above bullet.
 
-        .. code-block:: bash
+     .. code-block:: bash
 
-            pip install -e PATH_TO_GNCPY
+         pip install -e PATH_TO_GNCPY
 
 #. If using Anaconda, then to run the built-in tests as standalone scripts, install the test dependencies *[Optional]*.
 
-    .. code-block:: bash
+   .. code-block:: bash
 
-        conda install pytest
+       conda install pytest
 
 #. Install tox for automated testing and building the documentation *[Optional]*
 
-    * For Anaconda run
+   * For Anaconda run
 
-    .. code-block:: bash
+   .. code-block:: bash
 
-        conda install -c conda-forge tox
+       conda install -c conda-forge tox
 
-    * If not using Anaconda then run
+   * If not using Anaconda then run
 
-    .. code-block:: bash
+   .. code-block:: bash
 
-        pip install tox
+       pip install tox
 
 
 Using git with Submodules
-^^^^^^^^^^^^^^^^^^^^^^^^^
+-------------------------
 It is recommended to setup git to handle some submodule commands automatically by running the following commands once.
 
 .. code-block:: bash
@@ -181,7 +219,7 @@ For example to run any test cases containing a keyword, run the following (repla
 
 Custom options for the tests include
 
-    * :code:`--runslow` Runs additional tests that are more time consuming, by default these are skipped.
+* :code:`--runslow` Runs additional tests that are more time consuming, by default these are skipped.
 
 The unit test environment runs all tests within the **test/unit/** sub-directory. These tests are designed to confirm basic functionality.
 Many of them do not ensure algorithm performance but may do some basic checking of a few key parameters.
