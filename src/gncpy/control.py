@@ -5,6 +5,7 @@ Some algorithms may also be used for path planning.
 import io
 import numpy as np
 import scipy.linalg as la
+import matplotlib
 import matplotlib.pyplot as plt
 from PIL import Image
 from sys import exit
@@ -57,15 +58,19 @@ class LQR:
         Feedthrough gain vector. If finite horizon there is 1 per timestep.
     end_state : N x 1
         Ending state. This generally does not need to be set directly.
+    hard_constraints : bool
+            Flag indicating that state constraints should be enforced during value propagation.
     """
 
-    def __init__(self, time_horizon=float("inf")):
+    def __init__(self, time_horizon=float("inf"), hard_constraints: bool = False):
         """Initialize an object.
 
         Parameters
         ----------
         time_horizon : float, optional
             Time horizon for the controller. The default is float("inf").
+        hard_constraints : bool, optional
+            Flag indicating that state constraints should be enforced during value propagation.
         """
         super().__init__()
 
@@ -86,6 +91,8 @@ class LQR:
 
         self._init_state = np.array([])
         self.end_state = np.array([])
+        self.hard_constraints = hard_constraints
+        self.control_constraints = None
 
     @property
     def dt(self):
@@ -116,13 +123,16 @@ class LQR:
         """Read only control penalty matrix."""
         return self._R
 
-    def set_state_model(self, u_nom, dynObj=None, dt=None):
+    def set_state_model(self, u_nom, control_constraints=None, dynObj=None, dt=None):
         """Set the state/dynamics model.
 
         Parameters
         ----------
         u_nom : Nu x 1 numpy array
             Nominal control input.
+        control_constraints : callable
+            Function that takes in timestep and control signal and returns the constrained control signal as a Nu x 1
+            numpy array
         dynObj : :class:`gncpy.dynamics.basic.DynamicsBase`, optional
             System dynamics to control. The default is None.
         dt : float, optional
@@ -133,6 +143,8 @@ class LQR:
         self.dynObj = dynObj
         if dt is not None:
             self.dt = dt
+        if control_constraints is not None:
+            self.control_constraints = control_constraints
 
     def set_cost_model(self, Q, R, P=None):
         r"""Sets the cost model used.
@@ -205,7 +217,10 @@ class LQR:
                     )
                 else:
                     A, B = self.get_state_space(tt, x_hat, u_hat, state_args, ctrl_args)
-                    return la.inv(A) @ (x_hat - B @ u_hat)
+                    prev_state = la.inv(A) @ (x_hat - B @ u_hat)
+                    if self.dynObj.state_constraint is not None:
+                        prev_state = self.dynObj.state_constraint(tt, prev_state)
+                    return prev_state
 
         else:
             raise NotImplementedError()
@@ -352,6 +367,8 @@ class LQR:
             self.feedback_gain[kk] @ traj[kk + 1, :].reshape((-1, 1))
             + self.feedthrough_gain[kk]
         )
+        if self.hard_constraints and self.control_constraints is not None:
+            u_hat = self.control_constraints(tt, u_hat)
         x_hat_p, A, B, c = self.prop_state_backward(
             tt,
             traj[kk + 1, :].reshape((-1, 1)),
@@ -381,7 +398,14 @@ class LQR:
         self.ct_go_mats[kk] = D + C.T @ self.feedback_gain[kk]
         self.ct_go_vecs[kk] = d + C.T @ self.feedthrough_gain[kk]
 
-        return self._back_pass_update_traj(x_hat_p, kk)
+        out = self._back_pass_update_traj(x_hat_p, kk)
+        if (
+            self.hard_constraints
+            and self.dynObj is not None
+            and self.dynObj.state_constraint is not None
+        ):
+            out = self.dynObj.state_constraint(time_vec[kk], out.reshape((-1, 1)))
+        return out.ravel()
 
     def backward_pass(
         self,
@@ -598,6 +622,8 @@ class LQR:
 
             if self.dt is None:
                 ctrl_signal = (self.feedback_gain @ dx + self.feedthrough_gain).ravel()
+                if self.control_constraints is not None:
+                    ctrl_signal = self.control_constraints(0, ctrl_signal).ravel()
                 cost = np.nan
 
             else:
@@ -622,6 +648,8 @@ class LQR:
                     timestep += self.dt
                     dx = end_state - state_traj[-1, :].reshape((-1, 1))
                     u = self.feedback_gain @ dx + self.feedthrough_gain
+                    if self.control_constraints is not None:
+                        u = self.control_constraints(timestep, u)
                     if ctrl_signal is None:
                         ctrl_signal = u.reshape((1, -1))
                     else:
@@ -699,6 +727,8 @@ class LQR:
                     self.feedback_gain[kk] @ state_traj[kk, :].reshape((-1, 1))
                     + self.feedthrough_gain[kk]
                 )
+                if self.control_constraints is not None:
+                    u = self.control_constraints(tt, u)
                 ctrl_signal[kk, :] = u.ravel()
 
                 x = self.prop_state(
@@ -899,7 +929,7 @@ class ELQR(LQR):
                     self.end_state,
                     is_initial,
                     is_final,
-                    *cost_args
+                    *cost_args,
                 )
             )
 
@@ -1029,7 +1059,7 @@ class ELQR(LQR):
                         self.end_state,
                         is_initial,
                         is_final,
-                        *cost_args
+                        *cost_args,
                     ),
                 )
 
@@ -1053,7 +1083,7 @@ class ELQR(LQR):
                         self.end_state,
                         is_initial,
                         is_final,
-                        *cost_args
+                        *cost_args,
                     ),
                 )
 
@@ -1104,6 +1134,15 @@ class ELQR(LQR):
             @ (self.ct_go_vecs[num_timesteps] + self.ct_come_vecs[num_timesteps])
         ).ravel()
 
+        if (
+            self.hard_constraints
+            and self.dynObj is not None
+            and self.dynObj.state_constraint is not None
+        ):
+            traj[num_timesteps, :] = self.dynObj.state_constraint(
+                time_vec[num_timesteps], traj[num_timesteps, :].reshape((-1, 1))
+            ).ravel()
+
         return traj
 
     def _determine_cost_matrices(
@@ -1137,6 +1176,9 @@ class ELQR(LQR):
             self.feedback_gain[kk] @ traj[kk, :].reshape((-1, 1))
             + self.feedthrough_gain[kk]
         )
+        if self.hard_constraints and self.control_constraints is not None:
+            u_hat = self.control_constraints(tt, u_hat)
+
         x_hat_p, ABar, BBar, cBar = self.prop_state_forward(
             tt,
             traj[kk, :].reshape((-1, 1)),
@@ -1168,10 +1210,17 @@ class ELQR(LQR):
         self.ct_come_mats[kk + 1] = DBar + CBar.T @ self.feedback_gain[kk]
         self.ct_come_vecs[kk + 1] = dBar + CBar.T @ self.feedthrough_gain[kk]
 
-        return -(
+        out = -(
             np.linalg.inv(self.ct_go_mats[kk + 1] + self.ct_come_mats[kk + 1])
             @ (self.ct_go_vecs[kk + 1] + self.ct_come_vecs[kk + 1])
-        ).ravel()
+        )
+        if (
+            self.hard_constraints
+            and self.dynObj is not None
+            and self.dynObj.state_constraint is not None
+        ):
+            out = self.dynObj.state_constraint(time_vec[kk + 1], out)
+        return out.ravel()
 
     def forward_pass(
         self,
@@ -1243,7 +1292,7 @@ class ELQR(LQR):
         inv_ctrl_args,
         color=None,
         alpha=0.2,
-        zorder=-10
+        zorder=-10,
     ):
         if color is None:
             color = (0.5, 0.5, 0.5)
@@ -1266,23 +1315,33 @@ class ELQR(LQR):
             ).ravel()
 
         # plot backward pass trajectory
-        fig.axes[self._ax].plot(
-            state_traj[:, plt_inds[0]],
-            state_traj[:, plt_inds[1]],
-            color=color,
-            alpha=alpha,
-            zorder=zorder,
-        )
+        extra_args = dict(color=color, alpha=alpha, zorder=zorder,)
+        if len(plt_inds) == 3:
+            fig.axes[self._ax].plot(
+                state_traj[:, plt_inds[0]],
+                state_traj[:, plt_inds[1]],
+                state_traj[:, plt_inds[2]],
+                **extra_args,
+            )
+        else:
+            fig.axes[self._ax].plot(
+                state_traj[:, plt_inds[0]], state_traj[:, plt_inds[1]], **extra_args,
+            )
 
-        plt.pause(0.005)
+        if matplotlib.get_backend() != "Agg":
+            plt.pause(0.005)
         if save_animation:
             with io.BytesIO() as buff:
                 fig.savefig(buff, format="raw")
                 buff.seek(0)
-                img = np.frombuffer(buff.getvalue(), dtype=np.uint8).reshape(
-                    (fig_h, fig_w, -1)
+                arr = np.frombuffer(buff.getvalue(), dtype=np.uint8).reshape(
+                    (*(fig.canvas.get_width_height()[1::-1]), -1)
                 )
-            return Image.fromarray(img)
+                if arr.shape[0] != fig_w or arr.shape[1] != fig_h:
+                    img = Image.fromarray(arr).resize((fig_w, fig_h), Image.BICUBIC)
+                else:
+                    img = Image.fromarray(arr)
+            return img
 
         return []
 
@@ -1444,8 +1503,15 @@ class ELQR(LQR):
         if show_animation:
             if fig is None:
                 fig = plt.figure()
-                fig.add_subplot(1, 1, 1)
-                fig.axes[self._ax].set_aspect("equal", adjustable="box")
+                if len(plt_inds) == 3:
+                    extra_args = {"projection": "3d"}
+                else:
+                    extra_args = {}
+                fig.add_subplot(1, 1, 1, **extra_args)
+                try:
+                    fig.axes[self._ax].set_aspect("equal", adjustable="box")
+                except Exception:
+                    pass
 
                 if plt_opts is None:
                     plt_opts = gplot.init_plotting_opts(f_hndl=fig)
@@ -1459,8 +1525,7 @@ class ELQR(LQR):
 
                 # draw start
                 fig.axes[self._ax].scatter(
-                    self._init_state[plt_inds[0], 0],
-                    self._init_state[plt_inds[1], 0],
+                    *self._init_state.ravel()[plt_inds],
                     marker="o",
                     color="g",
                     zorder=1000,
@@ -1473,13 +1538,10 @@ class ELQR(LQR):
                     )
 
             fig.axes[self._ax].scatter(
-                self.end_state[plt_inds[0], 0],
-                self.end_state[plt_inds[1], 0],
-                marker="x",
-                color="r",
-                zorder=1000,
+                *self.end_state.ravel()[plt_inds], marker="x", color="r", zorder=1000,
             )
-            plt.pause(0.01)
+            if matplotlib.get_backend() != "Agg":
+                plt.pause(0.01)
 
             # for stopping simulation with the esc key.
             fig.canvas.mpl_connect(
@@ -1493,10 +1555,14 @@ class ELQR(LQR):
                 with io.BytesIO() as buff:
                     fig.savefig(buff, format="raw")
                     buff.seek(0)
-                    img = np.frombuffer(buff.getvalue(), dtype=np.uint8).reshape(
-                        (fig_h, fig_w, -1)
+                    arr = np.frombuffer(buff.getvalue(), dtype=np.uint8).reshape(
+                        (*(fig.canvas.get_width_height()[1::-1]), -1)
                     )
-                frame_list.append(Image.fromarray(img))
+                    if arr.shape[0] != fig_w or arr.shape[1] != fig_h:
+                        img = Image.fromarray(arr).resize((fig_w, fig_h), Image.BICUBIC)
+                    else:
+                        img = Image.fromarray(arr)
+                frame_list.append(img)
 
         if disp:
             print("Starting ELQR optimization loop...")
@@ -1538,6 +1604,8 @@ class ELQR(LQR):
             x = traj[0, :].copy().reshape((-1, 1))
             for kk, tt in enumerate(time_vec[:-1]):
                 u = self.feedback_gain[kk] @ x + self.feedthrough_gain[kk]
+                if self.control_constraints is not None:
+                    u = self.control_constraints(tt, u)
                 cost += self.cost_function(
                     tt, x, u, cost_args, is_initial=(kk == 0), is_final=False,
                 )
@@ -1583,6 +1651,11 @@ class ELQR(LQR):
                 self.feedback_gain[kk] @ state_traj[kk, :].reshape((-1, 1))
                 + self.feedthrough_gain[kk]
             ).ravel()
+            if self.control_constraints is not None:
+                ctrl_signal[kk, :] = self.control_constraints(
+                    tt, ctrl_signal[kk, :].reshape((-1, 1))
+                ).ravel()
+
             cost += self.cost_function(
                 tt,
                 state_traj[kk, :].reshape((-1, 1)),
@@ -1612,21 +1685,32 @@ class ELQR(LQR):
         )
 
         if show_animation:
-            fig.axes[self._ax].plot(
-                state_traj[:, plt_inds[0]],
-                state_traj[:, plt_inds[1]],
-                linestyle="-",
-                color="g",
-            )
-            plt.pause(0.001)
+            extra_args = dict(linestyle="-", color="g",)
+            if len(plt_inds) == 3:
+                fig.axes[self._ax].plot(
+                    state_traj[:, plt_inds[0]],
+                    state_traj[:, plt_inds[1]],
+                    state_traj[:, plt_inds[2]],
+                    **extra_args,
+                )
+            else:
+                fig.axes[self._ax].plot(
+                    state_traj[:, plt_inds[0]], state_traj[:, plt_inds[1]], **extra_args
+                )
+            if matplotlib.get_backend() != "Agg":
+                plt.pause(0.001)
             if save_animation:
                 with io.BytesIO() as buff:
                     fig.savefig(buff, format="raw")
                     buff.seek(0)
-                    img = np.frombuffer(buff.getvalue(), dtype=np.uint8).reshape(
-                        (fig_h, fig_w, -1)
+                    arr = np.frombuffer(buff.getvalue(), dtype=np.uint8).reshape(
+                        (*(fig.canvas.get_width_height()[1::-1]), -1)
                     )
-                frame_list.append(Image.fromarray(img))
+                    if arr.shape[0] != fig_w or arr.shape[1] != fig_h:
+                        img = Image.fromarray(arr).resize((fig_w, fig_h), Image.BICUBIC)
+                    else:
+                        img = Image.fromarray(arr)
+                frame_list.append(img)
 
         u = ctrl_signal[0, :].reshape((-1, 1))
         details = (cost, state_traj, ctrl_signal, fig, frame_list)

@@ -36,7 +36,7 @@ class BayesFilter(metaclass=abc.ABCMeta):
     def __init__(self, use_cholesky_inverse=True, **kwargs):
         self.use_cholesky_inverse = use_cholesky_inverse
 
-        super().__init__(**kwargs)
+        super().__init__()
 
     @abc.abstractmethod
     def predict(self, timestep, *args, **kwargs):
@@ -2977,14 +2977,15 @@ class MaxCorrEntUPF(UnscentedParticleFilter):
         self._filt.kernel_bandwidth = kernel_bandwidth
 
 
-class QuadratureKalmanFilter(KalmanFilter):
+class QuadratureKalmanFilter(ExtendedKalmanFilter):
     """Implementation of a Quadrature Kalman Filter.
 
     Notes
     -----
     This implementation is based on
     :cite:`Arasaratnam2007_DiscreteTimeNonlinearFilteringAlgorithmsUsingGaussHermiteQuadrature`
-    and uses Gauss-Hermite quadrature points.
+    and uses Gauss-Hermite quadrature points. It inherits from EKF to allow
+    for easier implementation of non-linear dynamics.
 
     Attributes
     ----------
@@ -2997,7 +2998,8 @@ class QuadratureKalmanFilter(KalmanFilter):
 
         self.quadPoints = gdistrib.QuadraturePoints(points_per_axis=points_per_axis)
         self._sqrt_cov = np.array([[]])
-        self._dyn_fnc = None
+        self._use_lin_dyn = False
+        self._use_non_lin_dyn = False
 
     def save_filter_state(self):
         """Saves filter variables so they can be restored later."""
@@ -3006,7 +3008,8 @@ class QuadratureKalmanFilter(KalmanFilter):
         filt_state["quadPoints"] = self.quadPoints
 
         filt_state["_sqrt_cov"] = self._sqrt_cov
-        filt_state["_dyn_fnc"] = self._dyn_fnc
+        filt_state["_use_lin_dyn"] = self._use_lin_dyn
+        filt_state["_use_non_lin_dyn"] = self._use_non_lin_dyn
 
         return filt_state
 
@@ -3022,7 +3025,8 @@ class QuadratureKalmanFilter(KalmanFilter):
 
         self.quadPoints = filt_state["quadPoints"]
         self._sqrt_cov = filt_state["_sqrt_cov"]
-        self._dyn_fnc = filt_state["_dyn_fnc"]
+        self._use_lin_dyn = filt_state["_use_lin_dyn"]
+        self._use_non_lin_dyn = filt_state["_use_non_lin_dyn"]
 
     @property
     def points_per_axis(self):
@@ -3033,28 +3037,78 @@ class QuadratureKalmanFilter(KalmanFilter):
     def points_per_axis(self, val):
         self.quadPoints.points_per_axis = val
 
-    def set_state_model(self, dyn_fun=None, **kwargs):
-        """Sets the state model.
+    def set_state_model(
+        self,
+        state_mat=None,
+        input_mat=None,
+        cont_time=False,
+        state_mat_fun=None,
+        input_mat_fun=None,
+        dyn_obj=None,
+        ode_lst=None,
+    ):
+        """Sets the state model for the filter.
 
-        This can either be a non-linear dyanmic function or any valid model
-        for the :class:`.KalmanFilter`.
+        This can use either linear dynamics (by calling the kalman filters
+        :meth:`gncpy.filters.KalmanFilter.set_state_model`) or non-linear dynamics
+        (by calling :meth:`gncpy.filters.ExtendedKalmanFilter.set_state_model`).
+        The linearness is automatically determined by the input arguments specified.
 
         Parameters
         ----------
-        dyn_fun : callable
-            The a function that propagates the state. This is assumed to be
-            non-linear but can also be a linear function. It must have the
-            signature :code:`f(t, x, *args)` where `t` is the timestep,
-            `x` is a N x 1 numpy array, and it returns an N x 1 numpy array
-            representing the next state.
-        **kwargs : dict
-            Additional agruments to pass to :class:`.KalmanFilter` if `dyn_fun`
-            is not used.
+        state_mat : N x N numpy array, optional
+            State matrix, continuous or discrete case. The default is None.
+        input_mat : N x Nu numpy array, optional
+            Input matrixx, continuous or discrete case. The default is None.
+        cont_time : bool, optional
+            Flag inidicating if the continuous model is provided. The default
+            is False.
+        state_mat_fun : callable, optional
+            Function that returns the `state_mat`, must take timestep and
+            `*args`. The default is None.
+        input_mat_fun : callable, optional
+            Function that returns the `input_mat`, must take timestep, and
+            `*args`. The default is None.
+        dyn_obj : :class:`gncpy.dynamics.LinearDynamicsBase` or :class:`gncpy.dynamics.NonlinearDynamicsBase`, optional
+            Sets the dynamics according to the class. The default is None.
+        ode_lst : list, optional
+            callable functions, 1 per ode/state. The callabale must have the
+            signature `f(t, x, *f_args)` just like scipy.integrate's ode
+            function. The default is None.
+
+        Raises
+        ------
+        RuntimeError
+            If an invalid state model or combination of inputs is specified.
+
+        Returns
+        -------
+        None.
         """
-        if dyn_fun is not None:
-            self._dyn_fnc = dyn_fun
+        self._use_lin_dyn = (
+            state_mat is not None
+            or state_mat_fun is not None
+            or isinstance(dyn_obj, gdyn.LinearDynamicsBase)
+        )
+        self._use_non_lin_dyn = (
+            isinstance(dyn_obj, gdyn.NonlinearDynamicsBase) or ode_lst is not None
+        ) and not self._use_lin_dyn
+
+        # allow for linear or non linear dynamics by calling the appropriate parent
+        if self._use_lin_dyn:
+            KalmanFilter.set_state_model(
+                self,
+                state_mat=state_mat,
+                input_mat=input_mat,
+                cont_time=cont_time,
+                state_mat_fun=state_mat_fun,
+                input_mat_fun=input_mat_fun,
+                dyn_obj=dyn_obj,
+            )
+        elif self._use_non_lin_dyn:
+            ExtendedKalmanFilter.set_state_model(self, dyn_obj=dyn_obj, ode_lst=ode_lst)
         else:
-            super().set_state_model(**kwargs)
+            raise RuntimeError("Invalid state model.")
 
     def set_measurement_model(self, meas_mat=None, meas_fun=None):
         r"""Sets the measurement model for the filter.
@@ -3092,7 +3146,7 @@ class QuadratureKalmanFilter(KalmanFilter):
         RuntimeError
             Rasied if no arguments are specified.
         """
-        super().set_measurement_model(meas_mat=meas_mat, meas_fun=meas_fun)
+        super().set_measurement_model(meas_mat=meas_mat, meas_fun_lst=meas_fun)
 
     def _factorize_cov(self, val=None):
         if val is None:
@@ -3104,17 +3158,26 @@ class QuadratureKalmanFilter(KalmanFilter):
         self.cov = self.proc_noise + self.quadPoints.cov
 
     def _predict_next_state(
-        self, timestep, cur_state, cur_input, state_mat_args, input_mat_args
+        self, timestep, cur_state, cur_input, state_mat_args, input_mat_args, dyn_fun_params
     ):
-        if self._dyn_fnc is not None:
-            return self._dyn_fnc(timestep, cur_state, *state_mat_args)
+        if self._use_lin_dyn:
+            return KalmanFilter._predict_next_state(
+                        self,
+                        timestep,
+                        cur_state.reshape((-1, 1)),
+                        cur_input,
+                        state_mat_args,
+                        input_mat_args,
+                    )[0]
+        elif self._use_non_lin_dyn:
+            return ExtendedKalmanFilter._predict_next_state(
+                        self, timestep, cur_state.reshape((-1, 1)), dyn_fun_params
+                    )[0]
         else:
-            return super()._predict_next_state(
-                timestep, cur_state, cur_input, state_mat_args, input_mat_args
-            )[0]
+            raise RuntimeError("State model not specified")
 
     def predict(
-        self, timestep, cur_state, cur_input=None, state_mat_args=(), input_mat_args=()
+        self, timestep, cur_state, cur_input=None, state_mat_args=None, input_mat_args=None, dyn_fun_params=None,
     ):
         """Prediction step of the filter.
 
@@ -3135,6 +3198,9 @@ class QuadratureKalmanFilter(KalmanFilter):
             Additional arguments for the get input matrix function if one has
             been specified or the propagate state function if using a dynamic
             object. The default is ().
+        dyn_fun_params : tuple, optional
+            Additional arguments to pass to the dynamics function if using non-linear
+            dynamics.
 
         Raises
         ------
@@ -3146,6 +3212,13 @@ class QuadratureKalmanFilter(KalmanFilter):
         N x 1 numpy array
             The predicted state.
         """
+        if state_mat_args is None:
+            state_mat_args = ()
+        if input_mat_args is None:
+            input_mat_args = ()
+        if dyn_fun_params is None:
+            dyn_fun_params = ()
+
         # factorize covariance as P = sqrt(P) * sqrt(P)^T
         self._factorize_cov()
 
@@ -3155,7 +3228,7 @@ class QuadratureKalmanFilter(KalmanFilter):
         # predict each point using the dynamics
         for ii, (point, _) in enumerate(self.quadPoints):
             pred_point = self._predict_next_state(
-                timestep, point, cur_input, state_mat_args, input_mat_args
+                timestep, point, cur_input, state_mat_args, input_mat_args, dyn_fun_params
             )
             self.quadPoints.points[ii, :] = pred_point.ravel()
         # update covariance as Q - m * x * x^T + sum(w_i * X_i * X_i^T)

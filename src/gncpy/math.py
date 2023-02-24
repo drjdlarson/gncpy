@@ -1,4 +1,6 @@
 """Useful math utility functions."""
+import warnings
+
 import numpy as np
 from copy import deepcopy
 
@@ -305,10 +307,20 @@ def get_elem_sym_fnc(z):
             F[i_n - 1, 0] = F[i_nminus - 1, 0] + z_loc[n - 1]
             for k in range(2, n + 1):
                 if k == n:
-                    F[i_n - 1, k - 1] = z_loc[n - 1] * F[i_nminus - 1, k - 1 - 1]
+                    with warnings.catch_warnings():
+                        warnings.filterwarnings("error", message=".*overflow encountered in double_scalars.*")
+                        try:
+                            F[i_n - 1, k - 1] = z_loc[n - 1] * F[i_nminus - 1, k - 1 - 1]
+                        except RuntimeWarning:
+                            F[i_n - 1, k - 1] = np.finfo(float).max
                 else:
-                    F[i_n - 1, k - 1] = F[i_nminus - 1, k - 1] \
-                        + z_loc[n - 1] * F[i_nminus - 1, k - 1 - 1]
+                    with warnings.catch_warnings():
+                        warnings.filterwarnings("error", message=".*overflow encountered in double_scalars.*")
+                        try:
+                            F[i_n - 1, k - 1] = F[i_nminus - 1, k - 1] \
+                                + z_loc[n - 1] * F[i_nminus - 1, k - 1 - 1]
+                        except RuntimeWarning:
+                            F[i_n - 1, k - 1] = np.finfo(float).max
             tmp = i_n
             i_n = i_nminus
             i_nminus = tmp
