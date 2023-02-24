@@ -86,3 +86,9 @@ def run():
     if not os.path.isfile(fout):
         fig = main()
         fig.savefig(fout)
+
+
+if __name__ == "__main__":
+    import matplotlib.pyplot as plt
+    main()
+    plt.show()
