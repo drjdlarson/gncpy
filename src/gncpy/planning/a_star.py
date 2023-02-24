@@ -469,6 +469,9 @@ class AStar:
             self.pos_to_ind(end_pos), self.get_map_cost(self.pos_to_ind(end_pos)), -1
         )
 
+        if not self.is_valid(startNode) or not self.is_valid(endNode):
+            return np.array((0, start_pos.size)), float('inf'), fig, [] 
+
         frame_list = []
 
         if show_animation:

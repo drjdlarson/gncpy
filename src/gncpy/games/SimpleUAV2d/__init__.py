@@ -1317,16 +1317,17 @@ class SimpleUAV2d(BaseGame2d):
             r_death_cumul += r_death
             r_wall_cumul += r_wall
             r_vel_cumul += r_vel
-            reward += r_hazard + r_target + r_death + r_wall
+            reward += r_hazard + r_target + r_death + r_wall + r_vel
 
         # add fixed terms to reward
         r_missed = 0
         if self.game_over:
             # get all targets later in the sequence
-            for target in self.params.targets:
-                if target.order <= self.target_seq[self.cur_target_seq]:
-                    continue
-                r_missed += target.priority
+            if self.cur_target_seq < len(self.target_seq):
+                for target in self.params.targets:
+                    if target.order <= self.target_seq[self.cur_target_seq]:
+                        continue
+                    r_missed += target.priority
 
             # get all remaining targets at current point in sequence
             for target in self.entityManager.get_entities("target"):
@@ -1335,7 +1336,7 @@ class SimpleUAV2d(BaseGame2d):
 
             r_missed *= self.params.score.missed_multiplier
 
-        reward += -self.params.score.time_penalty + r_missed + r_vel
+        reward += -self.params.score.time_penalty + r_missed
 
         info = {
             "hazard": r_haz_cumul,
