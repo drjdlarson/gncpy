@@ -1,17 +1,28 @@
 #pragma once
 #include "dynamics/IDynamics.h"
+#include "dynamics/Exceptions.h"
 
 namespace lager::gncpy::dynamics {
 
 template<typename T>
-class ILinearDynamics : IDynamics<T> {
+class ILinearDynamics : public IDynamics<T> {
 public:
-    matrix::Matrix<T> propagateState(T timestep, const matrix::Matrix<T>& state) const override {
-        matrix::Matrix<T> nextState = getStateMat(timestep) * state;
+    matrix::Matrix<T> propagateState(T timestep, const matrix::Matrix<T>& state, const matrix::Matrix<T>& control) const override {
+        matrix::Matrix<T> nextState = this->getStateMat(timestep) * state;
 
-        // TODO: implement control model changes
+        if(this->hasControlModel()){
+            nextState += this->getInputMat(timestep, nextState, control) * control;
+        }
+
+        if(this->hasStateConstraint()){
+            this->stateConstraint(timestep, nextState);
+        }
 
         return state;
+    }
+
+    matrix::Matrix<T> getInputMat(T timestep, const matrix::Matrix<T>& state, const matrix::Matrix<T>& control) const override{
+        return this->controlModel(timestep, state, control);
     }
 
 };

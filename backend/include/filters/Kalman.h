@@ -4,7 +4,7 @@
 namespace lager::gncpy::filters {
 
 template<typename T>
-class Kalman : IBayesFilter<T> {
+class Kalman : public IBayesFilter<T> {
     Kalman();
 
 };
