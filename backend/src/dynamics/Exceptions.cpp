@@ -1,4 +1,4 @@
-#include "dynamics/Exceptions.h"
+#include "gncpy/dynamics/Exceptions.h"
 
 namespace lager::gncpy::dynamics {
 

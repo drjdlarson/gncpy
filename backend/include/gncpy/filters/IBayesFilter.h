@@ -1,5 +1,5 @@
 #pragma once
-#include "Matrix.h"
+#include "gncpy/math/Matrix.h"
 
 namespace lager::gncpy::filters {
 

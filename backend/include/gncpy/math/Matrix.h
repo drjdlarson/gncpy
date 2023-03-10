@@ -1,19 +1,11 @@
 #pragma once
-#include <stdexcept>
 #include <stdint.h>
+#include "gncpy/math/Exceptions.h"
 
 namespace lager::gncpy::matrix {
 
-class BadIndex final: public std::runtime_error {
-public:
-    explicit BadIndex(char const* const message) noexcept;
-};
 
-class BadDimension final: public std::runtime_error {
-public:
-    BadDimension(char const* const message) throw();
-};
-
+// row-major ordering
 template<typename T>
 class Matrix final{
 public:
@@ -23,11 +15,10 @@ public:
         if(m_nRows == 0 || m_nCols == 0) {
             throw BadIndex("Matrix constructor has size 0");
         }
-        m_data = new T[m_nRows * m_nCols];
     
         for (int r = 0; r < m_nRows; r++) {
             for (int c = 0; c < m_nCols; c++) {
-                m_data[c + m_nCols * r] = ((listlist.begin()+r)->begin())[c];
+                m_data.emplace_back(((listlist.begin()+r)->begin())[c]);
             }
         }
     }
@@ -38,27 +29,44 @@ public:
         if(m_nRows == 0 || m_nCols == 0) {
             throw BadIndex("Matrix constructor has size 0");
         }
-        m_data = new T[m_nRows * m_nCols];
 
         for (int r = 0; r < m_nRows; r++) {
             for (int c = 0; c < m_nCols; c++) {
-                m_data[c + m_nCols * r] = static_cast<T>(0);
+                m_data.emplace_back(static_cast<T>(0));
             }
         }
 
     }
 
-    Matrix(const Matrix& m);               // Copy constructor
+    Matrix& operator+= (const Matrix& rhs) {
+        if (!this->isSameSize(rhs)){
+            throw BadDimension();
+        }
+        for (uint8_t i = 0; i < this->numRows() * this->numCols(); i++){
+            m_data[i] += rhs.m_data[i];
+        }
 
-    ~Matrix() {
-        delete[] m_data;
+        return *this;
     }
 
-    Matrix& operator= (const Matrix& m);   // Assignment operator
-    Matrix& operator+= (const Matrix& rhs);
+    Matrix operator+ (const Matrix& m) {
+        if (!this->isSameSize(m)){
+            throw BadDimension();
+        }
+        for (uint8_t i = 0; i < this->numRows() * this->numCols(); i++){
+            m_data[i] += m.m_data[i];
+        }
+    }
 
-    Matrix operator+ (const Matrix& m);
-    Matrix operator- (const Matrix& m);
+    Matrix operator- (const Matrix& m) {
+        if (!this->isSameSize(m)){
+            throw BadDimension();
+        }
+        for (uint8_t i = 0; i < this->numRows() * this->numCols(); i++){
+            m_data[i] -= m.m_data[i];
+        }
+    }
+
     Matrix operator* (const Matrix& m);
     Matrix operator/ (const Matrix& m);
 
@@ -74,9 +82,8 @@ private:
 
     uint8_t m_nRows;
     uint8_t m_nCols;
-    T* m_data;
+    std::vector<T> m_data;
     
 };
 
-    
 } // namespace lager::gncpy::matrix

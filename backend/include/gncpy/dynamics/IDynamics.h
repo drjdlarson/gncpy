@@ -1,7 +1,7 @@
 #pragma once
 #include <functional>
-#include "dynamics/Exceptions.h"
-#include "Matrix.h"
+#include "gncpy/dynamics/Exceptions.h"
+#include "gncpy/math/Matrix.h"
 
 namespace lager::gncpy::dynamics {
 
@@ -10,7 +10,7 @@ class IDynamics {
 public:
     virtual matrix::Matrix<T> propagateState(T timestep, const matrix::Matrix<T>& state, const matrix::Matrix<T>& control) const = 0;
     matrix::Matrix<T> propagateState(T timestep, const matrix::Matrix<T>& state) const {
-        return propagateState(timestep, state, matrix::Matrix(state.numRows(), 1));
+        return this->propagateState(timestep, state, matrix::Matrix(state.numRows(), 1));
     }
 
     virtual matrix::Matrix<T> getStateMat(T timestep) const = 0;

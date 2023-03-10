@@ -1,5 +1,5 @@
 #include <iostream>
-#include "dynamics/DoubleIntegrator.h"
+#include "gncpy/dynamics/DoubleIntegrator.h"
 
 
 int main() {

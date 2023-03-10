@@ -1,5 +1,5 @@
 #pragma once
-#include "filters/IBayesFilter.h"
+#include "gncpyfilters/IBayesFilter.h"
 
 namespace lager::gncpy::filters {
 

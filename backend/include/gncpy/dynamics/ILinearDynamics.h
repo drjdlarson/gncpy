@@ -1,6 +1,6 @@
 #pragma once
-#include "dynamics/IDynamics.h"
-#include "dynamics/Exceptions.h"
+#include "gncpy/dynamics/IDynamics.h"
+#include "gncpy/dynamics/Exceptions.h"
 
 namespace lager::gncpy::dynamics {
 
@@ -18,7 +18,7 @@ public:
             this->stateConstraint(timestep, nextState);
         }
 
-        return state;
+        return nextState;
     }
 
     matrix::Matrix<T> getInputMat(T timestep, const matrix::Matrix<T>& state, const matrix::Matrix<T>& control) const override{
