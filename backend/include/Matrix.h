@@ -9,6 +9,10 @@ public:
     explicit BadIndex(char const* const message) noexcept;
 };
 
+class BadDimension final: public std::runtime_error {
+public:
+    BadDimension(char const* const message) throw();
+};
 
 template<typename T>
 class Matrix final{
@@ -65,8 +69,8 @@ public:
     inline uint8_t numCols() const { return m_nCols; }
 
 private:
-    inline bool allowMultiplication(const Matrix& rhs) const {}
-    inline bool isSameSize(const Matrix& rhs) const {return numRows() == rhs.numRows && numCols() == rhs.numCols(); }
+    inline bool allowMultiplication(const Matrix& rhs) const {return numCols() == rhs.numRows();}
+    inline bool isSameSize(const Matrix& rhs) const {return numRows() == rhs.numRows() && numCols() == rhs.numCols(); }
 
     uint8_t m_nRows;
     uint8_t m_nCols;
