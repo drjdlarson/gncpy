@@ -1,5 +1,8 @@
 .idea/
+.vscode/
 .directory
+backend/build/
+backend/docs/html/
 
 # auto generated documentation images
 #docs/source/examples/**/*.png
