@@ -80,7 +80,7 @@ public:
 
     Matrix operator* (const Matrix& rhs) {
         if(!this->allowMultiplication(rhs)) {
-            throw BadDimension();
+            throw BadDimension("Dimensions do not match");
         }
 
         std::vector<T> out;
@@ -132,6 +132,20 @@ public:
             throw BadIndex("Indexing outside columns.");
         }
         return m_data[this->rowColToLin(row, col)];
+    }
+
+    Matrix transpose() {
+        // Insert transpose function here
+    }
+
+
+    void print(){
+        for (uint8_t r = 0; r < this->numRows(); r++){
+            for (uint8_t c = 0; c < this->numCols(); c++){
+                std::cout<< m_data[this->rowColToLin(r, c)]<<"  ";
+            }
+            std::cout<< "\n";
+        }
     }
 
     inline uint8_t numRows() const { return m_nRows; }
