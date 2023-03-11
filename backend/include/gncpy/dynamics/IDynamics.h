@@ -10,9 +10,7 @@ template<typename T>
 class IDynamics {
 public:
     virtual matrix::Vector<T> propagateState(T timestep, const matrix::Vector<T>& state, const matrix::Vector<T>& control) const = 0;
-    matrix::Matrix<T> propagateState(T timestep, const matrix::Vector<T>& state) const {
-        return this->propagateState(timestep, state, matrix::Vector<T>(state.numRows()));
-    }
+    virtual matrix::Vector<T> propagateState(T timestep, const matrix::Vector<T>& state) const = 0;
 
     virtual matrix::Matrix<T> getStateMat(T timestep) const = 0;
     virtual matrix::Matrix<T> getInputMat(T timestep, const matrix::Vector<T>& state, const matrix::Vector<T>& control) const = 0;
@@ -50,8 +48,8 @@ public:
     inline bool hasStateConstraint() const { return m_hasStateConstraint; }
 
 private:
-    bool m_hasContolModel;
-    bool m_hasStateConstraint;
+    bool m_hasContolModel = false;
+    bool m_hasStateConstraint = false;
 
     std::function<matrix::Matrix<T> (T timestep, const matrix::Vector<T>& state, const matrix::Vector<T>& control)> m_controlModel;
     std::function<void (T timestep, matrix::Vector<T>& state)> m_stateConstraints;

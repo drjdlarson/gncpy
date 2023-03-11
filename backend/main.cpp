@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sys/resource.h>
 #include "gncpy/dynamics/DoubleIntegrator.h"
 #include "gncpy/math/Vector.h"
 
@@ -10,7 +11,15 @@ int main() {
     lager::gncpy::matrix::Vector xk1 = xk;
 
     for(uint16_t kk = 0; kk < 10; kk++) {
-        // xk1 = dyn.propagateState(kk * dt, xk);
+        double timestep = kk * dt;
+        std::cout << "t = " << timestep << ": ";
+
+        xk1 = dyn.propagateState(timestep, xk);
+        for(auto const& x : xk1) {
+            std::cout << x << " ";
+        }
+        std::cout << std::endl;
+        xk = xk1;
     }
 
 
