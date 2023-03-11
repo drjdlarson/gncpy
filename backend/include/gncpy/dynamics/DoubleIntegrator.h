@@ -4,7 +4,7 @@
 namespace lager::gncpy::dynamics {
 
 template<typename T>
-class DoubleIntegrator final: public ILinearDynamics<T>{
+class DoubleIntegrator final: public LinearDynamics<T>{
 public:
     inline std::vector<std::string> stateNames() const { return std::vector<std::string>{"x pos", "y pos", "x vel", "y vel"}; };
 

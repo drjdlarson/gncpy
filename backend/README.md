@@ -1,0 +1,1 @@
+Doxygen must be installed for the documentation to be built. Also recommended to install graphviz for the documentation.
