@@ -23,7 +23,17 @@ project(${MY_PROJECT}
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # for sonarlint plugin/sonarqube
 set(CMAKE_CXX_STANDARD 20)
 set(CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_FLAGS "-fPIC -Wall -Wextra -Wpedantic -O3")
+set(CMAKE_CXX_FLAGS "-fPIC -Wall -Wextra -Wpedantic")
+
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+    message("DEBUG mode")
+    set(CMAKE_CXX_FLAGS_DEBUG "-gdwarf-4 -gstatement-frontiers -gvariable-location-views -ginline-points -fno-eliminate-unused-debug-symbols -fvar-tracking -fvar-tracking-assignments -Og")
+
+elseif(CMAKE_BUILD_TYPE MATCHES Release)
+    message("RELEASE mode")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
+endif()
 
 
 #---------------------------------------------------------------------------

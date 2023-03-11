@@ -123,7 +123,7 @@ public:
         if(row >= m_nRows) {
             throw BadIndex("Indexing outside rows.");
         }
-        if(col > m_nCols) {
+        if(col >= m_nCols) {
             throw BadIndex("Indexing outside columns.");
         }
         return m_data[this->rowColToLin(row, col)];
@@ -133,7 +133,7 @@ public:
         if(row >= m_nRows) {
             throw BadIndex("Indexing outside rows.");
         }
-        if(col > m_nCols) {
+        if(col >= m_nCols) {
             throw BadIndex("Indexing outside columns.");
         }
         return m_data[this->rowColToLin(row, col)];

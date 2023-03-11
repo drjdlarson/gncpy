@@ -1,6 +1,19 @@
 #include <gtest/gtest.h>
+#include "gncpy/math/Exceptions.h"
 #include "gncpy/math/Matrix.h"
 #include "gncpy/math/Vector.h"
+
+
+TEST(MatrixTest, Index) {
+    lager::gncpy::matrix::Matrix m({{1, 2}, {5, 1}});
+
+    EXPECT_EQ(m(0, 1), 2);
+    EXPECT_EQ(m(1, 1), 1);
+    EXPECT_EQ(m(1, 0), 5);
+    EXPECT_THROW(m(2, 0), lager::gncpy::matrix::BadIndex);
+
+    SUCCEED();
+}
 
 
 TEST(MatrixTest, Add) {
