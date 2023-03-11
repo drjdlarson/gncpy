@@ -13,7 +13,7 @@ public:
 
     }
 
-    matrix::Matrix<T> getStateMat([[maybe_unused]] T timestep) const override{
+    matrix::Matrix<T> getStateMat([[maybe_unused]] T timestep, [[maybe_unused]] const StateParams* const stateParams=nullptr) const override{
         matrix::Matrix<T> F({{1, 0, m_dt, 0},
                              {0, 1, 0, m_dt},
                              {0, 0, 1, 0},
