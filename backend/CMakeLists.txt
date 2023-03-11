@@ -5,6 +5,7 @@ set(MY_PROJECT gncpy)
 # cmake options
 #---------------------------------------------------------------------------
 option(ENABLE_TESTING "Build the tests" ON)
+option(BUILD_DOC "Build the documentation" ON)
 
 
 #---------------------------------------------------------------------------
@@ -25,11 +26,11 @@ set(CMAKE_CXX_STANDARD 20)
 set(CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_FLAGS "-fPIC -Wall -Wextra -Wpedantic")
 
-if(CMAKE_BUILD_TYPE MATCHES Debug)
+if(CMAKE_BUILD_TYPE MATCHES "^[Dd]ebug")
     message("DEBUG mode")
     set(CMAKE_CXX_FLAGS_DEBUG "-gdwarf-4 -gstatement-frontiers -gvariable-location-views -ginline-points -fno-eliminate-unused-debug-symbols -fvar-tracking -fvar-tracking-assignments -Og")
 
-elseif(CMAKE_BUILD_TYPE MATCHES Release)
+elseif(CMAKE_BUILD_TYPE MATCHES "^[Rr]elease")
     message("RELEASE mode")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
@@ -47,10 +48,38 @@ file(GLOB_RECURSE HDRS include/*.h)
 # check for testing code
 #---------------------------------------------------------------------------
 if(ENABLE_TESTING)
-        message("Enabling testing...")
-        enable_testing()
-        add_subdirectory(tests)
+    message("Enabling testing...")
+    enable_testing()
+    add_subdirectory(tests)
 endif(ENABLE_TESTING)
+
+
+#---------------------------------------------------------------------------
+# check for building documentation
+#---------------------------------------------------------------------------
+# see: https://vicrucann.github.io/tutorials/quick-cmake-doxygen/
+if(BUILD_DOC)
+    find_package(Doxygen)
+    if(DOXYGEN_FOUND)
+        set(DOXYGEN_IN ${CMAKE_CURRENT_SOURCE_DIR}/docs/Doxyfile.in)
+        set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+
+        # request to configure the file
+        configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
+        message("Doxygen build started")
+
+        # note the option ALL which allows to build the docs together with the application
+        add_custom_target(doc_doxygen ALL
+                          COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
+                          WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                          COMMENT "Generating API documentation with Doxygen"
+                          VERBATIM
+        )
+    else()
+        message("Doxygen needs to be installed to generate the doxygen documentation")
+    endif()
+endif()
+
 
 
 
@@ -59,11 +88,3 @@ endif(ENABLE_TESTING)
 #---------------------------------------------------------------------------
 add_library(${MY_PROJECT} ${SRCS} ${HDRS})
 target_include_directories(${MY_PROJECT} PUBLIC include)
-
-
-#---------------------------------------------------------------------------
-# temp for debugging
-#---------------------------------------------------------------------------
-add_executable(test_main main.cpp)
-target_link_libraries(test_main ${MY_PROJECT})
-target_include_directories(test_main PUBLIC include)
