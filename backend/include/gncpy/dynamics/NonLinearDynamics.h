@@ -12,9 +12,9 @@ class NonLinearDynamics : public IDynamics<T> {
 using control_fun_sig = (T timestep, const matrix::Vector<T>& state, const matrix::Vector<T>& control, const ControlParams* controlParams);
 
 public:
-    matrix::Vector<T> propagateState(T timestep, const matrix::Vector<T>& state, const StateParams* const stateParams=nullptr) const override;
+    matrix::Vector<T> propagateState(T timestep, const matrix::Vector<T>& state, const StateTransParams* const stateTransParams=nullptr) const override;
     matrix::Vector<T> propagateState(T timestep, const matrix::Vector<T>& state, const matrix::Vector<T>& control) const override;
-    matrix::Vector<T> propagateState(T timestep, const matrix::Vector<T>& state, const matrix::Vector<T>& control, const StateParams* const stateParams, const ControlParams* const controlParams, const ConstraintParams* const constraintParams) const final;
+    matrix::Vector<T> propagateState(T timestep, const matrix::Vector<T>& state, const matrix::Vector<T>& control, const StateTransParams* const stateTransParams, const ControlParams* const controlParams, const ConstraintParams* const constraintParams) const final;
 
     template<typename F>
     inline void setControlModel(F&& model) { 
@@ -24,7 +24,7 @@ public:
     inline void clearControlModel() override { m_hasContolModel = false; }
     inline bool hasControlModel() const override { return m_hasContolModel; }
 
-    matrix::Matrix<T> getStateMat(T timestep, const StateParams* stateParams=nullptr) const;
+    matrix::Matrix<T> getStateMat(T timestep, const StateTransParams* stateTransParams=nullptr) const;
     matrix::Matrix<T> getInputMat(T timestep, const ControlParams* controlParams=nullptr) const
 
 protected:
@@ -35,7 +35,7 @@ protected:
         throw NoControlError();
     }
 
-    inline matrix::Vector<T> propagateState_(T timestep, const matrix::Vector<T>& state, const StateParams* stateParams=nullptr) const {
+    inline matrix::Vector<T> propagateState_(T timestep, const matrix::Vector<T>& state, const StateTransParams* stateTransParams=nullptr) const {
         //TODO: implement this
     }
 

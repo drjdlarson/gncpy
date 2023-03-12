@@ -2,9 +2,9 @@
 
 namespace lager::gncpy::dynamics {
 
-class StateParams {
+class StateTransParams {
 public:
-    virtual ~StateParams() = default;
+    virtual ~StateTransParams() = default;
 };
 
 

@@ -10,10 +10,10 @@ namespace lager::gncpy::dynamics {
 template<typename T>
 class LinearDynamics : public IDynamics<T> {
 public:
-    virtual matrix::Matrix<T> getStateMat(T timestep, const StateParams* stateParams=nullptr) const = 0;
+    virtual matrix::Matrix<T> getStateMat(T timestep, const StateTransParams* stateTransParams=nullptr) const = 0;
 
-    matrix::Vector<T> propagateState(T timestep, const matrix::Vector<T>& state, const StateParams* stateParams=nullptr) const override {
-        matrix::Vector<T> nextState = this->propagateState_(timestep, state, stateParams);
+    matrix::Vector<T> propagateState(T timestep, const matrix::Vector<T>& state, const StateTransParams* stateTransParams=nullptr) const override {
+        matrix::Vector<T> nextState = this->propagateState_(timestep, state, stateTransParams);
 
         if(this->hasStateConstraint()){
             this->stateConstraint(timestep, nextState);
@@ -36,8 +36,8 @@ public:
         return nextState;
     }
 
-    matrix::Vector<T> propagateState(T timestep, const matrix::Vector<T>& state, const matrix::Vector<T>& control, const StateParams* stateParams, const ControlParams* controlParams, const ConstraintParams* constraintParams) const final {
-        matrix::Vector<T> nextState = this->propagateState_(timestep, state, stateParams);
+    matrix::Vector<T> propagateState(T timestep, const matrix::Vector<T>& state, const matrix::Vector<T>& control, const StateTransParams* stateTransParams, const ControlParams* controlParams, const ConstraintParams* constraintParams) const final {
+        matrix::Vector<T> nextState = this->propagateState_(timestep, state, stateTransParams);
 
         if(this->hasControlModel()){
             nextState += this->getInputMat(timestep, controlParams) * control;
@@ -70,8 +70,8 @@ protected:
         throw NoControlError();
     }
 
-    inline matrix::Vector<T> propagateState_(T timestep, const matrix::Vector<T>& state, const StateParams* stateParams=nullptr) const {
-        return stateParams == nullptr ? this->getStateMat(timestep) * state : this->getStateMat(timestep, stateParams) * state;
+    inline matrix::Vector<T> propagateState_(T timestep, const matrix::Vector<T>& state, const StateTransParams* stateTransParams=nullptr) const {
+        return stateTransParams == nullptr ? this->getStateMat(timestep) * state : this->getStateMat(timestep, stateTransParams) * state;
     }
 
 private:
