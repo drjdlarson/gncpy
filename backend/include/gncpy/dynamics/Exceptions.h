@@ -6,13 +6,14 @@ namespace lager::gncpy::dynamics {
 
 class NoControlError final: public std::runtime_error {
 public:
-    explicit NoControlError() noexcept;
+    NoControlError() noexcept;
 };
 
 
 class NoStateConstraintError final: public std::runtime_error {
 public:
-    explicit NoStateConstraintError() noexcept;
+    NoStateConstraintError() noexcept;
 };
-    
+
+
 } // namespace lager::gncpy::dynamics

@@ -26,3 +26,18 @@ target_link_libraries(
   ${MY_PROJECT}
 )
 gtest_discover_tests(vector_test)
+
+
+#---------------------------------------------------------------------------
+# setup Math tests
+#---------------------------------------------------------------------------
+add_executable(
+  math_test
+  Math.cpp
+)
+target_link_libraries(
+  math_test
+  GTest::gtest_main
+  ${MY_PROJECT}
+)
+gtest_discover_tests(math_test)
