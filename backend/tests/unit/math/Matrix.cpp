@@ -73,3 +73,20 @@ TEST(MatrixTest, MultiplyVector) {
 
     SUCCEED();
 }
+
+
+TEST(MatrixTest, TransposeMatrix) {
+    lager::gncpy::matrix::Matrix m1({{1., 2., 3., 4.}, {5., 6., 7., 8.}});
+    lager::gncpy::matrix::Matrix exp({{1., 5.},{2., 6.,},{3., 7.},{4., 8.}});
+    lager::gncpy::matrix::Matrix m2 = m1.transpose();
+
+    for(uint8_t r = 0; r < exp.numRows(); r++) {
+        for(uint8_t c = 0; c < exp.numCols(); c++) {
+            std::cout << m2(r, c);
+            EXPECT_DOUBLE_EQ(exp(r, c), m2(r, c));
+        }
+    }
+
+    SUCCEED();
+
+}

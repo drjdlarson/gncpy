@@ -1,6 +1,24 @@
 #pragma once
 #include <stdint.h>
+#include <iostream>
+#include <vector>
 #include "gncpy/math/Exceptions.h"
+
+/*
+TODO
+    LU decomp 
+    LU decomp unit test
+    Inverse
+        inplace and copy
+    Inverse unit test
+    Transpose unit test
+    Matrix * scalar
+    scalar * matrix
+    Matrix *= scalar
+    matrix / scalar
+    matrix /= scalar
+    
+*/
 
 namespace lager::gncpy::matrix {
 
@@ -21,8 +39,8 @@ public:
     }
 
     explicit Matrix(std::initializer_list<std::initializer_list<T>> listlist)
-    : m_nRows(listlist.begin()->size()),
-    m_nCols(listlist.size()) {
+    : m_nRows(listlist.size()),
+    m_nCols(listlist.begin()->size()) {
         if(m_nRows == 0 || m_nCols == 0) {
             throw BadDimension("Matrix constructor has size 0");
         }
@@ -139,23 +157,31 @@ public:
         return m_data[this->rowColToLin(row, col)];
     }
 
-    Matrix transpose() {
-        // Insert transpose function here
-    }
+    template<typename R>
+    friend std::ostream& operator<<(std::ostream& os, const Matrix<R>& m);
 
-
-    void print(){
-        for (uint8_t r = 0; r < this->numRows(); r++){
-            for (uint8_t c = 0; c < this->numCols(); c++){
-                std::cout<< m_data[this->rowColToLin(r, c)]<<"  ";
-            }
-            std::cout<< "\n";
-        }
-    }
     inline std::vector<T>::iterator begin() noexcept { return m_data.begin(); }
     inline std::vector<T>::iterator end() noexcept { return m_data.end(); }
     inline std::vector<T>::const_iterator cbegin() const noexcept { return m_data.cbegin(); }
     inline std::vector<T>::const_iterator cend() const noexcept { return m_data.cend(); }
+
+    // TODO: add optional arg for in place vs copy
+    Matrix transpose(bool in_place = false) {
+        std::vector<T> out;
+        for (uint8_t c = 0; c < this->numCols(); c++){
+            for (uint8_t r = 0; r < this->numRows(); r++){
+                out.emplace_back(this->m_data[this->rowColToLin(r,c)]);
+            }
+        }
+        if (in_place){
+            uint8_t temp = this->m_nCols;
+            this->m_nCols = this->m_nRows;
+            this->m_nRows = temp;
+            this->m_data = out;
+            return *this;
+        }
+        return Matrix(m_nCols, m_nRows, out);
+    }
 
     inline uint8_t numRows() const { return m_nRows; }
     inline uint8_t numCols() const { return m_nCols; }
@@ -176,5 +202,16 @@ private:
     std::vector<T> m_data;
     
 };
+
+template<typename T>
+std::ostream& operator<<(std::ostream& os, const Matrix<T>& m){
+    for (uint8_t r = 0; r < m.numRows(); r++){
+                for (uint8_t c = 0; c < m.numCols(); c++){
+            os << std::to_string(m(r,c))<< "\t";
+        }
+        os << "\n";
+    }
+    return os;
+}
 
 } // namespace lager::gncpy::matrix

@@ -88,3 +88,6 @@ endif()
 #---------------------------------------------------------------------------
 add_library(${MY_PROJECT} ${SRCS} ${HDRS})
 target_include_directories(${MY_PROJECT} PUBLIC include)
+add_executable(main main.cpp)
+target_link_libraries(main ${MY_PROJECT})
+target_include_directories(main PUBLIC include)
