@@ -31,7 +31,7 @@ matrix::Vector<T> getJacobian(const matrix::Vector<T>& x, const F& fnc) {
 
 
 template<typename T>
-matrix::Matrix<T> getJacobian(const matrix::Vector<T>& x, const std::vector<std::function<T (lager::gncpy::matrix::Vector<T>&)>>& fncLst) {
+matrix::Matrix<T> getJacobian(const matrix::Vector<T>& x, const std::vector<std::function<T (const lager::gncpy::matrix::Vector<T>&)>>& fncLst) {
     std::vector<T> data;
     for(auto const& f : fncLst) {
         for(auto & val : getJacobian(x, f)) {

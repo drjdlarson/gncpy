@@ -29,7 +29,7 @@ TEST(MathTest, JacobianSquareMat) {
     auto f1 = [&u](const lager::gncpy::matrix::Vector<double>& x_){ return x_(0)*x_(0) + 3. * x_(2) * x_(1) + u(0) * u(1); };
     auto f2 = [&u](const lager::gncpy::matrix::Vector<double>& x_){ return x_(2) * cos(x_(0)) + x_(1)*x_(1) + sin(u(0)); };
 
-    std::vector<std::function<double (lager::gncpy::matrix::Vector<double>&)>> fncLst({f0, f1, f2});
+    std::vector<std::function<double (const lager::gncpy::matrix::Vector<double>&)>> fncLst({f0, f1, f2});
 
     lager::gncpy::matrix::Matrix res = lager::gncpy::math::getJacobian(x, fncLst);
     lager::gncpy::matrix::Matrix exp({{0.42737987371310737, -21.462216395207179, 8.0999999951814061},
@@ -60,7 +60,7 @@ TEST(MathTest, JacobianMat) {
     auto f1 = [&x](const lager::gncpy::matrix::Vector<double>& u_){ return x(0)*x(0) + 3. * x(2) * x(1) + u_(0) * u_(1); };
     auto f2 = [&x](const lager::gncpy::matrix::Vector<double>& u_){ return x(2) * cos(x(0)) + x(1)*x(1) + sin(u_(0)); };
 
-    std::vector<std::function<double (lager::gncpy::matrix::Vector<double>&)>> fncLst({f0, f1, f2});
+    std::vector<std::function<double (const lager::gncpy::matrix::Vector<double>&)>> fncLst({f0, f1, f2});
 
     lager::gncpy::matrix::Matrix res = lager::gncpy::math::getJacobian(u, fncLst);
     lager::gncpy::matrix::Matrix exp({{1.0, 0.0},
