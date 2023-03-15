@@ -212,9 +212,9 @@ endif()
 #---------------------------------------------------------------------------
 # temp for debugging
 #---------------------------------------------------------------------------
-# add_executable(main main.cpp)
-# target_link_libraries(main ${BACKEND_PROJECT})
-# target_include_directories(main PUBLIC include)
+add_executable(main main.cpp)
+target_link_libraries(main lager::gncpy_backend)
+target_include_directories(main PUBLIC include)
 
 # add_executable(example_kf example_kf.cpp)
 # target_link_libraries(example_kf ${BACKEND_PROJECT})
