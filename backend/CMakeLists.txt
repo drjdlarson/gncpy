@@ -98,22 +98,22 @@ install(
 )
 configure_package_config_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Config.cmake.in"
-    "lagerConfig.cmake"
+    "lager::gncpy_backendConfig.cmake"
     INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/lager
     PATH_VARS
         CMAKE_INSTALL_LIBDIR
 )
 
 write_basic_package_version_file(
-    ${CMAKE_CURRENT_BINARY_DIR}/lagerConfigVersion.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/lager::gncpy_backendConfigVersion.cmake
     VERSION ${GNCPY_BACKEND_VERSION}
     COMPATIBILITY SameMajorVersion
 )
 
 
 install(
-    FILES "${CMAKE_CURRENT_BINARY_DIR}/lagerConfig.cmake"
-          "${CMAKE_CURRENT_BINARY_DIR}/lagerConfigVersion.cmake"
+    FILES "${CMAKE_CURRENT_BINARY_DIR}/lager::gncpy_backendConfig.cmake"
+          "${CMAKE_CURRENT_BINARY_DIR}/lager::gncpy_backendConfigVersion.cmake"
     DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/lager"
 )
 
