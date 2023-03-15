@@ -90,3 +90,20 @@ TEST(MatrixTest, TransposeMatrix) {
     SUCCEED();
 
 }
+
+TEST(MatrixTest, TransposeMatrixInPlace) {
+    lager::gncpy::matrix::Matrix m1({{1., 2., 3., 4.}, {5., 6., 7., 8.}});
+    lager::gncpy::matrix::Matrix exp({{1., 5.},{2., 6.,},{3., 7.},{4., 8.}});
+
+    m1.transpose(true);
+
+    for(uint8_t r = 0; r < exp.numRows(); r++) {
+        for(uint8_t c = 0; c < exp.numCols(); c++) {
+            std::cout << m1(r, c);
+            EXPECT_DOUBLE_EQ(exp(r, c), m1(r, c));
+        }
+    }
+
+    SUCCEED();
+
+}
