@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
-set(MY_PROJECT gncpy)
+set(BACKEND_PROJECT gncpy_backend)
+set(GNCPY_BACKEND_VERSION 0.0.0)
 
 #---------------------------------------------------------------------------
 # cmake options
@@ -11,12 +12,13 @@ option(BUILD_DOC "Build the documentation" ON)
 #---------------------------------------------------------------------------
 # library metadata
 #---------------------------------------------------------------------------
-project(${MY_PROJECT}
-        VERSION 0.1
-        DESCRIPTION "Backend for the GNCPy python package"
-        HOMEPAGE_URL "https://github.com/drjdlarson/gncpy"
-        LANGUAGES CXX
-)
+project(${BACKEND_PROJECT} LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CXX_STANDARD_REQUIRED ON)
+
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
 
 #---------------------------------------------------------------------------
 # compile settings
@@ -24,6 +26,8 @@ project(${MY_PROJECT}
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # for sonarlint plugin/sonarqube
 set(CMAKE_CXX_STANDARD 20)
 set(CXX_STANDARD_REQUIRED ON)
+
+
 set(CMAKE_CXX_FLAGS "-fPIC -Wall -Wextra -Wpedantic")
 
 if(CMAKE_BUILD_TYPE MATCHES "^[Dd]ebug")
@@ -37,11 +41,135 @@ elseif(CMAKE_BUILD_TYPE MATCHES "^[Rr]elease")
 endif()
 
 
+set(cmake_package_name lager CACHE INTERNAL "")
+
+
 #---------------------------------------------------------------------------
 # input files
 #---------------------------------------------------------------------------
 file(GLOB_RECURSE SRCS src/*.cpp)
 file(GLOB_RECURSE HDRS include/*.h)
+
+
+#---------------------------------------------------------------------------
+# setup library
+#---------------------------------------------------------------------------
+# see: https://stackoverflow.com/questions/55635294/how-to-create-packages-with-cmake for details/help
+# and https://stackoverflow.com/questions/20746936/what-use-is-find-package-when-you-need-to-specify-cmake-module-path
+
+# add library and set properties
+add_library(${BACKEND_PROJECT} "" ${HDRS} ${SRCS})
+add_library(lager::gncpy_backend ALIAS ${BACKEND_PROJECT})
+
+set(gncpy_backend_build_include_dirs
+  "${CMAKE_CURRENT_SOURCE_DIR}/include"
+  "${CMAKE_CURRENT_SOURCE_DIR}")
+include_directories(${gncpy_backend_build_include_dirs})
+
+set_target_properties(${BACKEND_PROJECT} 
+    PROPERTIES
+        VERSION ${GNCPY_BACKEND_VERSION}
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+        PDB_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+        COMPILE_PDB_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+)
+
+string(REPLACE ";" "$<SEMICOLON>" dirs "${gncpy_backend_build_include_dirs}")
+target_include_directories(${BACKEND_PROJECT} SYSTEM INTERFACE
+    "$<BUILD_INTERFACE:${dirs}>"
+    "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
+
+
+# setup install and declare export for the target
+install(TARGETS ${BACKEND_PROJECT}
+    EXPORT BackendTargets
+    ARCHIVE DESTINATION ${CMAKE_ISNTALL_LIBDIR}
+)
+
+
+# setup install for the exports
+install(
+    EXPORT BackendTargets
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/lager
+    NAMESPACE lager::
+    FILE BackendTargets.cmake
+)
+configure_package_config_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Config.cmake.in"
+    "lagerConfig.cmake"
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/lager
+    PATH_VARS
+        CMAKE_INSTALL_LIBDIR
+)
+
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/lagerConfigVersion.cmake
+    VERSION ${GNCPY_BACKEND_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+
+install(
+    FILES "${CMAKE_CURRENT_BINARY_DIR}/lagerConfig.cmake"
+          "${CMAKE_CURRENT_BINARY_DIR}/lagerConfigVersion.cmake"
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/lager"
+)
+
+
+
+
+
+
+
+
+
+
+
+
+# old stuff
+# ----------------------------------------------------------------------------
+
+
+
+
+# Set the output directory for build artifacts
+# set_target_properties(${BACKEND_PROJECT} 
+#     PROPERTIES
+#         VERSION ${GNCPY_BACKEND_VERSION}
+#         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+#         LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+#         ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+#         PDB_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+#         COMPILE_PDB_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+# )
+# # make PDBs match library name
+# get_target_property(pdb_debug_postfix ${BACKEND_PROJECT} DEBUG_POSTFIX)
+# set_target_properties(${BACKEND_PROJECT}
+#     PROPERTIES
+#         PDB_NAME "${BACKEND_PROJECT}"
+#         PDB_NAME_DEBUG "${BACKEND_PROJECT}${pdb_debug_postfix}"
+#         COMPILE_PDB_NAME "${BACKEND_PROJECT}"
+#         COMPILE_PDB_NAME_DEBUG "${BACKEND_PROJECT}${pdb_debug_postfix}"
+# )
+
+# string(REPLACE ";" "$<SEMICOLON>" dirs "${gtest_build_include_dirs}")
+# target_include_directories(${BACKEND_PROJECT} SYSTEM INTERFACE
+#     "$<BUILD_INTERFACE:${dirs}>"
+#     "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
+# install(TARGETS ${BACKEND_PROJECT}
+#     EXPORT ${targets_export_name}
+#     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+#     ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+#     LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+# )
+# set(configured_pc "${generated_dir}/${BACKEND_PROJECT}.pc")
+# configure_file("${PROJECT_SOURCE_DIR}/cmake/${BACKEND_PROJECT}.pc.in"
+#     "${configured_pc}" @ONLY
+# )
+# install(FILES "${configured_pc}" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+
 
 
 #---------------------------------------------------------------------------
@@ -81,22 +209,13 @@ if(BUILD_DOC)
 endif()
 
 
-
-
-#---------------------------------------------------------------------------
-# setup library
-#---------------------------------------------------------------------------
-add_library(${MY_PROJECT} ${SRCS} ${HDRS})
-target_include_directories(${MY_PROJECT} PUBLIC include)
-
-
 #---------------------------------------------------------------------------
 # temp for debugging
 #---------------------------------------------------------------------------
-add_executable(main main.cpp)
-target_link_libraries(main ${MY_PROJECT})
-target_include_directories(main PUBLIC include)
+# add_executable(main main.cpp)
+# target_link_libraries(main ${BACKEND_PROJECT})
+# target_include_directories(main PUBLIC include)
 
-add_executable(example_kf example_kf.cpp)
-target_link_libraries(example_kf ${MY_PROJECT})
-target_include_directories(example_kf PUBLIC include)
+# add_executable(example_kf example_kf.cpp)
+# target_link_libraries(example_kf ${BACKEND_PROJECT})
+# target_include_directories(example_kf PUBLIC include)

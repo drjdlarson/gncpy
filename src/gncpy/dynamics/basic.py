@@ -11,6 +11,8 @@ from warnings import warn
 
 import gncpy.math as gmath
 
+import gncpy.dynamics._dynamics as cpp_bindings
+
 
 class DynamicsBase(ABC):
     r"""Defines common attributes for all dynamics models.

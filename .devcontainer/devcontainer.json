@@ -11,6 +11,9 @@
 	"customizations": {
 		"vscode": {
 			"extensions": [
+				"ms-vscode.cpptools",
+				"twxs.cmake",
+				"ms-vscode.cmake-tools",
 				"cschlosser.doxdocgen",
 				"SonarSource.sonarlint-vscode"
 			]

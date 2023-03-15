@@ -1,0 +1,49 @@
+[project]
+name = "gncpy"
+version = "0.0.1"
+description = "A package for Guidance, Navigation, and Control (GNC) algorithms."
+readme = "README.rst"
+authors = [
+    { name = "Laboratory for Autonomy GNC and Estimation Research (LAGER)" },
+]
+python_requires = ">=3.7"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "numpy",
+    "scipy",
+    "matplotlib",
+    "ruamel.yaml>=0.17.21",
+]
+
+
+[build-system]
+requires = ["scikit-build-core>=0.2.1", "pybind11"]
+build-backend = "scikit_build_core.build"
+
+
+[tool.scikit-build]
+# The PEP 517 build hooks will add ninja and/or cmake if the versions on the
+# system are not at least these versions. Disabled by an empty string.
+cmake.minimum-version = "3.15"
+
+# This activates verbose builds
+cmake.verbose = false
+
+# This controls the CMake build type
+cmake.build-type = "Release"
+
+
+# Build directory (empty will use a temporary directory). {cache_tag} is
+# available to provide a unique directory per interpreter.
+# build-dir = "./build"

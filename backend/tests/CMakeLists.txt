@@ -1,5 +1,4 @@
 # see https://google.github.io/googletest/quickstart-cmake.html for info on gtest
-
 include(FetchContent)
 FetchContent_Declare(
     googletest
@@ -10,6 +9,8 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 include(GoogleTest)
+
+find_package(lager::gncpy_backend CONFIG REQUIRED)
 
 # can add other testing directories here such as integration
 add_subdirectory(unit)

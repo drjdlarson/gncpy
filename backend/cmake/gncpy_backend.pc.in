@@ -1,0 +1,9 @@
+libdir=@CMAKE_INSTALL_FULL_LIBDIR@
+includedir=@CMAKE_INSTALL_FULL_INCLUDEDIR@
+
+Name: gncpy_backend
+Description: GNCPy c++ backend
+Version: @PROJECT_VERSION@
+URL: https://github.com/drjdlarson/gncpy
+Libs: -L${libdir} -lgncpy
+Cflags: -I${includedir}

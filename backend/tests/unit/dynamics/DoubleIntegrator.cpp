@@ -1,7 +1,7 @@
 #include <iostream>
 #include <gtest/gtest.h>
-#include "gncpy/dynamics/DoubleIntegrator.h"
-#include "gncpy/math/Vector.h"
+#include <gncpy/dynamics/DoubleIntegrator.h>
+#include <gncpy/math/Vector.h>
 
 
 TEST(DoubleInt, Propagate) {
