@@ -9,8 +9,9 @@
 #include "gncpy/dynamics/Parameters.h"
 
 int main() {
-    lager::gncpy::matrix::Matrix<float> m = lager::gncpy::matrix::identity<float>(3);
+    lager::gncpy::matrix::Matrix<float> m ({{2, -1, -2.},{-4, 6, 3},{-4, -2, 8}});
     std::cout<<m;
     std::cout<<"\n";
-    std::cout<<m(1,0,2,2);
+    float det = m.determinant();
+    std::cout<<det;
 }

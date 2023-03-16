@@ -263,18 +263,74 @@ public:
             return *this;
         }
         std::vector<T> out;
-        for (uint8_t c = 0; c < this->numCols(); c++){
-            for (uint8_t r = 0; r < this->numRows(); r++){
-                out.emplace_back(this->m_data[this->rowColToLin(r,c)]);
+        for (uint8_t c = 0; c < m_nCols; c++){
+            for (uint8_t r = 0; r < m_nRows; r++){
+                out.emplace_back(this->operator()(r,c));
             }
         }
         return Matrix(m_nCols, m_nRows, out);
     }
 
+    /**
+     * @brief LU decomposition using Doolittle Algorithm
+     * 
+     * @param L 
+     * @param U 
+     */
     void LU_decomp(Matrix& L, Matrix& U){
-        if (!this->isSameSize(L) || !this->isSameSize(U)){
-
+        if (!this->isSameSize(L) || !this->isSameSize(U)||!this->isSquare()){
+            throw BadDimension("Matrix dimension is invalid");
         }
+        for (uint8_t i = 0; i < m_nCols; i++){
+            // Constuct Upper matrix
+            for (uint8_t j = i; j < m_nCols; j++){
+                T sum = 0;
+                for (uint8_t k = 0; k < i; k++){
+                    sum += (L(i,k) * U (k,j));
+                }
+                U(i,j) = this->operator()(i,j) - sum;
+            }
+
+            // Construct Lower matrix 
+            for (uint8_t j = i; j < m_nCols; j++){
+                if (i==j){
+                    L(i,i) = T(1);
+                }
+                else {
+                    T sum = 0;
+                    for (uint8_t k = 0; k < i; k++){
+                        sum += (L(j,k) * U(k,i));
+                    }
+                    L(j,i) = (this->operator()(j,i) - sum) / U(i,i);
+                }
+            }
+        }
+    }
+
+    Vector<T> diag(){
+        if (!this->isSquare()){
+            throw BadDimension ("Not a square matrix");
+        }
+        std::vector<T> out;
+        for (uint8_t i = 0; i < m_nCols; i++){
+            out.emplace_back(this->operator()(i,i));
+        }
+        return Vector(out.size(), out);
+    }
+
+    T determinant(){
+        if (!this->isSquare()){
+            throw BadDimension("Non square matrix non implimented");
+        }
+        Matrix L(m_nCols,m_nCols);
+        Matrix U(m_nCols,m_nCols);
+        this->LU_decomp(L,U);
+        Vector<T> u_diag = U.diag();
+        T det = u_diag(0);
+        for (uint8_t i = 1; i < u_diag.size(); i++){
+            det *= u_diag(i);
+        }
+        return det;
     }
 
     inline uint8_t numRows() const { return m_nRows; }
@@ -290,6 +346,7 @@ public:
     std::pair<row_t, column_t> shape() const { return std::make_pair(m_nRows, m_nCols); }
 
 private:
+    inline bool isSquare () const {return m_nCols == m_nRows;}
     inline bool allowMultiplication(const Matrix& rhs) const {return numCols() == rhs.numRows();}
     inline bool isSameSize(const Matrix& rhs) const {return numRows() == rhs.numRows() && numCols() == rhs.numCols(); }
     inline uint8_t rowColToLin(uint8_t r, uint8_t c) const { return m_transposed ? r + m_nRows * c : c + m_nCols * r; }
