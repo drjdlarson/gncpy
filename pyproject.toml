@@ -46,4 +46,4 @@ cmake.build-type = "Release"
 
 # Build directory (empty will use a temporary directory). {cache_tag} is
 # available to provide a unique directory per interpreter.
-# build-dir = "./build"
+build-dir = "./build"

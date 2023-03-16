@@ -8,7 +8,7 @@
 namespace lager::gncpy::dynamics {
 
 template<typename T>
-class LinearDynamics : public IDynamics<T> {
+class ILinearDynamics : public IDynamics<T> {
 public:
     virtual matrix::Matrix<T> getStateMat(T timestep, const StateTransParams* stateTransParams=nullptr) const = 0;
 
