@@ -4,6 +4,7 @@
 #include "gncpy/math/Vector.h"
 #include "gncpy/math/Matrix.h"
 #include "gncpy/math/Math.h"
+#include "gncpy/measurements/Exceptions.h"
 #include "gncpy/measurements/Parameters.h"
 #include "gncpy/measurements/ILinearMeasModel.h"
 #include "gncpy/Utilities.h"
@@ -22,12 +23,12 @@ public:
 template<typename T>
 class StateObservation : public ILinearMeasModel<T> {
 public:
-    matrix::Matrix<T> getMeasMat(const matrix::Vector<T>& state, const std::unique_ptr<MeasParams>& params=std::make_unique<MeasParams>()) const override {
+    matrix::Matrix<T> getMeasMat(const matrix::Vector<T>& state, const MeasParams* params=nullptr) const override {
         if (!params) {
             throw BadParams("State Observation requires parameters");
         }
         
-        auto ptr = dynamic_cast<StateObservationParams*>(params.get());
+        auto ptr = dynamic_cast<const StateObservationParams*>(params);
         matrix::Matrix<T> data(ptr->obsInds.size(), state.size());
 
         for (uint8_t ii=0;ii<ptr->obsInds.size();ii++) {

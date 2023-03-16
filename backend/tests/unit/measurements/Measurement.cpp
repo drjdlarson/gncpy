@@ -12,9 +12,9 @@ TEST(MeasurementTest, StateObservationMeasure) {
     lager::gncpy::measurements::StateObservation<double> sensor;
     std::vector<uint8_t> inds = {0, 1, 2};
 
-    std::unique_ptr<lager::gncpy::measurements::MeasParams> params = std::make_unique<lager::gncpy::measurements::StateObservationParams>(inds);
+    lager::gncpy::measurements::StateObservationParams params = lager::gncpy::measurements::StateObservationParams(inds);
 
-    lager::gncpy::matrix::Vector out = sensor.measure(x, params);
+    lager::gncpy::matrix::Vector out = sensor.measure(x, &params);
 
     EXPECT_EQ(3, out.size());
 
@@ -29,9 +29,9 @@ TEST(MeasurementTest, StateObservationMeasMat) {
     lager::gncpy::matrix::Vector x({3.0, 4.0, 1.0});
     lager::gncpy::measurements::StateObservation<double> sensor;
     std::vector<uint8_t> inds = {0, 1, 2};
-    std::unique_ptr<lager::gncpy::measurements::MeasParams> params = std::make_unique<lager::gncpy::measurements::StateObservationParams>(inds);
+    lager::gncpy::measurements::StateObservationParams params = lager::gncpy::measurements::StateObservationParams(inds);
 
-    lager::gncpy::matrix::Matrix out = sensor.getMeasMat(x, params);
+    lager::gncpy::matrix::Matrix out = sensor.getMeasMat(x, &params);
     lager::gncpy::matrix::Matrix exp({{1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}});
 
     EXPECT_EQ(9, out.size());
@@ -52,9 +52,9 @@ TEST(MeasurementTest, RangeBearingMeasure) {
 
     EXPECT_THROW(sensor.getMeasMat(x), lager::gncpy::measurements::BadParams);
 
-    std::unique_ptr<lager::gncpy::measurements::MeasParams> params = std::make_unique<lager::gncpy::measurements::RangeBearingParams>(0, 1);
+    lager::gncpy::measurements::RangeBearingParams params = lager::gncpy::measurements::RangeBearingParams(0, 1);
 
-    lager::gncpy::matrix::Vector out = sensor.measure(x, params);
+    lager::gncpy::matrix::Vector out = sensor.measure(x, &params);
 
     EXPECT_EQ(2, out.size());
 
@@ -72,9 +72,9 @@ TEST(MeasurementTest, RangeBearingMeasMat) {
 
     EXPECT_THROW(sensor.getMeasMat(x), lager::gncpy::measurements::BadParams);
 
-    std::unique_ptr<lager::gncpy::measurements::MeasParams> params = std::make_unique<lager::gncpy::measurements::RangeBearingParams>(0, 1);
+    lager::gncpy::measurements::RangeBearingParams params = lager::gncpy::measurements::RangeBearingParams(0, 1);
 
-    lager::gncpy::matrix::Matrix out = sensor.getMeasMat(x, params);
+    lager::gncpy::matrix::Matrix out = sensor.getMeasMat(x, &params);
 
     auto [nRows, nCols] = out.shape();
 

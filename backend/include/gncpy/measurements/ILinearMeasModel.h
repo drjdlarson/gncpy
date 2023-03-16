@@ -12,7 +12,7 @@ namespace lager::gncpy::measurements
 template<typename T>
 class ILinearMeasModel : public IMeasModel<T> {
 public:
-    matrix::Vector<T> measure(const matrix::Vector<T>& state, const std::unique_ptr<MeasParams>&params=std::make_unique<MeasParams>()) const override {
+    matrix::Vector<T> measure(const matrix::Vector<T>& state, const MeasParams* params=nullptr) const override {
         matrix::Matrix measMat = this->getMeasMat(state, params);
         return measMat * state;
     }
