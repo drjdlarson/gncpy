@@ -10,7 +10,17 @@ namespace py = pybind11;
 PYBIND11_MODULE(_matrix, m) {
     using namespace lager::gncpy;
 
-    py::class_<matrix::Matrix<double>>(m, "Matrix")
+    py::class_<matrix::Matrix<double>>(m, "Matrix", py::buffer_protocol())
+        .def_buffer([](matrix::Matrix<double>& mat){
+            return py::buffer_info(
+                mat.data(),
+                sizeof(double),
+                py::format_descriptor<double>::format(),
+                2,
+                {mat.numRows(), mat.numCols()},
+                {sizeof(double) * mat.numRows(), sizeof(double)}
+            );
+        })
         .def(py::init<uint8_t, uint8_t, std::vector<double>>())
         .def(py::init<std::initializer_list<std::initializer_list<double>>>())
         .def(py::init<uint8_t, uint8_t>())

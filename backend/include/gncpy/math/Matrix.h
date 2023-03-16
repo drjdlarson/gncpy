@@ -187,6 +187,8 @@ public:
     inline uint8_t numCols() const { return m_nCols; }
     inline bool beenTransposed() const { return m_transposed; }
 
+    inline T* data() { return m_data.data(); }
+
     inline uint8_t size() const { return static_cast<uint8_t>(m_data.size()); }
 
     using row_t = uint8_t;
