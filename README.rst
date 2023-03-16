@@ -1,5 +1,6 @@
 gncpy
 =====
+|Open in Dev Containers|
 
 A python package for Guidance, Navigation, and Control (GNC) algorithms developed by the Laboratory for Autonomy, GNC, and Estimation Research (LAGER) at the University of Alabama (UA).
 
@@ -17,11 +18,13 @@ For using this package, simply clone the repository and then pip install the top
 .. _SERUMS: https://github.com/drjdlarson/serums
 .. _STACKOVERFLOW: https://stackoverflow.com/questions/69704561/cannot-update-spyder-5-1-5-on-new-anaconda-install
 .. _SUBMODULE: https://git-scm.com/book/en/v2/Git-Tools-Submodules
+.. |Open in Dev Containers| image:: https://img.shields.io/static/v1?label=Dev%20Containers&message=Open&color=blue&logo=visualstudiocode
+   :target: https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/drjdlarson/gncpy.git
 
 
 General Development Environment Setup
 -------------------------------------
-Currently this package is not available via pip, this provides a guide on installation from the git repository. Note that Python 3 is required, pytest is used for managing the built-in tests, and tox is used for automating the testing and documentation generation. It is recommended to use Anaconda to manage virtual python environments to avoid dependency conflicts, but this is not necessary. The general process follows the following order with more details in the corresponding subsections.
+Currently this package is not available via pip, this provides a guide on installation from the git repository. Note that Python 3 is required, pytest is used for managing the built-in tests, and tox is used for automating the testing and documentation generation. The fastest way to get started with development is to use VS Code with the dev container extension which uses docker. All you need to do is have VS Code and docker installed then click on the badge |Open in Dev Containers|. If you want to work locally, it is recommended to use Anaconda to manage virtual python environments to avoid dependency conflicts, but this is not necessary. The general process follows the following order with more details in the corresponding subsections.
 
 #. Install Anaconda *[Optional]*. See the first step of `Installing and Updating Spyder`_. Note Spyder comes with Anaconda but is not needed.
 #. Decide if serums is needed as a seperate repository outside of gncpy. This makes it easier to develop for serums in addition to gncpy.

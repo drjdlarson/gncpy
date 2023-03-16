@@ -1,30 +1,14 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.15)
 
-set(TARGET _lager_super_bindings)
+project(${SKBUILD_PROJECT_NAME} VERSION ${SKBUILD_PROJECT_VERSION})
 
-project(${TARGET})
+option(ENABLE_TESTING OFF)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # for sonarlint plugin/sonarqube
+set(CMAKE_CXX_STANDARD 20)
+set(CXX_STANDARD_REQUIRED ON)
 
-add_subdirectory(lib/lager_super)
-add_subdirectory(lib/pybind11)
+find_package(pybind11 CONFIG REQUIRED)
 
-set(SOURCE_DIR "src/gncpy/dynamics/aircraft/lager_super_bindings")
-set(SOURCES "${SOURCE_DIR}/lager_super_bindings.cpp")
+add_subdirectory(backend)
+add_subdirectory(interface)
 
-pybind11_add_module(${TARGET} MODULE ${SOURCES})
-
-target_compile_options(${TARGET} PRIVATE
-    -std=c++2a
-    -fconcepts
-    -felide-constructors
-    -Wno-error=narrowing
-    -Wno-volatile
-    -Wno-psabi
-    -ffunction-sections
-    -fdata-sections
-    -MMD
-)
-
-target_link_libraries(${TARGET}
-    PRIVATE
-        lager_super
-)

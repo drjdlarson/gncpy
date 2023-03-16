@@ -8,7 +8,7 @@ add_executable(
 target_link_libraries(
   matrix_test
   GTest::gtest_main
-  ${MY_PROJECT}
+  lager::gncpy_backend
 )
 gtest_discover_tests(matrix_test)
 
@@ -23,7 +23,7 @@ add_executable(
 target_link_libraries(
   vector_test
   GTest::gtest_main
-  ${MY_PROJECT}
+  lager::gncpy_backend
 )
 gtest_discover_tests(vector_test)
 
@@ -38,6 +38,6 @@ add_executable(
 target_link_libraries(
   math_test
   GTest::gtest_main
-  ${MY_PROJECT}
+  lager::gncpy_backend
 )
 gtest_discover_tests(math_test)
