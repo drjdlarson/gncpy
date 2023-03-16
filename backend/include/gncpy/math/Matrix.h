@@ -30,6 +30,13 @@ class Vector;
 template<typename T>
 class Matrix {
 public:
+    /**
+     * @brief Construct a new Matrix object
+     * 
+     * @param nRows 
+     * @param nCols 
+     * @param data 
+     */
     Matrix(uint8_t nRows, uint8_t nCols, std::vector<T> data) 
     : m_nRows(nRows),
     m_nCols(nCols),
@@ -39,6 +46,11 @@ public:
         }
     }
 
+    /**
+     * @brief Construct a new Matrix object
+     * 
+     * @param listlist 
+     */
     explicit Matrix(std::initializer_list<std::initializer_list<T>> listlist)
     : m_nRows(listlist.size()),
     m_nCols(listlist.begin()->size()) {
@@ -53,6 +65,12 @@ public:
         }
     }
 
+    /**
+     * @brief Construct a new empty Matrix object
+     * 
+     * @param nRows 
+     * @param nCols 
+     */
     Matrix(uint8_t nRows, uint8_t nCols)
     : m_nRows(nRows),
     m_nCols(nCols) {
@@ -68,6 +86,12 @@ public:
 
     }
 
+    /**
+     * @brief Matrix addition assignment
+     * 
+     * @param rhs 
+     * @return Matrix& 
+     */
     Matrix& operator+= (const Matrix& rhs) {
         if (!this->isSameSize(rhs)){
             throw BadDimension();
@@ -79,6 +103,12 @@ public:
         return *this;
     }
 
+    /**
+     * @brief Matrix addition 
+     * 
+     * @param m 
+     * @return Matrix 
+     */
     Matrix operator+ (const Matrix& m) {
         if (!this->isSameSize(m)){
             throw BadDimension();
@@ -91,6 +121,12 @@ public:
         return Matrix(m_nRows, m_nCols, out);
     }
 
+    /**
+     * @brief 
+     * 
+     * @param rhs 
+     * @return Matrix 
+     */
     Matrix operator- (const Matrix& rhs) {
         if (!this->isSameSize(rhs)){
             throw BadDimension();
@@ -100,6 +136,12 @@ public:
         }
     }
 
+    /**
+     * @brief Matrix multiplication
+     * 
+     * @param rhs 
+     * @return Matrix 
+     */
     Matrix operator* (const Matrix& rhs) {
         if(!this->allowMultiplication(rhs)) {
             throw BadDimension("Dimensions do not match");
@@ -119,6 +161,12 @@ public:
         return Matrix(m_nRows, rhs.m_nCols, out);
     }
 
+    /**
+     * @brief Vector multiplication
+     * 
+     * @param rhs 
+     * @return Vector<T> 
+     */
     Vector<T> operator* (const Vector<T>& rhs) {
         if(!this->allowMultiplication(rhs)) {
             throw BadDimension("Number of rows do not match");
@@ -138,6 +186,13 @@ public:
 
     Matrix operator/ (const Matrix& m);
 
+    /**
+     * @brief Matrix indexing
+     * 
+     * @param row 
+     * @param col 
+     * @return T& 
+     */
     T& operator() (uint8_t row, uint8_t col) {
         if(row >= m_nRows) {
             throw BadIndex("Indexing outside rows.");
@@ -158,6 +213,31 @@ public:
         return m_data[this->rowColToLin(row, col)];
     }
 
+    /**
+     * @brief Matrix block indexing
+     * 
+     * @param start_row 
+     * @param start_col 
+     * @param row_span 
+     * @param col_span 
+     * @return Matrix 
+     */
+    Matrix operator() (uint8_t start_row, uint8_t start_col, uint8_t row_span, uint8_t col_span) const {
+        if(start_row + row_span > m_nRows){
+            throw BadIndex("Indexing outside rows");
+        }
+        if(start_col + col_span > m_nCols){
+            throw BadIndex("Indexing outside columns");
+        }
+        std::vector<T> out;
+        for(uint8_t r = start_row; r < start_row + row_span; r++) {
+            for(uint8_t c = start_col; c < start_col + col_span; c++) {
+                out.emplace_back(m_data[(this->rowColToLin(r,c))]);
+            }
+        }
+        return Matrix(row_span, col_span, out);
+    }
+
     template<typename R>
     friend std::ostream& operator<<(std::ostream& os, const Matrix<R>& m);
 
@@ -166,6 +246,12 @@ public:
     inline std::vector<T>::const_iterator cbegin() const noexcept { return m_data.cbegin(); }
     inline std::vector<T>::const_iterator cend() const noexcept { return m_data.cend(); }
 
+    /**
+     * @brief Matrix transpose
+     * 
+     * @param in_place 
+     * @return Matrix 
+     */
     Matrix transpose(bool in_place = false) {
         if (in_place){
             uint8_t temp = this->m_nCols;
@@ -206,7 +292,14 @@ private:
     std::vector<T> m_data;
     
 };
-
+/**
+ * @brief Print matrix using standard cout operator
+ * 
+ * @tparam T 
+ * @param os 
+ * @param m 
+ * @return std::ostream& 
+ */
 template<typename T>
 std::ostream& operator<<(std::ostream& os, const Matrix<T>& m){
     for (uint8_t r = 0; r < m.numRows(); r++){
