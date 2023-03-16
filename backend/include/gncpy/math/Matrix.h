@@ -6,12 +6,13 @@
 
 /*
 TODO
+    Determinant
+    Determinant unit test
     LU decomp 
     LU decomp unit test
     Inverse
         inplace and copy
     Inverse unit test
-    Transpose unit test
     Matrix * scalar
     scalar * matrix
     Matrix *= scalar
@@ -165,26 +166,26 @@ public:
     inline std::vector<T>::const_iterator cbegin() const noexcept { return m_data.cbegin(); }
     inline std::vector<T>::const_iterator cend() const noexcept { return m_data.cend(); }
 
-    // TODO: add optional arg for in place vs copy
     Matrix transpose(bool in_place = false) {
+        if (in_place){
+            uint8_t temp = this->m_nCols;
+            this->m_nCols = this->m_nRows;
+            this->m_nRows = temp;
+            this->m_transposed = !this->m_transposed;
+            return *this;
+        }
         std::vector<T> out;
         for (uint8_t c = 0; c < this->numCols(); c++){
             for (uint8_t r = 0; r < this->numRows(); r++){
                 out.emplace_back(this->m_data[this->rowColToLin(r,c)]);
             }
         }
-        if (in_place){
-            uint8_t temp = this->m_nCols;
-            this->m_nCols = this->m_nRows;
-            this->m_nRows = temp;
-            this->m_data = out;
-            return *this;
-        }
         return Matrix(m_nCols, m_nRows, out);
     }
 
     inline uint8_t numRows() const { return m_nRows; }
     inline uint8_t numCols() const { return m_nCols; }
+    inline bool beenTransposed() const { return m_transposed; }
 
     inline uint8_t size() const { return static_cast<uint8_t>(m_data.size()); }
 
@@ -195,8 +196,9 @@ public:
 private:
     inline bool allowMultiplication(const Matrix& rhs) const {return numCols() == rhs.numRows();}
     inline bool isSameSize(const Matrix& rhs) const {return numRows() == rhs.numRows() && numCols() == rhs.numCols(); }
-    inline uint8_t rowColToLin(uint8_t r, uint8_t c) const { return c + m_nCols * r; }
+    inline uint8_t rowColToLin(uint8_t r, uint8_t c) const { return m_transposed ? r + m_nRows * c : c + m_nCols * r; }
 
+    bool m_transposed = false;
     uint8_t m_nRows;
     uint8_t m_nCols;
     std::vector<T> m_data;
