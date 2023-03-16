@@ -18,7 +18,9 @@ TODO
     Matrix *= scalar
     matrix / scalar
     matrix /= scalar
-    
+    matrix block assignment
+    diag from matrix
+    Identity
 */
 
 namespace lager::gncpy::matrix {
@@ -269,6 +271,12 @@ public:
         return Matrix(m_nCols, m_nRows, out);
     }
 
+    void LU_decomp(Matrix& L, Matrix& U){
+        if (!this->isSameSize(L) || !this->isSameSize(U)){
+
+        }
+    }
+
     inline uint8_t numRows() const { return m_nRows; }
     inline uint8_t numCols() const { return m_nCols; }
     inline bool beenTransposed() const { return m_transposed; }
@@ -309,6 +317,15 @@ std::ostream& operator<<(std::ostream& os, const Matrix<T>& m){
         os << "\n";
     }
     return os;
+}
+
+template<typename T>
+lager::gncpy::matrix::Matrix<T> identity(uint8_t n){
+    lager::gncpy::matrix::Matrix<T> out( n, n);
+    for (uint8_t i = 0; i < n; i++){
+        out(i,i) = 1.;
+    }
+    return out;
 }
 
 } // namespace lager::gncpy::matrix
