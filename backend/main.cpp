@@ -9,9 +9,8 @@
 #include "gncpy/dynamics/Parameters.h"
 
 int main() {
-    lager::gncpy::matrix::Matrix<float> m ({{10.69, 20.5, 40.},{30.0000001, 40.2222222, 50},{69, 100, 53}});
+    lager::gncpy::matrix::Matrix<float> m = lager::gncpy::matrix::identity<float>(3);
     std::cout<<m;
     std::cout<<"\n";
-    lager::gncpy::matrix::Matrix<float> n = m(1,1,2,2);
-    std::cout<<n;
+    std::cout<<m(1,0,2,2);
 }
