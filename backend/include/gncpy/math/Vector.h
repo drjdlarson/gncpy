@@ -10,17 +10,27 @@ template<typename T>
 class Vector final: public Matrix<T> {
 
 public:
-    Vector(uint8_t nElements, std::vector<T> data) 
+    Vector<T>()
+    : Matrix<T>() {
+
+    }
+
+    Vector<T>(const std::vector<size_t>& shape, const T* data=nullptr)
+    : Matrix<T>(shape, data) {
+
+    }
+    
+    Vector<T>(uint8_t nElements, std::vector<T> data) 
     : Matrix<T>(nElements, 1, data) {
         
     }
 
-    explicit Vector(std::initializer_list<T> list) 
+    explicit Vector<T>(std::initializer_list<T> list) 
     : Matrix<T>(list.size(), 1, std::vector(list)) {
 
     }
 
-    explicit Vector(uint8_t nElements)
+    explicit Vector<T>(uint8_t nElements)
     : Matrix<T>(nElements, 1) {
 
     }

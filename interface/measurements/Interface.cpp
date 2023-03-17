@@ -1,6 +1,7 @@
 #include <pybind11/pybind11.h>
-#include <gncpy/dynamics/IDynamics.h>
-#include <gncpy/dynamics/ILinearDynamics.h>
+#include <gncpy/measurements/IMeasModel.h>
+#include <gncpy/measurements/ILinearMeasModel.h>
+#include <gncpy/measurements/INonLinearMeasModel.h>
 
 
 namespace py = pybind11;
@@ -12,6 +13,7 @@ void initInterface(py::module& m) {
     using namespace lager;
 
     // define these so the inherited classes import ok
-    py::class_<gncpy::dynamics::IDynamics<double>>(m, "IDynamics");
-    py::class_<gncpy::dynamics::ILinearDynamics<double>, gncpy::dynamics::IDynamics<double>>(m, "ILinearDynamics");
+    py::class_<gncpy::measurements::IMeasModel<double>>(m, "IMeasModel");
+    py::class_<gncpy::measurements::ILinearMeasModel<double>, gncpy::dynamics::IMeasModel<double>>(m, "ILinearMeasModel");
+    py::class_<gncpy::measurements::INonLinearMeasModel<double>, gncpy::dynamics::IMeasModel<double>>(m, "INonLinearMeasModel");
 }

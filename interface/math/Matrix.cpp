@@ -4,7 +4,7 @@
 #include <pybind11/numpy.h>
 #include <gncpy/math/Matrix.h>
 #include "../Macros.h"
-#include "Matrix.h"
+#include "Common.h"
 
 namespace py = pybind11;
 

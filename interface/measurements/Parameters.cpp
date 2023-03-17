@@ -1,5 +1,5 @@
 #include <pybind11/pybind11.h>
-#include <gncpy/dynamics/Parameters.h>
+#include <gncpy/measurements/Parameters.h>
 
 namespace py = pybind11;
 
@@ -9,12 +9,7 @@ void initParameters(py::module& m) {
 
     using namespace lager;
 
-    py::class_<gncpy::dynamics::StateTransParams>(m, "StateTransParams")
+    py::class_<gncpy::measurements::MeasParams>(m, "MeasParams")
         .def(py::init());
     
-    py::class_<gncpy::dynamics::ControlParams>(m, "ControlParams")
-        .def(py::init());
-
-    py::class_<gncpy::dynamics::ConstraintParams>(m, "ConstraintParams")
-        .def(py::init());
 }

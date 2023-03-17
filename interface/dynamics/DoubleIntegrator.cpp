@@ -3,7 +3,9 @@
 #include <gncpy/dynamics/IDynamics.h>
 #include <gncpy/dynamics/ILinearDynamics.h>
 #include <gncpy/dynamics/DoubleIntegrator.h>
-#include "../math/Matrix.h"
+#include <gncpy/math/Vector.h>
+#include "../math/Common.h"
+#include "Common.h"
 
 namespace py = pybind11;
 
@@ -11,13 +13,11 @@ namespace py = pybind11;
 // see https://stackoverflow.com/questions/62854830/error-by-wrapping-c-abstract-class-with-pybind11 for ImportError: generic_type: type "Derived" referenced unknown base type "Base" error
 void initDoubleIntegrator(py::module& m) {
 
-    using namespace lager::gncpy;
+    using namespace lager;
 
-    py::class_<dynamics::DoubleIntegrator<double>, dynamics::ILinearDynamics<double>>(m, "DoubleIntegrator")
+    py::class_<gncpy::dynamics::DoubleIntegrator<double>, gncpy::dynamics::ILinearDynamics<double>>(m, "DoubleIntegrator")
         .def(py::init<double>())
-        .def("state_names", &dynamics::DoubleIntegrator<double>::stateNames)
-        .def("get_state_mat", &dynamics::DoubleIntegrator<double>::getStateMat,
-                py::arg("timestep"), py::arg_v("stateTransParams", static_cast<dynamics::StateTransParams *>(nullptr), "lager::gncpy::dynamics::StateTransParams*=nullptr"))
-        .def_property("dt", &dynamics::DoubleIntegrator<double>::dt, &dynamics::DoubleIntegrator<double>::setDt);
+        GNCPY_DYNAMICS_ILINEARDYNAMICS_INTERFACE(gncpy::dynamics::DoubleIntegrator<double>, double)
+        .def_property("dt", &gncpy::dynamics::DoubleIntegrator<double>::dt, &gncpy::dynamics::DoubleIntegrator<double>::setDt);
         
 }
