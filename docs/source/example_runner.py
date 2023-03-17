@@ -7,10 +7,12 @@ def _run_filters():
     import kalman_filter_dynamic_object as kf_dyn
     import extended_kalman_filter_dynamic_object as ekf_dyn
     import imm_kalman_filters_dynamic_object as imm_dyn
+    import StudentTFilter as StudT
 
     kf_dyn.run()
     ekf_dyn.run()
     imm_dyn.run()
+    StudT.run()
 
     sys.path.pop(0)
 

@@ -45,3 +45,16 @@ which gives this as output.
 
 .. image:: /examples/filters/imm_kalman_filters_dynamic_object.png
    :align: center
+
+Student's t-filter
+------------------
+The Student's t-filter can be setup using dynamic objects with the following.
+
+.. literalinclude:: /examples/filters/StudentTFilter.py
+   :linenos:
+   :pyobject: main
+
+which gives this as output.
+
+.. image:: /examples/filters/StudentTFilter.png
+   :align: center
