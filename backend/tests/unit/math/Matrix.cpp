@@ -56,19 +56,30 @@ TEST(MatrixTest, Multiply) {
 
 TEST(MatrixTest, MultiplyVector) {
     lager::gncpy::matrix::Matrix m1({{1., 2.}, {3., 4.}});
-    lager::gncpy::matrix::Vector v2({2., 3.});
+    lager::gncpy::matrix::Matrix m2({{1., 0., 0.}, {0., 1., 0.}});
+    lager::gncpy::matrix::Vector v1({2., 3.});
+    lager::gncpy::matrix::Vector v2({4., 5., 6.});
 
-    for(uint8_t r = 0; r < v2.numRows(); r++) {
-        std::cout << v2(r) << std::endl;
+    std::cout << "v1 = \n" << v1 << std::endl;
+    std::cout << "v2 = \n" << v1 << std::endl;
+    std::cout << "m1 = \n" << m1 << std::endl;
+    std::cout << "m2 = \n" << m2 << std::endl;
+
+    lager::gncpy::matrix::Vector res1 = m1 * v1;
+    lager::gncpy::matrix::Vector res2 = m2 * v2;
+    lager::gncpy::matrix::Vector exp1({8., 18.,});
+    lager::gncpy::matrix::Vector exp2({v2(0), v2(1),});
+
+    EXPECT_EQ(exp1.size(), res1.size());
+    for(uint8_t r = 0; r < exp1.numRows(); r++) {
+        std::cout << res1(r) << std::endl;
+        EXPECT_DOUBLE_EQ(exp1(r), res1(r));
     }
 
-    lager::gncpy::matrix::Vector v3 = m1 * v2;
-
-    lager::gncpy::matrix::Vector exp({8., 18.,});
-
-    for(uint8_t r = 0; r < exp.numRows(); r++) {
-        std::cout << v3(r) << std::endl;
-        EXPECT_DOUBLE_EQ(exp(r), v3(r));
+    EXPECT_EQ(exp2.size(), res2.size());
+    for(uint8_t r = 0; r < exp2.numRows(); r++) {
+        std::cout << res2(r) << std::endl;
+        EXPECT_DOUBLE_EQ(exp2(r), res2(r));
     }
 
     SUCCEED();

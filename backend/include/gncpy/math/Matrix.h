@@ -203,7 +203,7 @@ public:
         }
 
         std::vector<T> out;
-        for(uint8_t r = 0; r < rhs.numRows(); r++) {
+        for(uint8_t r = 0; r < m_nRows; r++) {
             T total = 0;
             for(uint8_t c = 0; c < m_nCols; c++) {
                 total += m_data[this->rowColToLin(r, c)] * rhs.m_data[c];
