@@ -8,8 +8,6 @@
 TODO
     Determinant unit test
     LU decomp unit test
-    Inverse
-        inplace and copy
     Inverse unit test
     Matrix * scalar
     scalar * matrix
@@ -371,6 +369,11 @@ public:
         return det;
     }
 
+    /**
+     * @brief Calculate the inverse of a matrix using LU linear solver. Only square matrix implemented currently
+     * 
+     * @return Matrix 
+     */
     Matrix inverse(){
         if (!this->isSquare()){
             throw BadDimension("Non square matrix non implimented");
@@ -386,9 +389,7 @@ public:
         if (det == 0){
             throw BadDimension("Matrix is singular");
         }
-        Matrix I = identity<T>(m_nCols);
-        Matrix out = LU_solve(L, U, I);
-        return I;
+        return LU_solve(L, U, identity<T>(m_nCols));
     }
 
     inline uint8_t numRows() const { return m_nRows; }
@@ -444,6 +445,13 @@ std::ostream& operator<<(std::ostream& os, const Matrix<T>& m){
     return os;
 }
 
+/**
+ * @brief Construct identity matrix
+ * 
+ * @tparam T 
+ * @param n 
+ * @return lager::gncpy::matrix::Matrix<T> 
+ */
 template<typename T>
 lager::gncpy::matrix::Matrix<T> identity(uint8_t n){
     lager::gncpy::matrix::Matrix<T> out( n, n);
@@ -453,6 +461,14 @@ lager::gncpy::matrix::Matrix<T> identity(uint8_t n){
     return out;
 }
 
+/**
+ * @brief Perform forward substitution to solve linear system of equation given unity lower triangle matrix 
+ * 
+ * @tparam T 
+ * @param L 
+ * @param b 
+ * @return lager::gncpy::matrix::Matrix<T> 
+ */
 template<typename T>
 lager::gncpy::matrix::Matrix<T> forward_sub(const lager::gncpy::matrix::Matrix<T>& L, 
     const lager::gncpy::matrix::Matrix<T>& b){
@@ -464,13 +480,27 @@ lager::gncpy::matrix::Matrix<T> forward_sub(const lager::gncpy::matrix::Matrix<T
         for (uint8_t i = 0; i < b.numRows(); i++){
             T sum = b(i,k);
             for (uint8_t j = 0; j < i; j++){
-                sum-=(L(i,j)*x(j,k));
+                sum -= (L(i,j) * x(j,k));
             }
-            x(i,k) = sum / L(i,i);
+            /*
+            Division is skipped here assuming that the Doolittle is called 
+            which yield a unitary Lower matrix. Should save some time on division
+            */
+            //x(i,k) = sum / L(i,i);
+            x(i,k) = sum;
         }
     }
     return x;
 }
+
+/**
+ * @brief Perform back substitution to solve linear system of equation given upper triangle matrix
+ * 
+ * @tparam T 
+ * @param U 
+ * @param b 
+ * @return lager::gncpy::matrix::Matrix<T> 
+ */
 
 template<typename T>
 lager::gncpy::matrix::Matrix<T> back_sub(const lager::gncpy::matrix::Matrix<T>& U, 
@@ -479,20 +509,35 @@ lager::gncpy::matrix::Matrix<T> back_sub(const lager::gncpy::matrix::Matrix<T>& 
         throw BadDimension("Invalid matrix dimension");
     }
     lager::gncpy::matrix::Matrix<T> x (b.numRows(),b.numCols());
-    
+    for (uint8_t k = 0; k < b.numCols(); k++){
+        for (int8_t i = b.numRows()-1; i > -1; i--){
+            T sum = b(i,k);
+            for (int8_t j = b.numRows()-1; j > i; j--){
+                sum -= (U(i,j) * x(j,k));
+            }
+            x(i,k) = sum / U(i,i);
+        }
+    }
     return x;
 }
     
-
+/**
+ * @brief Sovlve system of linear equation from LU matrices
+ * 
+ * @tparam T 
+ * @param L 
+ * @param U 
+ * @param b 
+ * @return lager::gncpy::matrix::Matrix<T> 
+ */
 template<typename T>
 lager::gncpy::matrix::Matrix<T> LU_solve(const lager::gncpy::matrix::Matrix<T>& L, 
     const lager::gncpy::matrix::Matrix<T> U, const lager::gncpy::matrix::Matrix<T>& b){
     if (!L.numCols() == b.numRows() || !U.numCols() == b.numRows()){
         throw BadDimension("Invalid vector dimension");
     }
-    lager::gncpy::matrix::Matrix<T> out(b.numRows(),b.numCols());
-    lager::gncpy::matrix::Matrix<T> temp = forward_sub(L,b);
-    out = back_sub(U,temp);
+    lager::gncpy::matrix::Matrix<T> out = forward_sub(L,b);
+    out = back_sub(U,out);
     return out;
 }
 

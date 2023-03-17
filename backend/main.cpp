@@ -9,19 +9,10 @@
 #include "gncpy/dynamics/Parameters.h"
 
 int main() {
-    lager::gncpy::matrix::Matrix<float> m ({{2, -1, -2.},{-4, 6, 3},{-4, -2, 8}});
-    lager::gncpy::matrix::Matrix<float> l = lager::gncpy::matrix::Matrix<float>(3,3);
-    lager::gncpy::matrix::Matrix<float> u = l;
-    lager::gncpy::matrix::Matrix<float> I = lager::gncpy::matrix::identity<float>(3);
-    
-    m.LU_decomp(l,u);
-    //std::cout<<m;
-    //std::cout<<"\n";
-    //std::cout<<l;
-    //std::cout<<"\n";
-    //std::cout<<u;
-    //std::cout<<"\n";
+    lager::gncpy::matrix::Matrix<float> m ({{2, -1, -2., 3, 4, 5, 7, 8},{-4, 6, 3, 4, 6, 1, 2, 9},
+                                            {-4, -2, 8, 5, 6, 7, 8, 21},{14, 2, 2, 5, 3, 6, 3, 2},
+                                            {-3, -7, 10, 2, 1, 3, 4, 2},{1, 6, 23, 54, 0.1, 0, 1, 3},
+                                            {2, 3, 4, 1, 6, 7, 3, 0.5},{4, 2, 0.1, 7, 4, 2, 51, 3}});
     lager::gncpy::matrix::Matrix<float> n = m.inverse();
-    //std::cout<<n;
-
+    std::cout<<m<<"\n"<<n;
 }
