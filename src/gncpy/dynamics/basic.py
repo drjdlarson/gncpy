@@ -12,7 +12,6 @@ from warnings import warn
 import gncpy.math as gmath
 
 import gncpy.dynamics._dynamics as cpp_bindings
-import gncpy.math._matrix as cpp_matrix  # need to import this so the other bindings know how to return matrices
 
 
 class DynamicsBase(ABC):

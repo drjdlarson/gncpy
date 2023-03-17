@@ -1,7 +1,10 @@
 #---------------------------------------------------------------------------
 # setup Matrix module
 #---------------------------------------------------------------------------
-pybind11_add_module(_matrix MODULE Matrix.cpp)
+pybind11_add_module(_matrix MODULE 
+    Matrix.cpp
+    Matrix.h
+)
 target_compile_definitions(_matrix PRIVATE VERSION_INFO=${PROJECT_VERSION})
 target_link_libraries(_matrix
     PRIVATE
