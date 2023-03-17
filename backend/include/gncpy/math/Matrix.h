@@ -9,11 +9,6 @@ TODO
     Determinant unit test
     LU decomp unit test
     Inverse unit test
-    Matrix * scalar
-    scalar * matrix
-    Matrix *= scalar
-    matrix / scalar
-    matrix /= scalar
     matrix block assignment
 */
 
@@ -114,12 +109,6 @@ public:
 
     }
 
-    /**
-     * @brief Matrix addition assignment
-     * 
-     * @param rhs 
-     * @return Matrix& 
-     */
     Matrix& operator+= (const Matrix& rhs) {
         if (!this->isSameSize(rhs)){
             throw BadDimension();
@@ -131,12 +120,6 @@ public:
         return *this;
     }
 
-    /**
-     * @brief Matrix addition 
-     * 
-     * @param m 
-     * @return Matrix 
-     */
     Matrix operator+ (const Matrix& m) {
         if (!this->isSameSize(m)){
             throw BadDimension();
@@ -149,12 +132,6 @@ public:
         return Matrix(m_nRows, m_nCols, out);
     }
 
-    /**
-     * @brief 
-     * 
-     * @param rhs 
-     * @return Matrix 
-     */
     Matrix operator- (const Matrix& rhs) {
         if (!this->isSameSize(rhs)){
             throw BadDimension();
@@ -164,12 +141,6 @@ public:
         }
     }
 
-    /**
-     * @brief Matrix multiplication
-     * 
-     * @param rhs 
-     * @return Matrix 
-     */
     Matrix operator* (const Matrix& rhs) {
         if(!this->allowMultiplication(rhs)) {
             throw BadDimension("Dimensions do not match");
@@ -189,12 +160,21 @@ public:
         return Matrix(m_nRows, rhs.m_nCols, out);
     }
 
-    /**
-     * @brief Vector multiplication
-     * 
-     * @param rhs 
-     * @return Vector<T> 
-     */
+    Matrix operator* (const T& scalar){
+        std::vector<T> out = m_data;
+        for (uint8_t i = 0; i < out.size(); i++){
+            out[i] *= scalar;
+        }
+        return Matrix(m_nRows, m_nCols, out);
+    }
+
+    Matrix& operator*= (const T& scalar){
+        for (uint8_t i = 0; i < m_data.size(); i++){
+            m_data[i] *= scalar;
+        }
+        return *this;
+    }
+
     Vector<T> operator* (const Vector<T>& rhs) {
         if(!this->allowMultiplication(rhs)) {
             throw BadDimension("Number of rows do not match");
@@ -212,7 +192,24 @@ public:
         return Vector(out.size(), out);
     }
 
+
     Matrix operator/ (const Matrix& m);
+
+    Matrix operator/ (const T& scalar){
+        std::vector<T> out = m_data;
+        for (uint8_t i = 0; i < out.size(); i++){
+            out[i] /= scalar;
+        }
+        return Matrix(m_nRows, m_nCols, out);
+    }
+
+    Matrix& operator/= (const T& scalar){
+        for (uint8_t i = 0; i < m_data.size(); i++){
+            m_data[i] /= scalar;
+        }
+        return *this;
+    }
+
 
     /**
      * @brief Matrix indexing
@@ -268,6 +265,8 @@ public:
 
     template<typename R>
     friend std::ostream& operator<<(std::ostream& os, const Matrix<R>& m);
+    template<typename R>
+    friend Matrix<R> operator* (const R& scalar, const Matrix<R>& m);
 
     inline std::vector<T>::iterator begin() noexcept { return m_data.begin(); }
     inline std::vector<T>::iterator end() noexcept { return m_data.end(); }
@@ -425,6 +424,18 @@ private:
     std::vector<T> m_data;
     
 };
+
+template<typename T>
+    lager::gncpy::matrix::Matrix<T> operator* (const T& scalar, const lager::gncpy::matrix::Matrix<T>& m){
+        std::vector<T> out;
+        for (uint8_t i = 0; i < m.numRows(); i++){
+            for (uint8_t j = 0; j < m.numCols(); j++){
+                out.emplace_back(m(i,j) * scalar);
+            }
+        }
+        return lager::gncpy::matrix::Matrix<T> (m.numRows(),m.numCols(),out);
+    }
+
 
 /**
  * @brief Print matrix using standard cout operator
