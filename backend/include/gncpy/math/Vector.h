@@ -46,6 +46,7 @@ public:
     }
 
     T operator() (uint8_t elem) const {
+        std::cout<<elem;
         if(elem >= this->size()) {
             throw BadIndex("Indexing outside vector");
         }

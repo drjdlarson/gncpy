@@ -6,9 +6,7 @@
 
 /*
 TODO
-    Determinant
     Determinant unit test
-    LU decomp 
     LU decomp unit test
     Inverse
         inplace and copy
@@ -19,8 +17,6 @@ TODO
     matrix / scalar
     matrix /= scalar
     matrix block assignment
-    diag from matrix
-    Identity
 */
 
 namespace lager::gncpy::matrix {
@@ -339,6 +335,11 @@ public:
         }
     }
 
+    /**
+     * @brief Extract the diagonal elements of a square matrix
+     * 
+     * @return Vector<T> 
+     */
     Vector<T> diag(){
         if (!this->isSquare()){
             throw BadDimension ("Not a square matrix");
@@ -350,6 +351,11 @@ public:
         return Vector(out.size(), out);
     }
 
+    /**
+     * @brief Calculate determinant of a matrix. Only square matrix implemented currently
+     * 
+     * @return T 
+     */
     T determinant(){
         if (!this->isSquare()){
             throw BadDimension("Non square matrix non implimented");
@@ -363,6 +369,26 @@ public:
             det *= u_diag(i);
         }
         return det;
+    }
+
+    Matrix inverse(){
+        if (!this->isSquare()){
+            throw BadDimension("Non square matrix non implimented");
+        }
+        Matrix L(m_nCols,m_nCols);
+        Matrix U = L;
+        this->LU_decomp(L,U);
+        Vector<T> u_diag = U.diag();
+        T det = u_diag(0);
+        for (uint8_t i = 1; i < u_diag.size(); i++){
+            det *= u_diag(i);
+        }
+        if (det == 0){
+            throw BadDimension("Matrix is singular");
+        }
+        Matrix I = identity<T>(m_nCols);
+        Matrix out = LU_solve(L, U, I);
+        return I;
     }
 
     inline uint8_t numRows() const { return m_nRows; }
@@ -422,8 +448,51 @@ template<typename T>
 lager::gncpy::matrix::Matrix<T> identity(uint8_t n){
     lager::gncpy::matrix::Matrix<T> out( n, n);
     for (uint8_t i = 0; i < n; i++){
-        out(i,i) = 1.;
+        out(i,i) = T(1);
     }
+    return out;
+}
+
+template<typename T>
+lager::gncpy::matrix::Matrix<T> forward_sub(const lager::gncpy::matrix::Matrix<T>& L, 
+    const lager::gncpy::matrix::Matrix<T>& b){
+    if (!L.numCols() == b.numRows()){
+        throw BadDimension("Invalid matrix dimension");
+    }
+    lager::gncpy::matrix::Matrix<T> x (b.numRows(),b.numCols());
+    for (uint8_t k = 0; k < b.numCols(); k++){
+        for (uint8_t i = 0; i < b.numRows(); i++){
+            T sum = b(i,k);
+            for (uint8_t j = 0; j < i; j++){
+                sum-=(L(i,j)*x(j,k));
+            }
+            x(i,k) = sum / L(i,i);
+        }
+    }
+    return x;
+}
+
+template<typename T>
+lager::gncpy::matrix::Matrix<T> back_sub(const lager::gncpy::matrix::Matrix<T>& U, 
+    const lager::gncpy::matrix::Matrix<T>& b){
+    if (!U.numCols() == b.numRows()){
+        throw BadDimension("Invalid matrix dimension");
+    }
+    lager::gncpy::matrix::Matrix<T> x (b.numRows(),b.numCols());
+    
+    return x;
+}
+    
+
+template<typename T>
+lager::gncpy::matrix::Matrix<T> LU_solve(const lager::gncpy::matrix::Matrix<T>& L, 
+    const lager::gncpy::matrix::Matrix<T> U, const lager::gncpy::matrix::Matrix<T>& b){
+    if (!L.numCols() == b.numRows() || !U.numCols() == b.numRows()){
+        throw BadDimension("Invalid vector dimension");
+    }
+    lager::gncpy::matrix::Matrix<T> out(b.numRows(),b.numCols());
+    lager::gncpy::matrix::Matrix<T> temp = forward_sub(L,b);
+    out = back_sub(U,temp);
     return out;
 }
 

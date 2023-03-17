@@ -36,7 +36,8 @@ TEST(MathTest, JacobianSquareMat) {
                                       {5.999999999062311, -18.749999988187938, 8.0999999951814061},
                                       {0.88200003744987043, 5.4000000027087935, -0.98999249686926305}});
     
-    auto [nRows, nCols] = res.shape();
+    uint8_t nRows = res.shape()[0];
+    uint8_t nCols = res.shape()[1];
 
     EXPECT_EQ(exp.numRows(), nRows);
     EXPECT_EQ(exp.numCols(), nCols);
@@ -67,7 +68,8 @@ TEST(MathTest, JacobianMat) {
                                       {2.0, -0.5},
                                       {0.877582562, 0.0}});
     
-    auto [nRows, nCols] = res.shape();
+    uint8_t nRows = res.shape()[0];
+    uint8_t nCols = res.shape()[1];
 
     EXPECT_EQ(exp.numRows(), nRows);
     EXPECT_EQ(exp.numCols(), nCols);

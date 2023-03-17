@@ -79,16 +79,17 @@ TEST(MeasurementTest, RangeBearingMeasMat) {
 
     lager::gncpy::measurements::RangeBearingParams params(0, 1);
 
-    lager::gncpy::matrix::Matrix out = sensor.getMeasMat(x, &params);
+    lager::gncpy::matrix::Matrix res = sensor.getMeasMat(x, &params);
 
-    auto [nRows, nCols] = out.shape();
+    uint8_t nRows = res.shape()[0];
+    uint8_t nCols = res.shape()[1];
 
     EXPECT_EQ(exp.numRows(), nRows);
     EXPECT_EQ(exp.numCols(), nCols);
 
     for (uint8_t ii=0;ii<nRows;ii++) {
         for (uint8_t jj=0;jj<nCols;jj++) {
-            EXPECT_NEAR(exp(ii, jj), out(ii, jj), 1e-6);
+            EXPECT_NEAR(exp(ii, jj), res(ii, jj), 1e-6);
         }
     }
     SUCCEED();
