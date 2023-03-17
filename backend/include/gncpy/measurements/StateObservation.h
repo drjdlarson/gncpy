@@ -4,7 +4,7 @@
 #include "gncpy/math/Vector.h"
 #include "gncpy/math/Matrix.h"
 #include "gncpy/math/Math.h"
-#include "gncpy/measurements/Exceptions.h"
+#include "gncpy/Exceptions.h"
 #include "gncpy/measurements/Parameters.h"
 #include "gncpy/measurements/ILinearMeasModel.h"
 #include "gncpy/Utilities.h"
@@ -25,9 +25,11 @@ class StateObservation : public ILinearMeasModel<T> {
 public:
     matrix::Matrix<T> getMeasMat(const matrix::Vector<T>& state, const MeasParams* params=nullptr) const override {
         if (!params) {
-            throw BadParams("State Observation requires parameters");
+            throw exceptions::BadParams("State Observation requires parameters");
         }
-        
+        if (!utilities::instanceof<StateObservationParams>(params)) {
+            throw exceptions::BadParams("params type must be StateObservationParams.");
+        }
         auto ptr = dynamic_cast<const StateObservationParams*>(params);
         matrix::Matrix<T> data(ptr->obsInds.size(), state.size());
 

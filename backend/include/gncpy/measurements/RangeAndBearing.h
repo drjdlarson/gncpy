@@ -6,7 +6,7 @@
 #include "gncpy/math/Matrix.h"
 #include "gncpy/measurements/INonLinearMeasModel.h"
 #include "gncpy/measurements/Parameters.h"
-#include "gncpy/measurements/Exceptions.h"
+#include "gncpy/Exceptions.h"
 #include "gncpy/Utilities.h"
 
 
@@ -27,17 +27,17 @@ template<typename T>
 class RangeAndBearing : public INonLinearMeasModel<T> {   
 protected:
     std::vector<std::function<T (const matrix::Vector<T>&)>> getMeasFuncLst(const MeasParams* params) const override {
-        auto h1 = [this, &params](const matrix::Vector<T>& x) { return this->range(x, params); };
-        auto h2 = [this, &params](const matrix::Vector<T>& x) { return this->bearing(x, params); };
+        auto h1 = [this, params](const matrix::Vector<T>& x) { return this->range(x, params); };
+        auto h2 = [this, params](const matrix::Vector<T>& x) { return this->bearing(x, params); };
         return std::vector<std::function<T (const matrix::Vector<T>&)>>({h1, h2});
     }
 private:
     static T range (const matrix::Vector<T>& state, const MeasParams* params=nullptr) {
         if (!params) {
-            throw BadParams("Range and Bearing requires parameters.");
+            throw exceptions::BadParams("Range and Bearing requires parameters.");
         }
         if (!utilities::instanceof<RangeBearingParams>(params)) {
-            throw BadParams("params type must be RangeBearingParams.");
+            throw exceptions::BadParams("params type must be RangeBearingParams.");
         }
         auto ptr = dynamic_cast<const RangeBearingParams*>(params);
 
@@ -45,10 +45,10 @@ private:
     }
     static T bearing (const matrix::Vector<T>& state, const MeasParams* params=nullptr) { 
         if (!params) {
-            throw BadParams("Range and Bearing requires parameters.");
+            throw exceptions::BadParams("Range and Bearing requires parameters.");
         }
         if (!utilities::instanceof<RangeBearingParams>(params)) {
-            throw BadParams("params type must be RangeBearingParams.");
+            throw exceptions::BadParams("params type must be RangeBearingParams.");
         }
         auto ptr = dynamic_cast<const RangeBearingParams*>(params);
 

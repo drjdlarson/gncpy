@@ -5,16 +5,19 @@
 #include "gncpy/math/Math.h"
 #include "gncpy/measurements/RangeAndBearing.h"
 #include "gncpy/measurements/StateObservation.h"
-#include "gncpy/measurements/Exceptions.h"
+#include "gncpy/Exceptions.h"
 
 TEST(MeasurementTest, StateObservationMeasure) {
     lager::gncpy::matrix::Vector x({3.0, 4.0, 1.0});
     lager::gncpy::measurements::StateObservation<double> sensor;
     std::vector<uint8_t> inds = {0, 1, 2};
 
-    lager::gncpy::measurements::StateObservationParams params = lager::gncpy::measurements::StateObservationParams(inds);
+    EXPECT_THROW(sensor.measure(x, nullptr), lager::gncpy::exceptions::BadParams);
+
+    auto params = lager::gncpy::measurements::StateObservationParams(inds);
 
     lager::gncpy::matrix::Vector out = sensor.measure(x, &params);
+
 
     EXPECT_EQ(3, out.size());
 
@@ -29,7 +32,9 @@ TEST(MeasurementTest, StateObservationMeasMat) {
     lager::gncpy::matrix::Vector x({3.0, 4.0, 1.0});
     lager::gncpy::measurements::StateObservation<double> sensor;
     std::vector<uint8_t> inds = {0, 1, 2};
-    lager::gncpy::measurements::StateObservationParams params = lager::gncpy::measurements::StateObservationParams(inds);
+    auto params = lager::gncpy::measurements::StateObservationParams(inds);
+
+    EXPECT_THROW(sensor.getMeasMat(x, nullptr), lager::gncpy::exceptions::BadParams);
 
     lager::gncpy::matrix::Matrix out = sensor.getMeasMat(x, &params);
     lager::gncpy::matrix::Matrix exp({{1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}});
@@ -50,9 +55,9 @@ TEST(MeasurementTest, RangeBearingMeasure) {
     lager::gncpy::measurements::RangeAndBearing<double> sensor;
     lager::gncpy::matrix::Vector exp({5.0, atan2(4.0, 3.0)});
 
-    EXPECT_THROW(sensor.getMeasMat(x), lager::gncpy::measurements::BadParams);
+    EXPECT_THROW(sensor.measure(x, nullptr), lager::gncpy::exceptions::BadParams);
 
-    lager::gncpy::measurements::RangeBearingParams params = lager::gncpy::measurements::RangeBearingParams(0, 1);
+    lager::gncpy::measurements::RangeBearingParams params(0, 1);
 
     lager::gncpy::matrix::Vector out = sensor.measure(x, &params);
 
@@ -70,9 +75,9 @@ TEST(MeasurementTest, RangeBearingMeasMat) {
     lager::gncpy::measurements::RangeAndBearing<double> sensor;
     lager::gncpy::matrix::Matrix exp({{0.6, 0.8, 0.0},{-0.16, 0.12, 0.0}});
 
-    EXPECT_THROW(sensor.getMeasMat(x), lager::gncpy::measurements::BadParams);
+    EXPECT_THROW(sensor.getMeasMat(x), lager::gncpy::exceptions::BadParams);
 
-    lager::gncpy::measurements::RangeBearingParams params = lager::gncpy::measurements::RangeBearingParams(0, 1);
+    lager::gncpy::measurements::RangeBearingParams params(0, 1);
 
     lager::gncpy::matrix::Matrix out = sensor.getMeasMat(x, &params);
 
