@@ -32,6 +32,32 @@ class Vector;
 template<typename T>
 class Matrix {
 public:
+    Matrix<T>() = default;
+
+    Matrix<T>(const std::vector<size_t>& shape, const T* data=nullptr) {
+        if(shape.size() < 1 || shape.size() > 2) {
+            throw BadDimension("Only 2-D matrices are supported");
+        }
+
+        m_nRows = shape[0];
+        m_nCols = shape[1];
+        m_shape.emplace_back(m_nRows);
+        m_shape.emplace_back(m_nCols);
+
+        m_strides.emplace_back(m_shape[1]);
+        m_strides.emplace_back(1);
+
+        if(data != nullptr) {
+            for(uint8_t ii = 0; ii < static_cast<uint8_t>(shape[0]*shape[1]); ii++) {
+                m_data.emplace_back(data[ii]);
+            }
+        } else {
+            for(uint8_t ii = 0; ii < static_cast<uint8_t>(shape[0]*shape[1]); ii++) {
+                m_data.emplace_back(static_cast<T>(0));
+            }
+        }
+    }
+
     /**
      * @brief Construct a new Matrix object
      * 
@@ -39,9 +65,11 @@ public:
      * @param nCols 
      * @param data 
      */
-    Matrix(uint8_t nRows, uint8_t nCols, std::vector<T> data) 
+    Matrix<T>(uint8_t nRows, uint8_t nCols, std::vector<T> data) 
     : m_nRows(nRows),
     m_nCols(nCols),
+    m_shape({m_nRows, m_nCols}),
+    m_strides({m_nCols, 1}),
     m_data(data) {
         if(m_nRows * m_nCols != m_data.size()) {
             throw BadDimension("Supplied data does not match the given size");
@@ -53,9 +81,11 @@ public:
      * 
      * @param listlist 
      */
-    explicit Matrix(std::initializer_list<std::initializer_list<T>> listlist)
+    explicit Matrix<T>(std::initializer_list<std::initializer_list<T>> listlist)
     : m_nRows(listlist.size()),
-    m_nCols(listlist.begin()->size()) {
+    m_nCols(listlist.begin()->size()),
+    m_shape({m_nRows, m_nCols}),
+    m_strides({m_nCols, 1}) {
         if(m_nRows == 0 || m_nCols == 0) {
             throw BadDimension("Matrix constructor has size 0");
         }
@@ -73,9 +103,11 @@ public:
      * @param nRows 
      * @param nCols 
      */
-    Matrix(uint8_t nRows, uint8_t nCols)
+    Matrix<T>(uint8_t nRows, uint8_t nCols)
     : m_nRows(nRows),
-    m_nCols(nCols) {
+    m_nCols(nCols),
+    m_shape({m_nRows, m_nCols}),
+    m_strides({m_nCols, 1}) {
         if(m_nRows == 0 || m_nCols == 0) {
             throw BadDimension("Matrix constructor has size 0");
         }
@@ -335,15 +367,22 @@ public:
 
     inline uint8_t numRows() const { return m_nRows; }
     inline uint8_t numCols() const { return m_nCols; }
-    inline bool beenTransposed() const { return m_transposed; }
 
-    inline T* data() { return m_data.data(); }
+    inline const T* data() const { return m_data.data(); }
 
     inline uint8_t size() const { return static_cast<uint8_t>(m_data.size()); }
 
-    using row_t = uint8_t;
-    using column_t = uint8_t;
-    std::pair<row_t, column_t> shape() const { return std::make_pair(m_nRows, m_nCols); }
+    std::vector<uint8_t> shape() const { return m_shape; }
+    std::vector<uint8_t> strides(bool bytes=false) const {
+        std::vector<uint8_t> ret(m_strides.size());
+        for(size_t ii = 0; ii < ret.size(); ii++) {
+            ret[ii] = m_strides[ii];
+            if(bytes) {
+                ret[ii] *= sizeof(T);
+            }
+        }
+        return ret;
+    }
 
 private:
     inline bool isSquare () const {return m_nCols == m_nRows;}
@@ -354,9 +393,12 @@ private:
     bool m_transposed = false;
     uint8_t m_nRows;
     uint8_t m_nCols;
+    std::vector<uint8_t> m_shape;
+    std::vector<uint8_t> m_strides;
     std::vector<T> m_data;
     
 };
+
 /**
  * @brief Print matrix using standard cout operator
  * 

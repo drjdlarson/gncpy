@@ -14,6 +14,8 @@ option(BUILD_DOC "Build the documentation" ON)
 #---------------------------------------------------------------------------
 project(${BACKEND_PROJECT} LANGUAGES CXX)
 
+set(CMAKE_BUILD_TYPE Debug)
+
 set(CMAKE_CXX_STANDARD 20)
 set(CXX_STANDARD_REQUIRED ON)
 

@@ -12,7 +12,6 @@ from warnings import warn
 import gncpy.math as gmath
 
 import gncpy.dynamics._dynamics as cpp_bindings
-import gncpy.math._matrix as cpp_matrix  # need to import this so the other bindings know how to return matrices
 
 
 class DynamicsBase(ABC):
@@ -469,16 +468,26 @@ class NonlinearDynamicsBase(DynamicsBase):
 
 
 class DoubleIntegrator(LinearDynamicsBase):
-    """Implements a double integrator model."""
+    """Implements a double integrator model.
+    
+    Todo
+    ----
+    Implement the control model in c++ for this class
+    """
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.__model = cpp_bindings.DoubleIntegrator(0.1)
-        self.__state_trans_params = cpp_bindings.StateTransParams()
 
     @property
     def state_names(self):
         return self.__model.state_names()
+
+    def propagate_state(self, timestep, state, u=None, state_args=None, ctrl_args=None):
+        if state_args is None:
+            raise RuntimeError("state_args must be (dt,) not None")
+        self.__model.dt = state_args[0]
+        return self.__model.propagate_state(timestep, state)
 
     def get_dis_process_noise_mat(self, dt, proc_cov):
         """Discrete process noise matrix.

@@ -1,3 +1,5 @@
+#pragma once
+
 namespace lager::gncpy::utilities {
 
 template<typename Base, typename T>
