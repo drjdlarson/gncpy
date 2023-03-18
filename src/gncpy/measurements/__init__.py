@@ -1,1 +1,4 @@
-from gncpy.measurements._measurements import StateObservation, StateObservationParams
+from gncpy.measurements._measurements import (
+    StateObservation, StateObservationParams,
+    RangeAndBearing, RangeAndBearingParams
+)

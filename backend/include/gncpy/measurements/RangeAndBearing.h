@@ -12,19 +12,20 @@
 
 namespace lager::gncpy::measurements{
 
-class RangeBearingParams : public MeasParams {
+class RangeAndBearingParams final: public MeasParams {
 public: 
-    uint8_t xInd;
-    uint8_t yInd;
-    RangeBearingParams(uint8_t xInd, uint8_t yInd) 
+    RangeAndBearingParams(uint8_t xInd, uint8_t yInd) 
     : xInd(xInd), 
     yInd(yInd) {
         
     }
+
+    uint8_t xInd;
+    uint8_t yInd;
 };
 
 template<typename T>
-class RangeAndBearing : public INonLinearMeasModel<T> {   
+class RangeAndBearing final: public INonLinearMeasModel<T> {   
 protected:
     std::vector<std::function<T (const matrix::Vector<T>&)>> getMeasFuncLst(const MeasParams* params) const override {
         auto h1 = [this, params](const matrix::Vector<T>& x) { return this->range(x, params); };
@@ -36,10 +37,10 @@ private:
         if (!params) {
             throw exceptions::BadParams("Range and Bearing requires parameters.");
         }
-        if (!utilities::instanceof<RangeBearingParams>(params)) {
-            throw exceptions::BadParams("params type must be RangeBearingParams.");
+        if (!utilities::instanceof<RangeAndBearingParams>(params)) {
+            throw exceptions::BadParams("params type must be RangeAndBearingParams.");
         }
-        auto ptr = dynamic_cast<const RangeBearingParams*>(params);
+        auto ptr = dynamic_cast<const RangeAndBearingParams*>(params);
 
         return sqrt(state(ptr->xInd) * state(ptr->xInd) + state(ptr->yInd) * state(ptr->yInd));
     }
@@ -47,10 +48,10 @@ private:
         if (!params) {
             throw exceptions::BadParams("Range and Bearing requires parameters.");
         }
-        if (!utilities::instanceof<RangeBearingParams>(params)) {
-            throw exceptions::BadParams("params type must be RangeBearingParams.");
+        if (!utilities::instanceof<RangeAndBearingParams>(params)) {
+            throw exceptions::BadParams("params type must be RangeAndBearingParams.");
         }
-        auto ptr = dynamic_cast<const RangeBearingParams*>(params);
+        auto ptr = dynamic_cast<const RangeAndBearingParams*>(params);
 
         return atan2(state(ptr->yInd), state(ptr->xInd));
     }
