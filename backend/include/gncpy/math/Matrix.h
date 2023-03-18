@@ -129,7 +129,7 @@ public:
         return *this;
     }
 
-    Matrix operator+ (const Matrix& m) {
+    Matrix operator+ (const Matrix& m) const {
         if (!this->isSameSize(m)){
             throw BadDimension();
         }
@@ -141,16 +141,19 @@ public:
         return Matrix(m_nRows, m_nCols, out);
     }
 
-    Matrix operator- (const Matrix& rhs) {
-        if (!this->isSameSize(rhs)){
+    Matrix operator- (const Matrix& m) const {
+        if (!this->isSameSize(m)){
             throw BadDimension();
         }
+        std::vector<T> out;
         for (uint8_t i = 0; i < this->numRows() * this->numCols(); i++){
-            m_data[i] -= rhs.m_data[i];
+            out.emplace_back(m_data[i] - m.m_data[i]);
         }
+
+        return Matrix(m_nRows, m_nCols, out);
     }
 
-    Matrix operator* (const Matrix& rhs) {
+    Matrix operator* (const Matrix& rhs) const {
         if(!this->allowMultiplication(rhs)) {
             throw BadDimension("Dimensions do not match");
         }
@@ -160,7 +163,7 @@ public:
             for(uint8_t c = 0; c < rhs.m_nCols; c++) {
                 T total = 0;
                 for(uint8_t k = 0; k < m_nCols; k++){
-                    total += m_data[this->rowColToLin(r, k)] * rhs.m_data[this->rowColToLin(k, c)];
+                    total += m_data[this->rowColToLin(r, k)] * rhs.m_data[rhs.rowColToLin(k, c)];
                 }
                 out.emplace_back(total);
             }
@@ -169,7 +172,7 @@ public:
         return Matrix(m_nRows, rhs.m_nCols, out);
     }
 
-    Matrix operator* (const T& scalar){
+    Matrix operator* (const T& scalar) const {
         std::vector<T> out = m_data;
         for (uint8_t i = 0; i < out.size(); i++){
             out[i] *= scalar;
@@ -177,14 +180,14 @@ public:
         return Matrix(m_nRows, m_nCols, out);
     }
 
-    Matrix& operator*= (const T& scalar){
+    Matrix& operator*= (const T& scalar) const{
         for (uint8_t i = 0; i < m_data.size(); i++){
             m_data[i] *= scalar;
         }
         return *this;
     }
 
-    Vector<T> operator* (const Vector<T>& rhs) {
+    Vector<T> operator* (const Vector<T>& rhs) const {
         if(!this->allowMultiplication(rhs)) {
             throw BadDimension("Number of rows do not match");
         }
@@ -204,7 +207,7 @@ public:
 
     Matrix operator/ (const Matrix& m);
 
-    Matrix operator/ (const T& scalar){
+    Matrix operator/ (const T& scalar) const {
         std::vector<T> out = m_data;
         for (uint8_t i = 0; i < out.size(); i++){
             out[i] /= scalar;
@@ -212,7 +215,7 @@ public:
         return Matrix(m_nRows, m_nCols, out);
     }
 
-    Matrix& operator/= (const T& scalar){
+    Matrix& operator/= (const T& scalar) const{
         for (uint8_t i = 0; i < m_data.size(); i++){
             m_data[i] /= scalar;
         }
@@ -346,7 +349,7 @@ public:
      * 
      * @return Vector<T> 
      */
-    Vector<T> diag(){
+    Vector<T> diag() const {
         if (!this->isSquare()){
             throw BadDimension ("Not a square matrix");
         }

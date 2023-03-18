@@ -53,6 +53,21 @@ TEST(MatrixTest, Multiply) {
     SUCCEED();
 }
 
+TEST(MatrixTest, MultiplyNonSquare) {
+    lager::gncpy::matrix::Matrix<double> m1({{0, 1}, {2, 3}});
+    lager::gncpy::matrix::Matrix<double> m2({{1, 2, 3}, {-1, -2, -3}});
+    lager::gncpy::matrix::Matrix<double> m3=m1*m2;
+
+    lager::gncpy::matrix::Matrix<double> exp({{-1, -2, -3}, {-1, -2, -3}});
+
+    for (uint8_t r=0;r<exp.numRows();r++) {
+        for (uint8_t c=0;c<exp.numCols();c++) {
+            EXPECT_EQ(exp(r,c), m3(r,c));
+        }
+    }
+    SUCCEED();
+}
+
 
 TEST(MatrixTest, MultiplyVector) {
     lager::gncpy::matrix::Matrix m1({{1., 2.}, {3., 4.}});
@@ -117,4 +132,24 @@ TEST(MatrixTest, TransposeMatrixInPlace) {
 
     SUCCEED();
 
+}
+
+TEST(MatrixTest, InovCovCalc) {
+    lager::gncpy::matrix::Matrix<double> m1({{1, 0, 0, 0}, {0, 1, 0, 0}});
+    lager::gncpy::matrix::Matrix<double> m2({{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}});
+    // lager::gncpy::matrix::Matrix<double> exp({{1, 0}, {0, 1}})
+    lager::gncpy::matrix::Matrix<double> exp({{1, 0}, {0, 1}, {0, 0}, {0, 0}});
+
+    auto out = lager::gncpy::matrix::Matrix<double>({{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}) * lager::gncpy::matrix::Matrix<double>({{1, 0}, {0, 1}, {0, 0}, {0, 0}});
+
+    std::cout<<out<<"\n"<<lager::gncpy::matrix::Matrix<double>({{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}) * lager::gncpy::matrix::Matrix<double>({{1, 0}, {0, 1}, {0, 0}, {0, 0}});
+
+    for (uint8_t r=0;r<exp.numRows();r++) {
+        for (uint8_t c=0;c<exp.numCols();c++) {
+            EXPECT_EQ(out(r, c), exp(r, c));
+        }
+    }
+
+    // std::cout<<m2*m1.transpose()<<"\n"<<m1.transpose();
+    SUCCEED();
 }
