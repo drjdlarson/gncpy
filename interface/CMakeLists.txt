@@ -15,3 +15,8 @@ add_subdirectory(math)
 # setup measurements directory
 #---------------------------------------------------------------------------
 add_subdirectory(measurements)
+
+#---------------------------------------------------------------------------
+# setup filters directory
+#---------------------------------------------------------------------------
+add_subdirectory(filters)
