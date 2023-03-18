@@ -17,9 +17,9 @@ public:
 
     Kalman(T dt) 
     : M_dt(dt), 
-      m_cov(4, 4),
-      m_measNoise(4, 4),
-      m_procNoise(4, 4) {
+      m_cov(),
+      m_measNoise(),
+      m_procNoise() {
 
     }
 
@@ -65,26 +65,27 @@ public:
             newState = this->m_dynObj->propagateState(timestep, curState, params->stateTransParams.get());
             stateMat = dynamic_cast<dynamics::ILinearDynamics<T>*>(this->m_dynObj.get())->getStateMat(timestep, params->stateTransParams.get());
         }
-        std::cout<<stateMat<<"\n"<<this->m_cov;
         this->m_cov = stateMat * this->m_cov * stateMat.transpose() + this->m_procNoise;
 
         return matrix::Vector<T>(newState);
     }
 
-    matrix::Vector<T> correct([[maybe_unused]] T timestep, [[maybe_unused]] const matrix::Vector<T>& meas, [[maybe_unused]] const matrix::Vector<T>& curState, [[maybe_unused]] const CorrectParams* params=nullptr) override {
-    // matrix::Vector<T> correct(T timestep, const matrix::Vector<T>& meas, const matrix::Vector<T>& curState, const CorrectParams* params=nullptr) override {
-    //     matrix::Vector est_meas = this->m_measObj->measure(curState, params->measParams.get());
-    //     matrix::Matrix measMat = this->m_measObj->getMeasMat(curState, params->measParams.get());
+    // matrix::Vector<T> correct([[maybe_unused]] T timestep, [[maybe_unused]] const matrix::Vector<T>& meas, [[maybe_unused]] const matrix::Vector<T>& curState, [[maybe_unused]] const CorrectParams* params=nullptr) override {
+    matrix::Vector<T> correct(T timestep, const matrix::Vector<T>& meas, const matrix::Vector<T>& curState, const CorrectParams* params=nullptr) override {
+        matrix::Vector<T> est_meas = this->m_measObj->measure(curState, params->measParams.get());
+        matrix::Matrix<T> measMat = this->m_measObj->getMeasMat(curState, params->measParams.get());
 
-    //     matrix::Matrix inovCov = measMat * this->m_cov * measMat.transpose();
+        matrix::Matrix<T> inovCov = measMat * this->m_cov * measMat.transpose();
 
-    //     matrix::Matrix kalmanGain = this->m_cov * measMat.transpose() * inovCov.inverse();
+        matrix::Matrix<T> kalmanGain = this->m_cov * measMat.transpose() * inovCov.inverse();
 
-    //     curState = curState + kalmanGain * (meas - est_meas);
-    //     this->m_cov = this->m_cov - kalmanGain * measMat * this->m_cov;
+        matrix::Vector<T> inov = meas - est_meas;
+        matrix::Vector<T> newState(curState.size());
+        newState = curState + kalmanGain * inov;
+        this->m_cov = this->m_cov - kalmanGain * measMat * this->m_cov;
 
         
-        return matrix::Vector<T>(curState);
+        return newState;
     }
 
     private:
