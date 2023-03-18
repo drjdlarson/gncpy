@@ -1,4 +1,5 @@
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 #include <gncpy/measurements/StateObservation.h>
 #include "../math/Common.h"
 #include "Common.h"
@@ -11,11 +12,12 @@ void initStateObservation(py::module& m) {
 
     using namespace lager;
 
+    py::class_<gncpy::measurements::StateObservationParams, gncpy::measurements::MeasParams>(m, "StateObservationParams")
+        .def(py::init<const std::vector<uint8_t>&>())
+        .def_readonly("obs_inds", &gncpy::measurements::StateObservationParams::obsInds);
+
     py::class_<gncpy::measurements::StateObservation<double>, gncpy::measurements::ILinearMeasModel<double>>(m, "StateObservation")
-        .def(py::init<double>())
-        .def("measure", &gncpy::measurements::StateObservation<double>::measure,
-             py::arg("state"), py::arg_v("params", static_cast<gncpy::measurements::MeasParams *>(nullptr), "lager::gncpy::measurements::MeasParams*=nullptr"))
-        .def("get_meas_mat", &gncpy::measurements::StateObservation<double>::getMeasMat,
-            py::arg("state"), py::arg_v("params", static_cast<gncpy::measurements::MeasParams *>(nullptr), "lager::gncpy::measurements::MeasParams*=nullptr"));
+        .def(py::init())
+        GNCPY_MEASUREMENTS_IMEASMODEL_INTERFACE(gncpy::measurements::StateObservation<double>, double);
 
 }

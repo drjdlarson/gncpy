@@ -1,5 +1,4 @@
 #pragma once
-#include <functional>
 #include <vector>
 #include "gncpy/math/Vector.h"
 #include "gncpy/math/Matrix.h"
@@ -13,11 +12,12 @@ namespace lager::gncpy::measurements {
 
 class StateObservationParams : public MeasParams {
 public:
-    std::vector<uint8_t> obsInds;
-    StateObservationParams(const std::vector<uint8_t> obsInds)
+    explicit StateObservationParams(const std::vector<uint8_t>& obsInds)
     : obsInds(obsInds) {
 
     }
+
+    std::vector<uint8_t> obsInds;
 };
 
 template<typename T>
@@ -33,13 +33,10 @@ public:
         auto ptr = dynamic_cast<const StateObservationParams*>(params);
         matrix::Matrix<T> data(ptr->obsInds.size(), state.size());
 
-        for (uint8_t ii=0;ii<ptr->obsInds.size();ii++) {
-            for (uint8_t jj=0;jj<state.size();jj++) {
+        for(uint8_t ii = 0; ii < ptr->obsInds.size(); ii++) {
+            for (uint8_t jj = 0; jj < state.size(); jj++) {
                 if (ptr->obsInds[ii] == jj) {
-                    data(ii, jj) = 1.0;
-                }
-                else {
-                    data(ii, jj) = 0.0;
+                    data(ii, jj) = static_cast<T>(1.0);
                 }
             }
         }

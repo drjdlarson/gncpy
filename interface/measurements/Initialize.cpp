@@ -9,7 +9,7 @@ void initParameters(py::module&);
 void initStateObservation(py::module& m);
 
 
-PYBIND11_MODULE(_dynamics, m) {
+PYBIND11_MODULE(_measurements, m) {
 
     initInterface(m);
     initParameters(m);

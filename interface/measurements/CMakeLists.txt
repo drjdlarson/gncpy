@@ -2,6 +2,7 @@ pybind11_add_module(_measurements MODULE
     Initialize.cpp
     Interface.cpp
     Parameters.cpp
+    StateObservation.cpp
     Common.h
     ${CMAKE_CURRENT_SOURCE_DIR}/../Macros.h
     ${CMAKE_CURRENT_SOURCE_DIR}/../math/Common.h

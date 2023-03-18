@@ -10,3 +10,8 @@ add_subdirectory(dynamics)
 # setup math directory
 #---------------------------------------------------------------------------
 add_subdirectory(math)
+
+#---------------------------------------------------------------------------
+# setup measurements directory
+#---------------------------------------------------------------------------
+add_subdirectory(measurements)

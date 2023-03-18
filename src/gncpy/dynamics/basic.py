@@ -477,6 +477,7 @@ class DoubleIntegrator(LinearDynamicsBase):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.__state_trans_params = cpp_bindings.StateTransParams()
         self.__model = cpp_bindings.DoubleIntegrator(0.1)
 
     @property

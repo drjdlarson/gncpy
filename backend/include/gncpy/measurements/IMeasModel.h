@@ -1,5 +1,4 @@
 #pragma once
-#include <functional>
 #include "gncpy/math/Vector.h"
 #include "gncpy/math/Matrix.h"
 #include "gncpy/measurements/Parameters.h"

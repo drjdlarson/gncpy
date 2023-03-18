@@ -14,6 +14,6 @@ void initInterface(py::module& m) {
 
     // define these so the inherited classes import ok
     py::class_<gncpy::measurements::IMeasModel<double>>(m, "IMeasModel");
-    py::class_<gncpy::measurements::ILinearMeasModel<double>, gncpy::dynamics::IMeasModel<double>>(m, "ILinearMeasModel");
-    py::class_<gncpy::measurements::INonLinearMeasModel<double>, gncpy::dynamics::IMeasModel<double>>(m, "INonLinearMeasModel");
+    py::class_<gncpy::measurements::ILinearMeasModel<double>, gncpy::measurements::IMeasModel<double>>(m, "ILinearMeasModel");
+    py::class_<gncpy::measurements::INonLinearMeasModel<double>, gncpy::measurements::IMeasModel<double>>(m, "INonLinearMeasModel");
 }

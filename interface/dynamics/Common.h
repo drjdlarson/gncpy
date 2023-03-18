@@ -31,7 +31,7 @@
 
 #define GNCPY_DYNAMICS_PROPAGATE_STATE_INTERFACE(cName, T) \
     .def("propagate_state", py::overload_cast<T, const gncpy::matrix::Vector<T>&, const gncpy::dynamics::StateTransParams*>(&cName::propagateState, py::const_), \
-          py::arg("timestep"), py::arg("state"), py::arg_v("stateTransParams", static_cast<gncpy::dynamics::StateTransParams *>(nullptr), "lager::gncpy::dynamics::StateTransParams*=nullptr")) \
+          py::arg("timestep"), py::arg("state"), py::arg_v("stateTransParams", static_cast<gncpy::dynamics::StateTransParams *>(nullptr), "gncpy::dynamics::StateTransParams*=nullptr")) \
     .def("propagate_state", py::overload_cast<T, const gncpy::matrix::Vector<T>&, const gncpy::matrix::Vector<T>&>(&cName::propagateState, py::const_)) \
     .def("propagate_state", py::overload_cast<T, const gncpy::matrix::Vector<T>&, const gncpy::matrix::Vector<T>&, const gncpy::dynamics::StateTransParams* const, const gncpy::dynamics::ControlParams* const, const gncpy::dynamics::ConstraintParams* const>(&cName::propagateState, py::const_))
 
@@ -44,6 +44,6 @@
 #define GNCPY_DYNAMICS_ILINEARDYNAMICS_INTERFACE(cName, T) \
     GNCPY_DYNAMICS_IDYNAMICS_INTERFACE(cName, T) \
     .def("get_state_mat", &cName::getStateMat, \
-         py::arg("timestep"), py::arg_v("stateTransParams", static_cast<gncpy::dynamics::StateTransParams *>(nullptr), "lager::gncpy::dynamics::StateTransParams*=nullptr")) \
+         py::arg("timestep"), py::arg_v("stateTransParams", static_cast<gncpy::dynamics::StateTransParams *>(nullptr), "gncpy::dynamics::StateTransParams*=nullptr")) \
     .def("get_input_mat", &cName::getInputMat, \
-         py::arg("timestep"), py::arg_v("controlParams", static_cast<gncpy::dynamics::ControlParams *>(nullptr), "lager::gncpy::dynamics::ControlParams*=nullptr"))
+         py::arg("timestep"), py::arg_v("controlParams", static_cast<gncpy::dynamics::ControlParams *>(nullptr), "gncpy::dynamics::ControlParams*=nullptr"))
