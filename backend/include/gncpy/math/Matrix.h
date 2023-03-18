@@ -109,6 +109,15 @@ public:
 
     }
 
+    // mark as intentionally implicit to allow vector operator overloading
+    explicit(false) operator Vector<T>() const {
+        if(this->m_nRows == 1 || this->m_nCols == 1) {
+            return Vector<T>(this->size(), this->m_data);
+        } else {
+            throw BadDimension("Matrix dimensions do not allow casting to vector");
+        }
+    }
+
     Matrix& operator+= (const Matrix& rhs) {
         if (!this->isSameSize(rhs)){
             throw BadDimension();

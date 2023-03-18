@@ -10,3 +10,17 @@ TEST(VectorTest, Index) {
 
     SUCCEED();
 }
+
+
+TEST(VectorTest, Add) {
+    lager::gncpy::matrix::Vector v1({2, 3});
+    lager::gncpy::matrix::Vector v2({4, 5});
+
+    lager::gncpy::matrix::Vector<int> res = v1 + v2;
+    lager::gncpy::matrix::Vector exp({6, 8});
+
+    EXPECT_EQ(exp(0), res(0));
+    EXPECT_EQ(exp(1), res(1));
+
+    SUCCEED();
+}
