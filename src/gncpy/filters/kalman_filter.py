@@ -6,6 +6,7 @@ from copy import deepcopy
 
 import gncpy.errors as gerr
 from gncpy.filters.bayes_filter import BayesFilter
+from gncpy.filters._filters import Kalman, BayesPredictParams
 
 
 class KalmanFilter(BayesFilter):
@@ -32,7 +33,7 @@ class KalmanFilter(BayesFilter):
     def __init__(
         self, cov=np.array([[]]), meas_noise=np.array([[]]), dt=None, **kwargs
     ):
-        self.cov = cov
+        self._cov = cov
         self.meas_noise = meas_noise
         self.proc_noise = np.array([[]])
         self.dt = dt
@@ -44,11 +45,28 @@ class KalmanFilter(BayesFilter):
         self._get_input_mat = None
         self._meas_mat = np.array([[]])
         self._meas_fnc = None
+        self._measObj = None
 
         self._est_meas_noise_fnc = None
 
+        self.__model = None
+        self.__predParams = None
+
         super().__init__(**kwargs)
 
+    @property
+    def cov(self):
+        if self.__model is not None:
+            return self.__model.cov
+        else:
+            return self._cov
+    
+    @cov.setter
+    def cov(self, val):
+        if self.__model is not None:
+            self.__model.cov = val
+        else:
+            self._cov = val
     def save_filter_state(self):
         """Saves filter variables so they can be restored later."""
         filt_state = super().save_filter_state()
@@ -185,9 +203,11 @@ class KalmanFilter(BayesFilter):
         if have_obj:
             self._dyn_obj = dyn_obj
         elif have_mats and not cont_time:
+            self.__model = None
             self._state_mat = state_mat
             self._input_mat = input_mat
         elif have_mats:
+            self.__model = None
             if self.dt is None:
                 msg = "dt must be specified when using continuous time model"
                 raise RuntimeError(msg)
@@ -208,12 +228,13 @@ class KalmanFilter(BayesFilter):
             c_e = res.shape[1]
             self._input_mat = res[r_s:r_e, c_s:c_e]
         elif have_funs:
+            self.__model = None
             self._get_state_mat = state_mat_fun
             self._get_input_mat = input_mat_fun
         else:
             raise RuntimeError("Invalid combination of inputs")
 
-    def set_measurement_model(self, meas_mat=None, meas_fun=None):
+    def set_measurement_model(self, meas_mat=None, meas_fun=None, measObj=None):
         r"""Sets the measurement model for the filter.
 
         This can either set the constant measurement matrix, or the matrix can
@@ -237,6 +258,8 @@ class KalmanFilter(BayesFilter):
             Function that returns the matrix for transforming the state to
             estimated measurements. Must take timestep, and `*args` as
             arguments. The default is None.
+        measObj : class instance
+            Measurement class instance
 
         Raises
         ------
@@ -248,12 +271,20 @@ class KalmanFilter(BayesFilter):
         None.
 
         """
-        if meas_mat is not None:
+        if measObj is not None:
+            self._measObj = measObj
+            self._meas_mat = None
+            self._meas_fnc = None
+        elif meas_mat is not None:
+            self.__model = None
+            self._measObj = None
             self._meas_mat = meas_mat
             self._meas_fnc = None
         elif meas_fun is not None:
-            self._meas_fnc = meas_fun
+            self.__model = None
+            self._measObj = None
             self._meas_mat = None
+            self._meas_fnc = meas_fun
         else:
             raise RuntimeError("Invalid combination of inputs")
 
@@ -311,6 +342,21 @@ class KalmanFilter(BayesFilter):
                 next_state += input_mat @ cur_input
         return next_state, state_mat
 
+    def _init_model(self):
+        cpp_needs_init = (
+            self.__model is None
+            and (self._dyn_obj is not None and self._dyn_obj.allow_cpp)
+            and self._measObj is not None
+        )
+        if cpp_needs_init:
+            self.__model = Kalman()
+            self.__predParams = BayesPredictParams()
+
+            # make sure the cpp filter has its values set based on what python user gave (init only)
+            self.__model.cov = self._cov
+            self.__model.set_state_model(self._dyn_obj, self.proc_noise)
+            self.__model.set_measurement_model(self._measObj, self.meas_noise)
+
     def predict(
         self, timestep, cur_state, cur_input=None, state_mat_args=(), input_mat_args=()
     ):
@@ -344,13 +390,19 @@ class KalmanFilter(BayesFilter):
             Next state.
 
         """
-        next_state, state_mat = self._predict_next_state(
-            timestep, cur_state, cur_input, state_mat_args, input_mat_args
-        )
+        self._init_model()
+        
+        if self.__model is not None:
+            self.__predParams.stateTransParams, self.__predParams.controlParams = self._dyn_obj.args_to_params(state_mat_args, input_mat_args)
+            return self.__model.predict(timestep, cur_state, cur_input, self.__predParams)
+        else:
+            next_state, state_mat = self._predict_next_state(
+                timestep, cur_state, cur_input, state_mat_args, input_mat_args
+            )
 
-        self.cov = state_mat @ self.cov @ state_mat.T + self.proc_noise
-        self.cov = (self.cov + self.cov.T) * 0.5
-        return next_state
+            self.cov = state_mat @ self.cov @ state_mat.T + self.proc_noise
+            self.cov = (self.cov + self.cov.T) * 0.5
+            return next_state
 
     def _get_meas_mat(self, t, state, n_meas, meas_fun_args):
         # time varying matrix

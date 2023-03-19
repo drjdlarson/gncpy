@@ -45,6 +45,10 @@ class DynamicsBase(ABC):
         super().__init__()
         self.control_model = control_model
         self.state_constraint = state_constraint
+    
+    @property
+    def allow_cpp(self):
+        return False
 
     @abstractmethod
     def propagate_state(self, timestep, state, u=None, state_args=None, ctrl_args=None):
@@ -477,8 +481,31 @@ class DoubleIntegrator(LinearDynamicsBase):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.__state_trans_params = cpp_bindings.StateTransParams()
+        self.__controlParams = cpp_bindings.ControlParams()
+        self.__stateTransParams = cpp_bindings.StateTransParams()
         self.__model = cpp_bindings.DoubleIntegrator(0.1)
+
+    @property
+    def allow_cpp(self):
+        return True
+
+    # must be provided if allow_cpp is true
+    def args_to_params(self, state_args, control_args):
+        if len(state_args) != 1:
+            raise RuntimeError("state args must be only (dt,) not {}".format(repr(state_args)))
+        
+        if len(control_args) != 0 and self.control_model is None:
+            warn("Control agruments supplied but no control model specified")
+        elif self.control_model is not None:
+            try:
+                self.__controlParams = self.control_model.args_to_params(control_args)
+            except Exception:
+                warn("Supplied control model does not support c++ backend but model is supposed to allow c++ backend. Not generating parameters")
+                self.__controlParams = cpp_bindings.ControlParams()
+        
+        # hack since state params is empty but things are set in the model
+        self.__model.dt = state_args[0]
+        return self.__stateTransParams, self.__controlParams
 
     @property
     def state_names(self):

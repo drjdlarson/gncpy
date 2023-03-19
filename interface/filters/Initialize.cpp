@@ -6,14 +6,14 @@ namespace py = pybind11;
 
 void initInterface(py::module&);
 void initParameters(py::module&);
-void initKalmanFilter(py::module&);
+void initKalman(py::module&);
 
 
 PYBIND11_MODULE(_filters, m) {
     initInterface(m);
-    // initParameters(m);
+    initParameters(m);
 
-    // initKalmanFilter(m);
+    initKalman(m);
 
     #ifdef VERSION_INFO
     m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
