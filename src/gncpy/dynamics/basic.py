@@ -507,6 +507,11 @@ class DoubleIntegrator(LinearDynamicsBase):
         self.__model.dt = state_args[0]
         return self.__stateTransParams, self.__controlParams
 
+     # must be provided if allow_cpp is true
+    @property
+    def model(self):
+        return self.__model
+
     @property
     def state_names(self):
         return self.__model.state_names()
@@ -553,7 +558,7 @@ class DoubleIntegrator(LinearDynamicsBase):
 
         """
         self.__model.dt = dt
-        return self.__model.get_state_mat(timestep, self.__state_trans_params)
+        return self.__model.get_state_mat(timestep, self.__stateTransParams)
 
 
 class CurvilinearMotion(NonlinearDynamicsBase):

@@ -1,5 +1,7 @@
+#include <memory>
 #include <pybind11/pybind11.h>
 #include <gncpy/measurements/Parameters.h>
+#include "../Macros.h"
 
 namespace py = pybind11;
 
@@ -9,7 +11,7 @@ void initParameters(py::module& m) {
 
     using namespace lager;
 
-    py::class_<gncpy::measurements::MeasParams>(m, "MeasParams")
+    GNCPY_PY_BASE_CLASS(gncpy::measurements::MeasParams)(m, "MeasParams")
         .def(py::init());
     
 }

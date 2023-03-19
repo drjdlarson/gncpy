@@ -1,6 +1,7 @@
+#include <memory>
 #include <pybind11/pybind11.h>
 #include <gncpy/filters/IBayesFilter.h>
-
+#include "../Macros.h"
 
 namespace py = pybind11;
 
@@ -11,5 +12,5 @@ void initInterface(py::module& m) {
     using namespace lager;
 
     // define these so the inherited classes import ok
-    py::class_<gncpy::filters::IBayesFilter<double>>(m, "IBayesFilter");
+    GNCPY_PY_BASE_CLASS(gncpy::filters::IBayesFilter<double>)(m, "IBayesFilter");
 }

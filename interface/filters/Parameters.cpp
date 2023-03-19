@@ -1,7 +1,9 @@
+#include <memory>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // needed because some backend gncpy functions retrun stl types
 #include <gncpy/dynamics/Parameters.h>
 #include <gncpy/filters/Parameters.h>
+#include "../Macros.h"
 
 namespace py = pybind11;
 
@@ -11,12 +13,12 @@ void initParameters(py::module& m) {
 
     using namespace lager;
 
-    py::class_<gncpy::filters::BayesPredictParams>(m, "BayesPredictParams")
+    GNCPY_PY_BASE_CLASS(gncpy::filters::BayesPredictParams)(m, "BayesPredictParams")
         .def(py::init())
         .def_readwrite("stateTransParams", &gncpy::filters::BayesPredictParams::stateTransParams)
         .def_readwrite("controlParams", &gncpy::filters::BayesPredictParams::controlParams);
     
-    py::class_<gncpy::filters::BayesCorrectParams>(m, "BayesCorrectParams")
+    GNCPY_PY_BASE_CLASS(gncpy::filters::BayesCorrectParams)(m, "BayesCorrectParams")
         .def(py::init())
         .def_readwrite("measParams", &gncpy::filters::BayesCorrectParams::measParams);
 }

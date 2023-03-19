@@ -1,6 +1,8 @@
+#include <memory>
 #include <pybind11/pybind11.h>
 #include <gncpy/dynamics/IDynamics.h>
 #include <gncpy/dynamics/ILinearDynamics.h>
+#include "../Macros.h"
 
 
 namespace py = pybind11;
@@ -12,6 +14,6 @@ void initInterface(py::module& m) {
     using namespace lager;
 
     // define these so the inherited classes import ok
-    py::class_<gncpy::dynamics::IDynamics<double>>(m, "IDynamics");
-    py::class_<gncpy::dynamics::ILinearDynamics<double>, gncpy::dynamics::IDynamics<double>>(m, "ILinearDynamics");
+    GNCPY_PY_BASE_CLASS(gncpy::dynamics::IDynamics<double>)(m, "IDynamics");
+    GNCPY_PY_BASE_CLASS(gncpy::dynamics::ILinearDynamics<double>)(m, "ILinearDynamics");
 }

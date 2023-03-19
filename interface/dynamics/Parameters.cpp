@@ -1,6 +1,8 @@
+#include <memory>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // needed because some backend gncpy functions retrun stl types
 #include <gncpy/dynamics/Parameters.h>
+#include "../Macros.h"
 
 namespace py = pybind11;
 
@@ -10,12 +12,13 @@ void initParameters(py::module& m) {
 
     using namespace lager;
 
-    py::class_<gncpy::dynamics::StateTransParams>(m, "StateTransParams")
+    // see https://github.com/pybind/pybind11/issues/956 for why the shared_ptr is needed
+    GNCPY_PY_BASE_CLASS(gncpy::dynamics::StateTransParams)(m, "StateTransParams")
         .def(py::init());
     
-    py::class_<gncpy::dynamics::ControlParams>(m, "ControlParams")
+    GNCPY_PY_BASE_CLASS(gncpy::dynamics::ControlParams)(m, "ControlParams")
         .def(py::init());
 
-    py::class_<gncpy::dynamics::ConstraintParams>(m, "ConstraintParams")
+    GNCPY_PY_BASE_CLASS(gncpy::dynamics::ConstraintParams)(m, "ConstraintParams")
         .def(py::init());
 }

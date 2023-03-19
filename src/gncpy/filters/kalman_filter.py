@@ -354,7 +354,7 @@ class KalmanFilter(BayesFilter):
 
             # make sure the cpp filter has its values set based on what python user gave (init only)
             self.__model.cov = self._cov
-            self.__model.set_state_model(self._dyn_obj, self.proc_noise)
+            self.__model.set_state_model(self._dyn_obj.model, self.proc_noise)
             self.__model.set_measurement_model(self._measObj, self.meas_noise)
 
     def predict(

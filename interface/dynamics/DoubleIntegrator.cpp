@@ -1,7 +1,10 @@
+#include <memory>
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h> // needed because some backend gncpy functions retrun stl types
 #include <gncpy/dynamics/ILinearDynamics.h>
 #include <gncpy/dynamics/DoubleIntegrator.h>
 #include "../math/Common.h"
+#include "../Macros.h"
 #include "Common.h"
 
 namespace py = pybind11;
@@ -12,7 +15,7 @@ void initDoubleIntegrator(py::module& m) {
 
     using namespace lager;
 
-    py::class_<gncpy::dynamics::DoubleIntegrator<double>, gncpy::dynamics::ILinearDynamics<double>>(m, "DoubleIntegrator")
+    GNCPY_PY_CHILD_CLASS(gncpy::dynamics::DoubleIntegrator<double>, gncpy::dynamics::ILinearDynamics<double>)(m, "DoubleIntegrator")
         .def(py::init<double>())
         GNCPY_DYNAMICS_ILINEARDYNAMICS_INTERFACE(gncpy::dynamics::DoubleIntegrator<double>, double)
         .def_property("dt", &gncpy::dynamics::DoubleIntegrator<double>::dt, &gncpy::dynamics::DoubleIntegrator<double>::setDt);

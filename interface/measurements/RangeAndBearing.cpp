@@ -1,6 +1,9 @@
+#include <memory>
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 #include <gncpy/measurements/RangeAndBearing.h>
 #include <gncpy/measurements/Parameters.h>
+#include "../Macros.h"
 #include "../math/Common.h"
 #include "Common.h"
 
@@ -11,12 +14,12 @@ namespace py = pybind11;
 void initRangeAndBearing(py::module& m) {
     using namespace lager;
 
-    py::class_<gncpy::measurements::RangeAndBearingParams, gncpy::measurements::MeasParams>(m, "RangeAndBearingParams")
+    GNCPY_PY_CHILD_CLASS(gncpy::measurements::RangeAndBearingParams, gncpy::measurements::MeasParams)(m, "RangeAndBearingParams")
         .def(py::init<uint8_t, uint8_t>())
         .def_readwrite("x_ind", &gncpy::measurements::RangeAndBearingParams::xInd)
         .def_readwrite("y_ind", &gncpy::measurements::RangeAndBearingParams::yInd);
     
-    py::class_<gncpy::measurements::RangeAndBearing<double>, gncpy::measurements::INonLinearMeasModel<double>>(m, "RangeAndBearing")
+    GNCPY_PY_CHILD_CLASS(gncpy::measurements::RangeAndBearing<double>, gncpy::measurements::INonLinearMeasModel<double>)(m, "RangeAndBearing")
         .def(py::init())
         GNCPY_MEASUREMENTS_IMEASMODEL_INTERFACE(gncpy::measurements::RangeAndBearing<double>, double);
 }
