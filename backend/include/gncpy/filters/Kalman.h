@@ -4,6 +4,7 @@
 #include "gncpy/filters/IBayesFilter.h"
 #include "gncpy/math/Vector.h"
 #include "gncpy/math/Matrix.h"
+#include "gncpy/math/Math.h"
 #include "gncpy/filters/Parameters.h"
 #include "gncpy/dynamics/ILinearDynamics.h"
 #include "gncpy/measurements/ILinearMeasModel.h"
@@ -25,20 +26,22 @@ public:
         return this->m_dynObj->propagateState(timestep, curState, params->stateTransParams.get());
     }
 
-    matrix::Vector<T> correct(T timestep, const matrix::Vector<T>& meas, const matrix::Vector<T>& curState, const BayesCorrectParams* params=nullptr) override {
+    matrix::Vector<T> correct(T timestep, const matrix::Vector<T>& meas, const matrix::Vector<T>& curState, T& measFitProb, const BayesCorrectParams* params=nullptr) override {
         if (params != nullptr && !utilities::instanceof<BayesCorrectParams>(params)) {
             throw exceptions::BadParams("Params must be BayesCorrectParams");
         }
 
-        matrix::Vector<T> est_meas = this->measurementModel()->measure(curState, params->measParams.get());
+        matrix::Vector<T> estMeas = this->measurementModel()->measure(curState, params->measParams.get());
         matrix::Matrix<T> measMat = this->measurementModel()->getMeasMat(curState, params->measParams.get());
 
         matrix::Matrix<T> inovCov = measMat * this->m_cov * measMat.transpose();
 
         matrix::Matrix<T> kalmanGain = this->m_cov * measMat.transpose() * inovCov.inverse();
 
-        matrix::Vector<T> inov = meas - est_meas;
+        matrix::Vector<T> inov = meas - estMeas;
         this->m_cov -= kalmanGain * measMat * this->m_cov;
+
+        measFitProb = math::calcGaussianPDF(meas, estMeas, inovCov);
 
         return curState + kalmanGain * inov;
     }

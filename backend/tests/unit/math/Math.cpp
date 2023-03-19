@@ -83,3 +83,31 @@ TEST(MathTest, JacobianMat) {
     SUCCEED();
 
 }
+
+
+TEST(MathTest, GaussianPDF) {
+    lager::gncpy::matrix::Vector<double> x({0.5,});
+    lager::gncpy::matrix::Vector<double> m({1,});
+    lager::gncpy::matrix::Matrix<double> cov({{2,}});
+
+    double res = lager::gncpy::math::calcGaussianPDF(x, m, cov);
+    double exp = 0.26500353;
+
+    EXPECT_NEAR(exp, res, 1e-8);
+
+    SUCCEED();
+}
+
+
+TEST(MathTest, GaussianPDFVec) {
+    lager::gncpy::matrix::Vector<double> x({0.5, 3.4});
+    lager::gncpy::matrix::Vector<double> m({1, 2});
+    lager::gncpy::matrix::Matrix<double> cov({{2, 0}, {0, 2}});
+
+    double res = lager::gncpy::math::calcGaussianPDF(x, m, cov);
+    double exp = 0.04579756995735449;
+
+    EXPECT_NEAR(exp, res, 1e-8);
+
+    SUCCEED();
+}

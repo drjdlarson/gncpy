@@ -96,7 +96,8 @@ TEST(FilterTest, FilterCorrect) {
 
     auto meas = measObj->measure(exp, corrParams.measParams.get());
 
-    auto out = filt.correct(0.0, meas, exp, &corrParams);
+    double measFitProb;
+    auto out = filt.correct(0.0, meas, exp, measFitProb, &corrParams);
 
     for(uint8_t ii=0;ii<exp.size();ii++) {
         EXPECT_EQ(exp(ii), out(ii));
