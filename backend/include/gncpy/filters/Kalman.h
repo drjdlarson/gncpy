@@ -14,15 +14,6 @@ namespace lager::gncpy::filters {
 template<typename T>
 class Kalman : public IBayesFilter<T> {
 public:
-
-    Kalman(T dt) 
-    : M_dt(dt), 
-      m_cov(),
-      m_measNoise(),
-      m_procNoise() {
-
-    }
-
     void setStateModel(std::shared_ptr<dynamics::ILinearDynamics<T>> dynObj, matrix::Matrix<T> procNoise) {
         if (!dynObj || !utilities::instanceof<dynamics::ILinearDynamics<T>>(dynObj.get())) {
             throw exceptions::TypeError("dynObj must be a derived class of ILinearDynamics");
@@ -45,7 +36,7 @@ public:
         this->m_cov = newCov;
     }
 
-    matrix::Matrix<T>  getCovariance() {
+    matrix::Matrix<T>  covariance() const {
         return this->m_cov;
     }
     matrix::Vector<T> predict(T timestep, const matrix::Vector<T>& curState, [[maybe_unused]] const std::optional<matrix::Vector<T>> controlInput, const BayesPredictParams* params=nullptr) override {
@@ -70,8 +61,8 @@ public:
         return matrix::Vector<T>(newState);
     }
 
-    // matrix::Vector<T> correct([[maybe_unused]] T timestep, [[maybe_unused]] const matrix::Vector<T>& meas, [[maybe_unused]] const matrix::Vector<T>& curState, [[maybe_unused]] const CorrectParams* params=nullptr) override {
-    matrix::Vector<T> correct(T timestep, const matrix::Vector<T>& meas, const matrix::Vector<T>& curState, const CorrectParams* params=nullptr) override {
+    // matrix::Vector<T> correct([[maybe_unused]] T timestep, [[maybe_unused]] const matrix::Vector<T>& meas, [[maybe_unused]] const matrix::Vector<T>& curState, [[maybe_unused]] const BayesCorrectParams* params=nullptr) override {
+    matrix::Vector<T> correct(T timestep, const matrix::Vector<T>& meas, const matrix::Vector<T>& curState, const BayesCorrectParams* params=nullptr) override {
         matrix::Vector<T> est_meas = this->m_measObj->measure(curState, params->measParams.get());
         matrix::Matrix<T> measMat = this->m_measObj->getMeasMat(curState, params->measParams.get());
 
@@ -89,7 +80,6 @@ public:
     }
 
     private:
-        T M_dt;
         matrix::Matrix<T> m_cov;
         matrix::Matrix<T> m_measNoise;
         matrix::Matrix<T> m_procNoise;

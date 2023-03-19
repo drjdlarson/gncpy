@@ -7,12 +7,12 @@
 namespace lager::gncpy::filters{
 
 struct BayesPredictParams {
-    std::unique_ptr<lager::gncpy::dynamics::StateTransParams> stateTransParams; 
-    std::unique_ptr<lager::gncpy::dynamics::ControlParams> controlParams;
+    std::shared_ptr<lager::gncpy::dynamics::StateTransParams> stateTransParams; 
+    std::shared_ptr<lager::gncpy::dynamics::ControlParams> controlParams;
 };
 
-struct CorrectParams {
-    std::unique_ptr<lager::gncpy::measurements::MeasParams> measParams;
+struct BayesCorrectParams {
+    std::shared_ptr<lager::gncpy::measurements::MeasParams> measParams;
 };
 
 } // namespace lager::gncpy::filters

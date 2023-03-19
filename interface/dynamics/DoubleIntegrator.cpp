@@ -1,9 +1,6 @@
 #include <pybind11/pybind11.h>
-#include <pybind11/stl.h> // needed because some backend gncpy functions retrun stl types
-#include <gncpy/dynamics/IDynamics.h>
 #include <gncpy/dynamics/ILinearDynamics.h>
 #include <gncpy/dynamics/DoubleIntegrator.h>
-#include <gncpy/math/Vector.h>
 #include "../math/Common.h"
 #include "Common.h"
 
