@@ -9,6 +9,12 @@ namespace lager::gncpy::matrix {
 template<typename T>
 class Vector final: public Matrix<T> {
 
+/*
+dot
+cross
+skew
+*/
+
 public:
     Vector<T>()
     : Matrix<T>() {
@@ -56,6 +62,53 @@ public:
         return Matrix<T>::operator()(elem, static_cast<uint8_t>(0));
     }
 
+    T magnitude() const {
+        T sum = 0;
+        for (auto const & i : *this){
+                sum += i * i;
+            }
+        return T(sqrt(sum)); 
+    }
+
+    Vector<T> normalize(bool in_place = false) {
+        T mag = this->magnitude();
+        if (in_place){
+            *this /= (mag);
+            return *this;
+        }
+        else {
+            std::vector<T> out;
+            for (auto const & i : *this){
+                out.emplace_back(i/mag);
+            }
+            return Vector<T> (out.size(), out);
+        }
+    }
+
+    T dot(const Vector& rhs) const {
+        if (!this->size() == rhs.size()){
+            throw BadDimension("Vector size do not match");
+        }
+        T sum = 0;
+        for (uint8_t i = 0; i < this->size(); i++){
+            sum += this->operator()(i) * rhs(i);
+        }
+        return sum;
+    }
+
+    Vector<T> cross(const Vector& rhs) const {
+        if (!this->size() == rhs.size()){
+            throw BadDimension("Vector size do not match");
+        }
+        if (!this->size() > 3 || rhs.size() > 3){
+            throw BadDimension("Can only do cross product on 3D vector");
+        }
+        std::vector<T> out {0,0,0};
+        out[0] = this->operator()(1) * rhs(2) - this->operator()(2) * rhs(1);
+        out[1] = this->operator()(2) * rhs(0) - this->operator()(0) * rhs(2);
+        out[2] = this->operator()(0) * rhs(1) - this->operator()(1) * rhs(0);
+        return Vector<T> (out.size(), out);
+    }
 };
     
 } // namespace lager::gncpy::matrix

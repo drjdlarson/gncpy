@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <iostream>
 #include <vector>
+#include <cmath>
 #include "gncpy/math/Exceptions.h"
 
 /*
@@ -180,7 +181,7 @@ public:
         return Matrix(m_nRows, m_nCols, out);
     }
 
-    Matrix& operator*= (const T& scalar) const{
+    Matrix& operator*= (const T& scalar) {
         for (uint8_t i = 0; i < m_data.size(); i++){
             m_data[i] *= scalar;
         }
@@ -215,7 +216,7 @@ public:
         return Matrix(m_nRows, m_nCols, out);
     }
 
-    Matrix& operator/= (const T& scalar) const{
+    Matrix& operator/= (const T& scalar) {
         for (uint8_t i = 0; i < m_data.size(); i++){
             m_data[i] /= scalar;
         }
@@ -275,6 +276,8 @@ public:
         return Matrix(row_span, col_span, out);
     }
 
+    // Do as above for block assignment
+
     template<typename R>
     friend std::ostream& operator<<(std::ostream& os, const Matrix<R>& m);
     template<typename R>
@@ -291,7 +294,7 @@ public:
      * @param in_place 
      * @return Matrix 
      */
-    Matrix transpose(bool in_place = false) {
+    Matrix<T> transpose(bool in_place) {
         if (in_place){
             uint8_t temp = this->m_nCols;
             this->m_nCols = this->m_nRows;
@@ -299,13 +302,17 @@ public:
             this->m_transposed = !this->m_transposed;
             return *this;
         }
+        return this->transpose();
+    }
+
+    Matrix<T> transpose() const{
         std::vector<T> out;
         for (uint8_t c = 0; c < m_nCols; c++){
             for (uint8_t r = 0; r < m_nRows; r++){
                 out.emplace_back(this->operator()(r,c));
             }
         }
-        return Matrix(m_nCols, m_nRows, out);
+        return Matrix<T>(m_nCols, m_nRows, out);
     }
 
     /**
@@ -314,7 +321,7 @@ public:
      * @param L 
      * @param U 
      */
-    void LU_decomp(Matrix& L, Matrix& U){
+    void LU_decomp(Matrix& L, Matrix& U) const{
         if (!this->isSameSize(L) || !this->isSameSize(U)||!this->isSquare()){
             throw BadDimension("Matrix dimension is invalid");
         }
@@ -365,13 +372,20 @@ public:
      * 
      * @return T 
      */
-    T determinant(){
+    T determinant() const{
         if (!this->isSquare()){
             throw BadDimension("Non square matrix non implimented");
         }
         Matrix L(m_nCols,m_nCols);
         Matrix U(m_nCols,m_nCols);
         this->LU_decomp(L,U);
+        return this->determinant(U);
+    }
+
+    T determinant(Matrix& U) const{
+        if (!this->isSquare()){
+            throw BadDimension("Non square matrix non implimented");
+        }
         Vector<T> u_diag = U.diag();
         T det = u_diag(0);
         for (uint8_t i = 1; i < u_diag.size(); i++){
@@ -385,19 +399,15 @@ public:
      * 
      * @return Matrix 
      */
-    Matrix inverse(){
+    Matrix inverse() const{
         if (!this->isSquare()){
             throw BadDimension("Non square matrix non implimented");
         }
         Matrix L(m_nCols,m_nCols);
         Matrix U = L;
         this->LU_decomp(L,U);
-        Vector<T> u_diag = U.diag();
-        T det = u_diag(0);
-        for (uint8_t i = 1; i < u_diag.size(); i++){
-            det *= u_diag(i);
-        }
-        if (det == 0){
+        T det = this->determinant(U);
+        if (det == static_cast<T>(0)){
             throw BadDimension("Matrix is singular");
         }
         return LU_solve(L, U, identity<T>(m_nCols));
@@ -439,13 +449,8 @@ private:
 
 template<typename T>
     lager::gncpy::matrix::Matrix<T> operator* (const T& scalar, const lager::gncpy::matrix::Matrix<T>& m){
-        std::vector<T> out;
-        for (uint8_t i = 0; i < m.numRows(); i++){
-            for (uint8_t j = 0; j < m.numCols(); j++){
-                out.emplace_back(m(i,j) * scalar);
-            }
-        }
-        return lager::gncpy::matrix::Matrix<T> (m.numRows(),m.numCols(),out);
+        lager::gncpy::matrix::Matrix<T> out = m * scalar;
+        return out;
     }
 
 
