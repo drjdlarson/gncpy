@@ -9,11 +9,6 @@ namespace lager::gncpy::matrix {
 template<typename T>
 class Vector final: public Matrix<T> {
 
-/*
-dot
-cross
-skew
-*/
 
 public:
     Vector<T>()
@@ -104,11 +99,23 @@ public:
             throw BadDimension("Can only do cross product on 3D vector");
         }
         std::vector<T> out {0,0,0};
-        out[0] = this->operator()(1) * rhs(2) - this->operator()(2) * rhs(1);
-        out[1] = this->operator()(2) * rhs(0) - this->operator()(0) * rhs(2);
-        out[2] = this->operator()(0) * rhs(1) - this->operator()(1) * rhs(0);
+        out[0] = static_cast <T> (this->operator()(1) * rhs(2) - this->operator()(2) * rhs(1));
+        out[1] = static_cast <T> (this->operator()(2) * rhs(0) - this->operator()(0) * rhs(2));
+        out[2] = static_cast <T> (this->operator()(0) * rhs(1) - this->operator()(1) * rhs(0));
         return Vector<T> (out.size(), out);
     }
+
+    Matrix<T> skew() const{
+        Matrix<T> out(3,3);
+        out(0,1) = static_cast <T>(-this->operator()(2));
+        out(0,2) = static_cast <T>(this->operator()(1));
+        out(1,0) = static_cast <T>(this->operator()(2));
+        out(1,2) = static_cast <T>(-this->operator()(0));
+        out(2,0) = static_cast <T>(-this->operator()(1));
+        out(2,1) = static_cast <T>(this->operator()(0));
+        return out;
+    }
+    
 };
     
 } // namespace lager::gncpy::matrix
