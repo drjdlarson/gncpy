@@ -154,6 +154,18 @@ public:
         return Matrix(m_nRows, m_nCols, out);
     }
 
+    Matrix& operator -= (const Matrix& rhs) {
+        if(!this->isSameSize(rhs)) {
+            throw BadDimension();
+        }
+        for(uint8_t r = 0; r < this->numRows(); r++) {
+            for(uint8_t c = 0; c < this->numCols(); c++) {
+                this->m_data[this->rowColToLin(r, c)] -= rhs(r, c);
+            }
+        }
+        return *this;
+    }
+
     Matrix operator* (const Matrix& rhs) const {
         if(!this->allowMultiplication(rhs)) {
             throw BadDimension("Dimensions do not match");

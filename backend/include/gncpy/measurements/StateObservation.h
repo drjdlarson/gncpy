@@ -42,6 +42,7 @@ public:
             }
         }
         return data;
-    }    
+    }
+
 };
 }  // namespace lager::gncpy::measurement

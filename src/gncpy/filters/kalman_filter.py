@@ -471,35 +471,41 @@ class KalmanFilter(BayesFilter):
             covariance assuming Gaussian noise.
 
         """
-        est_meas, meas_mat = self._est_meas(
-            timestep, cur_state, meas.size, meas_fun_args
-        )
-
-        # get the Kalman gain
-        cov_meas_T = self.cov @ meas_mat.T
-        inov_cov = meas_mat @ cov_meas_T
-
-        # estimate the measurement noise online if applicable
-        if self._est_meas_noise_fnc is not None:
-            self.meas_noise = self._est_meas_noise_fnc(est_meas, inov_cov)
-        inov_cov += self.meas_noise
-        inov_cov = (inov_cov + inov_cov.T) * 0.5
-        if self.use_cholesky_inverse:
-            sqrt_inv_inov_cov = la.inv(la.cholesky(inov_cov))
-            inv_inov_cov = sqrt_inv_inov_cov.T @ sqrt_inv_inov_cov
+        self._init_model()
+        
+        if self.__model is not None:
+            self.__model.correct()
+            
         else:
-            inv_inov_cov = la.inv(inov_cov)
-        kalman_gain = cov_meas_T @ inv_inov_cov
+            est_meas, meas_mat = self._est_meas(
+                timestep, cur_state, meas.size, meas_fun_args
+            )
 
-        # update the state with measurement
-        inov = meas - est_meas
-        next_state = cur_state + kalman_gain @ inov
+            # get the Kalman gain
+            cov_meas_T = self.cov @ meas_mat.T
+            inov_cov = meas_mat @ cov_meas_T
 
-        # update the covariance
-        n_states = cur_state.shape[0]
-        self.cov = (np.eye(n_states) - kalman_gain @ meas_mat) @ self.cov
+            # estimate the measurement noise online if applicable
+            if self._est_meas_noise_fnc is not None:
+                self.meas_noise = self._est_meas_noise_fnc(est_meas, inov_cov)
+            inov_cov += self.meas_noise
+            inov_cov = (inov_cov + inov_cov.T) * 0.5
+            if self.use_cholesky_inverse:
+                sqrt_inv_inov_cov = la.inv(la.cholesky(inov_cov))
+                inv_inov_cov = sqrt_inv_inov_cov.T @ sqrt_inv_inov_cov
+            else:
+                inv_inov_cov = la.inv(inov_cov)
+            kalman_gain = cov_meas_T @ inv_inov_cov
 
-        # calculate the measuremnt fit probability assuming Gaussian
-        meas_fit_prob = self._calc_meas_fit(meas, est_meas, inov_cov)
+            # update the state with measurement
+            inov = meas - est_meas
+            next_state = cur_state + kalman_gain @ inov
 
-        return (next_state, meas_fit_prob)
+            # update the covariance
+            n_states = cur_state.shape[0]
+            self.cov = (np.eye(n_states) - kalman_gain @ meas_mat) @ self.cov
+
+            # calculate the measuremnt fit probability assuming Gaussian
+            meas_fit_prob = self._calc_meas_fit(meas, est_meas, inov_cov)
+
+            return (next_state, meas_fit_prob)

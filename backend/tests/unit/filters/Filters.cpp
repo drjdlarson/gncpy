@@ -10,7 +10,7 @@
 
 TEST(FilterTest, SetStateModel) {
     double dt = 0.01;
-    lager::gncpy::matrix::Matrix<double> noise({{1.0, 0.0}, {0.0, 1.0}});
+    lager::gncpy::matrix::Matrix<double> noise({{1.0, 0.0, 0, 0}, {0.0, 1.0, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}});
     auto dynObj = std::make_shared<lager::gncpy::dynamics::DoubleIntegrator<double>>(dt);
 
     lager::gncpy::filters::Kalman<double> filt;
