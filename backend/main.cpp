@@ -9,8 +9,8 @@
 #include "gncpy/dynamics/Parameters.h"
 
 int main() {
-    lager::gncpy::matrix::Vector<float> v ({1,2,3});
-    lager::gncpy::matrix::Vector<float> u ({4,5,6});
-    lager::gncpy::matrix::Matrix<float> h = v.skew();
-    std::cout<<h;
+    lager::gncpy::matrix::Matrix<float> m ({{1,2,3,4},{6,7,8,9},{10,11,12,13},{14,15,16,17}});
+    lager::gncpy::matrix::Matrix<float> n ({{99,98,97},{96,95,94},{93,92,91}});
+    m(0,0,3,3,n);
+    std::cout<<m;
 }

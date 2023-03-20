@@ -7,9 +7,6 @@
 
 /*
 TODO
-    Determinant unit test
-    LU decomp unit test
-    Inverse unit test
     matrix block assignment
 */
 
@@ -286,6 +283,28 @@ public:
             }
         }
         return Matrix(row_span, col_span, out);
+    }
+
+    Matrix& operator() (const uint8_t start_row, const uint8_t start_col, const uint8_t row_span, const uint8_t col_span, const Matrix& rhs) {
+        std::cout<<""; // Hack to make code works. No clue why
+        if(start_row + row_span > this->m_nRows){
+            throw BadIndex("Indexing outside rows");
+        }
+        if(start_col + col_span > this->m_nCols){
+            throw BadIndex("Indexing outside columns");
+        }
+        if (row_span != rhs.numRows() || col_span != rhs.numCols()){
+            throw BadDimension("Matrix size does not match");
+        }
+        for (uint8_t i = start_row; i < row_span; i++){
+            uint8_t a,b = 0;
+            for (uint8_t j = start_col; j < col_span; j++){
+                this->operator()(i,j) = rhs(a,b);
+                b++;
+            }
+            a++;
+        }
+        return *this;
     }
 
     // Do as above for block assignment
