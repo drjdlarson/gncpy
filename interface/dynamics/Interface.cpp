@@ -15,5 +15,5 @@ void initInterface(py::module& m) {
 
     // define these so the inherited classes import ok
     GNCPY_PY_BASE_CLASS(gncpy::dynamics::IDynamics<double>)(m, "IDynamics");
-    GNCPY_PY_BASE_CLASS(gncpy::dynamics::ILinearDynamics<double>)(m, "ILinearDynamics");
+    GNCPY_PY_CHILD_CLASS(gncpy::dynamics::ILinearDynamics<double>, gncpy::dynamics::IDynamics<double>)(m, "ILinearDynamics");
 }

@@ -3,6 +3,8 @@
 #include <pybind11/stl.h> // needed because some backend gncpy functions retrun stl types
 #include <gncpy/filters/IBayesFilter.h>
 #include <gncpy/filters/Kalman.h>
+#include <gncpy/math/Matrix.h>
+#include <gncpy/math/Vector.h>
 #include "../Macros.h"
 #include "../math/Common.h" // needs to be included so numpy to matrix/vector types work
 #include "Common.h"
@@ -20,6 +22,11 @@ void initKalman(py::module& m) {
         .def("set_state_model", &gncpy::filters::Kalman<double>::setStateModel)
         .def("set_measurement_model", &gncpy::filters::Kalman<double>::setMeasurementModel)
         .def("predict", &gncpy::filters::Kalman<double>::predict)
-        .def("correct", &gncpy::filters::Kalman<double>::correct)
+        // make a small wrapper function so the pass by reference works
+        .def("correct", [](gncpy::filters::Kalman<double>& self, double timestep, const gncpy::matrix::Vector<double>& meas, const gncpy::matrix::Vector<double>& curState, const gncpy::filters::BayesCorrectParams* params) {
+            double measFitProb;
+            gncpy::matrix::Vector nextState = self.correct(timestep, meas, curState, measFitProb, params);
+            return py::make_tuple(nextState, measFitProb);
+        })
         .def_property("cov", &gncpy::filters::Kalman<double>::covariance, &gncpy::filters::Kalman<double>::setCovariance);
 }

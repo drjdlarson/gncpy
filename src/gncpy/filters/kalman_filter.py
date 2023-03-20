@@ -5,8 +5,8 @@ import scipy.stats as stats
 from copy import deepcopy
 
 import gncpy.errors as gerr
+import gncpy.filters._filters as cpp_bindings
 from gncpy.filters.bayes_filter import BayesFilter
-from gncpy.filters._filters import Kalman, BayesPredictParams
 
 
 class KalmanFilter(BayesFilter):
@@ -51,6 +51,7 @@ class KalmanFilter(BayesFilter):
 
         self.__model = None
         self.__predParams = None
+        self.__corrParams = None
 
         super().__init__(**kwargs)
 
@@ -349,8 +350,9 @@ class KalmanFilter(BayesFilter):
             and self._measObj is not None
         )
         if cpp_needs_init:
-            self.__model = Kalman()
-            self.__predParams = BayesPredictParams()
+            self.__model = cpp_bindings.Kalman()
+            self.__predParams = cpp_bindings.BayesPredictParams()
+            self.__corrParams = cpp_bindings.BayesCorrectParams()
 
             # make sure the cpp filter has its values set based on what python user gave (init only)
             self.__model.cov = self._cov
@@ -474,7 +476,8 @@ class KalmanFilter(BayesFilter):
         self._init_model()
         
         if self.__model is not None:
-            self.__model.correct()
+            self.__corrParams.measParams = self._measObj.args_to_params(meas_fun_args)
+            return self.__model.correct(timestep, meas, cur_state, self.__corrParams)
             
         else:
             est_meas, meas_mat = self._est_meas(
