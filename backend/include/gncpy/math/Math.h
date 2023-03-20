@@ -1,4 +1,5 @@
 #pragma once
+#include <cmath>
 #include <vector>
 #include <functional>
 #include "gncpy/math/Matrix.h"
@@ -40,6 +41,20 @@ matrix::Matrix<T> getJacobian(const matrix::Vector<T>& x, const std::vector<std:
     }
 
     return matrix::Matrix(fncLst.size(), x.size(), data);
+}
+
+template<typename T>
+T calcGaussianPDF(const matrix::Vector<T>& x, const matrix::Vector<T>& m, const matrix::Matrix<T>& cov) {
+    uint8_t nDim = x.size();
+    T val;
+    if(nDim > 1) {
+        matrix::Vector<T> diff = x - m;
+        val = -0.5*(static_cast<T>(nDim) * std::log(static_cast<T>(2) * M_PI) + std::log(cov.determinant()) + (diff.transpose() * cov.inverse() * diff).toScalar());
+    } else {
+        T diff = (x - m).toScalar();
+        val = -0.5 * (std::log(static_cast<T>(2) * M_PI * cov.toScalar()) + std::pow(diff, 2) / cov.toScalar());
+    }
+    return std::exp(val);
 }
 
 } // namespace lager::gncpy::math

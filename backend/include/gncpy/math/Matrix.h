@@ -444,6 +444,13 @@ public:
         return LU_solve(L, U, identity<T>(m_nCols));
     }
 
+    inline T toScalar() const {
+        if(this->size() != 1) {
+            throw BadDimension("Matrix has too many values to convert to scalar");
+        }
+        return this->m_data[0];
+    }
+
     inline uint8_t numRows() const { return m_nRows; }
     inline uint8_t numCols() const { return m_nCols; }
 
