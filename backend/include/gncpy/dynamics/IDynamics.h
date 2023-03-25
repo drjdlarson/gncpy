@@ -27,6 +27,9 @@ public:
     inline void clearStateConstraints() { m_hasStateConstraint = false; }
     inline bool hasStateConstraint() const { return m_hasStateConstraint; }
 
+    inline std::function<void (T timestep, matrix::Vector<T>& state, const ConstraintParams* const constraintParams)> stateConstraints() const {
+        return m_stateConstraints;
+    }
 
 protected:
     inline void stateConstraint(T timestep, matrix::Vector<T>& state, const ConstraintParams* const constraintParams=nullptr) const {

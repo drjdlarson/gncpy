@@ -21,7 +21,7 @@ public:
 
     }
     
-    Vector<T>(uint8_t nElements, std::vector<T> data) 
+    Vector<T>(size_t nElements, std::vector<T> data) 
     : Matrix<T>(nElements, 1, data) {
         
     }
@@ -31,30 +31,30 @@ public:
 
     }
 
-    explicit Vector<T>(uint8_t nElements)
+    explicit Vector<T>(size_t nElements)
     : Matrix<T>(nElements, 1) {
 
     }
 
-    T& operator() (uint8_t elem) {
+    T& operator() (size_t elem) {
         if(elem >= this->size()) {
             throw BadIndex("Indexing outside vector");
         }
         if(this->numRows() == 1){
-            return Matrix<T>::operator()(static_cast<uint8_t>(0), elem);
+            return Matrix<T>::operator()(0, elem);
         }
-        return Matrix<T>::operator()(elem, static_cast<uint8_t>(0));
+        return Matrix<T>::operator()(elem, 0);
     }
 
-    T operator() (uint8_t elem) const {
+    T operator() (size_t elem) const {
         std::cout<<elem;
         if(elem >= this->size()) {
             throw BadIndex("Indexing outside vector");
         }
         if(this->numRows() == 1){
-            return Matrix<T>::operator()(static_cast<uint8_t>(0), elem);
+            return Matrix<T>::operator()(0, elem);
         }
-        return Matrix<T>::operator()(elem, static_cast<uint8_t>(0));
+        return Matrix<T>::operator()(elem, 0);
     }
 
     T magnitude() const {
@@ -85,7 +85,7 @@ public:
             throw BadDimension("Vector size do not match");
         }
         T sum = 0;
-        for (uint8_t i = 0; i < this->size(); i++){
+        for (size_t i = 0; i < this->size(); i++){
             sum += this->operator()(i) * rhs(i);
         }
         return sum;

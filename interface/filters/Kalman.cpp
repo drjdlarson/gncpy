@@ -28,5 +28,5 @@ void initKalman(py::module& m) {
             gncpy::matrix::Vector nextState = self.correct(timestep, meas, curState, measFitProb, params);
             return py::make_tuple(nextState, measFitProb);
         })
-        .def_property("cov", &gncpy::filters::Kalman<double>::covariance, &gncpy::filters::Kalman<double>::setCovariance);
+        .def_readwrite("cov", &gncpy::filters::Kalman<double>::cov);
 }

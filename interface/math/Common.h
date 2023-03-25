@@ -13,7 +13,7 @@ namespace py = pybind11;
 // and https://pybind11.readthedocs.io/en/stable/advanced/cast/custom.html for details
 namespace PYBIND11_NAMESPACE {
     namespace detail {
-        // TODO: avoid copies
+        // copies on python -> c++ but not c++ -> python
         template<typename T>
         struct type_caster<lager::gncpy::matrix::Matrix<T>> {
         public:
@@ -41,14 +41,14 @@ namespace PYBIND11_NAMESPACE {
             }
 
             // conversion from c++ -> python
-            static py::handle cast(const lager::gncpy::matrix::Matrix<T>& src, py::return_value_policy policy, py::handle parent) {
-                py::array a(std::move(src.shape()), std::move(src.strides(true)), src.data());
+            static py::handle cast(const lager::gncpy::matrix::Matrix<T>& src, [[maybe_unused]] py::return_value_policy policy, py::handle parent) {
+                py::array a(std::move(src.shape()), std::move(src.strides(true)), src.data(), parent);
                 return a.release();
             }
         };
 
 
-        // TODO: avoid copies
+        // copies on python -> c++ but not c++ -> python
         template<typename T>
         struct type_caster<lager::gncpy::matrix::Vector<T>> {
         public:
@@ -83,8 +83,8 @@ namespace PYBIND11_NAMESPACE {
             }
 
             // conversion from c++ -> python
-            static py::handle cast(const lager::gncpy::matrix::Vector<T>& src, py::return_value_policy policy, py::handle parent) {
-                py::array a(std::move(src.shape()), std::move(src.strides(true)), src.data());
+            static py::handle cast(const lager::gncpy::matrix::Vector<T>& src, [[maybe_unused]] py::return_value_policy policy, py::handle parent) {
+                py::array a(std::move(src.shape()), std::move(src.strides(true)), src.data(), parent);
                 return a.release();
             }
         };

@@ -28,18 +28,24 @@ public:
 
         m_nRows = shape[0];
         m_nCols = shape[1];
-        m_shape.emplace_back(m_nRows);
-        m_shape.emplace_back(m_nCols);
+        // store 'm_strides' and 'm_shape' always in 3-D,
+        // use unit-length for "extra" dimensions (> 'shape.size()')
+        while ( m_shape.size()<3 ) { m_shape.push_back(1); }
+        while ( m_strides.size()<3 ) { m_strides.push_back(1); }
 
-        m_strides.emplace_back(m_shape[1]);
-        m_strides.emplace_back(1);
+        for ( int i=0 ; i<shape.size() ; i++ )
+            m_shape[i] = shape[i];
+
+        m_strides[0] = m_shape[2]*m_shape[1];
+        m_strides[1] = m_shape[2];
+        m_strides[2] = 1;
 
         if(data != nullptr) {
-            for(uint8_t ii = 0; ii < static_cast<uint8_t>(shape[0]*shape[1]); ii++) {
+            for(size_t ii = 0; ii < shape[0]*shape[1]; ii++) {
                 m_data.emplace_back(data[ii]);
             }
         } else {
-            for(uint8_t ii = 0; ii < static_cast<uint8_t>(shape[0]*shape[1]); ii++) {
+            for(size_t ii = 0; ii < shape[0]*shape[1]; ii++) {
                 m_data.emplace_back(static_cast<T>(0));
             }
         }
@@ -52,15 +58,24 @@ public:
      * @param nCols 
      * @param data 
      */
-    Matrix<T>(uint8_t nRows, uint8_t nCols, std::vector<T> data) 
+    Matrix<T>(size_t nRows, size_t nCols, std::vector<T> data) 
     : m_nRows(nRows),
     m_nCols(nCols),
-    m_shape({m_nRows, m_nCols}),
-    m_strides({m_nCols, 1}),
     m_data(data) {
         if(m_nRows * m_nCols != m_data.size()) {
             throw BadDimension("Supplied data does not match the given size");
         }
+        // store 'm_strides' and 'm_shape' always in 3-D,
+        // use unit-length for "extra" dimensions (> 'shape.size()')
+        while ( m_shape.size()<3 ) { m_shape.push_back(1); }
+        while ( m_strides.size()<3 ) { m_strides.push_back(1); }
+        
+        m_shape[0] = m_nRows;
+        m_shape[1] = m_nCols;
+
+        m_strides[0] = m_shape[2]*m_shape[1];
+        m_strides[1] = m_shape[2];
+        m_strides[2] = 1;
     }
 
     /**
@@ -70,12 +85,22 @@ public:
      */
     explicit Matrix<T>(std::initializer_list<std::initializer_list<T>> listlist)
     : m_nRows(listlist.size()),
-    m_nCols(listlist.begin()->size()),
-    m_shape({m_nRows, m_nCols}),
-    m_strides({m_nCols, 1}) {
+    m_nCols(listlist.begin()->size()) {
         if(m_nRows == 0 || m_nCols == 0) {
             throw BadDimension("Matrix constructor has size 0");
         }
+
+        // store 'm_strides' and 'm_shape' always in 3-D,
+        // use unit-length for "extra" dimensions (> 'shape.size()')
+        while ( m_shape.size()<3 ) { m_shape.push_back(1); }
+        while ( m_strides.size()<3 ) { m_strides.push_back(1); }
+        
+        m_shape[0] = m_nRows;
+        m_shape[1] = m_nCols;
+
+        m_strides[0] = m_shape[2]*m_shape[1];
+        m_strides[1] = m_shape[2];
+        m_strides[2] = 1;
     
         for (int r = 0; r < m_nRows; r++) {
             for (int c = 0; c < m_nCols; c++) {
@@ -90,14 +115,24 @@ public:
      * @param nRows 
      * @param nCols 
      */
-    Matrix<T>(uint8_t nRows, uint8_t nCols)
+    Matrix<T>(size_t nRows, size_t nCols)
     : m_nRows(nRows),
-    m_nCols(nCols),
-    m_shape({m_nRows, m_nCols}),
-    m_strides({m_nCols, 1}) {
+    m_nCols(nCols) {
         if(m_nRows == 0 || m_nCols == 0) {
             throw BadDimension("Matrix constructor has size 0");
         }
+
+        // store 'm_strides' and 'm_shape' always in 3-D,
+        // use unit-length for "extra" dimensions (> 'shape.size()')
+        while ( m_shape.size()<3 ) { m_shape.push_back(1); }
+        while ( m_strides.size()<3 ) { m_strides.push_back(1); }
+        
+        m_shape[0] = m_nRows;
+        m_shape[1] = m_nCols;
+
+        m_strides[0] = m_shape[2]*m_shape[1];
+        m_strides[1] = m_shape[2];
+        m_strides[2] = 1;
 
         for (int r = 0; r < m_nRows; r++) {
             for (int c = 0; c < m_nCols; c++) {
@@ -120,7 +155,7 @@ public:
         if (!this->isSameSize(rhs)){
             throw BadDimension();
         }
-        for (uint8_t i = 0; i < this->numRows() * this->numCols(); i++){
+        for (size_t i = 0; i < this->numRows() * this->numCols(); i++){
             m_data[i] += rhs.m_data[i];
         }
 
@@ -132,7 +167,7 @@ public:
             throw BadDimension();
         }
         std::vector<T> out;
-        for (uint8_t i = 0; i < this->numRows() * this->numCols(); i++){
+        for (size_t i = 0; i < this->numRows() * this->numCols(); i++){
             out.emplace_back(m_data[i] + m.m_data[i]);
         }
 
@@ -144,7 +179,7 @@ public:
             throw BadDimension();
         }
         std::vector<T> out;
-        for (uint8_t i = 0; i < this->numRows() * this->numCols(); i++){
+        for (size_t i = 0; i < this->numRows() * this->numCols(); i++){
             out.emplace_back(m_data[i] - m.m_data[i]);
         }
 
@@ -155,8 +190,8 @@ public:
         if(!this->isSameSize(rhs)) {
             throw BadDimension();
         }
-        for(uint8_t r = 0; r < this->numRows(); r++) {
-            for(uint8_t c = 0; c < this->numCols(); c++) {
+        for(size_t r = 0; r < this->numRows(); r++) {
+            for(size_t c = 0; c < this->numCols(); c++) {
                 this->m_data[this->rowColToLin(r, c)] -= rhs(r, c);
             }
         }
@@ -169,10 +204,10 @@ public:
         }
 
         std::vector<T> out;
-        for(uint8_t r = 0; r < m_nRows; r++) {
-            for(uint8_t c = 0; c < rhs.m_nCols; c++) {
+        for(size_t r = 0; r < m_nRows; r++) {
+            for(size_t c = 0; c < rhs.m_nCols; c++) {
                 T total = 0;
-                for(uint8_t k = 0; k < m_nCols; k++){
+                for(size_t k = 0; k < m_nCols; k++){
                     total += m_data[this->rowColToLin(r, k)] * rhs.m_data[rhs.rowColToLin(k, c)];
                 }
                 out.emplace_back(total);
@@ -184,14 +219,14 @@ public:
 
     Matrix operator* (const T& scalar) const {
         std::vector<T> out = m_data;
-        for (uint8_t i = 0; i < out.size(); i++){
+        for (size_t i = 0; i < out.size(); i++){
             out[i] *= scalar;
         }
         return Matrix(m_nRows, m_nCols, out);
     }
 
     Matrix& operator*= (const T& scalar) {
-        for (uint8_t i = 0; i < m_data.size(); i++){
+        for (size_t i = 0; i < m_data.size(); i++){
             m_data[i] *= scalar;
         }
         return *this;
@@ -203,9 +238,9 @@ public:
         }
 
         std::vector<T> out;
-        for(uint8_t r = 0; r < m_nRows; r++) {
+        for(size_t r = 0; r < m_nRows; r++) {
             T total = 0;
-            for(uint8_t c = 0; c < m_nCols; c++) {
+            for(size_t c = 0; c < m_nCols; c++) {
                 total += m_data[this->rowColToLin(r, c)] * rhs.m_data[c];
             }
             out.emplace_back(total);
@@ -219,14 +254,14 @@ public:
 
     Matrix operator/ (const T& scalar) const {
         std::vector<T> out = m_data;
-        for (uint8_t i = 0; i < out.size(); i++){
+        for (size_t i = 0; i < out.size(); i++){
             out[i] /= scalar;
         }
         return Matrix(m_nRows, m_nCols, out);
     }
 
     Matrix& operator/= (const T& scalar) {
-        for (uint8_t i = 0; i < m_data.size(); i++){
+        for (size_t i = 0; i < m_data.size(); i++){
             m_data[i] /= scalar;
         }
         return *this;
@@ -240,7 +275,7 @@ public:
      * @param col 
      * @return T& 
      */
-    T& operator() (uint8_t row, uint8_t col) {
+    T& operator() (size_t row, size_t col) {
         if(row >= m_nRows) {
             throw BadIndex("Indexing outside rows.");
         }
@@ -250,7 +285,7 @@ public:
         return m_data[this->rowColToLin(row, col)];
     }
 
-    T operator() (uint8_t row, uint8_t col) const {
+    const T& operator() (size_t row, size_t col) const {
         if(row >= m_nRows) {
             throw BadIndex("Indexing outside rows.");
         }
@@ -269,7 +304,7 @@ public:
      * @param col_span 
      * @return Matrix 
      */
-    Matrix operator() (uint8_t start_row, uint8_t start_col, uint8_t row_span, uint8_t col_span) const {
+    Matrix operator() (size_t start_row, size_t start_col, size_t row_span, size_t col_span) const {
         if(start_row + row_span > m_nRows){
             throw BadIndex("Indexing outside rows");
         }
@@ -277,15 +312,15 @@ public:
             throw BadIndex("Indexing outside columns");
         }
         std::vector<T> out;
-        for(uint8_t r = start_row; r < start_row + row_span; r++) {
-            for(uint8_t c = start_col; c < start_col + col_span; c++) {
+        for(size_t r = start_row; r < start_row + row_span; r++) {
+            for(size_t c = start_col; c < start_col + col_span; c++) {
                 out.emplace_back(m_data[(this->rowColToLin(r,c))]);
             }
         }
         return Matrix(row_span, col_span, out);
     }
 
-    Matrix& operator() (const uint8_t start_row, const uint8_t start_col, const uint8_t row_span, const uint8_t col_span, const Matrix& rhs) {
+    Matrix& operator() (const size_t start_row, const size_t start_col, const size_t row_span, const size_t col_span, const Matrix& rhs) {
         std::cout<<""; // Hack to make code works. No clue why
         if(start_row + row_span > this->m_nRows){
             throw BadIndex("Indexing outside rows");
@@ -296,9 +331,10 @@ public:
         if (row_span != rhs.numRows() || col_span != rhs.numCols()){
             throw BadDimension("Matrix size does not match");
         }
-        for (uint8_t i = start_row; i < row_span; i++){
-            uint8_t a,b = 0;
-            for (uint8_t j = start_col; j < col_span; j++){
+        for (size_t i = start_row; i < row_span; i++){
+            size_t a = 0;
+            size_t b = 0;
+            for (size_t j = start_col; j < col_span; j++){
                 this->operator()(i,j) = rhs(a,b);
                 b++;
             }
@@ -327,7 +363,7 @@ public:
      */
     Matrix<T> transpose(bool in_place) {
         if (in_place){
-            uint8_t temp = this->m_nCols;
+            size_t temp = this->m_nCols;
             this->m_nCols = this->m_nRows;
             this->m_nRows = temp;
             this->m_transposed = !this->m_transposed;
@@ -338,8 +374,8 @@ public:
 
     Matrix<T> transpose() const{
         std::vector<T> out;
-        for (uint8_t c = 0; c < m_nCols; c++){
-            for (uint8_t r = 0; r < m_nRows; r++){
+        for (size_t c = 0; c < m_nCols; c++){
+            for (size_t r = 0; r < m_nRows; r++){
                 out.emplace_back(this->operator()(r,c));
             }
         }
@@ -356,24 +392,24 @@ public:
         if (!this->isSameSize(L) || !this->isSameSize(U)||!this->isSquare()){
             throw BadDimension("Matrix dimension is invalid");
         }
-        for (uint8_t i = 0; i < m_nCols; i++){
+        for (size_t i = 0; i < m_nCols; i++){
             // Constuct Upper matrix
-            for (uint8_t j = i; j < m_nCols; j++){
+            for (size_t j = i; j < m_nCols; j++){
                 T sum = 0;
-                for (uint8_t k = 0; k < i; k++){
+                for (size_t k = 0; k < i; k++){
                     sum += (L(i,k) * U (k,j));
                 }
                 U(i,j) = this->operator()(i,j) - sum;
             }
 
             // Construct Lower matrix 
-            for (uint8_t j = i; j < m_nCols; j++){
+            for (size_t j = i; j < m_nCols; j++){
                 if (i==j){
                     L(i,i) = T(1);
                 }
                 else {
                     T sum = 0;
-                    for (uint8_t k = 0; k < i; k++){
+                    for (size_t k = 0; k < i; k++){
                         sum += (L(j,k) * U(k,i));
                     }
                     L(j,i) = (this->operator()(j,i) - sum) / U(i,i);
@@ -392,7 +428,7 @@ public:
             throw BadDimension ("Not a square matrix");
         }
         std::vector<T> out;
-        for (uint8_t i = 0; i < m_nCols; i++){
+        for (size_t i = 0; i < m_nCols; i++){
             out.emplace_back(this->operator()(i,i));
         }
         return Vector(out.size(), out);
@@ -419,7 +455,7 @@ public:
         }
         Vector<T> u_diag = U.diag();
         T det = u_diag(0);
-        for (uint8_t i = 1; i < u_diag.size(); i++){
+        for (size_t i = 1; i < u_diag.size(); i++){
             det *= u_diag(i);
         }
         return det;
@@ -451,45 +487,76 @@ public:
         return this->m_data[0];
     }
 
-    inline uint8_t numRows() const { return m_nRows; }
-    inline uint8_t numCols() const { return m_nCols; }
+    inline size_t numRows() const { return m_nRows; }
+    inline size_t numCols() const { return m_nCols; }
 
     inline const T* data() const { return m_data.data(); }
+    inline T* data() { return m_data.data(); }
 
-    inline uint8_t size() const { return static_cast<uint8_t>(m_data.size()); }
+    inline size_t size() const { return m_data.size(); }
 
-    std::vector<uint8_t> shape() const { return m_shape; }
-    std::vector<uint8_t> strides(bool bytes=false) const {
-        std::vector<uint8_t> ret(m_strides.size());
-        for(size_t ii = 0; ii < ret.size(); ii++) {
-            ret[ii] = m_strides[ii];
-            if(bytes) {
-                ret[ii] *= sizeof(T);
+    std::vector<size_t> shape(size_t ndim=0) const { 
+        if(ndim == 0) {
+            ndim = this->ndim();
+        }
+
+      std::vector<size_t> ret(ndim);
+
+      for(size_t i = 0 ; i < ndim ; ++i) {
+        ret[i] = m_shape[i];
+      }
+
+      return ret;
+     }
+
+    std::vector<size_t> strides(bool bytes=false) const {
+        size_t ndim = this->ndim();
+        std::vector<size_t> ret(ndim);
+
+        for(size_t i = 0 ; i < ndim ; ++i) {
+            ret[i] = m_strides[i];
+        }
+
+        if(bytes) {
+            for(size_t i = 0 ; i < ndim ; ++i) {
+                ret[i] *= sizeof(T);
             }
         }
+
         return ret;
+    }
+
+    size_t ndim() const {
+      size_t i;
+      for(i = 2 ; i > 0 ; i--) {
+        if(m_shape[i] != 1 ) {
+          break;
+        }
+      }
+
+      return i+1;
     }
 
 private:
     inline bool isSquare () const {return m_nCols == m_nRows;}
     inline bool allowMultiplication(const Matrix& rhs) const {return numCols() == rhs.numRows();}
     inline bool isSameSize(const Matrix& rhs) const {return numRows() == rhs.numRows() && numCols() == rhs.numCols(); }
-    inline uint8_t rowColToLin(uint8_t r, uint8_t c) const { return m_transposed ? r + m_nRows * c : c + m_nCols * r; }
+    inline size_t rowColToLin(size_t r, size_t c) const { return m_transposed ? r + m_nRows * c : c + m_nCols * r; }
 
     bool m_transposed = false;
-    uint8_t m_nRows;
-    uint8_t m_nCols;
-    std::vector<uint8_t> m_shape;
-    std::vector<uint8_t> m_strides;
+    size_t m_nRows;
+    size_t m_nCols;
+    std::vector<size_t> m_shape;
+    std::vector<size_t> m_strides;
     std::vector<T> m_data;
     
 };
 
 template<typename T>
-    lager::gncpy::matrix::Matrix<T> operator* (const T& scalar, const lager::gncpy::matrix::Matrix<T>& m){
-        lager::gncpy::matrix::Matrix<T> out = m * scalar;
-        return out;
-    }
+lager::gncpy::matrix::Matrix<T> operator* (const T& scalar, const lager::gncpy::matrix::Matrix<T>& m){
+    lager::gncpy::matrix::Matrix<T> out = m * scalar;
+    return out;
+}
 
 
 /**
@@ -502,8 +569,8 @@ template<typename T>
  */
 template<typename T>
 std::ostream& operator<<(std::ostream& os, const Matrix<T>& m){
-    for (uint8_t r = 0; r < m.numRows(); r++){
-                for (uint8_t c = 0; c < m.numCols(); c++){
+    for (size_t r = 0; r < m.numRows(); r++){
+                for (size_t c = 0; c < m.numCols(); c++){
             os << std::to_string(m(r,c))<< "\t";
         }
         os << "\n";
@@ -519,9 +586,9 @@ std::ostream& operator<<(std::ostream& os, const Matrix<T>& m){
  * @return lager::gncpy::matrix::Matrix<T> 
  */
 template<typename T>
-lager::gncpy::matrix::Matrix<T> identity(uint8_t n){
+lager::gncpy::matrix::Matrix<T> identity(size_t n){
     lager::gncpy::matrix::Matrix<T> out( n, n);
-    for (uint8_t i = 0; i < n; i++){
+    for (size_t i = 0; i < n; i++){
         out(i,i) = T(1);
     }
     return out;
@@ -542,10 +609,10 @@ lager::gncpy::matrix::Matrix<T> forward_sub(const lager::gncpy::matrix::Matrix<T
         throw BadDimension("Invalid matrix dimension");
     }
     lager::gncpy::matrix::Matrix<T> x (b.numRows(),b.numCols());
-    for (uint8_t k = 0; k < b.numCols(); k++){
-        for (uint8_t i = 0; i < b.numRows(); i++){
+    for (size_t k = 0; k < b.numCols(); k++){
+        for (size_t i = 0; i < b.numRows(); i++){
             T sum = b(i,k);
-            for (uint8_t j = 0; j < i; j++){
+            for (size_t j = 0; j < i; j++){
                 sum -= (L(i,j) * x(j,k));
             }
             /*
@@ -575,7 +642,7 @@ lager::gncpy::matrix::Matrix<T> back_sub(const lager::gncpy::matrix::Matrix<T>& 
         throw BadDimension("Invalid matrix dimension");
     }
     lager::gncpy::matrix::Matrix<T> x (b.numRows(),b.numCols());
-    for (uint8_t k = 0; k < b.numCols(); k++){
+    for (size_t k = 0; k < b.numCols(); k++){
         for (int8_t i = b.numRows()-1; i > -1; i--){
             T sum = b(i,k);
             for (int8_t j = b.numRows()-1; j > i; j--){

@@ -58,7 +58,7 @@ class KalmanFilter(BayesFilter):
     @property
     def cov(self):
         if self.__model is not None:
-            return self.__model.cov
+            return np.array(self.__model.cov, copy=False)
         else:
             return self._cov
     
@@ -68,6 +68,7 @@ class KalmanFilter(BayesFilter):
             self.__model.cov = val
         else:
             self._cov = val
+
     def save_filter_state(self):
         """Saves filter variables so they can be restored later."""
         filt_state = super().save_filter_state()
@@ -102,6 +103,11 @@ class KalmanFilter(BayesFilter):
         filt_state["_meas_fnc"] = self._meas_fnc
         filt_state["_est_meas_noise_fnc"] = self._est_meas_noise_fnc
 
+        filt_state["_measObj"] = self._measObj
+        filt_state["__model"] = self.__model
+        filt_state["__predParams"] = self.__predParams
+        filt_state["__corrParams"] = self.__corrParams
+
         return filt_state
 
     def load_filter_state(self, filt_state):
@@ -127,6 +133,11 @@ class KalmanFilter(BayesFilter):
         self._meas_mat = filt_state["_meas_mat"]
         self._meas_fnc = filt_state["_meas_fnc"]
         self._est_meas_noise_fnc = filt_state["_est_meas_noise_fnc"]
+
+        self._measObj = filt_state["_measObj"]
+        self.__model = filt_state["__model"]
+        self.__predParams = filt_state["__predParams"]
+        self.__corrParams = filt_state["__corrParams"]
 
     def set_state_model(
         self,
@@ -396,7 +407,7 @@ class KalmanFilter(BayesFilter):
         
         if self.__model is not None:
             self.__predParams.stateTransParams, self.__predParams.controlParams = self._dyn_obj.args_to_params(state_mat_args, input_mat_args)
-            return self.__model.predict(timestep, cur_state, cur_input, self.__predParams)
+            return self.__model.predict(timestep, cur_state, cur_input, self.__predParams).reshape((-1, 1))
         else:
             next_state, state_mat = self._predict_next_state(
                 timestep, cur_state, cur_input, state_mat_args, input_mat_args
@@ -477,7 +488,8 @@ class KalmanFilter(BayesFilter):
         
         if self.__model is not None:
             self.__corrParams.measParams = self._measObj.args_to_params(meas_fun_args)
-            return self.__model.correct(timestep, meas, cur_state, self.__corrParams)
+            out = self.__model.correct(timestep, meas, cur_state, self.__corrParams)
+            return out[0].reshape((-1, 1)), out[1]
             
         else:
             est_meas, meas_mat = self._est_meas(

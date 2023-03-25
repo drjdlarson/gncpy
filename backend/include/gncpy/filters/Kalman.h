@@ -21,7 +21,7 @@ public:
             throw exceptions::BadParams("Params must be BayesPredictParams");
         }
         matrix::Matrix<T> stateMat = std::dynamic_pointer_cast<dynamics::ILinearDynamics<T>>(this->dynamicsModel())->getStateMat(timestep, params->stateTransParams.get());
-        this->m_cov = stateMat * this->m_cov * stateMat.transpose() + this->m_procNoise;
+        this->cov = stateMat * this->cov * stateMat.transpose() + this->m_procNoise;
 
         return this->m_dynObj->propagateState(timestep, curState, params->stateTransParams.get());
     }
@@ -34,12 +34,12 @@ public:
         matrix::Vector<T> estMeas = this->measurementModel()->measure(curState, params->measParams.get());
         matrix::Matrix<T> measMat = this->measurementModel()->getMeasMat(curState, params->measParams.get());
 
-        matrix::Matrix<T> inovCov = measMat * this->m_cov * measMat.transpose();
+        matrix::Matrix<T> inovCov = measMat * this->cov * measMat.transpose();
 
-        matrix::Matrix<T> kalmanGain = this->m_cov * measMat.transpose() * inovCov.inverse();
+        matrix::Matrix<T> kalmanGain = this->cov * measMat.transpose() * inovCov.inverse();
 
         matrix::Vector<T> inov = meas - estMeas;
-        this->m_cov -= kalmanGain * measMat * this->m_cov;
+        this->cov -= kalmanGain * measMat * this->cov;
 
         measFitProb = math::calcGaussianPDF(meas, estMeas, inovCov);
 
@@ -75,10 +75,6 @@ public:
         this->m_measNoise = measNoise;
     }
 
-    inline matrix::Matrix<T>  covariance() const override{
-        return this->m_cov;
-    }
-
     inline std::shared_ptr<dynamics::IDynamics<T>> dynamicsModel() const override {
         if(m_dynObj) {
             return m_dynObj;
@@ -95,12 +91,8 @@ public:
         }
     }
 
-    inline void setCovariance(matrix::Matrix<T> newCov) {
-        this->m_cov = newCov;
-    }
 
 private:
-    matrix::Matrix<T> m_cov;
     matrix::Matrix<T> m_measNoise;
     matrix::Matrix<T> m_procNoise;
 

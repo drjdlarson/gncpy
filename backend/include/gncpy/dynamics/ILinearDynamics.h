@@ -62,6 +62,10 @@ public:
     inline void clearControlModel() override { m_hasContolModel = false; }
     inline bool hasControlModel() const override { return m_hasContolModel; }
 
+    inline std::function<matrix::Matrix<T> (T timestep, const ControlParams* controlParams)> controlModel() const {
+        return m_controlModel;
+    }
+    
 protected:
     inline matrix::Matrix<T> controlModel(T timestep, const ControlParams* controlParams=nullptr) const {
         if(m_hasContolModel){

@@ -17,9 +17,10 @@ public:
     virtual void setStateModel(std::shared_ptr<dynamics::IDynamics<T>> dynObj, matrix::Matrix<T> procNoise) = 0;
     virtual void setMeasurementModel(std::shared_ptr<measurements::IMeasModel<T>> measObj, matrix::Matrix<T> measNoise) = 0;
 
-    virtual matrix::Matrix<T> covariance() const = 0;
     virtual std::shared_ptr<dynamics::IDynamics<T>> dynamicsModel() const = 0;
     virtual std::shared_ptr<measurements::IMeasModel<T>> measurementModel() const = 0;
+
+    matrix::Matrix<T> cov;
 
 };
 
