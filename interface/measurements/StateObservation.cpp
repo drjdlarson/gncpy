@@ -18,18 +18,18 @@ void initStateObservation(py::module& m) {
 
     GNCPY_PY_CHILD_CLASS(gncpy::measurements::StateObservationParams, gncpy::measurements::MeasParams)(m, "StateObservationParams")
         .def(py::init<const std::vector<uint8_t>&>())
-        .def_readonly("obs_inds", &gncpy::measurements::StateObservationParams::obsInds, "Indices of the state vector to measure (read-only)")
-        .def(py::pickle(
-            []([[maybe_unused]] const gncpy::measurements::StateObservationParams& p) { // __getstate__
-                return py::make_tuple(p.obsInds);
-            },
-            []([[maybe_unused]] py::tuple t) { // __setstate__
-                if(t.size() != 1){
-                    throw std::runtime_error("Invalid state!");
-                }
-                return gncpy::measurements::StateObservationParams(t[0].cast<std::vector<uint8_t>>());
-            }
-        ));
+        .def_readonly("obs_inds", &gncpy::measurements::StateObservationParams::obsInds, "Indices of the state vector to measure (read-only)");
+        // .def(py::pickle(
+        //     []([[maybe_unused]] const gncpy::measurements::StateObservationParams& p) { // __getstate__
+        //         return py::make_tuple(p.obsInds);
+        //     },
+        //     []([[maybe_unused]] py::tuple t) { // __setstate__
+        //         if(t.size() != 1){
+        //             throw std::runtime_error("Invalid state!");
+        //         }
+        //         return gncpy::measurements::StateObservationParams(t[0].cast<std::vector<uint8_t>>());
+        //     }
+        // ));
 
     GNCPY_PY_CHILD_CLASS(gncpy::measurements::StateObservation<double>, gncpy::measurements::ILinearMeasModel<double>)(m, "StateObservation")
         .def(py::init())

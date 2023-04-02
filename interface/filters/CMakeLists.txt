@@ -10,7 +10,7 @@ pybind11_add_module(_filters MODULE
 target_compile_definitions(_filters PRIVATE VERSION_INFO=${PROJECT_VERSION})
 target_link_libraries(_filters
     PRIVATE
-        lager::gncpy_backend
+        lager::gncpy
 )
 install(TARGETS _filters 
     DESTINATION 

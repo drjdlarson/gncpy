@@ -11,7 +11,7 @@ pybind11_add_module(_measurements MODULE
 target_compile_definitions(_measurements PRIVATE VERSION_INFO=${PROJECT_VERSION})
 target_link_libraries(_measurements
     PRIVATE
-        lager::gncpy_backend
+        lager::gncpy
 )
 install(TARGETS _measurements 
     DESTINATION 

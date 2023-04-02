@@ -1,20 +1,22 @@
-FROM mcr.microsoft.com/devcontainers/cpp:0-debian-11
+FROM debian:bullseye-slim
 
-# ARG REINSTALL_CMAKE_VERSION_FROM_SOURCE="3.22.2"
+SHELL ["/bin/bash", "-c"]
 
-# # Optionally install the cmake for vcpkg
-# COPY ./reinstall-cmake.sh /tmp/
+ARG DEBIAN_FRONTEND=noninteractive
+ARG USER_UID=1000
+ARG USER_GID=1000
 
-# RUN if [ "${REINSTALL_CMAKE_VERSION_FROM_SOURCE}" != "none" ]; then \
-#         chmod +x /tmp/reinstall-cmake.sh && /tmp/reinstall-cmake.sh ${REINSTALL_CMAKE_VERSION_FROM_SOURCE}; \
-#     fi \
-#     && rm -f /tmp/reinstall-cmake.sh
-
-# [Optional] Uncomment this section to install additional vcpkg ports.
-# RUN su vscode -c "${VCPKG_ROOT}/vcpkg install <your-port-name-here>"
-
-# [Optional] Uncomment this section to install additional packages.
-RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-    && apt-get -y install --no-install-recommends doxygen graphviz \
-    && apt-get clean -y \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        software-properties-common \
+        python3-pip \
+        python-is-python3 \
+        python3-dev \
+        g++ \
+        make \
+        cmake \
+        git \
+        doxygen \
+        graphviz \
     && rm -rf /var/lib/apt/lists/*
+

@@ -17,18 +17,18 @@ void initRangeAndBearing(py::module& m) {
     GNCPY_PY_CHILD_CLASS(gncpy::measurements::RangeAndBearingParams, gncpy::measurements::MeasParams)(m, "RangeAndBearingParams")
         .def(py::init<uint8_t, uint8_t>())
         .def_readwrite("x_ind", &gncpy::measurements::RangeAndBearingParams::xInd)
-        .def_readwrite("y_ind", &gncpy::measurements::RangeAndBearingParams::yInd)
-        .def(py::pickle(
-            []([[maybe_unused]] const gncpy::measurements::RangeAndBearingParams& p) { // __getstate__
-                return py::make_tuple(p.xInd, p.yInd);
-            },
-            []([[maybe_unused]] py::tuple t) { // __setstate__
-                if(t.size() != 2){
-                    throw std::runtime_error("Invalid state!");
-                }
-                return gncpy::measurements::RangeAndBearingParams(t[0].cast<uint8_t>(), t[1].cast<uint8_t>());
-            }
-        ));
+        .def_readwrite("y_ind", &gncpy::measurements::RangeAndBearingParams::yInd);
+        // .def(py::pickle(
+        //     []([[maybe_unused]] const gncpy::measurements::RangeAndBearingParams& p) { // __getstate__
+        //         return py::make_tuple(p.xInd, p.yInd);
+        //     },
+        //     []([[maybe_unused]] py::tuple t) { // __setstate__
+        //         if(t.size() != 2){
+        //             throw std::runtime_error("Invalid state!");
+        //         }
+        //         return gncpy::measurements::RangeAndBearingParams(t[0].cast<uint8_t>(), t[1].cast<uint8_t>());
+        //     }
+        // ));
     
     GNCPY_PY_CHILD_CLASS(gncpy::measurements::RangeAndBearing<double>, gncpy::measurements::INonLinearMeasModel<double>)(m, "RangeAndBearing")
         .def(py::init())
