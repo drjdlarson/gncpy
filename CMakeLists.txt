@@ -5,14 +5,25 @@ option(GNCPY_CPP_VERSION "Version of the c++ backend (without the v prefix)" 0.1
 
 set(CMAKE_CXX_STANDARD 20)
 set(CXX_STANDARD_REQUIRED ON)
-set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_CXX_FLAGS "-fPIC -Wall -Wextra -Wpedantic")
+
+if(CMAKE_BUILD_TYPE MATCHES "^[Dd]ebug")
+    set(CMAKE_CXX_FLAGS_DEBUG "-gdwarf-4 -gstatement-frontiers -gvariable-location-views -ginline-points -fno-eliminate-unused-debug-symbols -fvar-tracking -fvar-tracking-assignments -Og")
+
+elseif(CMAKE_BUILD_TYPE MATCHES "^[Rr]elease")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
+endif()
+
+message(STATUS "CMake version: ${CMAKE_VERSION}")
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+message(STATUS "Using GNCPy-c++ version: v${GNCPY_CPP_VERSION}")
+message(STATUS "Using GNCPy version: ${SKBUILD_PROJECT_VERSION}")
 
 
 # -----------------------------------------------------------------
 # -------------------- C++ dependency stuff -----------------------
 # -----------------------------------------------------------------
-message(STATUS "Using GNCPy-c++ version: v${GNCPY_CPP_VERSION}")
 include(FetchContent)
 if(CMAKE_BUILD_TYPE MATCHES "^[Rr]elease")
     FetchContent_Declare(

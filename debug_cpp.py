@@ -1,4 +1,5 @@
 import numpy as np
+import pickle
 import gncpy.dynamics.basic as gdyn
 import gncpy.measurements as gmeas
 import gncpy.filters as gfilt
@@ -49,5 +50,13 @@ if __name__ == "__main__":
     # print(corr_out2 - corr_out)
     # print("loaded filter prob diff:")
     # print(fit_prob2 - fit_prob)
+
+    print("Original filter: {}".format(repr(filt)))
+    with("test.pik", "wb") as fout:
+        pickle.dump(filt, fout)
+
+    with("test.pik", "rb") as fin:
+        filtLoad = pickle.load(fin)
+    print("Loaded filter: {}".format(repr(filtLoad)))
 
     print("done")

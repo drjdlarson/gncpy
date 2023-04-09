@@ -19,3 +19,5 @@ RUN apt-get update \
         git \
     && rm -rf /var/lib/apt/lists/*
 
+RUN pip install -y tox
+

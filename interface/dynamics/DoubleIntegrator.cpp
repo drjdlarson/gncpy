@@ -1,9 +1,13 @@
 #include <memory>
+#include <sstream>
+#include <string>
+
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // needed because some backend gncpy functions retrun stl types
 #include <pybind11/functional.h> // needed to allow pickling of std::function
 #include <gncpy/dynamics/ILinearDynamics.h>
 #include <gncpy/dynamics/DoubleIntegrator.h>
+
 #include "../math/Common.h"
 #include "../Macros.h"
 #include "Common.h"
@@ -19,27 +23,24 @@ void initDoubleIntegrator(py::module& m) {
     GNCPY_PY_CHILD_CLASS(gncpy::dynamics::DoubleIntegrator<double>, gncpy::dynamics::ILinearDynamics<double>)(m, "DoubleIntegrator")
         .def(py::init<double>())
         GNCPY_DYNAMICS_ILINEARDYNAMICS_INTERFACE(gncpy::dynamics::DoubleIntegrator<double>, double)
-        .def_property("dt", &gncpy::dynamics::DoubleIntegrator<double>::dt, &gncpy::dynamics::DoubleIntegrator<double>::setDt); // Essentially setter and getter
-        // .def(py::pickle(
-        //     [](const gncpy::dynamics::DoubleIntegrator<double>& p) { // __getstate__
-        //         return py::make_tuple(p.dt(), p.hasControlModel(), p.controlModel(), p.hasStateConstraint(), p.stateConstraints());
-        //     },
-        //     [](py::tuple t) { // __setstate__
-        //         if(t.size() != 5) {
-        //             throw std::runtime_error("Invalid state!");
-        //         }
+        .def_property("dt", &gncpy::dynamics::DoubleIntegrator<double>::dt, &gncpy::dynamics::DoubleIntegrator<double>::setDt) // Essentially setter and getter
+        .def(py::pickle(
+            [](gncpy::dynamics::DoubleIntegrator<double>& p) { // __getstate__
+                std::string ssb = p.saveClassState().str();
+                return py::make_tuple(py::bytes(ssb.str()));
+            },
+            [](py::tuple t) { // __setstate__
+                if(t.size() != 1) {
+                    throw std::runtime_error("Invalid state!");
+                }
 
-        //         gncpy::dynamics::DoubleIntegrator dynObj(t[0].cast<double>());
-                
-        //         if(t[1].cast<bool>()) {
-        //             dynObj.setControlModel(t[2].cast<std::function<gncpy::matrix::Matrix<double> (double timestep, const gncpy::dynamics::ControlParams* controlParams)>>());
-        //         }
-        //         if(t[3].cast<bool>()) {
-        //             dynObj.setStateConstraints(t[3].cast<std::function<void (double timestep, gncpy::matrix::Vector<double>& state, const gncpy::dynamics::ConstraintParams* const constraintParams)>>());
-        //         }
+                std::stringstream ssb(t[0].cast<std::string>(), std::ios::in | std::ios::out | std::ios::binary);
+                auto dynObj = lager::gncpy::dynamics::DoubleIntegrator<double>::loadClass(ssb);
 
-        //         return dynObj;
-        //     }
-        // ));
-        
+                return dynObj;
+            }
+        ))
+        .def("__str__", &gncpy::dynamics::DoubleIntegrator<double>::toJSON)
+        .def("__repr__", &gncpy::dynamics::DoubleIntegrator<double>::toJSON);
+
 }
