@@ -3,10 +3,17 @@ name = "gncpy"
 version = "0.0.1"
 description = "A package for Guidance, Navigation, and Control (GNC) algorithms."
 readme = "README.rst"
+python_requires = ">=3.7"
+license = {file = "LICENSE"}
+keywords = [
+    "Guidance Navigation and Control",
+    "dynamics",
+    "kalman filter",
+    "reinforcement learning"
+]
 authors = [
     { name = "Laboratory for Autonomy GNC and Estimation Research (LAGER)" },
 ]
-python_requires = ">=3.7"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -26,6 +33,25 @@ dependencies = [
     "ruamel.yaml>=0.17.21",
 ]
 
+[project.optional-dependencies]
+games = [
+    "pygame>=2.1.2"
+]
+reinforcement-learning = [
+    "gym>=0.25",
+    "opencv-python"
+]
+all = [
+    "gym>=0.25",
+    "opencv-python",
+    "pygame>=2.1.2"
+]
+
+[project.urls]
+homepage = "https://example.com"
+# documentation = "https://readthedocs.org"
+repository = "https://github.com/drjdlarson/gncpy"
+# changelog = "https://github.com/me/spam/blob/master/CHANGELOG.md"
 
 [build-system]
 requires = ["scikit-build-core>=0.2.1", "pybind11", "conan<2"]
@@ -34,8 +60,13 @@ build-backend = "scikit_build_core.build"
 
 [tool.scikit-build]
 # This controls the CMake build type
-cmake.build-type = "Release"
+cmake.build-type = "Debug"
 
 # Build directory (empty will use a temporary directory). {cache_tag} is
 # available to provide a unique directory per interpreter.
 build-dir = "./build"
+
+# Extra args for CMake. Pip, unlike build, does not support lists, so semicolon
+# can be used to separate. Setting this in config or envvar will override the
+# entire list. See also cmake.define.
+cmake.args = ["-DGNCPY_CPP_VERSION=0.1.0"]
