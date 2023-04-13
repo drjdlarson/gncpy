@@ -31,9 +31,7 @@ if(CMAKE_BUILD_TYPE MATCHES "^[Rr]elease")
         GIT_REPOSITORY https://github.com/ryan4984/gncpy_cpp.git
         GIT_TAG "v${GNCPY_CPP_VERSION}"
     )
-# TODO: figure out how to clone branch of repo for debug builds (following fails to generate valid tar file)
 else()
-    # TODO: make sure this will work to get latest on master branch
     # TODO: add option to get other branches
     FetchContent_Declare(
         gncpy_cpp

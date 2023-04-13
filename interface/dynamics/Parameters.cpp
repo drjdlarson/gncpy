@@ -12,37 +12,15 @@ void initParameters(py::module& m) {
 
     using namespace lager;
 
-    // see https://github.com/pybind/pybind11/issues/956 for why the shared_ptr is needed
     GNCPY_PY_BASE_CLASS(gncpy::dynamics::StateTransParams)(m, "StateTransParams")
-        .def(py::init());
-        // .def(py::pickle(
-        //     []([[maybe_unused]] const gncpy::dynamics::StateTransParams& p) { // __getstate__
-        //         return py::make_tuple();
-        //     },
-        //     []([[maybe_unused]] py::tuple t) { // __setstate__
-        //         return gncpy::dynamics::StateTransParams();
-        //     }
-        // ));
+        .def(py::init())
+        GNCPY_PICKLE(gncpy::dynamics::StateTransParams);
     
     GNCPY_PY_BASE_CLASS(gncpy::dynamics::ControlParams)(m, "ControlParams")
-        .def(py::init());
-        // .def(py::pickle(
-        //     []([[maybe_unused]] const gncpy::dynamics::ControlParams& p) { // __getstate__
-        //         return py::make_tuple();
-        //     },
-        //     []([[maybe_unused]] py::tuple t) { // __setstate__
-        //         return gncpy::dynamics::ControlParams();
-        //     }
-        // ));
+        .def(py::init())
+        GNCPY_PICKLE(gncpy::dynamics::ControlParams);
 
     GNCPY_PY_BASE_CLASS(gncpy::dynamics::ConstraintParams)(m, "ConstraintParams")
         .def(py::init())
-        .def(py::pickle(
-            []([[maybe_unused]] const gncpy::dynamics::ConstraintParams& p) { // __getstate__
-                return py::make_tuple();
-            },
-            []([[maybe_unused]]  py::tuple t) { // __setstate__
-                return gncpy::dynamics::ConstraintParams();
-            }
-        ));
+        GNCPY_PICKLE(gncpy::dynamics::ConstraintParams);
 }

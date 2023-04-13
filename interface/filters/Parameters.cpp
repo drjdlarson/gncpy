@@ -16,9 +16,11 @@ void initParameters(py::module& m) {
     GNCPY_PY_BASE_CLASS(gncpy::filters::BayesPredictParams)(m, "BayesPredictParams")
         .def(py::init())
         .def_readwrite("stateTransParams", &gncpy::filters::BayesPredictParams::stateTransParams)
-        .def_readwrite("controlParams", &gncpy::filters::BayesPredictParams::controlParams);
+        .def_readwrite("controlParams", &gncpy::filters::BayesPredictParams::controlParams)
+        GNCPY_PICKLE(gncpy::filters::BayesPredictParams);
     
     GNCPY_PY_BASE_CLASS(gncpy::filters::BayesCorrectParams)(m, "BayesCorrectParams")
         .def(py::init())
-        .def_readwrite("measParams", &gncpy::filters::BayesCorrectParams::measParams);
+        .def_readwrite("measParams", &gncpy::filters::BayesCorrectParams::measParams)
+        GNCPY_PICKLE(gncpy::filters::BayesCorrectParams);
 }

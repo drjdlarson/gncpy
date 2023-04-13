@@ -489,6 +489,19 @@ class DoubleIntegrator(LinearDynamicsBase):
     def allow_cpp(self):
         return True
 
+    def __getstate__(self):
+        if self.__model is not None:
+            return self.__model.__getstate__()
+        return self.__dict__
+    
+    def __setstate__(self, d):
+        self = DoubleIntegrator()
+        if isinstance(d, dict):
+            self.__dict__ = d
+        else:
+            # need to index these so they stay as tuples
+            self.__model.__setstate__(d)
+
     # must be provided if allow_cpp is true
     def args_to_params(self, state_args, control_args):
         if len(state_args) != 1:

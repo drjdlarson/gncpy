@@ -1,10 +1,12 @@
 #include <memory>
+
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // needed because some backend gncpy functions retrun stl types
 #include <gncpy/filters/IBayesFilter.h>
 #include <gncpy/filters/Kalman.h>
 #include <gncpy/math/Matrix.h>
 #include <gncpy/math/Vector.h>
+
 #include "../Macros.h"
 #include "../math/Common.h" // needs to be included so numpy to matrix/vector types work
 #include "Common.h"
@@ -28,5 +30,6 @@ void initKalman(py::module& m) {
             gncpy::matrix::Vector nextState = self.correct(timestep, meas, curState, measFitProb, params);
             return py::make_tuple(nextState, measFitProb);
         })
-        .def_readwrite("cov", &gncpy::filters::Kalman<double>::cov);
+        .def_readwrite("cov", &gncpy::filters::Kalman<double>::cov)
+        GNCPY_PICKLE(gncpy::filters::Kalman<double>);
 }

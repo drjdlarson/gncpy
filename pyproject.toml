@@ -54,7 +54,8 @@ repository = "https://github.com/drjdlarson/gncpy"
 # changelog = "https://github.com/me/spam/blob/master/CHANGELOG.md"
 
 [build-system]
-requires = ["scikit-build-core>=0.2.1", "pybind11", "conan<2"]
+# cmake.minimum-version = "3.26" # only need this version if building the backend c++ tests with coverage
+requires = ["scikit-build-core>=0.2.1", "pybind11"]
 build-backend = "scikit_build_core.build"
 
 
@@ -69,4 +70,4 @@ build-dir = "./build"
 # Extra args for CMake. Pip, unlike build, does not support lists, so semicolon
 # can be used to separate. Setting this in config or envvar will override the
 # entire list. See also cmake.define.
-cmake.args = ["-DGNCPY_CPP_VERSION=0.1.0"]
+cmake.args = ["-DGNCPY_CPP_VERSION=0.1.0"] # used if in "Release" mode

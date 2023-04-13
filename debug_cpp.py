@@ -51,12 +51,23 @@ if __name__ == "__main__":
     # print("loaded filter prob diff:")
     # print(fit_prob2 - fit_prob)
 
-    print("Original filter: {}".format(repr(filt)))
-    with("test.pik", "wb") as fout:
-        pickle.dump(filt, fout)
+    print("Original filter: {:s}".format(repr(filt)))
+    with open("test.pik", "wb") as fout:
+        data = pickle.dumps(filt)
+        fout.write(data)
 
-    with("test.pik", "rb") as fin:
+    with open("test.pik", "rb") as fin:
         filtLoad = pickle.load(fin)
     print("Loaded filter: {}".format(repr(filtLoad)))
+
+    print("loaded cov")
+    print(filtLoad.cov)
+    print("orig cov")
+    print(filt.cov)
+    filtLoad.cov[0, 2] = 5
+    print("modified load cov:")
+    print(filtLoad.cov)
+    print("original cov:")
+    print(filt.cov)
 
     print("done")

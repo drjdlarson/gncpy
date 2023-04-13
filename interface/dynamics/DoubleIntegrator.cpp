@@ -24,23 +24,6 @@ void initDoubleIntegrator(py::module& m) {
         .def(py::init<double>())
         GNCPY_DYNAMICS_ILINEARDYNAMICS_INTERFACE(gncpy::dynamics::DoubleIntegrator<double>, double)
         .def_property("dt", &gncpy::dynamics::DoubleIntegrator<double>::dt, &gncpy::dynamics::DoubleIntegrator<double>::setDt) // Essentially setter and getter
-        .def(py::pickle(
-            [](gncpy::dynamics::DoubleIntegrator<double>& p) { // __getstate__
-                std::string ssb = p.saveClassState().str();
-                return py::make_tuple(py::bytes(ssb.str()));
-            },
-            [](py::tuple t) { // __setstate__
-                if(t.size() != 1) {
-                    throw std::runtime_error("Invalid state!");
-                }
-
-                std::stringstream ssb(t[0].cast<std::string>(), std::ios::in | std::ios::out | std::ios::binary);
-                auto dynObj = lager::gncpy::dynamics::DoubleIntegrator<double>::loadClass(ssb);
-
-                return dynObj;
-            }
-        ))
-        .def("__str__", &gncpy::dynamics::DoubleIntegrator<double>::toJSON)
-        .def("__repr__", &gncpy::dynamics::DoubleIntegrator<double>::toJSON);
+        GNCPY_PICKLE(gncpy::dynamics::DoubleIntegrator<double>);
 
 }

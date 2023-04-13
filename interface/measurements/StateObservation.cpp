@@ -18,23 +18,13 @@ void initStateObservation(py::module& m) {
 
     GNCPY_PY_CHILD_CLASS(gncpy::measurements::StateObservationParams, gncpy::measurements::MeasParams)(m, "StateObservationParams")
         .def(py::init<const std::vector<uint8_t>&>())
-        .def_readonly("obs_inds", &gncpy::measurements::StateObservationParams::obsInds, "Indices of the state vector to measure (read-only)");
-        // .def(py::pickle(
-        //     []([[maybe_unused]] const gncpy::measurements::StateObservationParams& p) { // __getstate__
-        //         return py::make_tuple(p.obsInds);
-        //     },
-        //     []([[maybe_unused]] py::tuple t) { // __setstate__
-        //         if(t.size() != 1){
-        //             throw std::runtime_error("Invalid state!");
-        //         }
-        //         return gncpy::measurements::StateObservationParams(t[0].cast<std::vector<uint8_t>>());
-        //     }
-        // ));
+        .def_readonly("obs_inds", &gncpy::measurements::StateObservationParams::obsInds, "Indices of the state vector to measure (read-only)")
+        GNCPY_PICKLE(gncpy::measurements::StateObservationParams);
 
     GNCPY_PY_CHILD_CLASS(gncpy::measurements::StateObservation<double>, gncpy::measurements::ILinearMeasModel<double>)(m, "StateObservation")
         .def(py::init())
         GNCPY_MEASUREMENTS_IMEASMODEL_INTERFACE(gncpy::measurements::StateObservation<double>, double)
-        .def("args_to_params", [](gncpy::measurements::StateObservation<double>& self, py::tuple args) {
+        .def("args_to_params", []([[maybe_unused]] gncpy::measurements::StateObservation<double>& self, py::tuple args) {
             if(args.size() != 1){
                 throw gncpy::exceptions::BadParams("Must only pass indices to state observation model");
             }
@@ -44,6 +34,6 @@ void initStateObservation(py::module& m) {
             }
             // return std::make_shared<gncpy::measurements::StateObservationParams>(inds);
             return gncpy::measurements::StateObservationParams(inds);
-        });
-
+        })
+        GNCPY_PICKLE(gncpy::measurements::StateObservation<double>);
 }

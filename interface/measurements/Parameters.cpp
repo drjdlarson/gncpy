@@ -12,14 +12,7 @@ void initParameters(py::module& m) {
     using namespace lager;
 
     GNCPY_PY_BASE_CLASS(gncpy::measurements::MeasParams)(m, "MeasParams")
-        .def(py::init());
-        // .def(py::pickle(
-        //     []([[maybe_unused]] const gncpy::measurements::MeasParams& p) { // __getstate__
-        //         return py::make_tuple();
-        //     },
-        //     []([[maybe_unused]] py::tuple t) { // __setstate__
-        //         return gncpy::measurements::MeasParams();
-        //     }
-        // ));
+        .def(py::init())
+        GNCPY_PICKLE(gncpy::measurements::MeasParams);
     
 }

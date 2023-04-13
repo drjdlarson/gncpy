@@ -55,6 +55,18 @@ class KalmanFilter(BayesFilter):
 
         super().__init__(**kwargs)
 
+    def __repr__(self) -> str:
+        if self.__model is not None:
+            return self.__model.__repr__()
+        else:
+            return super().__repr__()
+    
+    def __str__(self) -> str:
+        if self.__model is not None:
+            return self.__model.__str__()
+        else:
+            return super().__str__()
+
     @property
     def cov(self):
         if self.__model is not None:
