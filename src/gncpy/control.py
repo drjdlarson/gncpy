@@ -62,7 +62,7 @@ class LQR:
             Flag indicating that state constraints should be enforced during value propagation.
     """
 
-    def __init__(self, time_horizon=float("inf"), hard_constraints: bool=False):
+    def __init__(self, time_horizon=float("inf"), hard_constraints: bool = False):
         """Initialize an object.
 
         Parameters
@@ -92,6 +92,7 @@ class LQR:
         self._init_state = np.array([])
         self.end_state = np.array([])
         self.hard_constraints = hard_constraints
+        self.control_constraints = None
 
     @property
     def dt(self):
@@ -122,13 +123,16 @@ class LQR:
         """Read only control penalty matrix."""
         return self._R
 
-    def set_state_model(self, u_nom, dynObj=None, dt=None):
+    def set_state_model(self, u_nom, control_constraints=None, dynObj=None, dt=None):
         """Set the state/dynamics model.
 
         Parameters
         ----------
         u_nom : Nu x 1 numpy array
             Nominal control input.
+        control_constraints : callable
+            Function that takes in timestep and control signal and returns the constrained control signal as a Nu x 1
+            numpy array
         dynObj : :class:`gncpy.dynamics.basic.DynamicsBase`, optional
             System dynamics to control. The default is None.
         dt : float, optional
@@ -139,6 +143,8 @@ class LQR:
         self.dynObj = dynObj
         if dt is not None:
             self.dt = dt
+        if control_constraints is not None:
+            self.control_constraints = control_constraints
 
     def set_cost_model(self, Q, R, P=None):
         r"""Sets the cost model used.
@@ -361,6 +367,8 @@ class LQR:
             self.feedback_gain[kk] @ traj[kk + 1, :].reshape((-1, 1))
             + self.feedthrough_gain[kk]
         )
+        if self.hard_constraints and self.control_constraints is not None:
+            u_hat = self.control_constraints(tt, u_hat)
         x_hat_p, A, B, c = self.prop_state_backward(
             tt,
             traj[kk + 1, :].reshape((-1, 1)),
@@ -391,7 +399,11 @@ class LQR:
         self.ct_go_vecs[kk] = d + C.T @ self.feedthrough_gain[kk]
 
         out = self._back_pass_update_traj(x_hat_p, kk)
-        if self.hard_constraints and self.dynObj is not None and self.dynObj.state_constraint is not None:
+        if (
+            self.hard_constraints
+            and self.dynObj is not None
+            and self.dynObj.state_constraint is not None
+        ):
             out = self.dynObj.state_constraint(time_vec[kk], out.reshape((-1, 1)))
         return out.ravel()
 
@@ -610,6 +622,8 @@ class LQR:
 
             if self.dt is None:
                 ctrl_signal = (self.feedback_gain @ dx + self.feedthrough_gain).ravel()
+                if self.control_constraints is not None:
+                    ctrl_signal = self.control_constraints(0, ctrl_signal).ravel()
                 cost = np.nan
 
             else:
@@ -634,6 +648,8 @@ class LQR:
                     timestep += self.dt
                     dx = end_state - state_traj[-1, :].reshape((-1, 1))
                     u = self.feedback_gain @ dx + self.feedthrough_gain
+                    if self.control_constraints is not None:
+                        u = self.control_constraints(timestep, u)
                     if ctrl_signal is None:
                         ctrl_signal = u.reshape((1, -1))
                     else:
@@ -711,6 +727,8 @@ class LQR:
                     self.feedback_gain[kk] @ state_traj[kk, :].reshape((-1, 1))
                     + self.feedthrough_gain[kk]
                 )
+                if self.control_constraints is not None:
+                    u = self.control_constraints(tt, u)
                 ctrl_signal[kk, :] = u.ravel()
 
                 x = self.prop_state(
@@ -1116,7 +1134,11 @@ class ELQR(LQR):
             @ (self.ct_go_vecs[num_timesteps] + self.ct_come_vecs[num_timesteps])
         ).ravel()
 
-        if self.hard_constraints and self.dynObj is not None and self.dynObj.state_constraint is not None:
+        if (
+            self.hard_constraints
+            and self.dynObj is not None
+            and self.dynObj.state_constraint is not None
+        ):
             traj[num_timesteps, :] = self.dynObj.state_constraint(
                 time_vec[num_timesteps], traj[num_timesteps, :].reshape((-1, 1))
             ).ravel()
@@ -1154,6 +1176,9 @@ class ELQR(LQR):
             self.feedback_gain[kk] @ traj[kk, :].reshape((-1, 1))
             + self.feedthrough_gain[kk]
         )
+        if self.hard_constraints and self.control_constraints is not None:
+            u_hat = self.control_constraints(tt, u_hat)
+
         x_hat_p, ABar, BBar, cBar = self.prop_state_forward(
             tt,
             traj[kk, :].reshape((-1, 1)),
@@ -1189,7 +1214,11 @@ class ELQR(LQR):
             np.linalg.inv(self.ct_go_mats[kk + 1] + self.ct_come_mats[kk + 1])
             @ (self.ct_go_vecs[kk + 1] + self.ct_come_vecs[kk + 1])
         )
-        if self.hard_constraints and self.dynObj is not None and self.dynObj.state_constraint is not None:
+        if (
+            self.hard_constraints
+            and self.dynObj is not None
+            and self.dynObj.state_constraint is not None
+        ):
             out = self.dynObj.state_constraint(time_vec[kk + 1], out)
         return out.ravel()
 
@@ -1286,11 +1315,7 @@ class ELQR(LQR):
             ).ravel()
 
         # plot backward pass trajectory
-        extra_args = dict(
-            color=color,
-            alpha=alpha,
-            zorder=zorder,
-        )
+        extra_args = dict(color=color, alpha=alpha, zorder=zorder,)
         if len(plt_inds) == 3:
             fig.axes[self._ax].plot(
                 state_traj[:, plt_inds[0]],
@@ -1300,9 +1325,7 @@ class ELQR(LQR):
             )
         else:
             fig.axes[self._ax].plot(
-                state_traj[:, plt_inds[0]],
-                state_traj[:, plt_inds[1]],
-                **extra_args,
+                state_traj[:, plt_inds[0]], state_traj[:, plt_inds[1]], **extra_args,
             )
 
         if matplotlib.get_backend() != "Agg":
@@ -1515,10 +1538,7 @@ class ELQR(LQR):
                     )
 
             fig.axes[self._ax].scatter(
-                *self.end_state.ravel()[plt_inds],
-                marker="x",
-                color="r",
-                zorder=1000,
+                *self.end_state.ravel()[plt_inds], marker="x", color="r", zorder=1000,
             )
             if matplotlib.get_backend() != "Agg":
                 plt.pause(0.01)
@@ -1584,24 +1604,16 @@ class ELQR(LQR):
             x = traj[0, :].copy().reshape((-1, 1))
             for kk, tt in enumerate(time_vec[:-1]):
                 u = self.feedback_gain[kk] @ x + self.feedthrough_gain[kk]
+                if self.control_constraints is not None:
+                    u = self.control_constraints(tt, u)
                 cost += self.cost_function(
-                    tt,
-                    x,
-                    u,
-                    cost_args,
-                    is_initial=(kk == 0),
-                    is_final=False,
+                    tt, x, u, cost_args, is_initial=(kk == 0), is_final=False,
                 )
                 x = self.prop_state(
                     tt, x, u, state_args, ctrl_args, True, inv_state_args, inv_ctrl_args
                 )
             cost += self.cost_function(
-                time_vec[-1],
-                x,
-                u,
-                cost_args,
-                is_initial=False,
-                is_final=True,
+                time_vec[-1], x, u, cost_args, is_initial=False, is_final=True,
             )
 
             if show_animation:
@@ -1639,6 +1651,11 @@ class ELQR(LQR):
                 self.feedback_gain[kk] @ state_traj[kk, :].reshape((-1, 1))
                 + self.feedthrough_gain[kk]
             ).ravel()
+            if self.control_constraints is not None:
+                ctrl_signal[kk, :] = self.control_constraints(
+                    tt, ctrl_signal[kk, :].reshape((-1, 1))
+                ).ravel()
+
             cost += self.cost_function(
                 tt,
                 state_traj[kk, :].reshape((-1, 1)),
@@ -1668,10 +1685,7 @@ class ELQR(LQR):
         )
 
         if show_animation:
-            extra_args = dict(
-                linestyle="-",
-                color="g",
-            )
+            extra_args = dict(linestyle="-", color="g",)
             if len(plt_inds) == 3:
                 fig.axes[self._ax].plot(
                     state_traj[:, plt_inds[0]],
