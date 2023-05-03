@@ -257,7 +257,7 @@ Please cite the framework as follows
 .. code-block:: bibtex
 
     @Misc{gncpy,
-    author       = {Jordan D. Larson and Ryan W. Thomas and Vincent W. Hill},
+    author       = {Jordan D. Larson and Ryan W. Thomas and Vincent W. Hill and Vaughn Weirens},
     howpublished = {Web page},
     title        = {{GNCPy}: A {P}ython library for {G}uidance, {N}avigation, and {C}ontrol algorithms},
     year         = {2019},
