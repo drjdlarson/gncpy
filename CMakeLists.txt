@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(${SKBUILD_PROJECT_NAME} VERSION ${SKBUILD_PROJECT_VERSION})
 
-option(GNCPY_CPP_VERSION "Version of the c++ backend (without the v prefix)" 0.1.0)
+option(GNCPY_CPP_VERSION "Version of the c++ backend (without the v prefix)")
 
 set(CMAKE_CXX_STANDARD 20)
 set(CXX_STANDARD_REQUIRED ON)
@@ -17,32 +17,34 @@ endif()
 
 message(STATUS "CMake version: ${CMAKE_VERSION}")
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
-message(STATUS "Using GNCPy-c++ version: v${GNCPY_CPP_VERSION}")
 message(STATUS "Using GNCPy version: ${SKBUILD_PROJECT_VERSION}")
+
 
 
 # -----------------------------------------------------------------
 # -------------------- C++ dependency stuff -----------------------
 # -----------------------------------------------------------------
 include(FetchContent)
+message(STATUS "Fetching gncpy_cpp...")
 if(CMAKE_BUILD_TYPE MATCHES "^[Rr]elease")
     FetchContent_Declare(
         gncpy_cpp
-        GIT_REPOSITORY https://github.com/ryan4984/gncpy_cpp.git
+        GIT_REPOSITORY https://github.com/drjdlarson/gncpy_cpp.git
         GIT_TAG "v${GNCPY_CPP_VERSION}"
     )
 else()
     # TODO: add option to get other branches
     FetchContent_Declare(
         gncpy_cpp
-        GIT_REPOSITORY https://github.com/ryan4984/gncpy_cpp
-        GIT_TAG master
+        GIT_REPOSITORY https://github.com/drjdlarson/gncpy_cpp.git
+        GIT_TAG cleanup
     )
 endif()
 set(GNCPY_DOC OFF CACHE INTERNAL "Skip building docs")
 set(GNCPY_TEST OFF CACHE INTERNAL "Skip building tests")
 set(GNCPY_INSTALL ON CACHE INTERNAL "Generate the install target")
 FetchContent_MakeAvailable(gncpy_cpp)
+
 
 
 # -----------------------------------------------------------------

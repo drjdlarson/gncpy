@@ -2,7 +2,7 @@
 // README at: https://github.com/devcontainers/templates/tree/main/src/cpp
 {
 	"name": "gncpy-dev",
-	"image": "ghcr.io/ryan4984/gncpy-dev:latest",
+	"image": "ghcr.io/drjdlarson/gncpy-dev:latest",
 	"customizations": {
 		"vscode": {
 			"extensions": [
