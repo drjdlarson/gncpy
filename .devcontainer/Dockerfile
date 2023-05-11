@@ -24,5 +24,5 @@ RUN apt-get update \
         librsvg2-bin \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip install -y tox
+RUN pip install tox genbadge[tests,coverage]
 

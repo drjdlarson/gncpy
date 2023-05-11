@@ -61,7 +61,8 @@ build-backend = "scikit_build_core.build"
 
 [tool.scikit-build]
 # This controls the CMake build type
-cmake.build-type = "Release"
+# cmake.build-type = "Release"
+cmake.build-type = "Debug"
 
 # Build directory (empty will use a temporary directory). {cache_tag} is
 # available to provide a unique directory per interpreter.
@@ -70,4 +71,4 @@ cmake.build-type = "Release"
 # Extra args for CMake. Pip, unlike build, does not support lists, so semicolon
 # can be used to separate. Setting this in config or envvar will override the
 # entire list. See also cmake.define.
-cmake.args = ["-DGNCPY_CPP_VERSION=0.2.0"] # used if in "Release" mode
+cmake.args = ["-DGNCPY_CPP_VERSION=0.2.0", -DGNCPY_CPP_BRANCH=python_fixes] # used if in "Release" mode
