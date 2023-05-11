@@ -2,7 +2,10 @@
 // README at: https://github.com/devcontainers/templates/tree/main/src/cpp
 {
 	"name": "gncpy-dev",
-	"image": "ghcr.io/drjdlarson/gncpy-dev:latest",
+	"build":{
+		"dockerfile": "Dockerfile"
+	},
+	// "image": "ghcr.io/drjdlarson/gncpy-dev:latest",
 	"customizations": {
 		"vscode": {
 			"extensions": [
@@ -16,10 +19,10 @@
 				"ms-python.vscode-pylance"
 			]
 		}
-	},
+	}
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "bash scripts/install-dev-tools.bash"
+	// "postCreateCommand": ""
 
 	// Configure tool-specific properties.
 	// "customizations": {},

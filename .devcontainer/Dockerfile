@@ -17,6 +17,11 @@ RUN apt-get update \
         make \
         cmake \
         git \
+        texlive-base \
+        latexmk \
+        texlive-latex-extra \
+        tex-gyre \
+        librsvg2-bin \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip install -y tox
