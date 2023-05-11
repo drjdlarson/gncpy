@@ -15,7 +15,6 @@ authors = [
     { name = "Laboratory for Autonomy GNC and Estimation Research (LAGER)" },
 ]
 classifiers = [
-    "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "Intended Audience :: Education",
     "Intended Audience :: Science/Research",
@@ -27,6 +26,7 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 dependencies = [
+    "serums",
     "numpy",
     "scipy",
     "matplotlib",
@@ -48,8 +48,8 @@ all = [
 ]
 
 [project.urls]
-homepage = "https://example.com"
-# documentation = "https://readthedocs.org"
+homepage = "http://lager.ua.edu/"
+documentation = "https://drjdlarson.github.io/gncpy/"
 repository = "https://github.com/drjdlarson/gncpy"
 # changelog = "https://github.com/me/spam/blob/master/CHANGELOG.md"
 
@@ -61,13 +61,13 @@ build-backend = "scikit_build_core.build"
 
 [tool.scikit-build]
 # This controls the CMake build type
-cmake.build-type = "Debug"
+cmake.build-type = "Release"
 
 # Build directory (empty will use a temporary directory). {cache_tag} is
 # available to provide a unique directory per interpreter.
-build-dir = "./build"
+# build-dir = "./build"
 
 # Extra args for CMake. Pip, unlike build, does not support lists, so semicolon
 # can be used to separate. Setting this in config or envvar will override the
 # entire list. See also cmake.define.
-cmake.args = ["-DGNCPY_CPP_VERSION=0.1.0"] # used if in "Release" mode
+cmake.args = ["-DGNCPY_CPP_VERSION=0.2.0"] # used if in "Release" mode

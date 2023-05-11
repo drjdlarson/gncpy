@@ -16,7 +16,12 @@
 				"cschlosser.doxdocgen",
 				// python tools
 				"ms-python.python",
-				"ms-python.vscode-pylance"
+				"ms-python.vscode-pylance",
+				"ms-python.black-formatter",
+				// sphinx/restructured text
+				"lextudio.restructuredtext",
+				"trond-snekvik.simple-rst",
+				"swyddfa.esbonio"
 			]
 		}
 	}

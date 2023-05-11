@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.15)
 project(${SKBUILD_PROJECT_NAME} VERSION ${SKBUILD_PROJECT_VERSION})
 
-option(GNCPY_CPP_VERSION "Version of the c++ backend (without the v prefix)")
+option(GNCPY_CPP_VERSION "Version of the c++ backend (without the v prefix) for release builds")
+option(GNCPY_CPP_BRANCH "Branch of the c++ backend for debug builds" master)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CXX_STANDARD_REQUIRED ON)
@@ -37,7 +38,7 @@ else()
     FetchContent_Declare(
         gncpy_cpp
         GIT_REPOSITORY https://github.com/drjdlarson/gncpy_cpp.git
-        GIT_TAG cleanup
+        GIT_TAG ${GNCPY_CPP_BRANCH}
     )
 endif()
 set(GNCPY_DOC OFF CACHE INTERNAL "Skip building docs")

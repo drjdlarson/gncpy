@@ -14,6 +14,8 @@ import os
 import sys
 import sphinx_theme
 
+from importlib.metadata import version as get_version
+
 sys.path.append(os.path.abspath("../../gncpy"))
 
 # run all example code to generate necesary figures
@@ -29,7 +31,8 @@ copyright = "2020, Laboratory for Autonomy, GNC, and Estimation Research (LAGER)
 author = "Laboratory for Autonomy, GNC, and Estimation Research (LAGER)"
 
 # The full version, including alpha/beta/rc tags
-release = "0.0.0"
+version = get_version("gncpy")
+release = get_version("gncpy")
 
 
 # -- General configuration ---------------------------------------------------
@@ -45,13 +48,12 @@ extensions = [
     "sphinx.ext.todo",
     "sphinx.ext.viewcode",
     "sphinxcontrib.bibtex",
-    'sphinx_copybutton',  # allow copying of code blocks
+    "sphinxcontrib.rsvgconverter",
+    "sphinx_sitemap",
+    "sphinx_copybutton",
+    "sphinx_rtd_theme",
 ]
 
-# configure copy button for code snippets
-copybutton_only_copy_prompt_lines = False
-# Note that we do not include `_static`
-# because the path should be *relative* to the static folder.
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -71,6 +73,9 @@ modindex_common_prefix = [
     "gncpy.",
 ]
 
+# configure copy button for code snippets
+copybutton_only_copy_prompt_lines = False
+
 # Todo configuration
 todo_include_todos = True
 todo_link_only = True
@@ -80,22 +85,21 @@ bibtex_bibfiles = ["refs.bib"]
 
 
 # -- Options for HTML output -------------------------------------------------
-
-# The theme to use for HTML and HTML Help pages.  See the documentation for
-# a list of builtin themes.
-#
-# html_theme = 'classic'
-# html_theme = 'alabaster'
-html_theme = "stanford_theme"
-html_theme_path = [sphinx_theme.get_html_theme_path("stanford-theme")]
+html_theme = "sphinx_rtd_theme"
 html_theme_options = {
     "display_version": True,
+    "style_nav_header_background": "#9E1B32",
     # Toc options
     "collapse_navigation": False,
     "sticky_navigation": True,
     "navigation_depth": 4,
 }
 html_show_sourcelink = False
+html_baseurl = "https://drjdlarson.github.io/gncpy/"
+html_extra_path = [
+    "robots.txt",
+]  # robots.txt is for search engine stuff
+html_logo = "logo.svg"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
