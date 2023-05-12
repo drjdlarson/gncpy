@@ -172,11 +172,13 @@ jobs:
   
   build_wheels:
     # build on each os
-    name: Build wheels on ${{ matrix.os }}
+    name: Build wheels on ${{ matrix.os }} for Python ${{ matrix.python }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        # os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest]
+        python: ['3.7', '3.8', '3.9']
 
     steps:
       - uses: actions/checkout@v3
@@ -184,7 +186,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v3
         with:
-          python-version: '3.7'
+          python-version: ${{ matrix.python }}
       
       - name: Install dependencies
         run: |
@@ -212,22 +214,23 @@ jobs:
         with:
           path: dist/*.tar.gz
   
-  build_win_sdist:
-    name: Build Windows source distribution
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v3
+  # build_win_sdist:
+  #   name: Build Windows source distribution
+  #   runs-on: windows-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
 
-      - name: Build sdist
-        run: pipx run build --sdist
+  #     - name: Build sdist
+  #       run: pipx run build --sdist
 
-      - uses: actions/upload-artifact@v3
-        with:
-          path: dist/*.zip
+  #     - uses: actions/upload-artifact@v3
+  #       with:
+  #         path: dist/*.zip
 
   upload_pypi:
     name: Upload to PyPI
-    needs: [build_wheels, build_sdist, build_win_sdist, publish]
+    # needs: [build_wheels, build_sdist, build_win_sdist, publish]
+    needs: [build_wheels, build_sdist, publish]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v3
