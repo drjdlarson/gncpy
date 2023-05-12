@@ -1,5 +1,6 @@
 import sys
 import numpy as np
+import pytest
 import numpy.random as rnd
 import scipy.stats as stats
 import scipy.linalg as la
@@ -56,12 +57,12 @@ def test_KF_dynObj():  # noqa
     filt = gfilts.KalmanFilter()
     filt.load_filter_state(filt_state)
 
-    A = gdyn.DoubleIntegrator().get_state_mat(0, dt)
+    dynObj = gdyn.DoubleIntegrator()
     for kk, t in enumerate(time[:-1]):
         states[kk + 1, :] = filt.predict(
             t, states[kk, :].reshape((4, 1)), state_mat_args=(dt,)
         ).flatten()
-        t_states[kk + 1, :] = (A @ t_states[kk, :].reshape((4, 1))).flatten()
+        t_states[kk + 1, :] = dynObj.propagate_state(t, t_states[kk].reshape((-1, 1)), state_args=(dt,)).ravel()
 
         pre_stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
 
@@ -146,12 +147,12 @@ def test_KF_mat():  # noqa
 
     t_states = states.copy()
 
-    A = gdyn.DoubleIntegrator().get_state_mat(0, dt)
+    dynObj = gdyn.DoubleIntegrator()
     for kk, t in enumerate(time[:-1]):
         states[kk + 1, :] = filt.predict(
             t, states[kk, :].reshape((4, 1)), state_mat_args=(dt,)
         ).flatten()
-        t_states[kk + 1, :] = (A @ t_states[kk, :].reshape((4, 1))).flatten()
+        t_states[kk + 1, :] = dynObj.propagate_state(t, t_states[kk].reshape((-1, 1)), state_args=(dt,)).ravel()
 
         pre_stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
 
@@ -210,6 +211,8 @@ def test_EKF_dynObj():  # noqa
 
     p_posx_std = 0.2
     p_posy_std = 0.2
+    p_velx_std = 0.01
+    p_vely_std = 0.01
     p_turn_std = 0.1 * d2r
 
     m_posx_std = 0.2
@@ -219,19 +222,15 @@ def test_EKF_dynObj():  # noqa
     dt = 0.01
     t0, t1 = 0, 10 + dt
 
-    coordTurn = gdyn.DoubleIntegrator()
+    coordTurn = gdyn.CoordinatedTurnKnown(turn_rate=5*d2r)
     filt = gfilts.ExtendedKalmanFilter()
     filt.set_state_model(dyn_obj=coordTurn)
     m_mat = np.eye(5)
     filt.set_measurement_model(meas_mat=m_mat)
-    filt.proc_noise = coordTurn.get_dis_process_noise_mat(
-        dt, p_posx_std, p_posy_std, p_turn_std
-    )
-    filt.meas_noise = (
-        np.diag([m_posx_std, m_posx_std, m_posy_std, m_posy_std, m_turn_std]) ** 2
-    )
-    filt.cov = 0.03 ** 2 * np.eye(5)
-    filt.cov[4, 4] = (0.3 * d2r) ** 2
+    filt.proc_noise = np.diag([p_posx_std, p_posy_std, p_velx_std, p_vely_std, p_turn_std])**2
+    filt.meas_noise = np.diag([m_posx_std, m_posy_std,]) ** 2
+    filt.cov = 0.03 ** 2 * np.eye(len(coordTurn.state_names))
+    filt.cov[-1, -1] = (0.3 * d2r) ** 2
 
     time = np.arange(t0, t1, dt)
     states = np.nan * np.ones((time.size, 5))
@@ -244,25 +243,18 @@ def test_EKF_dynObj():  # noqa
     filt = gfilts.ExtendedKalmanFilter()
     filt.load_filter_state(filt_state)
 
-    gamma = np.array(
-        [[dt ** 2 / 2, 0, 0], [dt, 0, 0], [0, dt ** 2 / 2, 0], [0, dt, 0], [0, 0, 1]]
-    )
-    Q = np.diag([p_posx_std ** 2, p_posy_std ** 2, p_turn_std ** 2])
     for kk, t in enumerate(time[:-1]):
-        states[kk + 1, :] = filt.predict(t, states[kk, :].reshape((5, 1))).flatten()
+        states[kk + 1, :] = filt.predict(t, states[kk].reshape((-1, 1)), dyn_fun_params=(dt,)).ravel()
 
-        t_states[kk + 1, :] = coordTurn.propagate_state(
-            t, t_states[kk, :].reshape((5, 1))
-        ).flatten()
-        meas = m_mat @ (
-            t_states[kk + 1, :].reshape((5, 1))
-            + gamma @ np.sqrt(np.diag(Q)).reshape((3, 1)) * rng.standard_normal(1)
-        )
+        t_states[kk + 1] = coordTurn.propagate_state(
+            t, t_states[kk].reshape((-1, 1))
+        ).ravel()
+        meas = m_mat @ t_states[kk + 1].reshape((-1, 1))
         meas = meas + (
             np.sqrt(np.diag(filt.meas_noise)) * rng.standard_normal(meas.size)
         ).reshape(meas.shape)
 
-        states[kk + 1, :] = filt.correct(t, meas, states[kk + 1, :].reshape((5, 1)))[
+        states[kk + 1, :] = filt.correct(t, meas, states[kk + 1].reshape((-1, 1)))[
             0
         ].flatten()
         stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
@@ -523,6 +515,7 @@ def test_UKF_dynObj():  # noqa
     ), "bounding failed"
 
 
+@pytest.mark.slow
 def test_PF_dyn_fnc():  # noqa
     print("test PF")
 
@@ -2565,7 +2558,7 @@ def test_EKF_GSM_gsm():
         return np.array([np.arctan2(x[1, 0], x[0, 0])])
 
     m_dfs = (2, 2)
-    m_vars = (100, 0.001)
+    m_vars = (10, 0.0001)
 
     # define base GSM parameters
     filt = gfilts.EKFGaussianScaleMixtureFilter()

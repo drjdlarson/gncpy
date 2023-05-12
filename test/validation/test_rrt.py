@@ -1,7 +1,8 @@
 import numpy as np
+import numpy.testing as test
 
 import gncpy.dynamics.basic as gdyn
-import gncpy.control as gcontrol
+import gncpy.control as gctrl
 import gncpy.planning.rrt_star as gplan
 
 
@@ -51,7 +52,7 @@ def test_lin_lqrrrtstar():
     search_area = np.vstack((minxy, maxxy))
 
     # define the LQR planner
-    lqr = gcontrol.LQR()
+    lqr = gctrl.LQR()
     Q = 50 * np.eye(len(dynObj.state_names))
     R = 0.6 * np.eye(u_nom.size)
     lqr.set_cost_model(Q, R)
@@ -83,7 +84,7 @@ def test_lin_lqrrrtstar():
         provide_details=True,
     )
 
-    np.testing.assert_allclose(trajectory[-1, :], end_state.ravel())
+    test.assert_allclose(trajectory[-1, :], end_state.ravel())
 
 
 def test_elqrrrtstar():
@@ -132,7 +133,7 @@ def test_elqrrrtstar():
     search_area = np.vstack((minxy, maxxy))
 
     # define the LQR controller
-    controller = gcontrol.ELQR(time_horizon=time_horizon, max_iters=300, tol=1e-2)
+    controller = gctrl.ELQR(time_horizon=time_horizon, max_iters=300, tol=1e-2)
     controller_args = dict()
     Q = np.diag([50, 50, 4, 2])
     R = np.diag([0.05, 0.001])
@@ -225,7 +226,7 @@ def test_elqrrrtstar():
     )
 
     # Check output
-    np.testing.assert_allclose(trajectory[-1, :], end_state.ravel())
+    test.assert_allclose(trajectory[-1, :], end_state.ravel())
 
 
 # %% Debugging entry point
