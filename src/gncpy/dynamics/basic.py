@@ -45,7 +45,7 @@ class DynamicsBase(ABC):
         super().__init__()
         self.control_model = control_model
         self.state_constraint = state_constraint
-    
+
     @property
     def allow_cpp(self):
         return False
@@ -374,7 +374,10 @@ class NonlinearDynamicsBase(DynamicsBase):
                 )[ii]
 
             return gmath.get_state_jacobian(
-                timestep, state, [factory(ii) for ii in range(state.size)], f_args,
+                timestep,
+                state,
+                [factory(ii) for ii in range(state.size)],
+                f_args,
             )
 
     def get_input_mat(self, timestep, state, u, state_args=None, ctrl_args=None):
@@ -413,7 +416,11 @@ class NonlinearDynamicsBase(DynamicsBase):
             )[ii]
 
         return gmath.get_input_jacobian(
-            timestep, state, u, [factory(ii) for ii in range(state.size)], (),
+            timestep,
+            state,
+            u,
+            [factory(ii) for ii in range(state.size)],
+            (),
         )
         # return gmath.get_input_jacobian(timestep, state, u, self.control_model, (),)
 
@@ -473,7 +480,7 @@ class NonlinearDynamicsBase(DynamicsBase):
 
 class DoubleIntegrator(LinearDynamicsBase):
     """Implements a double integrator model.
-    
+
     Todo
     ----
     Implement the control model in c++ for this class
@@ -493,7 +500,7 @@ class DoubleIntegrator(LinearDynamicsBase):
         if self.__model is not None:
             return self.__model.__getstate__()
         return self.__dict__
-    
+
     def __setstate__(self, d):
         self = DoubleIntegrator()
         if isinstance(d, dict):
@@ -505,22 +512,26 @@ class DoubleIntegrator(LinearDynamicsBase):
     # must be provided if allow_cpp is true
     def args_to_params(self, state_args, control_args):
         if len(state_args) != 1:
-            raise RuntimeError("state args must be only (dt,) not {}".format(repr(state_args)))
-        
+            raise RuntimeError(
+                "state args must be only (dt,) not {}".format(repr(state_args))
+            )
+
         if len(control_args) != 0 and self.control_model is None:
             warn("Control agruments supplied but no control model specified")
         elif self.control_model is not None:
             try:
                 self.__controlParams = self.control_model.args_to_params(control_args)
             except Exception:
-                warn("Supplied control model does not support c++ backend but model is supposed to allow c++ backend. Not generating parameters")
+                warn(
+                    "Supplied control model does not support c++ backend but model is supposed to allow c++ backend. Not generating parameters"
+                )
                 self.__controlParams = cpp_bindings.ControlParams()
-        
+
         # hack since state params is empty but things are set in the model
         self.__model.dt = state_args[0]
         return self.__stateTransParams, self.__controlParams
 
-     # must be provided if allow_cpp is true
+    # must be provided if allow_cpp is true
     @property
     def model(self):
         return self.__model
@@ -532,8 +543,13 @@ class DoubleIntegrator(LinearDynamicsBase):
     def propagate_state(self, timestep, state, u=None, state_args=None, ctrl_args=None):
         if state_args is None:
             raise RuntimeError("state_args must be (dt,) not None")
-        self.__model.dt = state_args[0]
-        return self.__model.propagate_state(timestep, state)
+        if self.control_model is None:
+            self.__model.dt = state_args[0]
+            return self.__model.propagate_state(timestep, state)
+        else:
+            return super().propagate_state(
+                timestep, state, u=u, state_args=state_args, ctrl_args=ctrl_args
+            )
 
     def get_dis_process_noise_mat(self, dt, proc_cov):
         """Discrete process noise matrix.
@@ -869,7 +885,10 @@ class CoordinatedTurnKnown(LinearDynamicsBase):
             raise RuntimeError("state_args must be (dt, )")
         if ctrl_args is None:
             ctrl_args = ()
-        F = self.get_state_mat(timestep, *state_args,)
+        F = self.get_state_mat(
+            timestep,
+            *state_args,
+        )
         if u is None:
             return F @ state + np.array(
                 [0, 0, 0, 0, state_args[0] * self.turn_rate]
@@ -998,7 +1017,7 @@ class CoordinatedTurnUnknown(NonlinearDynamicsBase):
         s_ta = np.sin(ta)
         c_ta = np.cos(ta)
 
-        w2 = w ** 2
+        w2 = w**2
         F04 = (w * self.dt * c_ta - s_ta) * x[2] / w2 - (
             w * self.dt * s_ta - 1 + c_ta
         ) * x[3] / w2
@@ -1044,8 +1063,8 @@ class CoordinatedTurnUnknown(NonlinearDynamicsBase):
         """
         return np.array(
             [
-                [0.5 * self.dt ** 2, 0, 0],
-                [0, 0.5 * self.dt ** 2, 0],
+                [0.5 * self.dt**2, 0, 0],
+                [0, 0.5 * self.dt**2, 0],
                 [self.dt, 0, 0],
                 [0, self.dt, 0],
                 [0, 0, 1],
@@ -1250,7 +1269,7 @@ class TschaunerHempelOrbit(NonlinearDynamicsBase):
     )
 
     def __init__(
-        self, mu=3.986004418 * 10 ** 14, semi_major=None, eccentricity=1, **kwargs
+        self, mu=3.986004418 * 10**14, semi_major=None, eccentricity=1, **kwargs
     ):
         self.mu = mu
         self.semi_major = semi_major
@@ -1267,6 +1286,7 @@ class TschaunerHempelOrbit(NonlinearDynamicsBase):
         list
             functions of the form :code:`(t, x, *args)`.
         """
+
         # returns x velocity
         def f0(t, x, *args):
             return x[3]
@@ -1285,15 +1305,15 @@ class TschaunerHempelOrbit(NonlinearDynamicsBase):
             a = self.semi_major
             mu = self.mu
 
-            e2 = e ** 2
+            e2 = e**2
             R3 = ((a * (1 - e2)) / (1 + e * np.cos(x[6]))) ** 3
-            n = np.sqrt(mu / a ** 3)
+            n = np.sqrt(mu / a**3)
 
             C1 = mu / R3
             wz = n * (1 + e * np.cos(x[6])) ** 2 / (1 - e2) ** (3.0 / 2.0)
             wz_dot = -2 * mu * e * np.sin(x[6]) / R3
 
-            return (wz ** 2 + 2 * C1) * x[0] + wz_dot * x[1] + 2 * wz * x[4]
+            return (wz**2 + 2 * C1) * x[0] + wz_dot * x[1] + 2 * wz * x[4]
 
         # returns y acceleration
         def f4(t, x, *args):
@@ -1301,15 +1321,15 @@ class TschaunerHempelOrbit(NonlinearDynamicsBase):
             a = self.semi_major
             mu = self.mu
 
-            e2 = e ** 2
+            e2 = e**2
             R3 = ((a * (1 - e2)) / (1 + e * np.cos(x[6]))) ** 3
-            n = np.sqrt(mu / a ** 3)
+            n = np.sqrt(mu / a**3)
 
             C1 = mu / R3
             wz = n * (1 + e * np.cos(x[6])) ** 2 / (1 - e2) ** (3.0 / 2.0)
             wz_dot = -2 * mu * e * np.sin(x[6]) / R3
 
-            return (wz ** 2 - C1) * x[1] - wz_dot * x[0] - 2 * wz * x[3]
+            return (wz**2 - C1) * x[1] - wz_dot * x[0] - 2 * wz * x[3]
 
         # returns z acceleration
         def f5(t, x, *args):
@@ -1317,7 +1337,7 @@ class TschaunerHempelOrbit(NonlinearDynamicsBase):
             a = self.semi_major
             mu = self.mu
 
-            e2 = e ** 2
+            e2 = e**2
             R3 = ((a * (1 - e2)) / (1 + e * np.cos(x[6]))) ** 3
 
             C1 = mu / R3
@@ -1328,11 +1348,11 @@ class TschaunerHempelOrbit(NonlinearDynamicsBase):
         def f6(t, x, *args):
             e = self.eccentricity
             a = self.semi_major
-            p = a * (1 - e ** 2)
+            p = a * (1 - e**2)
 
             H = np.sqrt(self.mu * p)
             R = p / (1 + e * np.cos(x[6]))
-            return H / R ** 2
+            return H / R**2
 
         return [f0, f1, f2, f3, f4, f5, f6]
 
@@ -1368,6 +1388,7 @@ class KarlgaardOrbit(NonlinearDynamicsBase):
         list
             functions of the form :code:`(t, x, *args)`.
         """
+
         # returns non-dim radius ROC
         def f0(t, x, *args):
             return x[3]
@@ -1387,7 +1408,7 @@ class KarlgaardOrbit(NonlinearDynamicsBase):
             theta_d = x[4]
             phi_d = x[5]
             return (
-                (-3 * r ** 2 + 2 * r * theta_d - phi ** 2 + theta_d ** 2 + phi_d ** 2)
+                (-3 * r**2 + 2 * r * theta_d - phi**2 + theta_d**2 + phi_d**2)
                 + 3 * r
                 + 2 * theta_d
             )

@@ -787,7 +787,7 @@ class ELQR(LQR):
         max_iters : int, optional
             Maximum number of iterations to try for convergence. The default is
             1e3.
-        tol : flaot, optional
+        tol : float, optional
             Tolerance on convergence. The default is 1e-4.
         **kwargs : dict
             Additional arguments.

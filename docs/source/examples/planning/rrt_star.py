@@ -2,7 +2,7 @@ def lin_lqrrrtstar():
     import numpy as np
 
     import gncpy.dynamics.basic as gdyn
-    import gncpy.control as gcontrol
+    import gncpy.control as gctrl
     from gncpy.planning.rrt_star import LQRRRTStar
 
     SEED = 29
@@ -46,7 +46,7 @@ def lin_lqrrrtstar():
     search_area = np.vstack((minxy, maxxy))
 
     # define the LQR planner
-    lqr = gcontrol.LQR()
+    lqr = gctrl.LQR()
     Q = 50 * np.eye(len(dynObj.state_names))
     R = 0.6 * np.eye(u_nom.size)
     lqr.set_cost_model(Q, R)
@@ -85,7 +85,7 @@ def nonlin_lqrrrtstar():
     import numpy as np
 
     import gncpy.dynamics.basic as gdyn
-    import gncpy.control as gcontrol
+    import gncpy.control as gctrl
     from gncpy.planning.rrt_star import LQRRRTStar
 
     d2r = np.pi / 180
@@ -132,7 +132,7 @@ def nonlin_lqrrrtstar():
     search_area = np.vstack((minxy, maxxy))
 
     # define the LQR planner
-    lqr = gcontrol.LQR(time_horizon=time_horizon)
+    lqr = gctrl.LQR(time_horizon=time_horizon)
     Q = np.diag([50, 50, 0.01, 0.1])
     R = np.diag([0.0001, 0.001])
     lqr.set_cost_model(Q, R)
@@ -185,7 +185,7 @@ def elqrrrtstar():
     import numpy as np
 
     import gncpy.dynamics.basic as gdyn
-    import gncpy.control as gcontrol
+    import gncpy.control as gctrl
     from gncpy.planning.rrt_star import ExtendedLQRRRTStar
 
     d2r = np.pi / 180
@@ -232,7 +232,7 @@ def elqrrrtstar():
     search_area = np.vstack((minxy, maxxy))
 
     # define the LQR controller
-    controller = gcontrol.ELQR(time_horizon=time_horizon, max_iters=300, tol=1e-2)
+    controller = gctrl.ELQR(time_horizon=time_horizon, max_iters=300, tol=1e-2)
     controller_args = dict()
     Q = np.diag([50, 50, 4, 2])
     R = np.diag([0.05, 0.001])

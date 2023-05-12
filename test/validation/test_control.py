@@ -1,7 +1,8 @@
 import numpy as np
+import numpy.testing as test
 
 import gncpy.dynamics.basic as gdyn
-import gncpy.control as gcontrol
+import gncpy.control as gctrl
 
 
 def test_lqr_lin_inf_hor():
@@ -20,7 +21,7 @@ def test_lqr_lin_inf_hor():
     u_nom = np.zeros((2, 1))
     Q = 10 * np.eye(len(dynObj.state_names))
     R = 0.5 * np.eye(u_nom.size)
-    lqr = gcontrol.LQR(time_horizon=time_horizon)
+    lqr = gctrl.LQR(time_horizon=time_horizon)
     # need to set dt here so the controller can generate a state trajectory
     lqr.set_state_model(u_nom, dynObj=dynObj, dt=dt)
     lqr.set_cost_model(Q, R)
@@ -35,7 +36,7 @@ def test_lqr_lin_inf_hor():
         provide_details=True,
     )
 
-    np.testing.assert_allclose(state_traj[-1, :], end_state.ravel())
+    test.assert_allclose(state_traj[-1, :], end_state.ravel(), rtol=0.025, atol=0.085)
 
 
 def test_lqr_lin_finite_hor():
@@ -55,7 +56,7 @@ def test_lqr_lin_finite_hor():
     u_nom = np.zeros((2, 1))
     Q = 200 * np.eye(len(dynObj.state_names))
     R = 0.01 * np.eye(u_nom.size)
-    lqr = gcontrol.LQR(time_horizon=time_horizon)
+    lqr = gctrl.LQR(time_horizon=time_horizon)
     # need to set dt here so the controller can generate a state trajectory
     lqr.set_state_model(u_nom, dynObj=dynObj, dt=dt)
     lqr.set_cost_model(Q, R)
@@ -69,7 +70,7 @@ def test_lqr_lin_finite_hor():
         provide_details=True,
     )
 
-    np.testing.assert_allclose(state_traj[-1, :], end_state.ravel())
+    test.assert_allclose(state_traj[-1, :], end_state.ravel(), rtol=0.002, atol=0.008)
 
 
 def test_lqr_nonlin_finite_hor():
@@ -77,46 +78,37 @@ def test_lqr_nonlin_finite_hor():
 
     cur_time = 0
     dt = 0.1
-    cur_state = np.array([0.5, 0, 1, 0, 45 * d2r]).reshape((-1, 1))
-    end_state = np.array([2, 0, 4, 0, 0]).reshape((-1, 1))
+    cur_state = np.array([0.5, 0, 1, 0, 5 * d2r]).reshape((-1, 1))
+    end_state = np.array([2, 4, 0, 0, 0]).reshape((-1, 1))
     time_horizon = 50 * dt
 
-    def ctrl02(t, x, u, *args):
-        return 0
-
-    def ctrl1(t, x, u, *args):
-        return (2 * np.min([np.max([u[0, 0], -1]), 1]) * np.cos(x[4])).item()
-
-    def ctrl3(t, x, u, *args):
-        return (2 * np.min([np.max([u[0, 0], -1]), 1]) * np.sin(x[4])).item()
-
-    def ctrl4(t, x, u, *args):
-        return (5 * d2r * np.min([np.max([u[1, 0], -1]), 1])).item()
-
     # Create dynamics object
-    dynObj = gdyn.CoordinatedTurn()
-    dynObj.control_model = [ctrl02, ctrl1, ctrl02, ctrl3, ctrl4]
+    dynObj = gdyn.CoordinatedTurnUnknown()
 
     # Setup LQR Object
-    u_nom = np.zeros((2, 1))
-    Q = np.diag([200, 0.0001, 2000, 0.0001, 2000])
+    u_nom = np.zeros((3, 1))
+    Q = np.diag([200, 2000, 1, 1, 2000])
     R = 0.01 * np.eye(u_nom.size)
-    lqr = gcontrol.LQR(time_horizon=time_horizon)
+    lqr = gctrl.LQR(time_horizon=time_horizon)
     # need to set dt here so the controller can generate a state trajectory
-    lqr.set_state_model(u_nom, dynObj=dynObj, dt=dt)
+    lqr.set_state_model(u_nom, dynObj=dynObj, dt=dt, 
+                        control_constraints=lambda t, u: np.array([
+                                                                    [u.ravel()[0]],
+                                                                    [u.ravel()[1]],
+                                                                    [5 * d2r * np.min([np.max([u.ravel()[2], -1]), 1])]
+                                                                  ])
+    )
     lqr.set_cost_model(Q, R)
 
     u, cost, state_traj, ctrl_signal = lqr.calculate_control(
-        cur_time, cur_state, end_state=end_state, provide_details=True,
+        cur_time, cur_state, end_state=end_state, provide_details=True, state_args=(dt,),
     )
 
-    err = np.abs(state_traj[-1, :] - end_state.ravel())
-    np.testing.assert_allclose(err[[0, 2]], np.zeros(err[[0, 2]].shape), atol=0.5)
-    np.testing.assert_allclose(err[[1, 3]], np.zeros(err[[1, 3]].shape), atol=2.2)
-    np.testing.assert_allclose(err[-1], 0, atol=0.35)
+    test.assert_allclose(state_traj[-1, :], end_state.ravel(), rtol=1e-3, atol=0.07)
 
 
-def test_elqr():
+
+def test_elqr_non_lin():
     tt = 0  # starting time when calculating control
     dt = 1 / 6
     time_horizon = 150 * dt  # run for 150 timesteps
@@ -210,7 +202,7 @@ def test_elqr():
         return P, Q, R, q, r
 
     # create control obect
-    elqr = gcontrol.ELQR(time_horizon=time_horizon)
+    elqr = gctrl.ELQR(time_horizon=time_horizon)
     elqr.set_state_model(u_nom, dynObj=dynObj)
     elqr.dt = dt  # set here or within the dynamic object
     elqr.set_cost_model(

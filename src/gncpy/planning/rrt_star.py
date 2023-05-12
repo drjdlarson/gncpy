@@ -7,7 +7,7 @@ from copy import deepcopy
 from PIL import Image
 from sys import exit
 
-import gncpy.control as gcontrol
+import gncpy.control as gctrl
 import gncpy.plotting as gplot
 
 
@@ -145,7 +145,7 @@ class LQRRRTStar:
         return len(self.pos_inds)
 
     def set_control_model(self, planner, pos_inds, controller_args=None):
-        if not isinstance(planner, gcontrol.LQR):
+        if not isinstance(planner, gctrl.LQR):
             raise TypeError("Must specify an LQR instance")
         self.planner = planner
         self.pos_inds = pos_inds
@@ -421,7 +421,7 @@ class LQRRRTStar:
         self._show_planner = False
         if show_animation:
             self._show_planner = show_planner and isinstance(
-                self.planner, gcontrol.ELQR
+                self.planner, gctrl.ELQR
             )
             if self._show_planner:
                 n_plts = 2

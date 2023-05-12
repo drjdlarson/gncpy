@@ -38,11 +38,11 @@ games = [
     "pygame>=2.1.2"
 ]
 reinforcement-learning = [
-    "gym>=0.25",
+    "gym==0.25",
     "opencv-python"
 ]
 all = [
-    "gym>=0.25",
+    "gym==0.25",
     "opencv-python",
     "pygame>=2.1.2"
 ]
