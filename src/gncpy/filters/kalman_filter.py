@@ -60,7 +60,7 @@ class KalmanFilter(BayesFilter):
             return self.__model.__repr__()
         else:
             return super().__repr__()
-    
+
     def __str__(self) -> str:
         if self.__model is not None:
             return self.__model.__str__()
@@ -70,10 +70,10 @@ class KalmanFilter(BayesFilter):
     @property
     def cov(self):
         if self.__model is not None:
-            return np.array(self.__model.cov, copy=False)
+            return self.__model.cov
         else:
             return self._cov
-    
+
     @cov.setter
     def cov(self, val):
         if self.__model is not None:
@@ -378,7 +378,7 @@ class KalmanFilter(BayesFilter):
             self.__corrParams = cpp_bindings.BayesCorrectParams()
 
             # make sure the cpp filter has its values set based on what python user gave (init only)
-            self.__model.cov = self._cov
+            self.__model.cov = self._cov.astype(np.float64)
             self.__model.set_state_model(self._dyn_obj.model, self.proc_noise)
             self.__model.set_measurement_model(self._measObj, self.meas_noise)
 
@@ -416,10 +416,15 @@ class KalmanFilter(BayesFilter):
 
         """
         self._init_model()
-        
+
         if self.__model is not None:
-            self.__predParams.stateTransParams, self.__predParams.controlParams = self._dyn_obj.args_to_params(state_mat_args, input_mat_args)
-            return self.__model.predict(timestep, cur_state, cur_input, self.__predParams).reshape((-1, 1))
+            (
+                self.__predParams.stateTransParams,
+                self.__predParams.controlParams,
+            ) = self._dyn_obj.args_to_params(state_mat_args, input_mat_args)
+            return self.__model.predict(
+                timestep, cur_state, cur_input, self.__predParams
+            ).reshape((-1, 1))
         else:
             next_state, state_mat = self._predict_next_state(
                 timestep, cur_state, cur_input, state_mat_args, input_mat_args
@@ -448,7 +453,7 @@ class KalmanFilter(BayesFilter):
     def _meas_fit_pdf(self, meas, est_meas, meas_cov):
         extra_args = {}
         if np.abs(np.linalg.det(meas_cov)) > np.finfo(float).eps:
-            extra_args['allow_singular'] = True
+            extra_args["allow_singular"] = True
         return stats.multivariate_normal.pdf(
             meas.ravel(), mean=est_meas.ravel(), cov=meas_cov, **extra_args
         )
@@ -497,12 +502,12 @@ class KalmanFilter(BayesFilter):
 
         """
         self._init_model()
-        
+
         if self.__model is not None:
             self.__corrParams.measParams = self._measObj.args_to_params(meas_fun_args)
             out = self.__model.correct(timestep, meas, cur_state, self.__corrParams)
             return out[0].reshape((-1, 1)), out[1]
-            
+
         else:
             est_meas, meas_mat = self._est_meas(
                 timestep, cur_state, meas.size, meas_fun_args

@@ -1,11 +1,15 @@
 #pragma once
+#include <memory>
+#include <sstream>
+#include <pybind11/pybind11.h>
+#include <pybind11/functional.h> // needed to allow pickling of std::function
 
 #define STRINGIFY(x) #x
 #define MACRO_STRINGIFY(x) STRINGIFY(x)
 
 // see https://github.com/pybind/pybind11/issues/956 for why the shared_ptr is needed
-#define GNCPY_PY_CHILD_CLASS(child, base) py::class_<child, base, std::shared_ptr<child>>
-#define GNCPY_PY_BASE_CLASS(base) py::class_<base, std::shared_ptr<base>>
+#define GNCPY_PY_CHILD_CLASS(child, base) pybind11::class_<child, base, std::shared_ptr<child>>
+#define GNCPY_PY_BASE_CLASS(base) pybind11::class_<base, std::shared_ptr<base>>
 
 #define GNCPY_STR(class_t) \
     .def("__str__", [](const class_t& self) { \
@@ -17,11 +21,11 @@
     )
 
 #define GNCPY_PICKLE(class_t) \
-    .def(py::pickle( \
+    .def(pybind11::pickle( \
             [](const class_t& self) { /* __getstate__ */ \
-                return py::make_tuple(py::bytes(self.saveClassState().str())); \
+                return pybind11::make_tuple(pybind11::bytes(self.saveClassState().str())); \
             }, \
-            [](py::tuple t) { /* __setstate__ */ \
+            [](pybind11::tuple t) { /* __setstate__ */ \
                 if(t.size() != 1) { \
                     throw std::runtime_error("Invalid state!"); \
                 } \

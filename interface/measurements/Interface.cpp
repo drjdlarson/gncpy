@@ -1,8 +1,8 @@
-#include <memory>
 #include <pybind11/pybind11.h>
 #include <gncpy/measurements/IMeasModel.h>
 #include <gncpy/measurements/ILinearMeasModel.h>
 #include <gncpy/measurements/INonLinearMeasModel.h>
+#include "Common.h"
 #include "../Macros.h"
 
 
@@ -15,7 +15,7 @@ void initInterface(py::module& m) {
     using namespace lager;
 
     // define these so the inherited classes import ok
-    GNCPY_PY_BASE_CLASS(gncpy::measurements::IMeasModel<double>)(m, "IMeasModel");
-    GNCPY_PY_CHILD_CLASS(gncpy::measurements::ILinearMeasModel<double>, gncpy::measurements::IMeasModel<double>)(m, "ILinearMeasModel");
-    GNCPY_PY_CHILD_CLASS(gncpy::measurements::INonLinearMeasModel<double>, gncpy::measurements::IMeasModel<double>)(m, "INonLinearMeasModel");
+    GNCPY_PY_BASE_CLASS(gncpy::measurements::IMeasModel)(m, "IMeasModel");
+    GNCPY_PY_CHILD_CLASS(gncpy::measurements::ILinearMeasModel, gncpy::measurements::IMeasModel)(m, "ILinearMeasModel");
+    GNCPY_PY_CHILD_CLASS(gncpy::measurements::INonLinearMeasModel, gncpy::measurements::IMeasModel)(m, "INonLinearMeasModel");
 }

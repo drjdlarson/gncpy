@@ -1,15 +1,12 @@
-#include <memory>
-
+#include <Eigen/Dense>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // needed because some backend gncpy functions retrun stl types
+#include <pybind11/eigen.h>
 #include <gncpy/filters/IBayesFilter.h>
 #include <gncpy/filters/Kalman.h>
-#include <gncpy/math/Matrix.h>
-#include <gncpy/math/Vector.h>
 
-#include "../Macros.h"
-#include "../math/Common.h" // needs to be included so numpy to matrix/vector types work
 #include "Common.h"
+#include "../Macros.h"
 
 namespace py = pybind11;
 
@@ -19,17 +16,21 @@ void initKalman(py::module& m) {
 
     using namespace lager;
 
-    GNCPY_PY_CHILD_CLASS(gncpy::filters::Kalman<double>, gncpy::filters::IBayesFilter<double>)(m, "Kalman")
+    GNCPY_PY_CHILD_CLASS(gncpy::filters::Kalman, gncpy::filters::IBayesFilter)(m, "Kalman")
         .def(py::init())
-        .def("set_state_model", &gncpy::filters::Kalman<double>::setStateModel)
-        .def("set_measurement_model", &gncpy::filters::Kalman<double>::setMeasurementModel)
-        .def("predict", &gncpy::filters::Kalman<double>::predict)
+        .def("set_state_model", &gncpy::filters::Kalman::setStateModel)
+        .def("set_measurement_model", &gncpy::filters::Kalman::setMeasurementModel)
+        .def("predict", &gncpy::filters::Kalman::predict)
         // make a small wrapper function so the pass by reference works
-        .def("correct", [](gncpy::filters::Kalman<double>& self, double timestep, const gncpy::matrix::Vector<double>& meas, const gncpy::matrix::Vector<double>& curState, const gncpy::filters::BayesCorrectParams* params) {
+        .def("correct", [](gncpy::filters::Kalman& self, double timestep, const Eigen::VectorXd& meas, const Eigen::VectorXd& curState, const gncpy::filters::BayesCorrectParams* params) {
             double measFitProb;
-            gncpy::matrix::Vector nextState = self.correct(timestep, meas, curState, measFitProb, params);
+            Eigen::VectorXd nextState = self.correct(timestep, meas, curState, measFitProb, params);
             return py::make_tuple(nextState, measFitProb);
         })
-        .def_readwrite("cov", &gncpy::filters::Kalman<double>::cov)
-        GNCPY_PICKLE(gncpy::filters::Kalman<double>);
+        .def_property("cov", [](gncpy::filters::Kalman& self) {
+            return py::EigenDRef<Eigen::MatrixXd>(self.getCov());
+        }, [](gncpy::filters::Kalman& self, py::EigenDRef<Eigen::MatrixXd> val){
+            self.getCov() = val;
+        }, py::return_value_policy::reference_internal)
+        GNCPY_PICKLE(gncpy::filters::Kalman);
 }

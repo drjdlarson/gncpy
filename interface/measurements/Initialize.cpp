@@ -1,13 +1,6 @@
 #include <pybind11/pybind11.h>
+#include "Common.h"
 #include "../Macros.h"
-
-
-namespace py = pybind11;
-
-void initInterface(py::module&);
-void initParameters(py::module&);
-void initStateObservation(py::module& m);
-void initRangeAndBearing(py::module& m);
 
 
 PYBIND11_MODULE(_measurements, m) {

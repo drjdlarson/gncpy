@@ -13,6 +13,7 @@ RUN apt-get update \
         python3-pip \
         python-is-python3 \
         python3-dev \
+        python3-tk \
         g++ \
         make \
         cmake \

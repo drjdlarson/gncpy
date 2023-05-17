@@ -8,7 +8,6 @@
 #include <gncpy/dynamics/ILinearDynamics.h>
 #include <gncpy/dynamics/DoubleIntegrator.h>
 
-#include "../math/Common.h"
 #include "../Macros.h"
 #include "Common.h"
 
@@ -20,10 +19,10 @@ void initDoubleIntegrator(py::module& m) {
 
     using namespace lager;
 
-    GNCPY_PY_CHILD_CLASS(gncpy::dynamics::DoubleIntegrator<double>, gncpy::dynamics::ILinearDynamics<double>)(m, "DoubleIntegrator")
+    GNCPY_PY_CHILD_CLASS(gncpy::dynamics::DoubleIntegrator, gncpy::dynamics::ILinearDynamics)(m, "DoubleIntegrator")
         .def(py::init<double>())
-        GNCPY_DYNAMICS_ILINEARDYNAMICS_INTERFACE(gncpy::dynamics::DoubleIntegrator<double>, double)
-        .def_property("dt", &gncpy::dynamics::DoubleIntegrator<double>::dt, &gncpy::dynamics::DoubleIntegrator<double>::setDt) // Essentially setter and getter
-        GNCPY_PICKLE(gncpy::dynamics::DoubleIntegrator<double>);
+        GNCPY_DYNAMICS_ILINEARDYNAMICS_INTERFACE(gncpy::dynamics::DoubleIntegrator)
+        .def_property("dt", &gncpy::dynamics::DoubleIntegrator::dt, &gncpy::dynamics::DoubleIntegrator::setDt) // Essentially setter and getter
+        GNCPY_PICKLE(gncpy::dynamics::DoubleIntegrator);
 
 }

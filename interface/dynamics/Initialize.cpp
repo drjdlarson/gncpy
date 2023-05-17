@@ -1,12 +1,6 @@
 #include <pybind11/pybind11.h>
+#include "Common.h"
 #include "../Macros.h"
-
-
-namespace py = pybind11;
-
-void initInterface(py::module&);
-void initParameters(py::module&);
-void initDoubleIntegrator(py::module&);
 
 
 PYBIND11_MODULE(_dynamics, m) {

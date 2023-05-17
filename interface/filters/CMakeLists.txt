@@ -5,14 +5,14 @@ pybind11_add_module(_filters MODULE
     Kalman.cpp
     Common.h
     ${CMAKE_CURRENT_SOURCE_DIR}/../Macros.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/../math/Common.h
 )
 target_compile_definitions(_filters PRIVATE VERSION_INFO=${PROJECT_VERSION})
 target_link_libraries(_filters
     PRIVATE
+        Eigen3::Eigen
         lager::gncpy
 )
 install(TARGETS _filters 
     DESTINATION 
-        gncpy/filters
+        ${SKBUILD_PROJECT_NAME}/filters
 )

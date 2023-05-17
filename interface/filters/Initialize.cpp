@@ -1,13 +1,6 @@
 #include <pybind11/pybind11.h>
+#include "Common.h"
 #include "../Macros.h"
-
-
-namespace py = pybind11;
-
-void initInterface(py::module&);
-void initParameters(py::module&);
-void initKalman(py::module&);
-
 
 PYBIND11_MODULE(_filters, m) {
     initInterface(m);

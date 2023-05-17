@@ -24,6 +24,8 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
 ]
 dependencies = [
     "serums",

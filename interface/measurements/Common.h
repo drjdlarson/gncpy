@@ -1,11 +1,17 @@
 #pragma once
-#include <pybind11/pybind11.h>
+#include <Eigen/Dense>
 #include <gncpy/measurements/Parameters.h>
-#include <gncpy/math/Vector.h>
+#include <pybind11/pybind11.h>
+#include <pybind11/eigen.h>
 
-#define GNCPY_MEASUREMENTS_IMEASMODEL_INTERFACE(cName, T) \
-    .def("get_meas_mat", py::overload_cast<const gncpy::matrix::Vector<T>&, const gncpy::measurements::MeasParams*>(&cName::getMeasMat, py::const_), \
-        py::arg("state"), py::arg_v("params", static_cast<gncpy::measurements::MeasParams *>(nullptr), "lager::gncpy::measurements::MeasParams*=nullptr")) \
-    .def("measure", py::overload_cast<const gncpy::matrix::Vector<T>&, const gncpy::measurements::MeasParams*>(&cName::measure, py::const_), \
-         py::arg("state"), py::arg_v("params", static_cast<gncpy::measurements::MeasParams *>(nullptr), "lager::gncpy::measurements::MeasParams*=nullptr"))
+void initInterface(pybind11::module&);
+void initParameters(pybind11::module&);
+void initStateObservation(pybind11::module&);
+void initRangeAndBearing(pybind11::module&);
+
+#define GNCPY_MEASUREMENTS_IMEASMODEL_INTERFACE(cName) \
+    .def("get_meas_mat", pybind11::overload_cast<const Eigen::VectorXd&, const lager::gncpy::measurements::MeasParams*>(&cName::getMeasMat, pybind11::const_), \
+        pybind11::arg("state"), pybind11::arg_v("params", static_cast<lager::gncpy::measurements::MeasParams *>(nullptr), "lager::gncpy::measurements::MeasParams*=nullptr")) \
+    .def("measure", pybind11::overload_cast<const Eigen::VectorXd&, const lager::gncpy::measurements::MeasParams*>(&cName::measure, pybind11::const_), \
+         pybind11::arg("state"), pybind11::arg_v("params", static_cast<lager::gncpy::measurements::MeasParams *>(nullptr), "lager::gncpy::measurements::MeasParams*=nullptr"))
     
