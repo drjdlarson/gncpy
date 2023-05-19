@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import gncpy.filters as gfilts
 import gncpy.dynamics.basic as gdyn
 import gncpy.distributions as gdistrib
+import gncpy.data_fusion as gdf
 from serums.enums import GSMTypes
 from serums.models import GaussianScaleMixture
 
@@ -2724,6 +2725,214 @@ def test_EKF_GSM_gsm():
         bounding > (stats.norm.sf(-sig_num) - stats.norm.sf(sig_num))
     ), "bounding failed"
 
+def test_GCI_KF_dynObj():
+    m_noise = 0.002
+    p_noise = 0.02
+
+    dt = 0.01
+    t0, t1 = 0, 10 + dt
+
+    rng = rnd.default_rng(global_seed)
+    in_filt = gfilts.KalmanFilter()
+    in_filt.set_state_model(dyn_obj=gdyn.DoubleIntegrator())
+    in_filt.proc_noise = gdyn.DoubleIntegrator().get_dis_process_noise_mat(
+        dt, np.array([[p_noise ** 2]])
+    )
+    in_filt.meas_noise = m_noise ** 2 * np.eye(2)
+    m_mat1 = np.array([[1, 0, 0, 0], [0, 1, 0, 0]])
+    m_mat2 = np.array([[0, 0, 1, 0], [0, 0, 0, 1]])
+    filt = gfilts.GCIFilter(base_filter=in_filt,
+                            meas_model_list=[m_mat1, m_mat2],
+                            meas_noise_list=[m_noise ** 2 * np.eye(2),
+                                             0.01*m_noise ** 2 * np.eye(2)])
+    filt.cov = 0.25 * np.eye(4)
+    vx0 = 2
+    vy0 = 1
+
+    time = np.arange(t0, t1, dt)
+    states = np.nan * np.ones((time.size, 4))
+    stds = np.nan * np.ones(states.shape)
+    pre_stds = stds.copy()
+    states[0, :] = np.array([0, 0, vx0, vy0])
+    stds[0, :] = np.sqrt(np.diag(filt.cov))
+    pre_stds[0, :] = stds[0, :]
+
+    t_states = states.copy()
+
+    filt_state = filt.save_filter_state()
+    filt = gfilts.GCIFilter()
+    filt.load_filter_state(filt_state)
+
+    m_noise_cov_1 = m_noise ** 2 * np.eye(2)
+    m_noise_cov_2 = 1 ** 2 * np.eye(2)
+
+    A = gdyn.DoubleIntegrator().get_state_mat(0, dt)
+    weight_list = [1.0/3.0, 1.0/3.0, 1.0/3.0]
+    for kk, t in enumerate(time[:-1]):
+        # print(kk)
+        states[kk + 1, :] = filt.predict(
+            t, states[kk, :].reshape((4, 1)), state_mat_args=(dt,)
+        ).flatten()
+        t_states[kk + 1, :] = (A @ t_states[kk, :].reshape((4, 1))).flatten()
+
+        pre_stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
+
+        n_state1 = m_mat1 @ (
+                t_states[kk + 1, :]
+                + np.sqrt(np.diag(filt.proc_noise)) * rng.standard_normal(1)
+        ).reshape((4, 1))
+        n_state2 = m_mat2 @ (
+                t_states[kk + 1, :]
+                + np.sqrt(np.diag(filt.proc_noise)) * rng.standard_normal(1)
+        ).reshape((4, 1))
+
+        meas1 = n_state1 + m_noise * rng.standard_normal(n_state1.size).reshape(n_state1.shape)
+        meas2 = n_state2 + 0.01 * m_noise * rng.standard_normal(n_state2.size).reshape(n_state2.shape)
+
+        states[kk + 1, :] = filt.correct(t, [meas1, meas2], states[kk + 1, :].reshape((4, 1)))[
+            0
+        ].flatten()
+        stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
+    errs = states - t_states
+    ylim_list = [(np.min(states[:, 0]), np.max(states[:, 0])),
+                 (np.min(states[:, 1]), np.max(states[:, 1])),
+                 (-1, 3),
+                 (-1, 2)]
+    # plot states
+    if debug_figs:
+        fig = plt.figure()
+        for ii, s in enumerate(gdyn.DoubleIntegrator().state_names):
+            fig.add_subplot(4, 1, ii + 1)
+            fig.axes[ii].plot(time, states[:, ii], color="b")
+            fig.axes[ii].plot(time, t_states[:, ii], color="r")
+            fig.axes[ii].grid(True)
+            fig.axes[ii].set_ylabel(s)
+            fig.axes[ii].set_ylim(ylim_list[ii])
+        fig.axes[-1].set_xlabel("time (s)")
+        fig.suptitle("States (obj)")
+        fig.tight_layout()
+
+        # plot stds
+        fig = plt.figure()
+        for ii, s in enumerate(gdyn.DoubleIntegrator().state_names):
+            fig.add_subplot(4, 1, ii + 1)
+            fig.axes[ii].plot(time, stds[:, ii], color="b")
+            fig.axes[ii].plot(time, pre_stds[:, ii], color="r")
+            fig.axes[ii].grid(True)
+            fig.axes[ii].set_ylabel(s + " std")
+        fig.axes[-1].set_xlabel("time (s)")
+        fig.suptitle("Filter standard deviations (obj)")
+        fig.tight_layout()
+    sig_num = 1
+    bounding = np.sum(np.abs(errs) < sig_num * stds, axis=0) / time.size
+    # assert all(
+    #     bounding > (stats.norm.sf(-sig_num) - stats.norm.sf(sig_num))
+    # ), "bounding failed"
+
+
+def test_GCI_EKF_dynObj():
+    def range_func(t, x):
+        return np.sqrt(x[0] ** 2 + x[1] ** 2)
+    def bear_func(t, x):
+        return np.arctan2(x[1], x[0])
+
+    m_noise = 0.002
+    p_noise = 0.02
+
+    dt = 0.01
+    t0, t1 = 0, 10 + dt
+
+    rng = rnd.default_rng(global_seed)
+    in_filt = gfilts.ExtendedKalmanFilter()
+    in_filt.set_state_model(dyn_obj=gdyn.DoubleIntegrator())
+    in_filt.proc_noise = gdyn.DoubleIntegrator().get_dis_process_noise_mat(
+        dt, np.array([[p_noise ** 2]])
+    )
+    in_filt.meas_noise = m_noise ** 2 * np.eye(1)
+
+    filt = gfilts.GCIFilter(base_filter=in_filt,
+                            meas_model_list=[[range_func], [bear_func]],
+                            meas_noise_list=[m_noise ** 2 * np.eye(1),
+                                             (np.pi / 180 * m_noise) ** 2 * np.eye(1)])
+    filt.cov = 0.25 * np.eye(4)
+    vx0 = 2
+    vy0 = 1
+
+    time = np.arange(t0, t1, dt)
+    states = np.nan * np.ones((time.size, 4))
+    stds = np.nan * np.ones(states.shape)
+    pre_stds = stds.copy()
+    states[0, :] = np.array([0, 0, vx0, vy0])
+    stds[0, :] = np.sqrt(np.diag(filt.cov))
+    pre_stds[0, :] = stds[0, :]
+
+    t_states = states.copy()
+
+    filt_state = filt.save_filter_state()
+    filt = gfilts.GCIFilter()
+    filt.load_filter_state(filt_state)
+
+    m_noise_cov_1 = m_noise ** 2 * np.eye(1)
+    m_noise_cov_2 = (np.pi / 180 * m_noise) ** 2 * np.eye(1)
+
+    dyn_fun_args = (dt,)
+    A = gdyn.DoubleIntegrator().get_state_mat(0, dt)
+    weight_list = [1.0/3.0, 1.0/3.0, 1.0/3.0]
+    for kk, t in enumerate(time[:-1]):
+        # print(kk)
+        states[kk + 1, :] = filt.predict(
+            t, states[kk, :].reshape((4, 1)), dyn_fun_params=dyn_fun_args
+        ).flatten()
+        t_states[kk + 1, :] = (A @ t_states[kk, :].reshape((4, 1))).flatten()
+
+        pre_stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
+
+        n_state1 = range_func(t, t_states[kk + 1, :].reshape((4, 1)) + (np.sqrt(np.diag(filt.proc_noise)) * rng.standard_normal(1)).reshape((4, 1)))
+        n_state2 = bear_func(t, t_states[kk + 1, :].reshape((4, 1)) + (np.sqrt(np.diag(filt.proc_noise * np.pi / 180)) * rng.standard_normal(1)).reshape((4, 1)))
+
+        meas1 = n_state1 + (m_noise_cov_1 * rng.standard_normal(1)).reshape(n_state1.shape)
+        meas2 = n_state2 + (m_noise_cov_2 * rng.standard_normal(1)).reshape(n_state2.shape)
+
+        states[kk + 1, :] = filt.correct(t, [meas1, meas2], states[kk + 1, :].reshape((4, 1)))[
+            0
+        ].flatten()
+        stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
+    errs = states - t_states
+    # ylim_list = [(np.min(states[:, 0]), np.max(states[:, 0])),
+    #              (np.min(states[:, 1]), np.max(states[:, 1])),
+    #              (-1, 3),
+    #              (-1, 2)]
+    # plot states
+    if debug_figs:
+        fig = plt.figure()
+        for ii, s in enumerate(gdyn.DoubleIntegrator().state_names):
+            fig.add_subplot(4, 1, ii + 1)
+            fig.axes[ii].plot(time, states[:, ii], color="b")
+            fig.axes[ii].plot(time, t_states[:, ii], color="r")
+            fig.axes[ii].grid(True)
+            fig.axes[ii].set_ylabel(s)
+            # fig.axes[ii].set_ylim(ylim_list[ii])
+        fig.axes[-1].set_xlabel("time (s)")
+        fig.suptitle("States (obj)")
+        fig.tight_layout()
+
+        # plot stds
+        fig = plt.figure()
+        for ii, s in enumerate(gdyn.DoubleIntegrator().state_names):
+            fig.add_subplot(4, 1, ii + 1)
+            fig.axes[ii].plot(time, stds[:, ii], color="b")
+            fig.axes[ii].plot(time, pre_stds[:, ii], color="r")
+            fig.axes[ii].grid(True)
+            fig.axes[ii].set_ylabel(s + " std")
+        fig.axes[-1].set_xlabel("time (s)")
+        fig.suptitle("Filter standard deviations (obj)")
+        fig.tight_layout()
+    sig_num = 1
+    bounding = np.sum(np.abs(errs) < sig_num * stds, axis=0) / time.size
+    assert all(
+        bounding > (stats.norm.sf(-sig_num) - stats.norm.sf(sig_num))
+    ), "bounding failed"
+
 
 def test_IMM_dynObj():
     m_noise = 0.002
@@ -2844,6 +3053,141 @@ def test_IMM_dynObj():
         bounding > (stats.norm.sf(-sig_num) - stats.norm.sf(sig_num))
     ), "bounding failed"
 
+def test_GCI_IMM_dynObj():
+    def range_func(t, x):
+        return np.sqrt(x[0] ** 2 + x[1] ** 2)
+    def bear_func(t, x):
+        return np.arctan2(x[1], x[0])
+
+    m_noise = 0.002
+    p_noise = 0.02
+
+    dt = 0.01
+    t0, t1 = 0, 10 + dt
+
+    dyn_obj1 = gdyn.CoordinatedTurnKnown(turn_rate=0)
+    dyn_obj2 = gdyn.CoordinatedTurnKnown(turn_rate=5 * np.pi / 180)
+
+    rng = rnd.default_rng(global_seed)
+
+    in_filt1 = gfilts.ExtendedKalmanFilter()
+    in_filt1.set_state_model(dyn_obj=dyn_obj1)
+    m_mat = np.array([[1, 0, 0, 0, 0], [0, 1, 0, 0, 0], [0, 0, 0, 0, 1]])
+    in_filt1.set_measurement_model(meas_fun_lst=[range_func])
+    in_filt1.cov = np.diag([0.25, 0.25, 3.0, 3.0, 0.25])
+    in_filt1.proc_noise = np.eye(5) * np.array([[p_noise ** 2]])
+    in_filt1.meas_noise = m_noise ** 2 * np.eye(1)
+
+    in_filt2 = gfilts.ExtendedKalmanFilter()
+    in_filt2.set_state_model(dyn_obj=dyn_obj2)
+    in_filt2.set_measurement_model(meas_fun_lst=[range_func])
+    in_filt2.cov = np.diag([0.25, 0.25, 3.0, 3.0, 0.25])
+    in_filt2.proc_noise = np.eye(5) * np.array([[p_noise ** 2]])
+    in_filt2.meas_noise = m_noise ** 2 * np.eye(1)
+
+    v = np.sqrt(2 ** 2 + 1 ** 2)
+    angle = 60 * np.pi / 180
+    vx0 = v * np.cos(angle)
+    vy0 = v * np.sin(angle)
+
+    filt_list = [in_filt1, in_filt2]
+
+    model_trans = np.array([[1 - 1 / 200, 1 / 200], [1 / 200, 1 - 1 / 200]])
+
+    init_means = [np.array([0, 0, vx0, vy0, 0]).reshape(-1, 1), np.array([0, 0, vx0, vy0, 0]).reshape(-1, 1)]
+    init_covs = [in_filt1.cov, in_filt2.cov]
+    # imm_filt = gfilts.InteractingMultipleModel()
+    # imm_filt.set_models(
+    #     filt_list, model_trans, init_means, init_covs, init_weights=[0.5, 0.5]
+    # )
+
+
+
+    # filt = gfilts.GCIFilter(base_filter=imm_filt,
+    #                         meas_model_list=[[range_func], [bear_func]],
+    #                         meas_noise_list=[m_noise ** 2 * np.eye(1),
+    #                                          (np.pi / 180 * m_noise) ** 2 * np.eye(1)])
+    filt = gfilts.IMMGCIFilter(meas_model_list=[[range_func], [bear_func], np.array([[0, 0, 0, 0, 1]])],
+                               meas_noise_list=[m_noise ** 2 * np.eye(1),
+                               (np.pi / 180 * m_noise) ** 2 * np.eye(1), (np.pi / 180 * m_noise) ** 2 * np.eye(1)])
+    filt.set_models(filt_list, model_trans, init_means, init_covs, init_weights=[0.5, 0.5])
+    time = np.arange(t0, t1, dt)
+    states = np.nan * np.ones((time.size, 5))
+    stds = np.nan * np.ones(states.shape)
+    pre_stds = stds.copy()
+    states[0, :] = np.array([0, 0, vx0, vy0, 0])
+    stds[0, :] = np.sqrt(np.diag(filt.cov))
+    pre_stds[0, :] = stds[0, :]
+
+    t_states = states.copy()
+
+    filt_state = filt.save_filter_state()
+    filt = gfilts.IMMGCIFilter()
+    filt.load_filter_state(filt_state)
+
+
+    dyn_fun_args = (dt,)
+    weight_list = [1.0/3.0, 1.0/3.0, 1.0/3.0]
+    for kk, t in enumerate(time[:-1]):
+        # print(kk)
+        states[kk + 1, :] = filt.predict(
+            t, dyn_fun_params=dyn_fun_args
+        ).flatten()
+        if t < 5:
+            t_states[kk + 1, :] = dyn_obj1.propagate_state(
+                t, t_states[kk, :].reshape((-1, 1)), state_args=(dt,)
+            ).flatten()
+        else:
+            t_states[kk + 1, :] = dyn_obj2.propagate_state(
+                t, t_states[kk, :].reshape((-1, 1)), state_args=(dt,)
+            ).flatten()
+
+        pre_stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
+
+        n_state1 = range_func(t, t_states[kk + 1, :].reshape((-1, 1)))
+        #         + np.sqrt(np.diag(filt.proc_noise)) * rng.standard_normal(1)
+        # ).reshape((4, 1))
+        n_state2 = bear_func(t, t_states[kk + 1, :].reshape((-1, 1)))
+        #         + np.sqrt(np.diag(filt.proc_noise)) * rng.standard_normal(1)
+        # ).reshape((4, 1))
+
+        meas1 = n_state1
+        meas2 = n_state2
+        meas3 = np.array([[0, 0, 0, 0, 1]]) @ t_states[kk + 1, :].reshape((-1, 1))
+
+        states[kk + 1, :] = filt.correct(t, [meas1, meas2, meas3])[0].flatten()
+        stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
+    errs = states - t_states
+    if debug_figs:
+        fig = plt.figure()
+        for ii, s in enumerate(gdyn.CoordinatedTurnKnown().state_names):
+            fig.add_subplot(5, 1, ii + 1)
+            fig.axes[ii].plot(time, states[:, ii], color="b")
+            fig.axes[ii].plot(time, t_states[:, ii], color="r")
+            fig.axes[ii].grid(True)
+            fig.axes[ii].set_ylabel(s)
+            # fig.axes[ii].set_ylim(ylim_list[ii])
+        fig.axes[-1].set_xlabel("time (s)")
+        fig.suptitle("States (obj)")
+        fig.tight_layout()
+
+        # plot stds
+        fig = plt.figure()
+        for ii, s in enumerate(gdyn.CoordinatedTurnKnown().state_names):
+            fig.add_subplot(5, 1, ii + 1)
+            fig.axes[ii].plot(time, stds[:, ii], color="b")
+            fig.axes[ii].plot(time, pre_stds[:, ii], color="r")
+            fig.axes[ii].grid(True)
+            fig.axes[ii].set_ylabel(s + " std")
+        fig.axes[-1].set_xlabel("time (s)")
+        fig.suptitle("Filter standard deviations (obj)")
+        fig.tight_layout()
+    sig_num = 1
+    bounding = np.sum(np.abs(errs) < sig_num * stds, axis=0) / time.size
+    assert all(
+        bounding > (stats.norm.sf(-sig_num) - stats.norm.sf(sig_num))
+    ), "bounding failed"
+
 
 # %% Main
 if __name__ == "__main__":
@@ -2882,7 +3226,12 @@ if __name__ == "__main__":
     # test_UKF_GSM_bootstrap()
     # test_EKF_GSM_gsm()
 
+    # test_GCI_KF_dynObj()
+    # test_GCI_EKF_dynObj()
+
     # test_IMM_dynObj()
+
+    test_GCI_IMM_dynObj()
 
     end = timer()
     print("{:.2f} s".format(end - start))
