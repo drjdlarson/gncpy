@@ -1,5 +1,6 @@
 from copy import deepcopy
-from gncpy.filters import InteractingMultipleModel, GCIFilter
+from gncpy.filters.interacting_multiple_model import InteractingMultipleModel
+from gncpy.filters.gci_filter import GCIFilter
 from warnings import warn
 import numpy as np
 import gncpy.data_fusion as gdf
