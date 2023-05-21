@@ -34,8 +34,6 @@ class DynamicsBase(ABC):
         any constraints applied to it.
     """
 
-    __slots__ = "control_model", "state_constraint"
-
     state_names = ()
     """Tuple of strings for the name of each state. The order should match
     that of the state vector.
@@ -139,8 +137,6 @@ class LinearDynamicsBase(DynamicsBase):
     based on these values.
 
     """
-
-    __slots__ = ()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -256,8 +252,6 @@ class NonlinearDynamicsBase(DynamicsBase):
     integrator_params : dict, optional
         additional parameters for the integrator. The default is {}.
     """
-
-    __slots__ = ("dt", "integrator_type", "integrator_params", "_integrator")
 
     def __init__(
         self, integrator_type="dopri5", integrator_params={}, dt=np.nan, **kwargs
@@ -617,8 +611,6 @@ class CurvilinearMotion(NonlinearDynamicsBase):
     details.
     """
 
-    __slots__ = "control_constraint"
-
     state_names = (
         "x pos",
         "y pos",
@@ -784,8 +776,6 @@ class CoordinatedTurnKnown(LinearDynamicsBase):
         Turn rate in rad/s
     """
 
-    __slots__ = "turn_rate"
-
     state_names = ("x pos", "y pos", "x vel", "y vel", "turn angle")
 
     def __init__(self, turn_rate=5 * np.pi / 180, **kwargs):
@@ -920,8 +910,6 @@ class CoordinatedTurnUnknown(NonlinearDynamicsBase):
     turn_rate_cor_time : float
         Correlation time for the turn rate. If None then a Wiener process is used.
     """
-
-    __slots__ = ("turn_rate_cor_time",)
 
     state_names = ("x pos", "y pos", "x vel", "y vel", "turn rate")
 

@@ -201,6 +201,8 @@ class ExtendedKalmanFilter(KalmanFilter):
         )
 
         if self.cont_cov:
+            if self.dt is None:
+                raise RuntimeError("dt can not be None when using a continuous covariance model")
 
             def ode(t, x, n_states, F, proc_noise):
                 P = x.reshape((n_states, n_states))

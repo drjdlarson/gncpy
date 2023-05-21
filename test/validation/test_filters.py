@@ -222,7 +222,7 @@ def test_EKF_dynObj():  # noqa
     dt = 0.01
     t0, t1 = 0, 10 + dt
 
-    coordTurn = gdyn.CoordinatedTurnKnown(turn_rate=5*d2r)
+    coordTurn = gdyn.CoordinatedTurnKnown(turn_rate=5*d2r, dt=dt)
     filt = gfilts.ExtendedKalmanFilter()
     filt.set_state_model(dyn_obj=coordTurn)
     m_mat = np.eye(5)
