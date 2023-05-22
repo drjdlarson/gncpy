@@ -416,7 +416,6 @@ class NonlinearDynamicsBase(DynamicsBase):
             [factory(ii) for ii in range(state.size)],
             (),
         )
-        # return gmath.get_input_jacobian(timestep, state, u, self.control_model, (),)
 
     def propagate_state(self, timestep, state, u=None, state_args=None, ctrl_args=None):
         """Propagates the continuous time dynamics.
@@ -492,16 +491,13 @@ class DoubleIntegrator(LinearDynamicsBase):
 
     def __getstate__(self):
         if self.__model is not None:
-            return self.__model.__getstate__()
+            return dict(__dict__=self.__dict__, model=self.__model.__getstate__())
         return self.__dict__
 
     def __setstate__(self, d):
         self = DoubleIntegrator()
-        if isinstance(d, dict):
-            self.__dict__ = d
-        else:
-            # need to index these so they stay as tuples
-            self.__model.__setstate__(d)
+        self.__dict__ = d["__dict__"]
+        self.__model.__setstate__(d["model"])
 
     # must be provided if allow_cpp is true
     def args_to_params(self, state_args, control_args):
@@ -539,7 +535,7 @@ class DoubleIntegrator(LinearDynamicsBase):
             raise RuntimeError("state_args must be (dt,) not None")
         if self.control_model is None:
             self.__model.dt = state_args[0]
-            return self.__model.propagate_state(timestep, state)
+            return self.__model.propagate_state(timestep, state).reshape((-1, 1))
         else:
             return super().propagate_state(
                 timestep, state, u=u, state_args=state_args, ctrl_args=ctrl_args
@@ -1017,7 +1013,7 @@ class CoordinatedTurnUnknown(NonlinearDynamicsBase):
         return np.array(
             [
                 [1, 0, s_ta / w, -(1 - c_ta) / w, F04],
-                [0, 1, (1 - c_ta) / x[4], s_ta / w, F14],  # shouldn't the x[4] be w?
+                [0, 1, (1 - c_ta) / w, s_ta / w, F14],
                 [0, 0, c_ta, -s_ta, F24],
                 [0, 0, s_ta, c_ta, F34],
                 [0, 0, 0, 0, self.beta],
