@@ -4662,23 +4662,19 @@ class InteractingMultipleModel:
                 )
                 self.cov_list[ii] = filt.cov.copy()
             new_weight_list[ii] = meas_fit_prob_list[ii] * self.filt_weights[ii]
-        out_meas_fit_prob = np.sum(new_weight_list)
+        # out_meas_fit_prob = np.sum(new_weight_list)
         if np.sum(new_weight_list) == 0:
             new_weight_list = new_weight_list * 0
         else:
             new_weight_list = new_weight_list / np.sum(new_weight_list)
         self.filt_weights = new_weight_list
 
-        # self.cov = np.zeros((np.shape(self.cov_list[0, :, :])))
-        # for ii in range(0, len(self.in_filt_list)):
-        #     self.cov = self.cov + self.filt_weights[ii] * self.cov_list[ii, :, :]
         out_state = np.zeros(np.shape(self.mean_list[0]))
-        # out_meas_fit_prob = 0
+        out_meas_fit_prob = 0
         for ii in range(0, len(self.in_filt_list)):
             out_state = out_state + new_weight_list[ii] * self.mean_list[ii]
-            # out_meas_fit_prob = out_meas_fit_prob + new_weight_list[ii] * meas_fit_prob_list[ii]
+            out_meas_fit_prob = out_meas_fit_prob + new_weight_list[ii] * meas_fit_prob_list[ii]
         out_state = out_state.reshape((np.shape(out_state)[0], 1))
-        # Two options for outputting measurement fit probability, averaging all a-la the mean, or only outputting the maximum. Starting with maximum.
         # out_meas_fit_prob = np.max(meas_fit_prob_list)
 
         self.cur_out_state = out_state
@@ -4775,7 +4771,7 @@ class IMMGCIFilter(InteractingMultipleModel, GCIFilter):
                 cur_cov_list.append(filt.cov)
                 meas_fit_prob_list.append(new_prob)
                 cur_weight_list.append(new_prob * self.filt_weights[ii])
-            #fuse measurements for each motion model
+            #need to include a check for if ther eare no measurements potentially
             model_est, model_cov, model_weights = gdf.GeneralizedCovarianceIntersection(cur_est_list, cur_cov_list, self.weight_list, eye_list, optimizer=self.optimizer)
             filt.cov = model_cov.copy()
             self.mean_list[ii] = model_est.copy()
