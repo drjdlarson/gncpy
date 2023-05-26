@@ -1,3 +1,4 @@
+import pytest
 import numpy as np
 import numpy.testing as test
 
@@ -91,23 +92,32 @@ def test_lqr_nonlin_finite_hor():
     R = 0.01 * np.eye(u_nom.size)
     lqr = gctrl.LQR(time_horizon=time_horizon)
     # need to set dt here so the controller can generate a state trajectory
-    lqr.set_state_model(u_nom, dynObj=dynObj, dt=dt, 
-                        control_constraints=lambda t, u: np.array([
-                                                                    [u.ravel()[0]],
-                                                                    [u.ravel()[1]],
-                                                                    [5 * d2r * np.min([np.max([u.ravel()[2], -1]), 1])]
-                                                                  ])
+    lqr.set_state_model(
+        u_nom,
+        dynObj=dynObj,
+        dt=dt,
+        control_constraints=lambda t, u: np.array(
+            [
+                [u.ravel()[0]],
+                [u.ravel()[1]],
+                [5 * d2r * np.min([np.max([u.ravel()[2], -1]), 1])],
+            ]
+        ),
     )
     lqr.set_cost_model(Q, R)
 
     u, cost, state_traj, ctrl_signal = lqr.calculate_control(
-        cur_time, cur_state, end_state=end_state, provide_details=True, state_args=(dt,),
+        cur_time,
+        cur_state,
+        end_state=end_state,
+        provide_details=True,
+        state_args=(dt,),
     )
 
     test.assert_allclose(state_traj[-1, :], end_state.ravel(), rtol=1e-3, atol=0.07)
 
 
-
+@pytest.mark.slow
 def test_elqr_non_lin():
     tt = 0  # starting time when calculating control
     dt = 1 / 6
@@ -227,4 +237,4 @@ if __name__ == "__main__":
     # test_lqr_lin_inf_hor()
     # test_lqr_lin_finite_hor()
     # test_lqr_nonlin_finite_hor()
-    test_elqr()
+    test_elqr_non_lin()

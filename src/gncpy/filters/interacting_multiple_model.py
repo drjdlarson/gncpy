@@ -92,10 +92,6 @@ class InteractingMultipleModel:
         self.cov_list = filt_state["cov_list"]
 
     def initialize_states(self, init_means, init_covs, init_weights=None):
-        # if isinstance(self._baseFilter, gfilts.UnscentedKalmanFilter) or isinstance(
-        #         self._baseFilter, gfilts.UKFGaussianScaleMixtureFilter
-        # ):
-        #     self._baseFilter.init_sigma_points(m)
         self.mean_list = init_means
         self.cov_list = init_covs
         if len(init_means) != len(self.in_filt_list) or len(init_covs) != len(
@@ -105,7 +101,7 @@ class InteractingMultipleModel:
                 "Number of means or covariances does not match number of inner filters"
             )
         for ii in range(0, len(self.in_filt_list)):
-            self.in_filt_list[ii].mean = self.mean_list[ii]
+            self.in_filt_list[ii].mean = self.mean_list[ii].reshape((-1, 1))
             self.in_filt_list[ii].cov = self.cov_list[ii]
 
         if init_weights is not None:
@@ -113,13 +109,9 @@ class InteractingMultipleModel:
         else:
             self.filt_weights = np.ones(len(self.in_filt_list)) / len(self.in_filt_list)
         self.filt_weight_history = np.array(self.filt_weights)
-        # if self.filt_weight_history.size == 0:
-        #     self.filt_weight_history = np.array(self.filt_weights)
-        # else:
-        #     self.filt_weight_history = np.vstack((self.filt_weight_history, self.filt_weights))
-        out_state = np.zeros(np.shape(self.mean_list[0]))
-        for ii in range(0, len(self.in_filt_list)):
-            out_state = out_state + self.filt_weights[ii] * self.mean_list[0]
+        out_state = np.zeros((self.mean_list[0].size, 1))
+        for ii in range(len(self.in_filt_list)):
+            out_state += self.filt_weights[ii] * self.mean_list[ii]
         self.cur_out_state = out_state
 
     def initialize_filters(self, filter_lst, model_trans):
@@ -225,15 +217,9 @@ class InteractingMultipleModel:
             new_weight_list = new_weight_list / np.sum(new_weight_list)
         self.filt_weights = new_weight_list
 
-        # self.cov = np.zeros((np.shape(self.cov_list[0, :, :])))
-        # for ii in range(0, len(self.in_filt_list)):
-        #     self.cov = self.cov + self.filt_weights[ii] * self.cov_list[ii, :, :]
-        out_state = np.zeros(np.shape(self.mean_list)[0])
-        for ii in range(0, len(self.in_filt_list)):
-            out_state = out_state + new_weight_list[ii] * self.mean_list[ii]
-        out_state = out_state.reshape((np.shape(out_state)[0], 1))
-        # Two options for outputting measurement fit probability, averaging all a-la the mean, or only outputting the maximum. Starting with maximum.
-        # out_meas_fit_prob = np.max(meas_fit_prob_list)
+        out_state = np.zeros(self.mean_list[0].shape)
+        for ii in range(len(self.in_filt_list)):
+            out_state += new_weight_list[ii] * self.mean_list[ii]
 
         self.cur_out_state = out_state
         return (out_state, out_meas_fit_prob)

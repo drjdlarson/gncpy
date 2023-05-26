@@ -3262,9 +3262,9 @@ if __name__ == "__main__":
     # test_GCI_KF_dynObj()
     # test_GCI_EKF_dynObj()
 
-    # test_IMM_dynObj()
+    test_IMM_dynObj()
 
-    test_GCI_IMM_dynObj()
+    # test_GCI_IMM_dynObj()
 
     end = timer()
     print("{:.2f} s".format(end - start))
