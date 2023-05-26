@@ -30,9 +30,7 @@
                     throw std::runtime_error("Invalid state!"); \
                 } \
                 std::stringstream ssb(t[0].cast<std::string>(), std::ios::in | std::ios::out | std::ios::binary); \
-                auto obj = class_t::loadClass(ssb); \
-                std::cout << "in c++:" << obj.toJSON() << std::endl; \
-                return obj; \
+                return class_t::loadClass(ssb); \
             } \
         )) \
         GNCPY_STR(class_t)

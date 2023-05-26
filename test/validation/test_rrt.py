@@ -1,5 +1,6 @@
 import numpy as np
 import numpy.testing as test
+import pytest
 
 import gncpy.dynamics.basic as gdyn
 import gncpy.control as gctrl
@@ -87,6 +88,7 @@ def test_lin_lqrrrtstar():
     test.assert_allclose(trajectory[-1, :], end_state.ravel())
 
 
+@pytest.mark.slow
 def test_elqrrrtstar():
     global SEED
 
@@ -232,6 +234,7 @@ def test_elqrrrtstar():
 # %% Debugging entry point
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
+
     DEBUG_PLOTS = True
 
     plt.close("all")

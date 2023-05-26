@@ -155,49 +155,38 @@ class InteractingMultipleModel:
         # Perform inner filter predictions
         for ii, filt in enumerate(self.in_filt_list):
             new_weight = 0
-            weighted_state = np.zeros((np.shape(self.mean_list)[0]))
+            weighted_state = np.zeros(self.mean_list[0].shape)
             weighted_cov = np.zeros(np.shape(self.cov_list[0]))
             # Calculate weighted input states and new weights
             for jj in range(0, len(self.in_filt_list)):
-                if self.model_trans_mat[ii][jj] == 0:
-                    continue
-                new_weight = (
-                    new_weight + self.model_trans_mat[ii][jj] * self.filt_weights[jj]
-                )
-                weighted_state = weighted_state + (
+                new_weight += self.model_trans_mat[ii][jj] * self.filt_weights[jj]
+                weighted_state += (
                     self.model_trans_mat[ii][jj]
                     * self.filt_weights[jj]
                     * self.mean_list[jj]
-                ).reshape(np.shape(weighted_state))
+                )
             # Normalize weighted state
             weighted_state = weighted_state / new_weight
 
             # Iterate through all means/weights to compile weighted covariance
             for jj in range(0, len(self.in_filt_list)):
-                weighted_cov = weighted_cov + self.model_trans_mat[ii][
-                    jj
-                ] * self.filt_weights[jj] * (
-                    self.cov_list[jj]
-                    + (
-                        self.mean_list[jj].reshape(np.shape(self.mean_list[0]))
-                        - weighted_state
+                weighted_cov += (
+                    self.model_trans_mat[ii][jj]
+                    * self.filt_weights[jj]
+                    * (
+                        self.cov_list[jj]
+                        + (self.mean_list[jj] - weighted_state)
+                        @ (self.mean_list[jj] - weighted_state).T
                     )
-                    @ (
-                        self.mean_list[jj].reshape(np.shape(self.mean_list[0]))
-                        - weighted_state
-                    ).T
                 )
             weighted_cov = weighted_cov / new_weight
 
             # Perform inner filter prediction
             if not isinstance(filt, ParticleFilter):
                 filt.cov = weighted_cov.copy()
-                new_mean_list.append = filt.predict(
-                    timestep,
-                    weighted_state.reshape(np.shape(self.mean_list[0])),
-                    *args,
-                    **kwargs
-                ).reshape(np.shape(self.mean_list[ii]))
+                new_mean_list.append(
+                    filt.predict(timestep, weighted_state, *args, **kwargs)
+                )
                 new_cov_list.append(filt.cov.copy())
             else:
                 raise ValueError("Particle Filters not enabled with IMM")
@@ -212,9 +201,9 @@ class InteractingMultipleModel:
         if np.sum(new_weight_list) != 1:
             new_weight_list = new_weight_list / np.sum(new_weight_list)
         # Output predicted state
-        out_state = np.zeros(np.shape(self.mean_list[0]))
+        out_state = np.zeros(self.mean_list[0].shape)
         for ii in range(0, len(self.in_filt_list)):
-            out_state = out_state + new_weight_list[ii] * self.mean_list[ii]
+            out_state += new_weight_list[ii] * self.mean_list[ii]
         self.cur_out_state = out_state
         return out_state
 

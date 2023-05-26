@@ -1,9 +1,11 @@
 import numpy as np
-import scipy.optimize as sopt
+import scipy.stats as stats
 import gncpy.data_fusion as gdf
 import gncpy.filters as gfilts
 import gncpy.dynamics.basic as gdyn
 import matplotlib.pyplot as plt
+
+debug_figs = False
 
 
 def test_GCI_meas_fusion():
@@ -13,35 +15,21 @@ def test_GCI_meas_fusion():
     dt = 0.01
     t0, t1 = 0, 10 + dt
 
-    # def meas_fun0(t, state):
-    #     cur_state = meas_fun_args[0]
-    #     x = cur_state[0][0]
-    #     y = cur_state[1][0]
-    #     return np.array([[x / np.sqrt(x ** 2 + y ** 2),  y / np.sqrt(x ** 2 + y ** 2), 0, 0],
-    #                      [-y / np.sqrt(x ** 2 + y ** 2), x / np.sqrt(x ** 2 + y ** 2), 0, 0]])
-    # def meas_fun1(t, state):
-    #     cur_state = meas_fun_args[0]
-    #     x = cur_state[0][0] - 10
-    #     y = cur_state[1][0]
-    #     return np.array([[x / np.sqrt(x ** 2 + y ** 2),  y / np.sqrt(x ** 2 + y ** 2), 0, 0],
-    #                      [-y / np.sqrt(x ** 2 + y ** 2), x / np.sqrt(x ** 2 + y ** 2), 0, 0]])
-    #
     def meas_fun2(t, meas_fun_args):
         x = meas_fun_args[0] + 10
         y = meas_fun_args[1]
-        return np.array([[(x) / np.sqrt(x ** 2 + y ** 2),  y / np.sqrt(x ** 2 + y ** 2)],
-                         [-y / (x ** 2 + y ** 2), (x) / (x ** 2 + y ** 2)]]).reshape(2, 2)
+        return np.array(
+            [
+                [(x) / np.sqrt(x**2 + y**2), y / np.sqrt(x**2 + y**2)],
+                [-y / (x**2 + y**2), (x) / (x**2 + y**2)],
+            ]
+        ).reshape(2, 2)
 
     def meas_fun0(t, state):
-        return np.array([[1, 0, 0, 0],
-                         [0, 1, 0, 0]])
-    def meas_fun1(t, state):
-        return np.array([[1, 0],
-                         [0, 1]])
+        return np.array([[1, 0, 0, 0], [0, 1, 0, 0]])
 
-    # def meas_fun2(t, state):
-    #     return np.array([[1, 0, 0, 0],
-    #                      [0, 1, 0, 0]])
+    def meas_fun1(t, state):
+        return np.array([[1, 0], [0, 1]])
 
     meas_model_list = [meas_fun1, meas_fun2]
     filt = gfilts.KalmanFilter()
@@ -50,9 +38,9 @@ def test_GCI_meas_fusion():
     filt.set_measurement_model(meas_fun=meas_fun0)
     filt.cov = 0.25 * np.eye(4)
     filt.proc_noise = gdyn.DoubleIntegrator().get_dis_process_noise_mat(
-        dt, np.array([[p_noise ** 2]])
+        dt, np.array([[p_noise**2]])
     )
-    filt.meas_noise = m_noise ** 2 * np.eye(2)
+    filt.meas_noise = m_noise**2 * np.eye(2)
 
     time = np.arange(t0, t1, dt)
     states = np.nan * np.ones((time.size, 4))
@@ -77,34 +65,25 @@ def test_GCI_meas_fusion():
 
         pre_stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
 
-        # n_state = m_mat @ (
-        #         t_states[kk + 1, :]
-        #         + np.sqrt(np.diag(filt.proc_noise)) * rng.standard_normal(1)
-        # ).reshape((4, 1))
-        # meas = n_state + m_noise * rng.standard_normal(n_state.size).reshape(
-        #     n_state.shape
-        # )
-
-        # meas1 = np.array([[np.sqrt((t_states[kk + 1][0] - 10) ** 2 + t_states[kk + 1][1] ** 2)],
-        #                   [np.arctan2(t_states[kk + 1][1], t_states[kk + 1][0] - 10)]])
-        meas2 = np.array([[np.sqrt((t_states[kk + 1][0] + 10) ** 2 + t_states[kk + 1][1] ** 2)],
-                          [np.arctan2(t_states[kk + 1][1], t_states[kk + 1][0] + 10)]])
-        meas1 = meas_fun0(t, states[kk + 1]) @ states[kk + 1].reshape(4,1)
-        # meas2 = np.array([[np.sqrt((t_states[kk + 1][0]) ** 2 + t_states[kk + 1][1] ** 2)],
-        #                   [np.arctan2(t_states[kk + 1][1], t_states[kk + 1][0])]])
-        # meas2 = meas_fun2(t, states[kk + 1]) @ states[kk + 1].reshape(4,1)
-        # meas1_cov = meas_noise * meas1 @ meas1.T
-        # meas2_cov = meas_noise * meas2 @ meas2.T
+        meas2 = np.array(
+            [
+                [np.sqrt((t_states[kk + 1][0] + 10) ** 2 + t_states[kk + 1][1] ** 2)],
+                [np.arctan2(t_states[kk + 1][1], t_states[kk + 1][0] + 10)],
+            ]
+        )
+        meas1 = meas_fun0(t, states[kk + 1]) @ states[kk + 1].reshape(4, 1)
         meas1_cov = np.eye(2)
-        meas2_cov = np.array([[1, 0], [0, 1*np.pi/180]])
+        meas2_cov = np.array([[1, 0], [0, 1 * np.pi / 180]])
         meas_list = [meas1, meas2]
         meas_cov_list = [meas1_cov, meas2_cov]
 
-        meas, meas_cov, new_weight_list = gdf.GeneralizedCovarianceIntersection(meas_list, meas_cov_list, [0.5, 0.5], meas_model_list)
+        meas, meas_cov, new_weight_list = gdf.GeneralizedCovarianceIntersection(
+            meas_list, meas_cov_list, [0.5, 0.5], meas_model_list
+        )
         meas_fun_args = (states[kk + 1, :].reshape((4, 1)),)
-        states[kk + 1, :] = filt.correct(t, meas, states[kk + 1, :].reshape((4, 1)), meas_fun_args=meas_fun_args)[
-            0
-        ].flatten()
+        states[kk + 1, :] = filt.correct(
+            t, meas, states[kk + 1, :].reshape((4, 1)), meas_fun_args=meas_fun_args
+        )[0].flatten()
         stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
     errs = states - t_states
 
@@ -133,6 +112,10 @@ def test_GCI_meas_fusion():
         fig.tight_layout()
     sig_num = 1
     bounding = np.sum(np.abs(errs) < sig_num * stds, axis=0) / time.size
+    assert all(
+        bounding > (stats.norm.sf(-sig_num) - stats.norm.sf(sig_num))
+    ), "bounding failed"
+
 
 if __name__ == "__main__":
     from timeit import default_timer as timer

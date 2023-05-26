@@ -36,9 +36,9 @@ def test_KF_dynObj():  # noqa
     filt.set_measurement_model(meas_mat=m_mat)
     filt.cov = 0.25 * np.eye(4)
     filt.proc_noise = gdyn.DoubleIntegrator().get_dis_process_noise_mat(
-        dt, np.array([[p_noise ** 2]])
+        dt, np.array([[p_noise**2]])
     )
-    filt.meas_noise = m_noise ** 2 * np.eye(2)
+    filt.meas_noise = m_noise**2 * np.eye(2)
 
     vx0 = 2
     vy0 = 1
@@ -62,7 +62,9 @@ def test_KF_dynObj():  # noqa
         states[kk + 1, :] = filt.predict(
             t, states[kk, :].reshape((4, 1)), state_mat_args=(dt,)
         ).flatten()
-        t_states[kk + 1, :] = dynObj.propagate_state(t, t_states[kk].reshape((-1, 1)), state_args=(dt,)).ravel()
+        t_states[kk + 1, :] = dynObj.propagate_state(
+            t, t_states[kk].reshape((-1, 1)), state_args=(dt,)
+        ).ravel()
 
         pre_stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
 
@@ -131,8 +133,8 @@ def test_KF_mat():  # noqa
     filt.set_measurement_model(meas_mat=m_mat)
     filt.cov = 0.25 * np.eye(4)
     gamma = np.array([0, 0, 1, 1]).reshape((4, 1))
-    filt.proc_noise = gamma @ np.array([[p_noise ** 2]]) @ gamma.T
-    filt.meas_noise = m_noise ** 2 * np.eye(2)
+    filt.proc_noise = gamma @ np.array([[p_noise**2]]) @ gamma.T
+    filt.meas_noise = m_noise**2 * np.eye(2)
 
     vx0 = 2
     vy0 = 1
@@ -152,7 +154,9 @@ def test_KF_mat():  # noqa
         states[kk + 1, :] = filt.predict(
             t, states[kk, :].reshape((4, 1)), state_mat_args=(dt,)
         ).flatten()
-        t_states[kk + 1, :] = dynObj.propagate_state(t, t_states[kk].reshape((-1, 1)), state_args=(dt,)).ravel()
+        t_states[kk + 1, :] = dynObj.propagate_state(
+            t, t_states[kk].reshape((-1, 1)), state_args=(dt,)
+        ).ravel()
 
         pre_stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
 
@@ -209,28 +213,30 @@ def test_KF_mat():  # noqa
 def test_EKF_dynObj():  # noqa
     rng = rnd.default_rng(global_seed)
 
-    p_posx_std = 0.2
+    p_posx_std = 0.25
     p_posy_std = 0.2
     p_velx_std = 0.01
     p_vely_std = 0.01
     p_turn_std = 0.1 * d2r
 
-    m_posx_std = 0.2
-    m_posy_std = 0.2
-    m_turn_std = 0.2 * d2r
+    m_posx_std = 0.1
+    m_posy_std = 0.1
+    m_turn_std = 0.05 * d2r
 
     dt = 0.01
     t0, t1 = 0, 10 + dt
 
-    coordTurn = gdyn.CoordinatedTurnKnown(turn_rate=5*d2r)
+    coordTurn = gdyn.CoordinatedTurnKnown(turn_rate=5 * d2r)
     filt = gfilts.ExtendedKalmanFilter()
     filt.dt = dt
     filt.set_state_model(dyn_obj=coordTurn)
-    m_mat = np.eye(5)
+    m_mat = np.array([[1, 0, 0, 0, 0], [0, 1, 0, 0, 0], [0, 0, 0, 0, 1]], dtype=float)
     filt.set_measurement_model(meas_mat=m_mat)
-    filt.proc_noise = np.diag([p_posx_std, p_posy_std, p_velx_std, p_vely_std, p_turn_std])**2
-    filt.meas_noise = np.diag([m_posx_std, m_posy_std,]) ** 2
-    filt.cov = 0.03 ** 2 * np.eye(len(coordTurn.state_names))
+    filt.proc_noise = (
+        np.diag([p_posx_std, p_posy_std, p_velx_std, p_vely_std, p_turn_std]) ** 2
+    )
+    filt.meas_noise = np.diag([m_posx_std, m_posy_std, m_turn_std]) ** 2
+    filt.cov = 0.03**2 * np.eye(len(coordTurn.state_names))
     filt.cov[-1, -1] = (0.3 * d2r) ** 2
 
     time = np.arange(t0, t1, dt)
@@ -245,10 +251,12 @@ def test_EKF_dynObj():  # noqa
     filt.load_filter_state(filt_state)
 
     for kk, t in enumerate(time[:-1]):
-        states[kk + 1, :] = filt.predict(t, states[kk].reshape((-1, 1)), dyn_fun_params=(dt,)).ravel()
+        states[kk + 1, :] = filt.predict(
+            t, states[kk].reshape((-1, 1)), dyn_fun_params=(dt,)
+        ).ravel()
 
         t_states[kk + 1] = coordTurn.propagate_state(
-            t, t_states[kk].reshape((-1, 1))
+            t, t_states[kk].reshape((-1, 1)), state_args=(dt,)
         ).ravel()
         meas = m_mat @ t_states[kk + 1].reshape((-1, 1))
         meas = meas + (
@@ -314,9 +322,8 @@ def test_EKF_dynObj():  # noqa
     sig_num = 1
     bounding = np.sum(np.abs(errs) < sig_num * stds, axis=0) / time.size
     print(bounding)
-    assert all(
-        bounding > (stats.norm.sf(-sig_num) - stats.norm.sf(sig_num))
-    ), "bounding failed"
+    min_bounding = stats.norm.sf(-sig_num) - stats.norm.sf(sig_num)
+    assert all(bounding > min_bounding), "bounding failed"
 
 
 def test_STF_dynObj():  # noqa
@@ -337,14 +344,14 @@ def test_STF_dynObj():  # noqa
     filt.meas_noise_dof = 3
     filt.dof = 4
 
-    filt.scale = ((filt.dof - 2) / filt.dof) * 0.25 ** 2 * np.eye(4)
+    filt.scale = ((filt.dof - 2) / filt.dof) * 0.25**2 * np.eye(4)
     gamma = np.array([0, 0, 1, 1]).reshape((4, 1))
     p_scale = ((filt.proc_noise_dof - 2) / filt.proc_noise_dof) * np.array(
-        [[p_noise ** 2]]
+        [[p_noise**2]]
     )
     filt.proc_noise = gdyn.DoubleIntegrator().get_dis_process_noise_mat(dt, p_scale)
     filt.meas_noise = (
-        ((filt.meas_noise_dof - 2) / filt.meas_noise_dof) * m_noise ** 2 * np.eye(2)
+        ((filt.meas_noise_dof - 2) / filt.meas_noise_dof) * m_noise**2 * np.eye(2)
     )
 
     vx0 = 2
@@ -437,9 +444,9 @@ def test_UKF_dynObj():  # noqa
     filt.set_measurement_model(meas_mat=m_mat)
     filt.cov = 0.25 * np.eye(4)
     filt.proc_noise = gdyn.DoubleIntegrator().get_dis_process_noise_mat(
-        dt, np.array([[p_noise ** 2]])
+        dt, np.array([[p_noise**2]])
     )
-    filt.meas_noise = m_noise ** 2 * np.eye(2)
+    filt.meas_noise = m_noise**2 * np.eye(2)
     alpha = 0.5
     kappa = 1
 
@@ -604,7 +611,7 @@ def test_PF_dyn_fnc():  # noqa
         pf.plot_particles(0, title="Final Particle Distribution")
     # check that particle distribution matches the expected mean assuming
     # that the covariance is the same and its normally distributed
-    exp_cov = la.solve_discrete_are(F.T, H.T, proc_noise_std ** 2, meas_noise_std ** 2)
+    exp_cov = la.solve_discrete_are(F.T, H.T, proc_noise_std**2, meas_noise_std**2)
     exp_std = np.sqrt(exp_cov)
     z_stat = (pred_state - true_state).T @ la.inv(exp_std)
     z_stat = z_stat.item()
@@ -643,7 +650,7 @@ def test_UPF_dyn_fnc():  # noqa
             - proc_noise_std
             + true_state
         )
-        p.uncertainty = 0.5 ** 2 * np.eye(1)
+        p.uncertainty = 0.5**2 * np.eye(1)
         p.sigmaPoints = gdistrib.SigmaPoints(
             alpha=alpha, kappa=kappa, num_axes=true_state.size
         )
@@ -656,8 +663,8 @@ def test_UPF_dyn_fnc():  # noqa
     def f(t, *args):
         return F
 
-    pf.proc_noise = proc_noise_std ** 2
-    pf.meas_noise = meas_noise_std ** 2
+    pf.proc_noise = proc_noise_std**2
+    pf.meas_noise = meas_noise_std**2
 
     pf.set_measurement_model(meas_mat=H)
     pf.set_state_model(state_mat_fun=f)
@@ -687,7 +694,7 @@ def test_UPF_dyn_fnc():  # noqa
         pf.plot_particles(0, title="Final Particle Distribution")
     # check that particle distribution matches the expected mean assuming
     # that the covariance is the same and its normally distributed
-    exp_cov = la.solve_discrete_are(F.T, H.T, proc_noise_std ** 2, meas_noise_std ** 2)
+    exp_cov = la.solve_discrete_are(F.T, H.T, proc_noise_std**2, meas_noise_std**2)
     exp_std = np.sqrt(exp_cov)
     z_stat = (pred_state - true_state).T @ la.inv(exp_std)
     z_stat = z_stat.item()
@@ -699,6 +706,7 @@ def test_UPF_dyn_fnc():  # noqa
     assert p_val > level_sig, "p-value too low, final state is unexpected"
 
 
+@pytest.mark.slow
 def test_UPF_dynObj():  # noqa
     print("test UPF dynObj")
 
@@ -721,14 +729,14 @@ def test_UPF_dynObj():  # noqa
     pf.set_state_model(dyn_obj=dynObj)
     pf.set_measurement_model(meas_mat=meas_mat)
 
-    proc_noise = p_noise_std ** 2 * np.diag([dt ** 2, dt ** 2, 1, 1])
+    proc_noise = p_noise_std**2 * np.diag([dt**2, dt**2, 1, 1])
     pf.proc_noise = proc_noise.copy()
-    pf.meas_noise = m_noise_std ** 2 * np.eye(meas_mat.shape[0])
+    pf.meas_noise = m_noise_std**2 * np.eye(meas_mat.shape[0])
 
     true_state = np.array([20, 80, 3, -3]).reshape((4, 1))
 
     distrib = gdistrib.ParticleDistribution()
-    b_cov = np.diag([3 ** 2, 5 ** 2, 2 ** 2, 1])
+    b_cov = np.diag([3**2, 5**2, 2**2, 1])
     alpha = 0.5
     kappa = 1
     spread = 2 * np.sqrt(np.diag(b_cov)).reshape((true_state.shape))
@@ -763,7 +771,7 @@ def test_UPF_dynObj():  # noqa
         true_state = dynObj.propagate_state(tt, true_state, state_args=(dt,))
         true_pos[kk + 1, :] = true_state[0:2, 0]
         m_noise = rng.multivariate_normal(
-            np.zeros(meas_mat.shape[0]), m_noise_std ** 2 * np.eye(2)
+            np.zeros(meas_mat.shape[0]), m_noise_std**2 * np.eye(2)
         )
         meas = meas_mat @ (
             true_state + p_noise.reshape(true_state.shape)
@@ -792,7 +800,7 @@ def test_UPF_dynObj():  # noqa
         dynObj.get_state_mat(0, dt).T,
         meas_mat.T,
         proc_noise,
-        m_noise_std ** 2 * np.eye(2),
+        m_noise_std**2 * np.eye(2),
     )
 
     inv_cov = la.inv(exp_cov)
@@ -847,7 +855,7 @@ def test_MCMC_UPF_dyn_fnc():  # noqa
             - proc_noise_std
             + true_state
         )
-        p.uncertainty = 0.5 ** 2 * np.eye(1)
+        p.uncertainty = 0.5**2 * np.eye(1)
         p.sigmaPoints = gdistrib.SigmaPoints(
             alpha=alpha, kappa=kappa, num_axes=true_state.size
         )
@@ -860,8 +868,8 @@ def test_MCMC_UPF_dyn_fnc():  # noqa
     def f(t, *args):
         return F
 
-    pf.proc_noise = proc_noise_std ** 2
-    pf.meas_noise = meas_noise_std ** 2
+    pf.proc_noise = proc_noise_std**2
+    pf.meas_noise = meas_noise_std**2
 
     pf.set_measurement_model(meas_mat=H)
     pf.set_state_model(state_mat_fun=f)
@@ -891,7 +899,7 @@ def test_MCMC_UPF_dyn_fnc():  # noqa
         pf.plot_particles(0, title="Final Particle Distribution")
     # check that particle distribution matches the expected mean assuming
     # that the covariance is the same and its normally distributed
-    exp_cov = la.solve_discrete_are(F.T, H.T, proc_noise_std ** 2, meas_noise_std ** 2)
+    exp_cov = la.solve_discrete_are(F.T, H.T, proc_noise_std**2, meas_noise_std**2)
     exp_std = np.sqrt(exp_cov)
     z_stat = (pred_state - true_state).T @ la.inv(exp_std)
     z_stat = z_stat.item()
@@ -902,6 +910,7 @@ def test_MCMC_UPF_dyn_fnc():  # noqa
     assert p_val > level_sig, "p-value too low, final state is unexpected"
 
 
+@pytest.mark.slow
 def test_MCMC_UPF_dynObj():  # noqa
     print("test MCMC UPF dynObj")
 
@@ -924,14 +933,14 @@ def test_MCMC_UPF_dynObj():  # noqa
     pf.set_state_model(dyn_obj=dynObj)
     pf.set_measurement_model(meas_mat=meas_mat)
 
-    proc_noise = p_noise_std ** 2 * np.diag([dt ** 2, dt ** 2, 1, 1])
+    proc_noise = p_noise_std**2 * np.diag([dt**2, dt**2, 1, 1])
     pf.proc_noise = proc_noise.copy()
-    pf.meas_noise = m_noise_std ** 2 * np.eye(meas_mat.shape[0])
+    pf.meas_noise = m_noise_std**2 * np.eye(meas_mat.shape[0])
 
     true_state = np.array([20, 80, 3, -3]).reshape((4, 1))
 
     distrib = gdistrib.ParticleDistribution()
-    b_cov = np.diag([3 ** 2, 5 ** 2, 2 ** 2, 1])
+    b_cov = np.diag([3**2, 5**2, 2**2, 1])
     alpha = 0.5
     kappa = 1
     spread = 2 * np.sqrt(np.diag(b_cov)).reshape((true_state.shape))
@@ -966,7 +975,7 @@ def test_MCMC_UPF_dynObj():  # noqa
         true_state = dynObj.propagate_state(tt, true_state, state_args=(dt,))
         true_pos[kk + 1, :] = true_state[0:2, 0]
         m_noise = rng.multivariate_normal(
-            np.zeros(meas_mat.shape[0]), m_noise_std ** 2 * np.eye(2)
+            np.zeros(meas_mat.shape[0]), m_noise_std**2 * np.eye(2)
         )
         meas = meas_mat @ (
             true_state + p_noise.reshape(true_state.shape)
@@ -995,7 +1004,7 @@ def test_MCMC_UPF_dynObj():  # noqa
         dynObj.get_state_mat(0, dt).T,
         meas_mat.T,
         proc_noise,
-        m_noise_std ** 2 * np.eye(2),
+        m_noise_std**2 * np.eye(2),
     )
 
     inv_cov = la.inv(exp_cov)
@@ -1037,9 +1046,9 @@ def test_max_corr_ent_UKF_dynObj():  # noqa
     filt.set_measurement_model(meas_mat=m_mat)
     filt.cov = 0.25 * np.eye(4)
     filt.proc_noise = gdyn.DoubleIntegrator().get_dis_process_noise_mat(
-        dt, np.array([[p_noise ** 2]])
+        dt, np.array([[p_noise**2]])
     )
-    filt.meas_noise = m_noise ** 2 * np.eye(2)
+    filt.meas_noise = m_noise**2 * np.eye(2)
     filt.kernel_bandwidth = 10
     alpha = 0.5
     kappa = 1
@@ -1145,7 +1154,7 @@ def test_MCUPF_dyn_fnc():  # noqa
             - proc_noise_std
             + true_state
         )
-        p.uncertainty = 0.5 ** 2 * np.eye(1)
+        p.uncertainty = 0.5**2 * np.eye(1)
         p.sigmaPoints = gdistrib.SigmaPoints(
             alpha=alpha, kappa=kappa, num_axes=true_state.size
         )
@@ -1159,8 +1168,8 @@ def test_MCUPF_dyn_fnc():  # noqa
     def f(t, *args):
         return F
 
-    pf.proc_noise = proc_noise_std ** 2
-    pf.meas_noise = meas_noise_std ** 2
+    pf.proc_noise = proc_noise_std**2
+    pf.meas_noise = meas_noise_std**2
 
     pf.set_measurement_model(meas_mat=H)
     pf.set_state_model(state_mat_fun=f)
@@ -1191,7 +1200,7 @@ def test_MCUPF_dyn_fnc():  # noqa
         pf.plot_particles(0, title="Final Particle Distribution")
     # check that particle distribution matches the expected mean assuming
     # that the covariance is the same and its normally distributed
-    exp_cov = la.solve_discrete_are(F.T, H.T, proc_noise_std ** 2, meas_noise_std ** 2)
+    exp_cov = la.solve_discrete_are(F.T, H.T, proc_noise_std**2, meas_noise_std**2)
     exp_std = np.sqrt(exp_cov)
     z_stat = (pred_state - true_state).T @ la.inv(exp_std)
     z_stat = z_stat.item()
@@ -1230,7 +1239,7 @@ def test_MCMC_MCUPF_dyn_fnc():  # noqa
             - proc_noise_std
             + true_state
         )
-        p.uncertainty = 0.5 ** 2 * np.eye(1)
+        p.uncertainty = 0.5**2 * np.eye(1)
         p.sigmaPoints = gdistrib.SigmaPoints(
             alpha=alpha, kappa=kappa, num_axes=true_state.size
         )
@@ -1244,8 +1253,8 @@ def test_MCMC_MCUPF_dyn_fnc():  # noqa
     def f(t, *args):
         return F
 
-    pf.proc_noise = proc_noise_std ** 2
-    pf.meas_noise = meas_noise_std ** 2
+    pf.proc_noise = proc_noise_std**2
+    pf.meas_noise = meas_noise_std**2
 
     pf.set_measurement_model(meas_mat=H)
     pf.set_state_model(state_mat_fun=f)
@@ -1276,7 +1285,7 @@ def test_MCMC_MCUPF_dyn_fnc():  # noqa
         pf.plot_particles(0, title="Final Particle Distribution")
     # check that particle distribution matches the expected mean assuming
     # that the covariance is the same and its normally distributed
-    exp_cov = la.solve_discrete_are(F.T, H.T, proc_noise_std ** 2, meas_noise_std ** 2)
+    exp_cov = la.solve_discrete_are(F.T, H.T, proc_noise_std**2, meas_noise_std**2)
     exp_std = np.sqrt(exp_cov)
     z_stat = (pred_state - true_state).T @ la.inv(exp_std)
     z_stat = z_stat.item()
@@ -1305,9 +1314,9 @@ def test_QKF_dynObj():  # noqa
     filt.set_state_model(dyn_obj=dynObj)
     m_mat = np.array([[1, 0, 0, 0], [0, 1, 0, 0]])
     filt.set_measurement_model(meas_mat=m_mat)
-    proc_noise = p_noise_std ** 2 * np.eye(4)
-    meas_noise = m_noise_std ** 2 * np.eye(2)
-    filt.cov = 0.1 ** 2 * np.eye(4)
+    proc_noise = p_noise_std**2 * np.eye(4)
+    meas_noise = m_noise_std**2 * np.eye(2)
+    filt.cov = 0.1**2 * np.eye(4)
     filt.proc_noise = proc_noise.copy()
     filt.meas_noise = meas_noise.copy()
 
@@ -1438,9 +1447,9 @@ def test_SQKF_dynObj():  # noqa
     filt.set_state_model(dyn_obj=dynObj)
     m_mat = np.array([[1, 0, 0, 0], [0, 1, 0, 0]])
     filt.set_measurement_model(meas_mat=m_mat)
-    proc_noise = p_noise_std ** 2 * np.eye(4)
-    meas_noise = m_noise_std ** 2 * np.eye(2)
-    filt.cov = 0.1 ** 2 * np.eye(4)
+    proc_noise = p_noise_std**2 * np.eye(4)
+    meas_noise = m_noise_std**2 * np.eye(2)
+    filt.cov = 0.1**2 * np.eye(4)
     filt.proc_noise = proc_noise.copy()
     filt.meas_noise = meas_noise.copy()
 
@@ -1559,13 +1568,13 @@ def __gsm_import_dist_factory():
 
         disc = 0.99
         a = (3 * disc - 1) / (2 * disc)
-        h = np.sqrt(1 - a ** 2)
+        h = np.sqrt(1 - a**2)
         last_means = np.mean(parts.particles, axis=0)
         means = a * parts.particles[:, 0:2] + (1 - a) * last_means[0:2]
 
         # df, sig
         for ind in range(means.shape[1]):
-            std = np.sqrt(h ** 2 * np.cov(parts.particles[:, ind]))
+            std = np.sqrt(h**2 * np.cov(parts.particles[:, ind]))
 
             for ii, m in enumerate(means):
                 samp = stats.norm.rvs(loc=m[ind], scale=std, random_state=rng)
@@ -1601,7 +1610,7 @@ def test_QKF_GSM_bootstrap():
     # define state and measurement models
     state_mat = np.vstack(
         (
-            np.hstack((np.eye(2), dt * np.eye(2), dt ** 2 / 2 * np.eye(2))),
+            np.hstack((np.eye(2), dt * np.eye(2), dt**2 / 2 * np.eye(2))),
             np.hstack((np.zeros((2, 2)), np.eye(2), dt * np.eye(2))),
             np.hstack((np.zeros((2, 2)), np.zeros((2, 2)), np.eye(2))),
         )
@@ -1621,7 +1630,7 @@ def test_QKF_GSM_bootstrap():
     filt.set_state_model(state_mat=state_mat)
     filt.proc_noise = proc_cov
     filt.set_measurement_model(meas_fun=meas_fun)
-    filt.cov = np.diag((5 * 10 ** 4, 5 * 10 ** 4, 8, 8, 0.02, 0.02))
+    filt.cov = np.diag((5 * 10**4, 5 * 10**4, 8, 8, 0.02, 0.02))
 
     # define measurement noise filters
     num_parts = 500
@@ -1784,7 +1793,7 @@ def test_QKF_GSM_gsm():
     # define state and measurement models
     state_mat = np.vstack(
         (
-            np.hstack((np.eye(2), dt * np.eye(2), dt ** 2 / 2 * np.eye(2))),
+            np.hstack((np.eye(2), dt * np.eye(2), dt**2 / 2 * np.eye(2))),
             np.hstack((np.zeros((2, 2)), np.eye(2), dt * np.eye(2))),
             np.hstack((np.zeros((2, 2)), np.zeros((2, 2)), np.eye(2))),
         )
@@ -1804,7 +1813,7 @@ def test_QKF_GSM_gsm():
     filt.set_state_model(state_mat=state_mat)
     filt.proc_noise = proc_cov
     filt.set_measurement_model(meas_fun=meas_fun)
-    filt.cov = np.diag((5 * 10 ** 4, 5 * 10 ** 4, 8, 8, 0.02, 0.02))
+    filt.cov = np.diag((5 * 10**4, 5 * 10**4, 8, 8, 0.02, 0.02))
 
     # define measurement noise filters
     num_parts = 500
@@ -1956,7 +1965,7 @@ def test_QKF_GSM_gsm_proc_est():
     # define state and measurement models
     state_mat = np.vstack(
         (
-            np.hstack((np.eye(2), dt * np.eye(2), dt ** 2 / 2 * np.eye(2))),
+            np.hstack((np.eye(2), dt * np.eye(2), dt**2 / 2 * np.eye(2))),
             np.hstack((np.zeros((2, 2)), np.eye(2), dt * np.eye(2))),
             np.hstack((np.zeros((2, 2)), np.zeros((2, 2)), np.eye(2))),
         )
@@ -1975,7 +1984,7 @@ def test_QKF_GSM_gsm_proc_est():
     filt = gfilts.QKFGaussianScaleMixtureFilter()
     filt.set_state_model(state_mat=state_mat)
     filt.set_measurement_model(meas_fun=meas_fun)
-    filt.cov = np.diag((5 * 10 ** 4, 5 * 10 ** 4, 8, 8, 0.02, 0.02))
+    filt.cov = np.diag((5 * 10**4, 5 * 10**4, 8, 8, 0.02, 0.02))
 
     # define process noise estimator
     filt.set_process_noise_model(
@@ -2168,7 +2177,7 @@ def test_SQKF_GSM_bootstrap():
     # define state and measurement models
     state_mat = np.vstack(
         (
-            np.hstack((np.eye(2), dt * np.eye(2), dt ** 2 / 2 * np.eye(2))),
+            np.hstack((np.eye(2), dt * np.eye(2), dt**2 / 2 * np.eye(2))),
             np.hstack((np.zeros((2, 2)), np.eye(2), dt * np.eye(2))),
             np.hstack((np.zeros((2, 2)), np.zeros((2, 2)), np.eye(2))),
         )
@@ -2188,7 +2197,7 @@ def test_SQKF_GSM_bootstrap():
     filt.set_state_model(state_mat=state_mat)
     filt.proc_noise = proc_cov
     filt.set_measurement_model(meas_fun=meas_fun)
-    filt.cov = np.diag((5 * 10 ** 4, 5 * 10 ** 4, 8, 8, 0.02, 0.02))
+    filt.cov = np.diag((5 * 10**4, 5 * 10**4, 8, 8, 0.02, 0.02))
 
     # define measurement noise filters
     num_parts = 600
@@ -2354,7 +2363,7 @@ def test_UKF_GSM_bootstrap():
     # define state and measurement models
     state_mat = np.vstack(
         (
-            np.hstack((np.eye(2), dt * np.eye(2), dt ** 2 / 2 * np.eye(2))),
+            np.hstack((np.eye(2), dt * np.eye(2), dt**2 / 2 * np.eye(2))),
             np.hstack((np.zeros((2, 2)), np.eye(2), dt * np.eye(2))),
             np.hstack((np.zeros((2, 2)), np.zeros((2, 2)), np.eye(2))),
         )
@@ -2378,7 +2387,7 @@ def test_UKF_GSM_bootstrap():
     filt.set_state_model(state_mat=state_mat)
     filt.proc_noise = proc_cov
     filt.set_measurement_model(meas_fun_lst=[meas_fun_range, meas_fun_bearing])
-    filt.cov = np.diag((5 * 10 ** 4, 5 * 10 ** 4, 8, 8, 0.02, 0.02))
+    filt.cov = np.diag((5 * 10**4, 5 * 10**4, 8, 8, 0.02, 0.02))
 
     # define measurement noise filters
     num_parts = 500
@@ -2542,7 +2551,7 @@ def test_EKF_GSM_gsm():
     # define state and measurement models
     state_mat = np.vstack(
         (
-            np.hstack((np.eye(2), dt * np.eye(2), dt ** 2 / 2 * np.eye(2))),
+            np.hstack((np.eye(2), dt * np.eye(2), dt**2 / 2 * np.eye(2))),
             np.hstack((np.zeros((2, 2)), np.eye(2), dt * np.eye(2))),
             np.hstack((np.zeros((2, 2)), np.zeros((2, 2)), np.eye(2))),
         )
@@ -2587,7 +2596,7 @@ def test_EKF_GSM_gsm():
     filt.set_state_model(ode_lst=ode_lst)
     filt.proc_noise = proc_cov
     filt.set_measurement_model(meas_fun_lst=[meas_fun_range, meas_fun_bearing])
-    filt.cov = np.diag((5 * 10 ** 4, 5 * 10 ** 4, 8, 8, 0.02, 0.02))
+    filt.cov = np.diag((5 * 10**4, 5 * 10**4, 8, 8, 0.02, 0.02))
 
     # define measurement noise filters
     num_parts = 500
@@ -2726,6 +2735,7 @@ def test_EKF_GSM_gsm():
         bounding > (stats.norm.sf(-sig_num) - stats.norm.sf(sig_num))
     ), "bounding failed"
 
+
 def test_GCI_KF_dynObj():
     m_noise = 0.002
     p_noise = 0.02
@@ -2737,15 +2747,16 @@ def test_GCI_KF_dynObj():
     in_filt = gfilts.KalmanFilter()
     in_filt.set_state_model(dyn_obj=gdyn.DoubleIntegrator())
     in_filt.proc_noise = gdyn.DoubleIntegrator().get_dis_process_noise_mat(
-        dt, np.array([[p_noise ** 2]])
+        dt, np.array([[p_noise**2]])
     )
-    in_filt.meas_noise = m_noise ** 2 * np.eye(2)
+    in_filt.meas_noise = m_noise**2 * np.eye(2)
     m_mat1 = np.array([[1, 0, 0, 0], [0, 1, 0, 0]])
     m_mat2 = np.array([[0, 0, 1, 0], [0, 0, 0, 1]])
-    filt = gfilts.GCIFilter(base_filter=in_filt,
-                            meas_model_list=[m_mat1, m_mat2],
-                            meas_noise_list=[m_noise ** 2 * np.eye(2),
-                                             0.01*m_noise ** 2 * np.eye(2)])
+    filt = gfilts.GCIFilter(
+        base_filter=in_filt,
+        meas_model_list=[m_mat1, m_mat2],
+        meas_noise_list=[m_noise**2 * np.eye(2), 0.01 * m_noise**2 * np.eye(2)],
+    )
     filt.cov = 0.25 * np.eye(4)
     vx0 = 2
     vy0 = 1
@@ -2764,11 +2775,11 @@ def test_GCI_KF_dynObj():
     filt = gfilts.GCIFilter()
     filt.load_filter_state(filt_state)
 
-    m_noise_cov_1 = m_noise ** 2 * np.eye(2)
-    m_noise_cov_2 = 1 ** 2 * np.eye(2)
+    m_noise_cov_1 = m_noise**2 * np.eye(2)
+    m_noise_cov_2 = 1**2 * np.eye(2)
 
     A = gdyn.DoubleIntegrator().get_state_mat(0, dt)
-    weight_list = [1.0/3.0, 1.0/3.0, 1.0/3.0]
+    weight_list = [1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0]
     for kk, t in enumerate(time[:-1]):
         # print(kk)
         states[kk + 1, :] = filt.predict(
@@ -2779,26 +2790,32 @@ def test_GCI_KF_dynObj():
         pre_stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
 
         n_state1 = m_mat1 @ (
-                t_states[kk + 1, :]
-                + np.sqrt(np.diag(filt.proc_noise)) * rng.standard_normal(1)
+            t_states[kk + 1, :]
+            + np.sqrt(np.diag(filt.proc_noise)) * rng.standard_normal(1)
         ).reshape((4, 1))
         n_state2 = m_mat2 @ (
-                t_states[kk + 1, :]
-                + np.sqrt(np.diag(filt.proc_noise)) * rng.standard_normal(1)
+            t_states[kk + 1, :]
+            + np.sqrt(np.diag(filt.proc_noise)) * rng.standard_normal(1)
         ).reshape((4, 1))
 
-        meas1 = n_state1 + m_noise * rng.standard_normal(n_state1.size).reshape(n_state1.shape)
-        meas2 = n_state2 + 0.01 * m_noise * rng.standard_normal(n_state2.size).reshape(n_state2.shape)
+        meas1 = n_state1 + m_noise * rng.standard_normal(n_state1.size).reshape(
+            n_state1.shape
+        )
+        meas2 = n_state2 + 0.01 * m_noise * rng.standard_normal(n_state2.size).reshape(
+            n_state2.shape
+        )
 
-        states[kk + 1, :] = filt.correct(t, [meas1, meas2], states[kk + 1, :].reshape((4, 1)))[
-            0
-        ].flatten()
+        states[kk + 1, :] = filt.correct(
+            t, [meas1, meas2], states[kk + 1, :].reshape((4, 1))
+        )[0].flatten()
         stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
     errs = states - t_states
-    ylim_list = [(np.min(states[:, 0]), np.max(states[:, 0])),
-                 (np.min(states[:, 1]), np.max(states[:, 1])),
-                 (-1, 3),
-                 (-1, 2)]
+    ylim_list = [
+        (np.min(states[:, 0]), np.max(states[:, 0])),
+        (np.min(states[:, 1]), np.max(states[:, 1])),
+        (-1, 3),
+        (-1, 2),
+    ]
     # plot states
     if debug_figs:
         fig = plt.figure()
@@ -2834,6 +2851,7 @@ def test_GCI_KF_dynObj():
 def test_GCI_EKF_dynObj():
     def range_func(t, x):
         return np.sqrt(x[0] ** 2 + x[1] ** 2)
+
     def bear_func(t, x):
         return np.arctan2(x[1], x[0])
 
@@ -2845,16 +2863,21 @@ def test_GCI_EKF_dynObj():
 
     rng = rnd.default_rng(global_seed)
     in_filt = gfilts.ExtendedKalmanFilter()
+    in_filt.dt = dt
     in_filt.set_state_model(dyn_obj=gdyn.DoubleIntegrator())
     in_filt.proc_noise = gdyn.DoubleIntegrator().get_dis_process_noise_mat(
-        dt, np.array([[p_noise ** 2]])
+        dt, np.array([[p_noise**2]])
     )
-    in_filt.meas_noise = m_noise ** 2 * np.eye(1)
+    in_filt.meas_noise = m_noise**2 * np.eye(1)
 
-    filt = gfilts.GCIFilter(base_filter=in_filt,
-                            meas_model_list=[[range_func], [bear_func]],
-                            meas_noise_list=[m_noise ** 2 * np.eye(1),
-                                             (np.pi / 180 * m_noise) ** 2 * np.eye(1)])
+    filt = gfilts.GCIFilter(
+        base_filter=in_filt,
+        meas_model_list=[[range_func], [bear_func]],
+        meas_noise_list=[
+            m_noise**2 * np.eye(1),
+            (np.pi / 180 * m_noise) ** 2 * np.eye(1),
+        ],
+    )
     filt.cov = 0.25 * np.eye(4)
     vx0 = 2
     vy0 = 1
@@ -2873,36 +2896,49 @@ def test_GCI_EKF_dynObj():
     filt = gfilts.GCIFilter()
     filt.load_filter_state(filt_state)
 
-    m_noise_cov_1 = m_noise ** 2 * np.eye(1)
+    m_noise_cov_1 = m_noise**2 * np.eye(1)
     m_noise_cov_2 = (np.pi / 180 * m_noise) ** 2 * np.eye(1)
 
     dyn_fun_args = (dt,)
-    A = gdyn.DoubleIntegrator().get_state_mat(0, dt)
-    weight_list = [1.0/3.0, 1.0/3.0, 1.0/3.0]
+    dynObj = gdyn.DoubleIntegrator()
+    weight_list = [1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0]
     for kk, t in enumerate(time[:-1]):
-        # print(kk)
         states[kk + 1, :] = filt.predict(
             t, states[kk, :].reshape((4, 1)), dyn_fun_params=dyn_fun_args
         ).flatten()
-        t_states[kk + 1, :] = (A @ t_states[kk, :].reshape((4, 1))).flatten()
+        t_states[kk + 1, :] = dynObj.propagate_state(
+            t, t_states[kk], state_args=dyn_fun_args
+        ).ravel()
 
         pre_stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
 
-        n_state1 = range_func(t, t_states[kk + 1, :].reshape((4, 1)) + (np.sqrt(np.diag(filt.proc_noise)) * rng.standard_normal(1)).reshape((4, 1)))
-        n_state2 = bear_func(t, t_states[kk + 1, :].reshape((4, 1)) + (np.sqrt(np.diag(filt.proc_noise * np.pi / 180)) * rng.standard_normal(1)).reshape((4, 1)))
+        n_state1 = range_func(
+            t,
+            t_states[kk + 1].reshape((-1, 1))
+            + (np.sqrt(np.diag(filt.proc_noise)) * rng.standard_normal(4)).reshape(
+                (-1, 1)
+            ),
+        )
+        n_state2 = bear_func(
+            t,
+            t_states[kk + 1].reshape((-1, 1))
+            + (
+                np.sqrt(np.diag(filt.proc_noise * np.pi / 180)) * rng.standard_normal(4)
+            ).reshape((-1, 1)),
+        )
 
-        meas1 = n_state1 + (m_noise_cov_1 * rng.standard_normal(1)).reshape(n_state1.shape)
-        meas2 = n_state2 + (m_noise_cov_2 * rng.standard_normal(1)).reshape(n_state2.shape)
+        meas1 = n_state1 + (m_noise_cov_1 * rng.standard_normal(n_state1.size)).reshape(
+            n_state1.shape
+        )
+        meas2 = n_state2 + (m_noise_cov_2 * rng.standard_normal(n_state2.size)).reshape(
+            n_state2.shape
+        )
 
-        states[kk + 1, :] = filt.correct(t, [meas1, meas2], states[kk + 1, :].reshape((4, 1)))[
-            0
-        ].flatten()
+        states[kk + 1, :] = filt.correct(
+            t, [meas1, meas2], states[kk + 1].reshape((-1, 1))
+        )[0].flatten()
         stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
     errs = states - t_states
-    # ylim_list = [(np.min(states[:, 0]), np.max(states[:, 0])),
-    #              (np.min(states[:, 1]), np.max(states[:, 1])),
-    #              (-1, 3),
-    #              (-1, 2)]
     # plot states
     if debug_figs:
         fig = plt.figure()
@@ -2912,7 +2948,6 @@ def test_GCI_EKF_dynObj():
             fig.axes[ii].plot(time, t_states[:, ii], color="r")
             fig.axes[ii].grid(True)
             fig.axes[ii].set_ylabel(s)
-            # fig.axes[ii].set_ylim(ylim_list[ii])
         fig.axes[-1].set_xlabel("time (s)")
         fig.suptitle("States (obj)")
         fig.tight_layout()
@@ -2954,20 +2989,20 @@ def test_IMM_dynObj():
     in_filt1.cov = np.diag([0.25, 0.25, 3.0, 3.0, 0.25])
     gamma = np.array([0, 0, 1, 1, 0]).reshape((5, 1))
     # in_filt1.proc_noise = gamma @ np.array([[p_noise ** 2]]) @ gamma.T
-    in_filt1.proc_noise = np.eye(5) * np.array([[p_noise ** 2]])
-    in_filt1.meas_noise = m_noise ** 2 * np.eye(m_mat.shape[0])
+    in_filt1.proc_noise = np.eye(5) * np.array([[p_noise**2]])
+    in_filt1.meas_noise = m_noise**2 * np.eye(m_mat.shape[0])
 
     in_filt2 = gfilts.KalmanFilter()
     in_filt2.set_state_model(dyn_obj=dyn_obj2)
     in_filt2.set_measurement_model(meas_mat=m_mat)
     in_filt2.cov = np.diag([0.25, 0.25, 3.0, 3.0, 0.25])
-    in_filt2.proc_noise = np.eye(5) * np.array([[p_noise ** 2]])
+    in_filt2.proc_noise = np.eye(5) * np.array([[p_noise**2]])
     # in_filt2.proc_noise = gamma @ np.array([[p_noise ** 2]]) @ gamma.T
-    in_filt2.meas_noise = m_noise ** 2 * np.eye(m_mat.shape[0])
+    in_filt2.meas_noise = m_noise**2 * np.eye(m_mat.shape[0])
 
     # vx0 = 2
     # vy0 = 1
-    v = np.sqrt(2 ** 2 + 1 ** 2)
+    v = np.sqrt(2**2 + 1**2)
     angle = 60 * np.pi / 180
     vx0 = v * np.cos(angle)
     vy0 = v * np.sin(angle)
@@ -2979,7 +3014,10 @@ def test_IMM_dynObj():
     # init_means = np.array([[0, 0, vx0, vy0, 0], [0, 0, vx0, vy0, 0]]).T
     # init_covs = np.array([in_filt1.cov, in_filt2.cov])
 
-    init_means = [np.array([0, 0, vx0, vy0, 0]).reshape(-1, 1), np.array([0, 0, vx0, vy0, 0]).reshape(-1, 1)]
+    init_means = [
+        np.array([0, 0, vx0, vy0, 0]).reshape(-1, 1),
+        np.array([0, 0, vx0, vy0, 0]).reshape(-1, 1),
+    ]
     init_covs = [in_filt1.cov, in_filt2.cov]
     filt = gfilts.InteractingMultipleModel()
     filt.set_models(
@@ -3054,9 +3092,11 @@ def test_IMM_dynObj():
         bounding > (stats.norm.sf(-sig_num) - stats.norm.sf(sig_num))
     ), "bounding failed"
 
+
 def test_GCI_IMM_dynObj():
     def range_func(t, x):
         return np.sqrt(x[0] ** 2 + x[1] ** 2)
+
     def bear_func(t, x):
         return np.arctan2(x[1], x[0])
 
@@ -3072,21 +3112,23 @@ def test_GCI_IMM_dynObj():
     rng = rnd.default_rng(global_seed)
 
     in_filt1 = gfilts.ExtendedKalmanFilter()
+    in_filt1.dt = dt
     in_filt1.set_state_model(dyn_obj=dyn_obj1)
     m_mat = np.array([[1, 0, 0, 0, 0], [0, 1, 0, 0, 0], [0, 0, 0, 0, 1]])
     in_filt1.set_measurement_model(meas_fun_lst=[range_func])
     in_filt1.cov = np.diag([0.25, 0.25, 3.0, 3.0, 0.25])
-    in_filt1.proc_noise = np.eye(5) * np.array([[p_noise ** 2]])
-    in_filt1.meas_noise = m_noise ** 2 * np.eye(1)
+    in_filt1.proc_noise = np.eye(5) * np.array([[p_noise**2]])
+    in_filt1.meas_noise = m_noise**2 * np.eye(1)
 
     in_filt2 = gfilts.ExtendedKalmanFilter()
+    in_filt2.dt = dt
     in_filt2.set_state_model(dyn_obj=dyn_obj2)
     in_filt2.set_measurement_model(meas_fun_lst=[range_func])
     in_filt2.cov = np.diag([0.25, 0.25, 3.0, 3.0, 0.25])
-    in_filt2.proc_noise = np.eye(5) * np.array([[p_noise ** 2]])
-    in_filt2.meas_noise = m_noise ** 2 * np.eye(1)
+    in_filt2.proc_noise = np.eye(5) * np.array([[p_noise**2]])
+    in_filt2.meas_noise = m_noise**2 * np.eye(1)
 
-    v = np.sqrt(2 ** 2 + 1 ** 2)
+    v = np.sqrt(2**2 + 1**2)
     angle = 60 * np.pi / 180
     vx0 = v * np.cos(angle)
     vy0 = v * np.sin(angle)
@@ -3095,23 +3137,22 @@ def test_GCI_IMM_dynObj():
 
     model_trans = np.array([[1 - 1 / 200, 1 / 200], [1 / 200, 1 - 1 / 200]])
 
-    init_means = [np.array([0, 0, vx0, vy0, 0]).reshape(-1, 1), np.array([0, 0, vx0, vy0, 0]).reshape(-1, 1)]
+    init_means = [
+        np.array([0, 0, vx0, vy0, 0]).reshape(-1, 1),
+        np.array([0, 0, vx0, vy0, 0]).reshape(-1, 1),
+    ]
     init_covs = [in_filt1.cov, in_filt2.cov]
-    # imm_filt = gfilts.InteractingMultipleModel()
-    # imm_filt.set_models(
-    #     filt_list, model_trans, init_means, init_covs, init_weights=[0.5, 0.5]
-    # )
-
-
-
-    # filt = gfilts.GCIFilter(base_filter=imm_filt,
-    #                         meas_model_list=[[range_func], [bear_func]],
-    #                         meas_noise_list=[m_noise ** 2 * np.eye(1),
-    #                                          (np.pi / 180 * m_noise) ** 2 * np.eye(1)])
-    filt = gfilts.IMMGCIFilter(meas_model_list=[[range_func], [bear_func], np.array([[0, 0, 0, 0, 1]])],
-                               meas_noise_list=[m_noise ** 2 * np.eye(1),
-                               (np.pi / 180 * m_noise) ** 2 * np.eye(1), (np.pi / 180 * m_noise) ** 2 * np.eye(1)])
-    filt.set_models(filt_list, model_trans, init_means, init_covs, init_weights=[0.5, 0.5])
+    filt = gfilts.IMMGCIFilter(
+        meas_model_list=[[range_func], [bear_func], np.array([[0, 0, 0, 0, 1]])],
+        meas_noise_list=[
+            m_noise**2 * np.eye(1),
+            (np.pi / 180 * m_noise) ** 2 * np.eye(1),
+            (np.pi / 180 * m_noise) ** 2 * np.eye(1),
+        ],
+    )
+    filt.set_models(
+        filt_list, model_trans, init_means, init_covs, init_weights=[0.5, 0.5]
+    )
     time = np.arange(t0, t1, dt)
     states = np.nan * np.ones((time.size, 5))
     stds = np.nan * np.ones(states.shape)
@@ -3126,14 +3167,10 @@ def test_GCI_IMM_dynObj():
     filt = gfilts.IMMGCIFilter()
     filt.load_filter_state(filt_state)
 
-
     dyn_fun_args = (dt,)
-    weight_list = [1.0/3.0, 1.0/3.0, 1.0/3.0]
+    weight_list = [1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0]
     for kk, t in enumerate(time[:-1]):
-        # print(kk)
-        states[kk + 1, :] = filt.predict(
-            t, dyn_fun_params=dyn_fun_args
-        ).flatten()
+        states[kk + 1, :] = filt.predict(t, dyn_fun_params=dyn_fun_args).flatten()
         if t < 5:
             t_states[kk + 1, :] = dyn_obj1.propagate_state(
                 t, t_states[kk, :].reshape((-1, 1)), state_args=(dt,)
@@ -3146,11 +3183,7 @@ def test_GCI_IMM_dynObj():
         pre_stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
 
         n_state1 = range_func(t, t_states[kk + 1, :].reshape((-1, 1)))
-        #         + np.sqrt(np.diag(filt.proc_noise)) * rng.standard_normal(1)
-        # ).reshape((4, 1))
         n_state2 = bear_func(t, t_states[kk + 1, :].reshape((-1, 1)))
-        #         + np.sqrt(np.diag(filt.proc_noise)) * rng.standard_normal(1)
-        # ).reshape((4, 1))
 
         meas1 = n_state1
         meas2 = n_state2
@@ -3167,7 +3200,6 @@ def test_GCI_IMM_dynObj():
             fig.axes[ii].plot(time, t_states[:, ii], color="r")
             fig.axes[ii].grid(True)
             fig.axes[ii].set_ylabel(s)
-            # fig.axes[ii].set_ylim(ylim_list[ii])
         fig.axes[-1].set_xlabel("time (s)")
         fig.suptitle("States (obj)")
         fig.tight_layout()

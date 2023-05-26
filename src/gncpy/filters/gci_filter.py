@@ -1,7 +1,9 @@
-from gncpy.filters.bayes_filter import BayesFilter
-from warnings import warn
 import numpy as np
 import gncpy.data_fusion as gdf
+
+from gncpy.filters.bayes_filter import BayesFilter
+from warnings import warn
+from copy import deepcopy
 
 
 class GCIFilter(BayesFilter):
@@ -28,19 +30,28 @@ class GCIFilter(BayesFilter):
 
     def save_filter_state(self):
         filt_state = super().save_filter_state()
-        filt_state["base_filter_state"] = self.base_filter.save_filter_state()
-        filt_state["base_filter"] = self.base_filter
-        filt_state["weight_list"] = self.weight_list
+        if self.base_filter is not None:
+            filt_state["base_filter"] = (
+                type(self.base_filter),
+                self.base_filter.save_filter_state(),
+            )
+        else:
+            filt_state["base_filter"] = (None, self.base_filter)
+        filt_state["weight_list"] = deepcopy(self.weight_list)
         filt_state["optimizer"] = self.optimizer
-        filt_state["meas_model_list"] = self.meas_model_list
-        filt_state["meas_noise_list"] = self.meas_noise_list
+        filt_state["meas_model_list"] = deepcopy(self.meas_model_list)
+        filt_state["meas_noise_list"] = deepcopy(self.meas_noise_list)
 
         return filt_state
 
     def load_filter_state(self, filt_state):
         super().load_filter_state(filt_state)
-        self.base_filter = filt_state["base_filter"]
-        self.base_filter.load_filter_state(filt_state["base_filter_state"])
+        cls_type = filt_state["base_filter"][0]
+        if cls_type is not None:
+            self.base_filter = cls_type()
+            self.base_filter.load_filter_state(filt_state["base_filter"][1])
+        else:
+            self.base_filter = None
         self.weight_list = filt_state["weight_list"]
         self.optimizer = filt_state["optimizer"]
         self.meas_model_list = filt_state["meas_model_list"]
@@ -57,17 +68,6 @@ class GCIFilter(BayesFilter):
         if meas_model_list is not None:
             self.meas_model_list = meas_model_list
 
-    # def set_measurement_noise_estimator(self, func_list):
-    #     self._est_meas_noise_fnc = func_list
-
-    # def _est_meas(self, timestep, cur_state, n_meas, ii, meas_fun_args):
-    #     if isinstance(self.meas_model_list[ii] , types.FunctionType):
-    #         meas_mat = self.meas_model_list[ii](meas_fun_args)
-    #     else:
-    #         meas_mat = self.meas_model_list[ii]
-    #     est_meas = meas_mat @ cur_state
-    #     return est_meas, meas_mat
-
     @property
     def cov(self):
         return self.base_filter.cov
@@ -75,10 +75,6 @@ class GCIFilter(BayesFilter):
     @cov.setter
     def cov(self, val):
         self.base_filter.cov = val
-
-    @cov.getter
-    def cov(self):
-        return self.base_filter.cov
 
     @property
     def proc_noise(self):
@@ -88,17 +84,10 @@ class GCIFilter(BayesFilter):
     def proc_noise(self, val):
         self.base_filter.proc_noise = val
 
-    @proc_noise.getter
-    def proc_noise(self):
-        return self.base_filter.proc_noise
-
     def predict(self, timestep, cur_state, **kwargs):
         return self.base_filter.predict(timestep, cur_state, **kwargs)
 
-    # def predict(self, timestep, cur_state, cur_input=None, state_mat_args=(), input_mat_args=()):
-    #     return self.base_filter.predict(timestep, cur_state, cur_input=cur_input, state_mat_args=state_mat_args, input_mat_args=input_mat_args)
     def correct(self, timestep, meas_list, cur_state, meas_fun_args=()):
-        # est_list.append(cur_state)
         n_est_list = []
         n_prob_list = []
         n_cov_list = []
@@ -125,7 +114,6 @@ class GCIFilter(BayesFilter):
         new_est, new_cov, new_weight_list = gdf.GeneralizedCovarianceIntersection(
             n_est_list, n_cov_list, self.weight_list, eye_list, optimizer=self.optimizer
         )
-        # new_est, new_cov, new_weight_list = gdf.GeneralizedCovarianceIntersection(n_est_list, n_cov_list, self.weight_list, self.meas_model_list, optimizer=self.optimizer)
         meas_fit_prob = 0
         for ii, prob in enumerate(n_prob_list):
             meas_fit_prob += new_weight_list[ii] * prob
