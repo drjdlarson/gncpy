@@ -56,7 +56,6 @@ repository = "https://github.com/drjdlarson/gncpy"
 # changelog = "https://github.com/me/spam/blob/master/CHANGELOG.md"
 
 [build-system]
-# cmake.minimum-version = "3.26" # only need this version if building the backend c++ tests with coverage
 requires = ["scikit-build-core>=0.2.1", "pybind11"]
 build-backend = "scikit_build_core.build"
 
