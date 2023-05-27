@@ -1,0 +1,3 @@
+User-agent: *
+
+Sitemap: https://drjdlarson.github.io/gncpy/sitemap.xml

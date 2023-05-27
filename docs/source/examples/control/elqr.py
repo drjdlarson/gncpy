@@ -6,7 +6,7 @@ def basic():
     import numpy as np
 
     import gncpy.plotting as gplot
-    import gncpy.control as gcontrol
+    import gncpy.control as gctrl
     from gncpy.dynamics.basic import IRobotCreate
 
     tt = 0  # starting time when calculating control
@@ -93,7 +93,7 @@ def basic():
         return cost
 
     # create control obect
-    elqr = gcontrol.ELQR(time_horizon=time_horizon)
+    elqr = gctrl.ELQR(time_horizon=time_horizon)
     elqr.set_state_model(u_nom, dynObj=dynObj)
     elqr.dt = dt  # set here or within the dynamic object
     elqr.set_cost_model(Q=Q, R=R, non_quadratic_fun=non_quadratic_cost)
@@ -133,7 +133,7 @@ def modify_quadratize():
     import numpy as np
 
     import gncpy.plotting as gplot
-    import gncpy.control as gcontrol
+    import gncpy.control as gctrl
     from gncpy.dynamics.basic import IRobotCreate
 
     tt = 0  # starting time when calculating control
@@ -229,7 +229,7 @@ def modify_quadratize():
         return P, Q, R, q, r
 
     # create control obect
-    elqr = gcontrol.ELQR(time_horizon=time_horizon)
+    elqr = gctrl.ELQR(time_horizon=time_horizon)
     elqr.set_state_model(u_nom, dynObj=dynObj)
     elqr.dt = dt  # set here or within the dynamic object
     elqr.set_cost_model(
@@ -270,7 +270,7 @@ def linear():
     import numpy as np
 
     import gncpy.plotting as gplot
-    import gncpy.control as gcontrol
+    import gncpy.control as gctrl
     from gncpy.dynamics.basic import DoubleIntegrator
 
     tt = 0  # starting time when calculating control
@@ -371,7 +371,7 @@ def linear():
         return cost
 
     # create control obect
-    elqr = gcontrol.ELQR(time_horizon=time_horizon)
+    elqr = gctrl.ELQR(time_horizon=time_horizon)
     elqr.set_state_model(u_nom, dynObj=dynObj)
     elqr.dt = dt  # set here or within the dynamic object
     elqr.set_cost_model(Q=Q, R=R, non_quadratic_fun=non_quadratic_cost)

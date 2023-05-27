@@ -1,0 +1,33 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/cpp
+{
+	"name": "gncpy-dev",
+	"image": "ghcr.io/drjdlarson/gncpy-dev:latest",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				// c++ tools
+				"ms-vscode.cpptools",
+				"twxs.cmake",
+				"ms-vscode.cmake-tools",
+				"cschlosser.doxdocgen",
+				// python tools
+				"ms-python.python",
+				"ms-python.vscode-pylance",
+				"ms-python.black-formatter",
+				// sphinx/restructured text
+				"lextudio.restructuredtext",
+				"trond-snekvik.simple-rst"
+			]
+		}
+	}
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	// "postCreateCommand": ""
+
+	// Configure tool-specific properties.
+	// "customizations": {},
+
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	// "remoteUser": "root"
+}

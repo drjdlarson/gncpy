@@ -1,4 +1,4 @@
-gncpy
+GNCPy
 =====
 
 A python package for Guidance, Navigation, and Control (GNC) algorithms developed by the Laboratory for Autonomy, GNC, and Estimation Research (LAGER) at the University of Alabama (UA).
@@ -6,249 +6,86 @@ A python package for Guidance, Navigation, and Control (GNC) algorithms develope
 For using this package, simply clone the repository and then pip install the top level folder. It is recommended to install with the `-e` flag such that new updates can be applied automatically. For setting up a development environment to extend the package see the following sections.
 
 .. contents:: Table of Contents
+    :depth: 2
     :local:
     :backlinks: entry
 
+..
+    BEGIN LINKS INCLUDE
+
+.. |Open in Dev Containers| image:: https://img.shields.io/static/v1?label=Dev%20Containers&message=Open&color=blue&logo=visualstudiocode
+   :target: https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/drjdlarson/gncpy.git
+
+.. |Test Status| image:: https://drjdlarson.github.io/gncpy/reports/junit/tests-badge.svg?dummy=8484744
+    :target: https://drjdlarson.github.io/gncpy/reports/junit/junit.html
+
+.. |Test Cov| image:: https://drjdlarson.github.io/gncpy/reports/coverage/coverage-badge.svg?dummy=8484744
+    :target: https://drjdlarson.github.io/gncpy/reports/coverage/index.html
+
+..
+    END LINKS INCLUDE
+
+|Open in Dev Containers| |Test Status| |Test Cov|
 
 ..
     BEGIN TOOLCHAIN INCLUDE
 
-.. _GNCPY: https://github.com/drjdlarson/gncpy
-.. _SERUMS: https://github.com/drjdlarson/serums
-.. _STACKOVERFLOW: https://stackoverflow.com/questions/69704561/cannot-update-spyder-5-1-5-on-new-anaconda-install
-.. _SUBMODULE: https://git-scm.com/book/en/v2/Git-Tools-Submodules
+This project uses the pytest for developing and running the tests (with extensions for generating summary and coverage reports), tox automates setting up and running the test environment (as well as the documentation), Sphinx is used for documenting the code, and the Black formatter is used to auto format the python code. This project also follows `semantic versioning <https://semver.org/>`__ where any api breaking changes will increment the major version number. Additionally, a prebuilt docker container image is provided to get started with developing for this library. It contains all of the needed tools to compile the code, run the tests, and build the documentation. The docker container can be used within VS Code through their dev container extension to allow editing local files but compiling using the toolchain provided within the container.
 
 
-General Development Environment Setup
--------------------------------------
-Currently this package is not available via pip, this provides a guide on installation from the git repository. Note that Python 3 is required, pytest is used for managing the built-in tests, and tox is used for automating the testing and documentation generation. It is recommended to use Anaconda to manage virtual python environments to avoid dependency conflicts, but this is not necessary. The general process follows the following order with more details in the corresponding subsections.
+Development Environment Setup
+-----------------------------
+It is recommended to use VS Code with the dev containers extension for developing. Development containers allow the full toolchain to be automatically setup on most any machine capable of running Docker. For information on dev-containers see `here <https://code.visualstudio.com/docs/devcontainers/containers>`__ for an overview, `here <https://stackoverflow.com/questions/71402603/vs-code-in-docker-container-is-there-a-way-to-automatically-install-extensions>`__ for auto installing extensions in the container
+and `here <https://pspdfkit.com/blog/2020/visual-studio-code-cpp-docker/>`__ for an example setup. The provided dev container also has useful extensions installed to ease development.
 
-#. Install Anaconda *[Optional]*. See the first step of `Installing and Updating Spyder`_. Note Spyder comes with Anaconda but is not needed.
-#. Decide if serums is needed as a seperate repository outside of gncpy. This makes it easier to develop for serums in addition to gncpy.
+To being, make sure VS Code and git are installed. Additionally, make sure docker is installed for your system (`Windows <https://docs.docker.com/desktop/install/windows-install/>`__, `Mac <https://docs.docker.com/desktop/install/mac-install/>`_, `Linux <https://docs.docker.com/engine/install/>`__). Next, install the dev containers extension within VS Code. Clone the repository locally on your computer, for windows it is recommended to clone it within your linux subsystem directory (e.g. a sub-directory of your linux home folder) to improve performance within the container (the linux directories on Windows can be accessed through the file browser by typing :code:`\\wsl$` in the address bar and clicking on your distro). Now open the repo folder within VS Code (for windows you may need to connect to the linux subsystem first). Then you should be prompted to open the folder in the container, click yes. If you are not prompted, you can go to the command palette and start typing "Open folder in container". Now your terminal within VS Code will be running commands within the container but the files your are editing/creating will be accessible from your local machine's file browser.
 
-   * **If serums is installed outside, tox will still use the version within gncpy for running automated tests.**
+Note if you click the open in container button on the repo's page it will automatically open VS Code, open the container, and clone the repo for you. However, it will do this within a docker volume so the files are only accessible within the container (ie you can't view them through your local file browser).
 
-#. Setup git for submodules if tox will be used to automate running all test cases or if serums is not being installed outside caser *[Optional]*. See `Using git with Submodules`_.
-#. Clone gncpy.
-#. Clone serums outside gncpy *[Optional]*.
-#. Create a virtual environment *[Optional but recommended]*
-#. Install gncpy and serums. See `Installing gncpy, and serums`_
-#. Setup the IDE *[Optional]*. See `Pycharm Setup`_
 
+Example Workflow
+----------------
+Once the repository is open in the container, you can edit files, run tests, and make commits just like normal. For example, after editing some files and adding some validation tests to run these tests you would simply call the following from the root of the repository.
 
-Pycharm Setup
--------------
-This should be done after te `General Development Environment Setup`_. Pycharm can be used as the IDE and setup to use the conda environements, this is the reccommended IDE to use and the documentation should be kept up to date.
+.. code-block:: 
 
-#. Install `Pycharm <https://www.jetbrains.com/pycharm/download/#section=linux>`_
-#. Install the BlackConnect plugin for autoformatting code *[Optional]*
-   * Go to File->Settings->Plugins and use the search bar
-   * This will require you to `pip install black` in your environment.
-   * Once it is installed, reopen the settings dialog and go to File->Settings->Tools->BlackConnect and configre it to run a startup. This is also where you can restart a blackd instance if one is not started/connected.
-   * You may need to restart Pycharm to have it take effect.
-#. Configure your virtual environment
-   * In the bottom right corner, click on where it says python and go to add new interpreter and add local interpreter.
-   * Select the conda environemnt tab (if using Anaconda) and the drop down should prepopulate with the available conda environements. Select the one you want to use and click ok.
-   * Now the bottom right should show the environement name and python version.
+    tox
 
-Sypder Setup (not recommended)
-------------------------------
-The Spyder IDE that comes with Anaconda may be used for development, but this is not necessary and not recommended. This section may be out of date but should provide enough of a starting point.
+This will attempt to run the all the validation tests, except those marked as slow, on multiple versions of python. If the python version can not be found, it will be skipped.
 
-#. Install Anaconda and Spyder and update to the latest version *[Optional]*. See `Installing and Updating Spyder`_.
-#. Decide if serums is needed as a seperate repository outside of gncpy. This makes it easier to develop for serums in addition to gncpy.
+After running tests, it may be helpful to check the documentation build locally to ensure code comments are being pulled correctly. This can be done with
 
-   * **If serums is installed outside, tox will still use the version within gncpy for running automated tests.**
+.. code-block:: 
 
-#. Setup git for submodules if tox will be used to automate running all test cases or if serums is not being installed outside caser *[Optional]*. See `Using git with Submodules`_.
-#. Clone gncpy.
-#. Clone serums outside gncpy *[Optional]*.
-#. Install gncpy and serums to the base conda environment. See `Installing gncpy, and serums`_.
+    tox -e clean_docs
+    tox -e docs_html
 
-   * Other virtual environments can be used for development/projects but it seems gncpy/serums are needed in the base to get Spyder's variable explorer to work with their custom types.
+to remove any existing documenation builds and generate the html version. The output is placed in **docs/build/html** and can be viewed by opening the **docs/build/html/index.html** file in your web browser.
 
-If using Anaconda and Spyder and all optional steps were followed then you should be able to run tests with tox, generate documentation with tox, and run tests as standalone scripts from within Spyder (See `Testing`_ and `Building Documentation`_). Also the Spyder IDE variable explorer should recognize gncpy and serums data types for debugging. It is also possible to create conda environments and tell Spyder to use that as the interpreter for running code. Note that the proper version of :code:`spyder-kernels` must be installed in the environment but Spyder will tell you the command to run when it fails to start the interpreter. This can be useful if you need additional libraries for certain projects. Information on conda environments can be found `here <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`_ and setting up Spyder with a custom interpreter can be done through Spyder's settings.
 
+Notes on tox
+------------
+Tox will automatically create virtual environements, install dependencies, install the package, and run some commands in the virtual environment. These are defined in the **tox.ini** file in the repository. If tox is called without specifying an envrionment, it will run all of the default environments. The available environments can be listed with
 
-Installing and Updating Spyder
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-#. Download and install `Anaconda <https://www.anaconda.com/>`_. This should also install Spyder, numpy, matplotlib, and some other common libraries to a base conda (virtual) environment.
-#. Open Spyder and check the version by going to about spyder from the help menu.
-
-   * If it is not version >= 5.1.5 and you want to update to the version 5.1.5 (recommended), close Spyder and run the following commands from a terminal (Anaconda prompt on windows) the second and third commands may give errors but they can be ignored. See here on `stackoverflow`_.
-
-     .. code-block:: bash
-
-         conda remove spyder
-         conda remove python-language-server
-         conda update anaconda
-         conda install spyder=5.1.5
-
-
-Installing gncpy, and serums
-----------------------------
-#. Download/clone the `gncpy`_ repository and save it somewhere on your system (remember the location).
-#. Download/clone the `serums`_ repository and save it somewhere on your system (remember the location) *[Optional]*.
-
-   * Only do this if you need/want serums outside of gncpy.
-
-#. Open the terminal that has the base Anaconda environment activated (normal terminal for linux, Anaconda prompt on windows).
-#. Navigate to the directory where you saved the repositories.
-
-   * The directory structure should look like the following. Where you only have two serums folders if you are installing them outside, and cloned both repositories to the same top level directory.
-
-     ::
-
-         . (YOU ARE HERE)
-         ├── gncpy/
-         │   ├── serums/
-         │   │   └── setup.py
-         │   └── setup.py
-         └── serums/
-             └── setup.py
-
-#. Install serums.
-
-   * If using anaconda then install without dependencies to allow conda to manage dependencies. Note, :code:`PATH_TO_SERUMS` is either :code:`./serums/` if installing serums outside caser, or :code:`./gncpy/serums/` otherwise.
-
-     .. code-block:: bash
-
-         conda install numpy scipy matplotlib
-         pip install --no-dependencies -e PATH_TO_SERUMS
-
-   * If not using anaconda then serums can be installed with the dependencies. Note, :code:`PATH_TO_SERUMS` follows the format in the above bullet.
-
-     .. code-block:: bash
-
-         pip install -e PATH_TO_SERUMS
-
-#. Install gncpy.
-
-   * If using anaconda then install without dependencies to allow conda to manage dependencies. Note, :code:`PATH_TO_GNCPY` is either :code:`./gncpy/` if saving in the recomended directory structure.
-
-     .. code-block:: bash
-
-         conda install numpy scipy matplotlib
-         pip install --no-dependencies -e PATH_TO_GNCPY
-
-   * If not using anaconda then gncpy can be installed with the dependencies. Note, :code:`PATH_TO_GNCPY` follows the format in the above bullet.
-
-     .. code-block:: bash
-
-         pip install -e PATH_TO_GNCPY
-
-#. If using Anaconda, then to run the built-in tests as standalone scripts, install the test dependencies *[Optional]*.
-
-   .. code-block:: bash
-
-       conda install pytest
-
-#. Install tox for automated testing and building the documentation *[Optional]*
-
-   * For Anaconda run
-
-   .. code-block:: bash
-
-       conda install -c conda-forge tox
-
-   * If not using Anaconda then run
-
-   .. code-block:: bash
-
-       pip install tox
-
-
-Using git with Submodules
--------------------------
-It is recommended to setup git to handle some submodule commands automatically by running the following commands once.
-
-.. code-block:: bash
-
-    git config --global diff.submodule log
-    git config --global status.submodulesummary 1
-    git config --global submodule.recurse true
-
-Otherwise, some helpful commands are outlined below and see git's `submodule`_ page for more information.
-
-To clone a repo with submodules use
-
-.. code-block:: bash
-
-    git clone --recursive [URL to Git repo]
-
-To pull new changes for all submodules and new changes in the base repo use
-
-.. code-block:: bash
-
-    git pull --recurse-submodules
-
-To just pull changes from all submodules use
-
-.. code-block:: bash
-
-    git submodule update --remote
-
-You can also :code:`cd` into individual submodules and use git commands as if you were inside that repo.
-
-
-Testing
--------
-Unit and validation tests make use of **pytest** for the test runner, and tox for automation. The test scripts are located within the **test/** sub-directory.
-The tests can be run through a command line with python 3 and tox installed. If the Spyder setup instructions were followed then the tests can also be run as standalone scripts from within Spyder by uncommenting the appropriate line under the :code:`__main__` section.
-
-The available test environments can be found by running
-
-.. code-block:: bash
+.. code-block:: 
 
     tox -av
 
-Each environment uses a specific version of python. If that version is not available on your system
-then the tests will be skipped. To run all default environments run :code:`tox` without any arguments, this will skip any environments using a version of python that is unavailable.
-Specific environments can be run with
+and a specific environment run by calling
 
-.. code-block::
+.. code-block:: 
 
-    tox -e NAME
+    tox -e ENV
 
-and additional arguments passed to pytest by appending :code:`-- ARGS`.
-For example to run any test cases containing a keyword, run the following (replacing `guidance` with the desired keyword),
+where :code:`ENV` is replaced with the environment name. To pass positional arguments into the commands run within the tox environment you must use :code:`--` after the environment name but before the positional arguments. For example to run validation tests using Python 3.9 and pass the :code:`--runslow` option to pytest you would call :code:`tox -e py39-validation_test -- --runslow`.
 
-.. code-block:: bash
-
-    tox -e NAME -- -k guidance
-
-Custom options for the tests include
-
-* :code:`--runslow` Runs additional tests that are more time consuming, by default these are skipped.
-
-The unit test environment runs all tests within the **test/unit/** sub-directory. These tests are designed to confirm basic functionality.
-Many of them do not ensure algorithm performance but may do some basic checking of a few key parameters.
-The validation test environment runs all tests within the **test/validation/** sub-directory. These are designed to verify algorithm performance and include more extensive checking of the output arguments against known values. They often run slower than unit tests.
-
-Building Documentation
-----------------------
-The documentation uses sphinx and autodoc to pull docstrings from the code. This process is run through a command line that has python 3 and tox installed. The built documentation is in the **docs/build/** sub-directory.
-The HTML version of the docs can be built using the following command
-
-.. code-block:: bash
-
-    tox -e docs -- html
-
-Then they can be viewed by opening **docs/build/html/index.html** with a web browser.
-
-
-Notes about tox
----------------
-If tox is failing to install the dependencies due to an error in distutils, then it may be required to instal distutils seperately by
-
-.. code-block:: bash
-
-    sudo apt install python3.7-distutils
-
-for a debian based system.
+Note, all tox commands must be run from the root of the repository because this is where the **tox.ini** file lives.
 
 ..
     END TOOLCHAIN INCLUDE
+
+.. 
+    BEGIN CITE INCLUDE
 
 Cite
 ====
@@ -257,9 +94,12 @@ Please cite the framework as follows
 .. code-block:: bibtex
 
     @Misc{gncpy,
-    author       = {Jordan D. Larson and Ryan W. Thomas and Vincent W. Hill and Vaughn Weirens},
-    howpublished = {Web page},
-    title        = {{GNCPy}: A {P}ython library for {G}uidance, {N}avigation, and {C}ontrol algorithms},
-    year         = {2019},
-    url          = {https://github.com/drjdlarson/gncpy},
+        author       = {Jordan D. Larson and Ryan W. Thomas and Vincent W. Hill and Vaughn Weirens},
+        howpublished = {Web page},
+        title        = {{GNCPy}: A {P}ython library for {G}uidance, {N}avigation, and {C}ontrol algorithms},
+        year         = {2019},
+        url          = {https://github.com/drjdlarson/gncpy},
     }
+
+..
+    END CITE INCLUDE
