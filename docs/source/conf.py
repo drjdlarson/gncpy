@@ -12,7 +12,6 @@
 
 import os
 import sys
-import sphinx_theme
 
 from importlib.metadata import version as get_version
 
@@ -21,6 +20,7 @@ sys.path.append(os.path.abspath("../../gncpy"))
 # run all example code to generate necesary figures
 sys.path.append(os.path.abspath("."))
 from example_runner import run_examples
+
 run_examples()
 
 
