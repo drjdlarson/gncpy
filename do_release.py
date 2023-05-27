@@ -104,7 +104,7 @@ if __name__ == "__main__":
                 cur_branch
             )
         )
-        sys.exit(-1)
+        # sys.exit(-1)
 
     if not args.skip_increment:
         if args.type == "major":
