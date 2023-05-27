@@ -1,6 +1,6 @@
 [project]
 name = "gncpy"
-version = "0.0.0"
+version = "1.0.0"
 description = "A package for Guidance, Navigation, and Control (GNC) algorithms."
 readme = "README.rst"
 python_requires = ">=3.7"
