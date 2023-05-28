@@ -1,0 +1,39 @@
+AStar
+=====
+
+.. currentmodule:: gncpy.planning.a_star
+
+.. autoclass:: AStar
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~AStar.__init__
+      ~AStar.calc_heuristic
+      ~AStar.calc_weight
+      ~AStar.draw_end
+      ~AStar.draw_map
+      ~AStar.draw_start
+      ~AStar.final_path
+      ~AStar.get_map_cost
+      ~AStar.ind_to_pos
+      ~AStar.is_valid
+      ~AStar.plan
+      ~AStar.pos_to_ind
+      ~AStar.ravel_ind
+      ~AStar.set_map
+   
+   
+
+   
+   
+   

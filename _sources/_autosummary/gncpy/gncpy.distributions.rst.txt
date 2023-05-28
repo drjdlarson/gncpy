@@ -1,0 +1,36 @@
+distributions
+=============
+
+.. automodule:: gncpy.distributions
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: distributions
+      :nosignatures:
+      :template: class.rst_t
+   
+      Particle
+      ParticleDistribution
+      QuadraturePoints
+      SigmaPoints
+      SimpleParticleDistribution
+   
+   
+
+   
+   
+   
+
+
+

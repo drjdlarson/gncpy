@@ -1,0 +1,43 @@
+basic
+=====
+
+.. automodule:: gncpy.dynamics.basic
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: basic
+      :nosignatures:
+      :template: class.rst_t
+   
+      ClohessyWiltshireOrbit
+      ClohessyWiltshireOrbit2d
+      CoordinatedTurnKnown
+      CoordinatedTurnUnknown
+      CurvilinearMotion
+      DoubleIntegrator
+      DynamicsBase
+      IRobotCreate
+      KarlgaardOrbit
+      LinearDynamicsBase
+      NonlinearDynamicsBase
+      TschaunerHempelOrbit
+   
+   
+
+   
+   
+   
+
+
+

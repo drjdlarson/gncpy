@@ -1,0 +1,41 @@
+QuadratureKalmanFilter
+======================
+
+.. currentmodule:: gncpy.filters.quadrature_kalman_filter
+
+.. autoclass:: QuadratureKalmanFilter
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~QuadratureKalmanFilter.__init__
+      ~QuadratureKalmanFilter.correct
+      ~QuadratureKalmanFilter.load_filter_state
+      ~QuadratureKalmanFilter.plot_quadrature
+      ~QuadratureKalmanFilter.predict
+      ~QuadratureKalmanFilter.save_filter_state
+      ~QuadratureKalmanFilter.set_measurement_model
+      ~QuadratureKalmanFilter.set_measurement_noise_estimator
+      ~QuadratureKalmanFilter.set_state_model
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~QuadratureKalmanFilter.cov
+      ~QuadratureKalmanFilter.points_per_axis
+   
+   

@@ -1,0 +1,60 @@
+SimpleUAV2d
+===========
+
+.. currentmodule:: gncpy.games.SimpleUAV2d
+
+.. autoclass:: SimpleUAV2d
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~SimpleUAV2d.__init__
+      ~SimpleUAV2d.append_name_to_keys
+      ~SimpleUAV2d.basic_reward
+      ~SimpleUAV2d.close
+      ~SimpleUAV2d.create_dynamics
+      ~SimpleUAV2d.create_hazards
+      ~SimpleUAV2d.create_obstacles
+      ~SimpleUAV2d.create_player
+      ~SimpleUAV2d.create_targets
+      ~SimpleUAV2d.get_image_size
+      ~SimpleUAV2d.get_player_ids
+      ~SimpleUAV2d.get_player_pos_vel_inds
+      ~SimpleUAV2d.get_player_state_bounds
+      ~SimpleUAV2d.get_players_state
+      ~SimpleUAV2d.parse_config_file
+      ~SimpleUAV2d.propagate_dynamics
+      ~SimpleUAV2d.register_params
+      ~SimpleUAV2d.reset
+      ~SimpleUAV2d.s_collision
+      ~SimpleUAV2d.s_game_over
+      ~SimpleUAV2d.s_input
+      ~SimpleUAV2d.s_movement
+      ~SimpleUAV2d.s_render
+      ~SimpleUAV2d.s_score
+      ~SimpleUAV2d.setup
+      ~SimpleUAV2d.spawn_players
+      ~SimpleUAV2d.step
+      ~SimpleUAV2d.validate_config_file
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~SimpleUAV2d.current_time
+      ~SimpleUAV2d.elapsed_time
+   
+   

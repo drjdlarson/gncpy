@@ -1,0 +1,32 @@
+bayes\_filter
+=============
+
+.. automodule:: gncpy.filters.bayes_filter
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: bayes_filter
+      :nosignatures:
+      :template: class.rst_t
+   
+      BayesFilter
+   
+   
+
+   
+   
+   
+
+
+

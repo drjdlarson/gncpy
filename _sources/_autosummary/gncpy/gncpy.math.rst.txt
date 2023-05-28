@@ -1,0 +1,43 @@
+math
+====
+
+.. automodule:: gncpy.math
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree: math
+      :nosignatures:
+   
+      epanechnikov_kernel
+      gamma_fnc
+      gaussian_kernel
+      get_elem_sym_fnc
+      get_hessian
+      get_input_jacobian
+      get_jacobian
+      get_state_jacobian
+      log_sum_exp
+      rk4
+      rk4_backward
+      weighted_sum_mat
+      weighted_sum_vec
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

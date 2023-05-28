@@ -1,0 +1,6 @@
+gncpy.game\_engine.physics2d.resolve\_collision2d
+=================================================
+
+.. currentmodule:: gncpy.game_engine.physics2d
+
+.. autofunction:: resolve_collision2d

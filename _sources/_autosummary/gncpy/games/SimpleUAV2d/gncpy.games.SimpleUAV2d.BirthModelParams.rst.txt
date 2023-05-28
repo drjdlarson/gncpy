@@ -1,0 +1,26 @@
+BirthModelParams
+================
+
+.. currentmodule:: gncpy.games.SimpleUAV2d
+
+.. autoclass:: BirthModelParams
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~BirthModelParams.__init__
+   
+   
+
+   
+   
+   

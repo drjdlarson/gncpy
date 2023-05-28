@@ -1,0 +1,6 @@
+gncpy.wgs84.init\_egm\_lookup\_table
+====================================
+
+.. currentmodule:: gncpy.wgs84
+
+.. autofunction:: init_egm_lookup_table

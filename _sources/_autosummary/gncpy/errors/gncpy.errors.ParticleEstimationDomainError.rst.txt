@@ -1,0 +1,6 @@
+gncpy.errors.ParticleEstimationDomainError
+==========================================
+
+.. currentmodule:: gncpy.errors
+
+.. autoexception:: ParticleEstimationDomainError

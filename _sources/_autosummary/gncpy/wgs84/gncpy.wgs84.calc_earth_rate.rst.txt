@@ -1,0 +1,6 @@
+gncpy.wgs84.calc\_earth\_rate
+=============================
+
+.. currentmodule:: gncpy.wgs84
+
+.. autofunction:: calc_earth_rate

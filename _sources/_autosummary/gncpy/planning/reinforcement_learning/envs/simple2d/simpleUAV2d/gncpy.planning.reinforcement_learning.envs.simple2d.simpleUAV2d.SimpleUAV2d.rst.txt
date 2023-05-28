@@ -1,0 +1,46 @@
+SimpleUAV2d
+===========
+
+.. currentmodule:: gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d
+
+.. autoclass:: SimpleUAV2d
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~SimpleUAV2d.__init__
+      ~SimpleUAV2d.calc_obs_space
+      ~SimpleUAV2d.close
+      ~SimpleUAV2d.gen_act_map
+      ~SimpleUAV2d.render
+      ~SimpleUAV2d.reset
+      ~SimpleUAV2d.seed
+      ~SimpleUAV2d.step
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~SimpleUAV2d.action_space
+      ~SimpleUAV2d.metadata
+      ~SimpleUAV2d.np_random
+      ~SimpleUAV2d.render_mode
+      ~SimpleUAV2d.reward_range
+      ~SimpleUAV2d.spec
+      ~SimpleUAV2d.unwrapped
+      ~SimpleUAV2d.observation_space
+   
+   

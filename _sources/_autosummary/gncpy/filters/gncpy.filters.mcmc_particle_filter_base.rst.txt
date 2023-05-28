@@ -1,0 +1,32 @@
+mcmc\_particle\_filter\_base
+============================
+
+.. automodule:: gncpy.filters.mcmc_particle_filter_base
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: mcmc_particle_filter_base
+      :nosignatures:
+      :template: class.rst_t
+   
+      MCMCParticleFilterBase
+   
+   
+
+   
+   
+   
+
+
+

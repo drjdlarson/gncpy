@@ -1,0 +1,32 @@
+kalman\_filter
+==============
+
+.. automodule:: gncpy.filters.kalman_filter
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: kalman_filter
+      :nosignatures:
+      :template: class.rst_t
+   
+      KalmanFilter
+   
+   
+
+   
+   
+   
+
+
+

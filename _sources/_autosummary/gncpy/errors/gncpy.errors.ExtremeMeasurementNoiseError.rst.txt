@@ -1,0 +1,6 @@
+gncpy.errors.ExtremeMeasurementNoiseError
+=========================================
+
+.. currentmodule:: gncpy.errors
+
+.. autoexception:: ExtremeMeasurementNoiseError

@@ -1,0 +1,6 @@
+gncpy.math.gaussian\_kernel
+===========================
+
+.. currentmodule:: gncpy.math
+
+.. autofunction:: gaussian_kernel

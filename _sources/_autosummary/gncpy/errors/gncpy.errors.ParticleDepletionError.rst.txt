@@ -1,0 +1,6 @@
+gncpy.errors.ParticleDepletionError
+===================================
+
+.. currentmodule:: gncpy.errors
+
+.. autoexception:: ParticleDepletionError

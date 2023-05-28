@@ -1,0 +1,6 @@
+gncpy.orbital\_mechanics.ecc\_anom\_from\_mean
+==============================================
+
+.. currentmodule:: gncpy.orbital_mechanics
+
+.. autofunction:: ecc_anom_from_mean

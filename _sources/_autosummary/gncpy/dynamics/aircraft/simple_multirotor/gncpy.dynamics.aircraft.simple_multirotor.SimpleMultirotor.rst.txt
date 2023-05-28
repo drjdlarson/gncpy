@@ -1,0 +1,39 @@
+SimpleMultirotor
+================
+
+.. currentmodule:: gncpy.dynamics.aircraft.simple_multirotor
+
+.. autoclass:: SimpleMultirotor
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~SimpleMultirotor.__init__
+      ~SimpleMultirotor.get_input_mat
+      ~SimpleMultirotor.get_state_mat
+      ~SimpleMultirotor.propagate_state
+      ~SimpleMultirotor.set_initial_conditions
+      ~SimpleMultirotor.validate_params_file
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~SimpleMultirotor.allow_cpp
+      ~SimpleMultirotor.state_names
+      ~SimpleMultirotor.state_units
+   
+   

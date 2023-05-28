@@ -1,0 +1,32 @@
+BayesFilter
+===========
+
+.. currentmodule:: gncpy.filters.bayes_filter
+
+.. autoclass:: BayesFilter
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~BayesFilter.__init__
+      ~BayesFilter.correct
+      ~BayesFilter.load_filter_state
+      ~BayesFilter.predict
+      ~BayesFilter.save_filter_state
+      ~BayesFilter.set_measurement_model
+      ~BayesFilter.set_state_model
+   
+   
+
+   
+   
+   

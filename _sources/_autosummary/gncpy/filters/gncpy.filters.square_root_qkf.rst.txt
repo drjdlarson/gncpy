@@ -1,0 +1,32 @@
+square\_root\_qkf
+=================
+
+.. automodule:: gncpy.filters.square_root_qkf
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: square_root_qkf
+      :nosignatures:
+      :template: class.rst_t
+   
+      SquareRootQKF
+   
+   
+
+   
+   
+   
+
+
+

@@ -1,0 +1,26 @@
+Base2dParams
+============
+
+.. currentmodule:: gncpy.game_engine.base_game
+
+.. autoclass:: Base2dParams
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~Base2dParams.__init__
+   
+   
+
+   
+   
+   

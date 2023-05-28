@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gncpy.filters.particle_filter &mdash; GNCPy 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+    <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_modules/gncpy/filters/particle_filter.html" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #9E1B32" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            GNCPy
+              <img src="../../../_static/logo.svg" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../_autosummary/gncpy.html">gncpy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.control.html">control</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/control/gncpy.control.ELQR.html">ELQR</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/control/gncpy.control.LQR.html">LQR</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.coordinate_transforms.html">coordinate_transforms</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/coordinate_transforms/gncpy.coordinate_transforms.ecef_to_LLA.html">gncpy.coordinate_transforms.ecef_to_LLA</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/coordinate_transforms/gncpy.coordinate_transforms.ecef_to_NED.html">gncpy.coordinate_transforms.ecef_to_NED</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/coordinate_transforms/gncpy.coordinate_transforms.lla_to_ECEF.html">gncpy.coordinate_transforms.lla_to_ECEF</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/coordinate_transforms/gncpy.coordinate_transforms.lla_to_NED.html">gncpy.coordinate_transforms.lla_to_NED</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/coordinate_transforms/gncpy.coordinate_transforms.ned_to_LLA.html">gncpy.coordinate_transforms.ned_to_LLA</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.data_fusion.html">data_fusion</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/data_fusion/gncpy.data_fusion.GeneralizedCovarianceIntersection.html">gncpy.data_fusion.GeneralizedCovarianceIntersection</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.distributions.html">distributions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/distributions/gncpy.distributions.Particle.html">Particle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/distributions/gncpy.distributions.ParticleDistribution.html">ParticleDistribution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/distributions/gncpy.distributions.QuadraturePoints.html">QuadraturePoints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/distributions/gncpy.distributions.SigmaPoints.html">SigmaPoints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/distributions/gncpy.distributions.SimpleParticleDistribution.html">SimpleParticleDistribution</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.dynamics.html">dynamics</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/dynamics/gncpy.dynamics.aircraft.html">aircraft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/dynamics/gncpy.dynamics.basic.html">basic</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.errors.html">errors</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/errors/gncpy.errors.ExtremeMeasurementNoiseError.html">gncpy.errors.ExtremeMeasurementNoiseError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/errors/gncpy.errors.ParticleDepletionError.html">gncpy.errors.ParticleDepletionError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/errors/gncpy.errors.ParticleEstimationDomainError.html">gncpy.errors.ParticleEstimationDomainError</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.filters.html">filters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.bayes_filter.html">bayes_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.bootstrap_filter.html">bootstrap_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.ekf_gaussian_scale_mixture_filter.html">ekf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.extended_kalman_filter.html">extended_kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.gci_filter.html">gci_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.gsm_filter_base.html">gsm_filter_base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.imm_gci_filter.html">imm_gci_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.interacting_multiple_model.html">interacting_multiple_model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.kalman_filter.html">kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.kf_gaussian_scale_mixture_filter.html">kf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.max_corr_ent_ukf.html">max_corr_ent_ukf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.max_corr_ent_upf.html">max_corr_ent_upf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.mcmc_particle_filter_base.html">mcmc_particle_filter_base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.particle_filter.html">particle_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.qkf_gaussian_scale_mixture_filter.html">qkf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.quadrature_kalman_filter.html">quadrature_kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.sqkf_gaussian_scale_mixture_filter.html">sqkf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.square_root_qkf.html">square_root_qkf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.students_t_filter.html">students_t_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.ukf_gaussian_scale_mixture_filter.html">ukf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.unscented_kalman_filter.html">unscented_kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.unscented_particle_filter.html">unscented_particle_filter</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.game_engine.html">game_engine</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/game_engine/gncpy.game_engine.base_game.html">base_game</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/game_engine/gncpy.game_engine.components.html">components</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/game_engine/gncpy.game_engine.entities.html">entities</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/game_engine/gncpy.game_engine.physics2d.html">physics2d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/game_engine/gncpy.game_engine.rendering2d.html">rendering2d</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.games.html">games</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/games/gncpy.games.SimpleUAV2d.html">SimpleUAV2d</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.math.html">math</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.epanechnikov_kernel.html">gncpy.math.epanechnikov_kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.gamma_fnc.html">gncpy.math.gamma_fnc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.gaussian_kernel.html">gncpy.math.gaussian_kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.get_elem_sym_fnc.html">gncpy.math.get_elem_sym_fnc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.get_hessian.html">gncpy.math.get_hessian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.get_input_jacobian.html">gncpy.math.get_input_jacobian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.get_jacobian.html">gncpy.math.get_jacobian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.get_state_jacobian.html">gncpy.math.get_state_jacobian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.log_sum_exp.html">gncpy.math.log_sum_exp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.rk4.html">gncpy.math.rk4</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.rk4_backward.html">gncpy.math.rk4_backward</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.weighted_sum_mat.html">gncpy.math.weighted_sum_mat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.weighted_sum_vec.html">gncpy.math.weighted_sum_vec</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.measurements.html">measurements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.orbital_mechanics.html">orbital_mechanics</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/orbital_mechanics/gncpy.orbital_mechanics.correct_lon_ascend.html">gncpy.orbital_mechanics.correct_lon_ascend</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/orbital_mechanics/gncpy.orbital_mechanics.ecc_anom_from_mean.html">gncpy.orbital_mechanics.ecc_anom_from_mean</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/orbital_mechanics/gncpy.orbital_mechanics.ecef_from_orbit.html">gncpy.orbital_mechanics.ecef_from_orbit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/orbital_mechanics/gncpy.orbital_mechanics.true_anom_from_ecc.html">gncpy.orbital_mechanics.true_anom_from_ecc</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.planning.html">planning</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/planning/gncpy.planning.a_star.html">a_star</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/planning/gncpy.planning.reinforcement_learning.html">reinforcement_learning</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/planning/gncpy.planning.rrt_star.html">rrt_star</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.plotting.html">plotting</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/plotting/gncpy.plotting.calc_error_ellipse.html">gncpy.plotting.calc_error_ellipse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/plotting/gncpy.plotting.get_cmap.html">gncpy.plotting.get_cmap</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/plotting/gncpy.plotting.init_plotting_opts.html">gncpy.plotting.init_plotting_opts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/plotting/gncpy.plotting.set_title_label.html">gncpy.plotting.set_title_label</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.sampling.html">sampling</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/sampling/gncpy.sampling.MetropolisHastings.html">MetropolisHastings</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.utilities.html">utilities</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/utilities/gncpy.utilities.classproperty.html">gncpy.utilities.classproperty</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/utilities/gncpy.utilities.ClassPropertyDescriptor.html">ClassPropertyDescriptor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/utilities/gncpy.utilities.ClassPropertyMetaClass.html">ClassPropertyMetaClass</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.wgs84.html">wgs84</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_earth_rate.html">gncpy.wgs84.calc_earth_rate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_ew_rad.html">gncpy.wgs84.calc_ew_rad</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_gravity.html">gncpy.wgs84.calc_gravity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_ns_rad.html">gncpy.wgs84.calc_ns_rad</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_transport_rate.html">gncpy.wgs84.calc_transport_rate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.convert_msl_to_wgs.html">gncpy.wgs84.convert_msl_to_wgs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.convert_wgs_to_msl.html">gncpy.wgs84.convert_wgs_to_msl</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.init_egm_lookup_table.html">gncpy.wgs84.init_egm_lookup_table</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/control.html">Control Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/control.html#lqr-infinite-horizon-linear-dyanmics">LQR Infinite Horizon Linear Dyanmics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/control.html#lqr-finite-horzon-linear-dynamics">LQR Finite Horzon Linear Dynamics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/control.html#lqr-finite-horzon-non-linear-dynamics">LQR Finite Horzon Non-linear Dynamics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/control.html#elqr">ELQR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/control.html#elqr-modified-quadratization">ELQR Modified Quadratization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/control.html#elqr-linear-dynamics">ELQR Linear Dynamics</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/filters.html">Filter Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/filters.html#kalman-filter">Kalman Filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/filters.html#extended-kalman-filter">Extended Kalman Filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/filters.html#interacting-multiple-model-filter">Interacting Multiple Model Filter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/planning.html">Planning Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/a_star.html">A* Examples</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../usage/a_star.html#normal-a">Normal A*</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../usage/a_star.html#beam-search">Beam Search</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../usage/a_star.html#weighted-a">Weighted A*</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/rrtstar.html">RRT* Examples</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../usage/rrtstar.html#lqr-rrt-with-linear-dynamics">LQR-RRT* with Linear Dynamics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../usage/rrtstar.html#lqr-rrt-with-non-linear-dynamics">LQR-RRT* with Non-Linear Dynamics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../usage/rrtstar.html#elqr-rrt-with-non-linear-dynamics">ELQR-RRT* with Non-Linear Dynamics</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../toolchain.html">Toolchain</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../toolchain.html#development-environment-setup">Development Environment Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../toolchain.html#example-workflow">Example Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../toolchain.html#notes-on-tox">Notes on tox</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cicd.html">CI/CD Pipeline</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../cicd.html#github-actions-quick-guide">Github Actions Quick Guide</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="./reports/coverage/index.html#http://">Test Coverage Report</a></li>
+<li class="toctree-l1"><a class="reference external" href="./reports/junit/junit.html#http://">Test Results Report</a></li>
+<li class="toctree-l1"><a class="reference external" href="http://lager.ua.edu/">LAGER Homepage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../References.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #9E1B32" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">GNCPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gncpy.filters.particle_filter</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gncpy.filters.particle_filter</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numpy.random</span> <span class="k">as</span> <span class="nn">rnd</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
+
+<span class="kn">import</span> <span class="nn">gncpy.distributions</span> <span class="k">as</span> <span class="nn">gdistrib</span>
+<span class="kn">import</span> <span class="nn">gncpy.errors</span> <span class="k">as</span> <span class="nn">gerr</span>
+<span class="kn">import</span> <span class="nn">gncpy.plotting</span> <span class="k">as</span> <span class="nn">pltUtil</span>
+<span class="kn">from</span> <span class="nn">gncpy.filters.bayes_filter</span> <span class="kn">import</span> <span class="n">BayesFilter</span>
+
+
+<div class="viewcode-block" id="ParticleFilter"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/particle_filter/gncpy.filters.particle_filter.ParticleFilter.html#gncpy.filters.particle_filter.ParticleFilter">[docs]</a><span class="k">class</span> <span class="nc">ParticleFilter</span><span class="p">(</span><span class="n">BayesFilter</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Implements a basic Particle Filter.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The implementation is based on</span>
+<span class="sd">    :cite:`Simon2006_OptimalStateEstimationKalmanHInfinityandNonlinearApproaches`</span>
+<span class="sd">    and uses Sampling-Importance Resampling (SIR) sampling. Other resampling</span>
+<span class="sd">    methods can be added in derived classes.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    require_copy_prop_parts : bool</span>
+<span class="sd">        Flag indicating if the propagated particles need to be copied if this</span>
+<span class="sd">        filter is being manipulated externally. This is a constant value that</span>
+<span class="sd">        should not be modified outside of the class, but can be overridden by</span>
+<span class="sd">        inherited classes.</span>
+<span class="sd">    require_copy_can_dist : bool</span>
+<span class="sd">        Flag indicating if a candidate distribution needs to be copied if this</span>
+<span class="sd">        filter is being manipulated externally. This is a constant value that</span>
+<span class="sd">        should not be modified outside of the class, but can be overridden by</span>
+<span class="sd">        inherited classes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">require_copy_prop_parts</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">require_copy_can_dist</span> <span class="o">=</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="ParticleFilter.__init__"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/particle_filter/gncpy.filters.particle_filter.ParticleFilter.html#gncpy.filters.particle_filter.ParticleFilter.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">dyn_obj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">dyn_fun</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">part_dist</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">transition_prob_fnc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">rng</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__meas_likelihood_fnc</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__proposal_sampling_fnc</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__proposal_fnc</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__transition_prob_fnc</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">rng</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">rng</span> <span class="o">=</span> <span class="n">rnd</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rng</span> <span class="o">=</span> <span class="n">rng</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dyn_fnc</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dyn_obj</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_meas_mat</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_meas_fnc</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">dyn_obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">dyn_fun</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_state_model</span><span class="p">(</span><span class="n">dyn_obj</span><span class="o">=</span><span class="n">dyn_obj</span><span class="p">,</span> <span class="n">dyn_fun</span><span class="o">=</span><span class="n">dyn_fun</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span> <span class="o">=</span> <span class="n">gdistrib</span><span class="o">.</span><span class="n">ParticleDistribution</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">part_dist</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">init_from_dist</span><span class="p">(</span><span class="n">part_dist</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prop_parts</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ParticleFilter.save_filter_state"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/particle_filter/gncpy.filters.particle_filter.ParticleFilter.html#gncpy.filters.particle_filter.ParticleFilter.save_filter_state">[docs]</a>    <span class="k">def</span> <span class="nf">save_filter_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Saves filter variables so they can be restored later.&quot;&quot;&quot;</span>
+        <span class="n">filt_state</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">save_filter_state</span><span class="p">()</span>
+
+        <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;__meas_likelihood_fnc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__meas_likelihood_fnc</span>
+        <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;__proposal_sampling_fnc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__proposal_sampling_fnc</span>
+        <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;__proposal_fnc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__proposal_fnc</span>
+        <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;__transition_prob_fnc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__transition_prob_fnc</span>
+
+        <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;rng&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rng</span>
+
+        <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_dyn_fnc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dyn_fnc</span>
+        <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_dyn_obj&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dyn_obj</span>
+
+        <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_meas_mat&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meas_mat</span>
+        <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_meas_fnc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meas_fnc</span>
+
+        <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_particleDist&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span><span class="p">)</span>
+        <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;prop_parts&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prop_parts</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">filt_state</span></div>
+
+<div class="viewcode-block" id="ParticleFilter.load_filter_state"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/particle_filter/gncpy.filters.particle_filter.ParticleFilter.html#gncpy.filters.particle_filter.ParticleFilter.load_filter_state">[docs]</a>    <span class="k">def</span> <span class="nf">load_filter_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filt_state</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes filter using saved filter state.</span>
+
+<span class="sd">        Attributes</span>
+<span class="sd">        ----------</span>
+<span class="sd">        filt_state : dict</span>
+<span class="sd">            Dictionary generated by :meth:`save_filter_state`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">load_filter_state</span><span class="p">(</span><span class="n">filt_state</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__meas_likelihood_fnc</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;__meas_likelihood_fnc&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__proposal_sampling_fnc</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;__proposal_sampling_fnc&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__proposal_fnc</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;__proposal_fnc&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__transition_prob_fnc</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;__transition_prob_fnc&quot;</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">rng</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;rng&quot;</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dyn_fnc</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_dyn_fnc&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dyn_obj</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_dyn_obj&quot;</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_meas_mat</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_meas_mat&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_meas_fnc</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_meas_fnc&quot;</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_particleDist&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prop_parts</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;prop_parts&quot;</span><span class="p">]</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">meas_likelihood_fnc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;A function that returns the likelihood of the measurement.</span>
+
+<span class="sd">        This must have the signature :code:`f(y, y_hat, *args)` where `y` is</span>
+<span class="sd">        the measurement as an Nm x 1 numpy array, and `y_hat` is the estimated</span>
+<span class="sd">        measurement.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        This represents :math:`p(y_t \vert x_t)` in the importance</span>
+<span class="sd">        weight</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            w_t = w_{t-1} \frac{p(y_t \vert x_t) p(x_t \vert x_{t-1})}{q(x_t \vert x_{t-1}, y_t)}</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        callable</span>
+<span class="sd">            function to return the measurement likelihood.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__meas_likelihood_fnc</span>
+
+    <span class="nd">@meas_likelihood_fnc</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">meas_likelihood_fnc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__meas_likelihood_fnc</span> <span class="o">=</span> <span class="n">val</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">proposal_fnc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;A function that returns the probability for the proposal distribution.</span>
+
+<span class="sd">        This must have the signature :code:`f(x_hat, x, y, *args)` where</span>
+<span class="sd">        `x_hat` is a :class:`gncpy.distributions.Particle` of the estimated</span>
+<span class="sd">        state, `x` is the particle it is conditioned on, and `y` is the</span>
+<span class="sd">        measurement.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        This represents :math:`q(x_t \vert x_{t-1}, y_t)` in the importance</span>
+<span class="sd">        weight</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            w_t = w_{t-1} \frac{p(y_t \vert x_t) p(x_t \vert x_{t-1})}{q(x_t \vert x_{t-1}, y_t)}</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        callable</span>
+<span class="sd">            function to return the proposal probability.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__proposal_fnc</span>
+
+    <span class="nd">@proposal_fnc</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">proposal_fnc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__proposal_fnc</span> <span class="o">=</span> <span class="n">val</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">proposal_sampling_fnc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A function that returns a random sample from the proposal distribtion.</span>
+
+<span class="sd">        This should be consistent with the PDF specified in the</span>
+<span class="sd">        :meth:`gncpy.filters.ParticleFilter.proposal_fnc`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        callable</span>
+<span class="sd">            function to return a random sample.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__proposal_sampling_fnc</span>
+
+    <span class="nd">@proposal_sampling_fnc</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">proposal_sampling_fnc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__proposal_sampling_fnc</span> <span class="o">=</span> <span class="n">val</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">transition_prob_fnc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;A function that returns the transition probability for the state.</span>
+
+<span class="sd">        This must have the signature :code:`f(x_hat, x, *args)` where</span>
+<span class="sd">        `x_hat` is an N x 1 numpy array representing the propagated state, and</span>
+<span class="sd">        `x` is the state it is conditioned on.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        This represents :math:`p(x_t \vert x_{t-1})` in the importance</span>
+<span class="sd">        weight</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            w_t = w_{t-1} \frac{p(y_t \vert x_t) p(x_t \vert x_{t-1})}{q(x_t \vert x_{t-1}, y_t)}</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        callable</span>
+<span class="sd">            function to return the transition probability.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__transition_prob_fnc</span>
+
+    <span class="nd">@transition_prob_fnc</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">transition_prob_fnc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__transition_prob_fnc</span> <span class="o">=</span> <span class="n">val</span>
+
+<div class="viewcode-block" id="ParticleFilter.set_state_model"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/particle_filter/gncpy.filters.particle_filter.ParticleFilter.html#gncpy.filters.particle_filter.ParticleFilter.set_state_model">[docs]</a>    <span class="k">def</span> <span class="nf">set_state_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dyn_obj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dyn_fun</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets the state model.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dyn_obj : :class:gncpy.dynamics.DynamicsBase`, optional</span>
+<span class="sd">            Dynamic object to use. The default is None.</span>
+<span class="sd">        dyn_fun : callable, optional</span>
+<span class="sd">            function that returns the next state. It must have the signature</span>
+<span class="sd">            `f(t, x, *args)` and return a N x 1 numpy array. The default is None.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        RuntimeError</span>
+<span class="sd">            If no model is specified.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">dyn_obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dyn_obj</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">dyn_obj</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">dyn_fun</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dyn_fnc</span> <span class="o">=</span> <span class="n">dyn_fun</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Invalid state model specified. Check arguments&quot;</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ParticleFilter.set_measurement_model"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/particle_filter/gncpy.filters.particle_filter.ParticleFilter.html#gncpy.filters.particle_filter.ParticleFilter.set_measurement_model">[docs]</a>    <span class="k">def</span> <span class="nf">set_measurement_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meas_mat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">meas_fun</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Sets the measurement model for the filter.</span>
+
+<span class="sd">        This can either set the constant measurement matrix, or a set of</span>
+<span class="sd">        non-linear functions (potentially time varying) to map states to</span>
+<span class="sd">        measurements.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        The constant matrix assumes a measurement model of the form</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            \tilde{y}_{k+1} = H x_{k+1}^-</span>
+
+<span class="sd">        and the non-linear case assumes</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            \tilde{y}_{k+1} = h(t, x_{k+1}^-)</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        meas_mat : Nm x N numpy array, optional</span>
+<span class="sd">            Measurement matrix that transforms the state to estimated</span>
+<span class="sd">            measurements. The default is None.</span>
+<span class="sd">        meas_fun_lst : list, optional</span>
+<span class="sd">            Non-linear functions that return the expected measurement for the</span>
+<span class="sd">            given state. Each function must have the signature `h(t, x, *args)`.</span>
+<span class="sd">            The default is None.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        RuntimeError</span>
+<span class="sd">            Rasied if no arguments are specified.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">meas_mat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_meas_mat</span> <span class="o">=</span> <span class="n">meas_mat</span>
+        <span class="k">elif</span> <span class="n">meas_fun</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_meas_fnc</span> <span class="o">=</span> <span class="n">meas_fun</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Invalid combination of inputs&quot;</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">cov</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read only covariance of the particles.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        N x N numpy array</span>
+<span class="sd">            covariance matrix.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span><span class="o">.</span><span class="n">covariance</span>
+
+    <span class="nd">@cov</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">cov</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Covariance is read only&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">num_particles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read only number of particles used by the filter.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            Number of particles.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span><span class="o">.</span><span class="n">num_particles</span>
+
+<div class="viewcode-block" id="ParticleFilter.init_from_dist"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/particle_filter/gncpy.filters.particle_filter.ParticleFilter.html#gncpy.filters.particle_filter.ParticleFilter.init_from_dist">[docs]</a>    <span class="k">def</span> <span class="nf">init_from_dist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dist</span><span class="p">,</span> <span class="n">make_copy</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the distribution from a distribution object.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dist : :class:`gncpy.distributions.ParticleDistribution`</span>
+<span class="sd">            Distribution object to use.</span>
+<span class="sd">        make_copy : bool, optional</span>
+<span class="sd">            Flag indicating if a deepcopy of the input distribution should be</span>
+<span class="sd">            performed. The default is True.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">make_copy</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">dist</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span> <span class="o">=</span> <span class="n">dist</span></div>
+
+<div class="viewcode-block" id="ParticleFilter.extract_dist"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/particle_filter/gncpy.filters.particle_filter.ParticleFilter.html#gncpy.filters.particle_filter.ParticleFilter.extract_dist">[docs]</a>    <span class="k">def</span> <span class="nf">extract_dist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">make_copy</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extracts the particle distribution used by the filter.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        make_copy : bool, optional</span>
+<span class="sd">            Flag indicating if a deepcopy of the distribution should be</span>
+<span class="sd">            performed. The default is True.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        :class:`gncpy.distributions.ParticleDistribution`</span>
+<span class="sd">            Particle distribution object used by the filter</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">make_copy</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span></div>
+
+<div class="viewcode-block" id="ParticleFilter.init_particles"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/particle_filter/gncpy.filters.particle_filter.ParticleFilter.html#gncpy.filters.particle_filter.ParticleFilter.init_particles">[docs]</a>    <span class="k">def</span> <span class="nf">init_particles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">particle_lst</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes the particle distribution with the given list of points.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        particle_lst : list</span>
+<span class="sd">            List of numpy arrays, one for each particle.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">num_parts</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">particle_lst</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">num_parts</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;No particles to initialize. SKIPPING&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span><span class="o">.</span><span class="n">clear_particles</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span><span class="o">.</span><span class="n">add_particle</span><span class="p">(</span><span class="n">particle_lst</span><span class="p">,</span> <span class="p">[</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">num_parts</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_parts</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_calc_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span><span class="o">.</span><span class="n">mean</span>
+
+<div class="viewcode-block" id="ParticleFilter.predict"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/particle_filter/gncpy.filters.particle_filter.ParticleFilter.html#gncpy.filters.particle_filter.ParticleFilter.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">dyn_fun_params</span><span class="o">=</span><span class="p">(),</span> <span class="n">sampling_args</span><span class="o">=</span><span class="p">(),</span> <span class="n">transition_args</span><span class="o">=</span><span class="p">()</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Predicts the next state.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        timestep : float</span>
+<span class="sd">            Current timestep.</span>
+<span class="sd">        dyn_fun_params : tuple, optional</span>
+<span class="sd">            Extra arguments to be passed to the dynamics function. The default</span>
+<span class="sd">            is ().</span>
+<span class="sd">        sampling_args : tuple, optional</span>
+<span class="sd">            Extra arguments to be passed to the proposal sampling function.</span>
+<span class="sd">            The default is ().</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        RuntimeError</span>
+<span class="sd">            If no state model is set.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        N x 1 numpy array</span>
+<span class="sd">            predicted state.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dyn_obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">prop_parts</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_dyn_obj</span><span class="o">.</span><span class="n">propagate_state</span><span class="p">(</span><span class="n">timestep</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">state_args</span><span class="o">=</span><span class="n">dyn_fun_params</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span><span class="o">.</span><span class="n">particles</span>
+            <span class="p">]</span>
+            <span class="n">mean</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dyn_obj</span><span class="o">.</span><span class="n">propagate_state</span><span class="p">(</span>
+                <span class="n">timestep</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">state_args</span><span class="o">=</span><span class="n">dyn_fun_params</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dyn_fnc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">prop_parts</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_dyn_fnc</span><span class="p">(</span><span class="n">timestep</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">dyn_fun_params</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span><span class="o">.</span><span class="n">particles</span>
+            <span class="p">]</span>
+            <span class="n">mean</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dyn_fnc</span><span class="p">(</span><span class="n">timestep</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="o">*</span><span class="n">dyn_fun_params</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;No state model set&quot;</span><span class="p">)</span>
+        <span class="n">new_weights</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">w</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">transition_prob_fnc</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="o">*</span><span class="n">transition_args</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">transition_prob_fnc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="n">w</span>
+            <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">w</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prop_parts</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span><span class="o">.</span><span class="n">weights</span><span class="p">)</span>
+        <span class="p">]</span>
+
+        <span class="n">new_parts</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">proposal_sampling_fnc</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="p">,</span> <span class="o">*</span><span class="n">sampling_args</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">prop_parts</span>
+        <span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span><span class="o">.</span><span class="n">clear_particles</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">w</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">new_parts</span><span class="p">,</span> <span class="n">new_weights</span><span class="p">):</span>
+            <span class="n">part</span> <span class="o">=</span> <span class="n">gdistrib</span><span class="o">.</span><span class="n">Particle</span><span class="p">(</span><span class="n">point</span><span class="o">=</span><span class="n">p</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span><span class="o">.</span><span class="n">add_particle</span><span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_state</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_est_meas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">cur_state</span><span class="p">,</span> <span class="n">n_meas</span><span class="p">,</span> <span class="n">meas_fun_args</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meas_fnc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">est_meas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meas_fnc</span><span class="p">(</span><span class="n">timestep</span><span class="p">,</span> <span class="n">cur_state</span><span class="p">,</span> <span class="o">*</span><span class="n">meas_fun_args</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meas_mat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">est_meas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meas_mat</span> <span class="o">@</span> <span class="n">cur_state</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;No measurement model set&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">est_meas</span>
+
+    <span class="k">def</span> <span class="nf">_selection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unnorm_weights</span><span class="p">,</span> <span class="n">rel_likeli_in</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">new_parts</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_particles</span>
+        <span class="n">old_weights</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_particles</span>
+        <span class="n">rel_likeli_out</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_particles</span>
+        <span class="n">inds_kept</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">probs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_particles</span><span class="p">)</span>
+        <span class="n">cumulative_weight</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span><span class="o">.</span><span class="n">weights</span><span class="p">)</span>
+        <span class="n">failed</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">probs</span><span class="p">):</span>
+            <span class="n">inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">cumulative_weight</span> <span class="o">&gt;=</span> <span class="n">r</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">inds</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">new_parts</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span><span class="o">.</span><span class="n">_particles</span><span class="p">[</span><span class="n">inds</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+                <span class="n">old_weights</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">unnorm_weights</span><span class="p">[</span><span class="n">inds</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                <span class="k">if</span> <span class="n">rel_likeli_in</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">rel_likeli_out</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">rel_likeli_in</span><span class="p">[</span><span class="n">inds</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                <span class="k">if</span> <span class="n">inds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">inds_kept</span><span class="p">:</span>
+                    <span class="n">inds_kept</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inds</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">failed</span><span class="p">:</span>
+            <span class="n">tot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span><span class="o">.</span><span class="n">weights</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span><span class="o">.</span><span class="n">clear_particles</span><span class="p">()</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">&quot;Failed to select enough particles, &quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;check weights (sum = </span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tot</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">gerr</span><span class="o">.</span><span class="n">ParticleDepletionError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="n">inds_removed</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">ii</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_particles</span><span class="p">)</span> <span class="k">if</span> <span class="n">ii</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">inds_kept</span>
+        <span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span><span class="o">.</span><span class="n">clear_particles</span><span class="p">()</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_parts</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span><span class="o">.</span><span class="n">add_particle</span><span class="p">(</span><span class="n">new_parts</span><span class="p">,</span> <span class="p">[</span><span class="n">w</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_parts</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">inds_removed</span><span class="p">,</span> <span class="n">old_weights</span><span class="p">,</span> <span class="n">rel_likeli_out</span>
+
+<div class="viewcode-block" id="ParticleFilter.correct"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/particle_filter/gncpy.filters.particle_filter.ParticleFilter.html#gncpy.filters.particle_filter.ParticleFilter.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">timestep</span><span class="p">,</span>
+        <span class="n">meas</span><span class="p">,</span>
+        <span class="n">meas_fun_args</span><span class="o">=</span><span class="p">(),</span>
+        <span class="n">meas_likely_args</span><span class="o">=</span><span class="p">(),</span>
+        <span class="n">proposal_args</span><span class="o">=</span><span class="p">(),</span>
+        <span class="n">selection</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Corrects the state estimate.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        timestep : float</span>
+<span class="sd">            Current timestep.</span>
+<span class="sd">        meas : Nm x 1 numpy array</span>
+<span class="sd">            Current measurement.</span>
+<span class="sd">        meas_fun_args : tuple, optional</span>
+<span class="sd">            Arguments for the measurement matrix function if one has</span>
+<span class="sd">            been specified. The default is ().</span>
+<span class="sd">        meas_likely_args : tuple, optional</span>
+<span class="sd">            additional agruments for the measurement likelihood function.</span>
+<span class="sd">            The default is ().</span>
+<span class="sd">        proposal_args : tuple, optional</span>
+<span class="sd">            Additional arguments for the proposal distribution function. The</span>
+<span class="sd">            default is ().</span>
+<span class="sd">        selection : bool, optional</span>
+<span class="sd">            Flag indicating if the selection step should be performed. The</span>
+<span class="sd">            default is True.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        RuntimeError</span>
+<span class="sd">            If no measurement model is set</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        state : N x 1 numpy array</span>
+<span class="sd">            corrected state.</span>
+<span class="sd">        rel_likeli : numpy array</span>
+<span class="sd">            The unnormalized measurement likelihood of each particle.</span>
+<span class="sd">        inds_removed : list</span>
+<span class="sd">            each element is an int representing the index of any particles</span>
+<span class="sd">            that were removed during the selection process.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># calculate weights</span>
+        <span class="n">est_meas</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_est_meas</span><span class="p">(</span><span class="n">timestep</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">meas</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">meas_fun_args</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span><span class="o">.</span><span class="n">particles</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">meas_likelihood_fnc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">rel_likeli</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">est_meas</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">rel_likeli</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">meas_likelihood_fnc</span><span class="p">(</span><span class="n">meas</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">*</span><span class="n">meas_likely_args</span><span class="p">)</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">est_meas</span><span class="p">]</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">proposal_fnc</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prop_parts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">prop_fit</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span><span class="o">.</span><span class="n">particles</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">prop_fit</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">proposal_fnc</span><span class="p">(</span><span class="n">x_hat</span><span class="p">,</span> <span class="n">cond</span><span class="p">,</span> <span class="n">meas</span><span class="p">,</span> <span class="o">*</span><span class="n">proposal_args</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">x_hat</span><span class="p">,</span> <span class="n">cond</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span><span class="o">.</span><span class="n">particles</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">prop_parts</span>
+                    <span class="p">)</span>
+                <span class="p">]</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+        <span class="n">inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">prop_fit</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">inds</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">prop_fit</span><span class="p">[</span><span class="n">inds</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span>
+        <span class="n">unnorm_weights</span> <span class="o">=</span> <span class="n">rel_likeli</span> <span class="o">/</span> <span class="n">prop_fit</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span><span class="o">.</span><span class="n">weights</span><span class="p">)</span>
+
+        <span class="n">tot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">unnorm_weights</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">tot</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">tot</span> <span class="o">!=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">:</span>
+            <span class="n">weights</span> <span class="o">=</span> <span class="n">unnorm_weights</span> <span class="o">/</span> <span class="n">tot</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">unnorm_weights</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span><span class="o">.</span><span class="n">update_weights</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
+
+        <span class="c1"># resample</span>
+        <span class="k">if</span> <span class="n">selection</span><span class="p">:</span>
+            <span class="n">inds_removed</span><span class="p">,</span> <span class="n">rel_likeli</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selection</span><span class="p">(</span>
+                <span class="n">unnorm_weights</span><span class="p">,</span> <span class="n">rel_likeli_in</span><span class="o">=</span><span class="n">rel_likeli</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">inds_removed</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_calc_state</span><span class="p">(),</span> <span class="n">rel_likeli</span><span class="p">,</span> <span class="n">inds_removed</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ParticleFilter.plot_particles"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/particle_filter/gncpy.filters.particle_filter.ParticleFilter.html#gncpy.filters.particle_filter.ParticleFilter.plot_particles">[docs]</a>    <span class="k">def</span> <span class="nf">plot_particles</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">inds</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Particle Distribution&quot;</span><span class="p">,</span>
+        <span class="n">x_lbl</span><span class="o">=</span><span class="s2">&quot;State&quot;</span><span class="p">,</span>
+        <span class="n">y_lbl</span><span class="o">=</span><span class="s2">&quot;Probability&quot;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plots the particle distribution.</span>
+
+<span class="sd">        This will either plot a histogram for a single index, or plot a 2-d</span>
+<span class="sd">        heatmap/histogram if a list of 2 indices are given. The 1-d case will</span>
+<span class="sd">        have the counts normalized to represent the probability.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        inds : int or list</span>
+<span class="sd">            Index of the particle vector to plot.</span>
+<span class="sd">        title : string, optional</span>
+<span class="sd">            Title of the plot. The default is &#39;Particle Distribution&#39;.</span>
+<span class="sd">        x_lbl : string, optional</span>
+<span class="sd">            X-axis label. The default is &#39;State&#39;.</span>
+<span class="sd">        y_lbl : string, optional</span>
+<span class="sd">            Y-axis label. The default is &#39;Probability&#39;.</span>
+<span class="sd">        **kwargs : dict</span>
+<span class="sd">            Additional plotting options for :meth:`gncpy.plotting.init_plotting_opts`</span>
+<span class="sd">            function. Values implemented here are `f_hndl`, `lgnd_loc`, and</span>
+<span class="sd">            any values relating to title/axis text formatting.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        f_hndl : matplotlib figure</span>
+<span class="sd">            Figure object the data was plotted on.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">opts</span> <span class="o">=</span> <span class="n">pltUtil</span><span class="o">.</span><span class="n">init_plotting_opts</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">f_hndl</span> <span class="o">=</span> <span class="n">opts</span><span class="p">[</span><span class="s2">&quot;f_hndl&quot;</span><span class="p">]</span>
+        <span class="n">lgnd_loc</span> <span class="o">=</span> <span class="n">opts</span><span class="p">[</span><span class="s2">&quot;lgnd_loc&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">f_hndl</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">f_hndl</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+            <span class="n">f_hndl</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">h_opts</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;histtype&quot;</span><span class="p">:</span> <span class="s2">&quot;stepfilled&quot;</span><span class="p">,</span> <span class="s2">&quot;bins&quot;</span><span class="p">:</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="s2">&quot;density&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inds</span><span class="p">,</span> <span class="nb">list</span><span class="p">))</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">inds</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inds</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">ii</span> <span class="o">=</span> <span class="n">inds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ii</span> <span class="o">=</span> <span class="n">inds</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span><span class="o">.</span><span class="n">particles</span><span class="p">]</span>
+            <span class="n">f_hndl</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">h_opts</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="n">inds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span><span class="o">.</span><span class="n">particles</span><span class="p">]</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="n">inds</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span><span class="o">.</span><span class="n">particles</span><span class="p">]</span>
+            <span class="n">f_hndl</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">hist2d</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="n">pltUtil</span><span class="o">.</span><span class="n">set_title_label</span><span class="p">(</span><span class="n">f_hndl</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">ttl</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">x_lbl</span><span class="o">=</span><span class="n">x_lbl</span><span class="p">,</span> <span class="n">y_lbl</span><span class="o">=</span><span class="n">y_lbl</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">lgnd_loc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="n">lgnd_loc</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">f_hndl</span></div>
+
+<div class="viewcode-block" id="ParticleFilter.plot_weighted_particles"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/particle_filter/gncpy.filters.particle_filter.ParticleFilter.html#gncpy.filters.particle_filter.ParticleFilter.plot_weighted_particles">[docs]</a>    <span class="k">def</span> <span class="nf">plot_weighted_particles</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">inds</span><span class="p">,</span>
+        <span class="n">x_lbl</span><span class="o">=</span><span class="s2">&quot;State&quot;</span><span class="p">,</span>
+        <span class="n">y_lbl</span><span class="o">=</span><span class="s2">&quot;Weight&quot;</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Weighted Particle Distribution&quot;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plots the weight vs state distribution of the particles.</span>
+
+<span class="sd">        This generates a bar chart and only works for single indices.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        inds : int</span>
+<span class="sd">            Index of the particle vector to plot.</span>
+<span class="sd">        x_lbl : string, optional</span>
+<span class="sd">            X-axis label. The default is &#39;State&#39;.</span>
+<span class="sd">        y_lbl : string, optional</span>
+<span class="sd">            Y-axis label. The default is &#39;Weight&#39;.</span>
+<span class="sd">        title : string, optional</span>
+<span class="sd">            Title of the plot. The default is &#39;Weighted Particle Distribution&#39;.</span>
+<span class="sd">        **kwargs : dict</span>
+<span class="sd">            Additional plotting options for :meth:`gncpy.plotting.init_plotting_opts`</span>
+<span class="sd">            function. Values implemented here are `f_hndl`, `lgnd_loc`, and</span>
+<span class="sd">            any values relating to title/axis text formatting.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        f_hndl : matplotlib figure</span>
+<span class="sd">            Figure object the data was plotted on.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">opts</span> <span class="o">=</span> <span class="n">pltUtil</span><span class="o">.</span><span class="n">init_plotting_opts</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">f_hndl</span> <span class="o">=</span> <span class="n">opts</span><span class="p">[</span><span class="s2">&quot;f_hndl&quot;</span><span class="p">]</span>
+        <span class="n">lgnd_loc</span> <span class="o">=</span> <span class="n">opts</span><span class="p">[</span><span class="s2">&quot;lgnd_loc&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">f_hndl</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">f_hndl</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+            <span class="n">f_hndl</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inds</span><span class="p">,</span> <span class="nb">list</span><span class="p">))</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">inds</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inds</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">ii</span> <span class="o">=</span> <span class="n">inds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ii</span> <span class="o">=</span> <span class="n">inds</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span><span class="o">.</span><span class="n">particles</span><span class="p">]</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="n">w</span> <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span><span class="p">]</span>
+            <span class="n">f_hndl</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Only 1 element supported for weighted particle distribution&quot;</span><span class="p">)</span>
+        <span class="n">pltUtil</span><span class="o">.</span><span class="n">set_title_label</span><span class="p">(</span><span class="n">f_hndl</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">ttl</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">x_lbl</span><span class="o">=</span><span class="n">x_lbl</span><span class="p">,</span> <span class="n">y_lbl</span><span class="o">=</span><span class="n">y_lbl</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">lgnd_loc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="n">lgnd_loc</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">f_hndl</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Laboratory for Autonomy, GNC, and Estimation Research (LAGER).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

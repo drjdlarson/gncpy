@@ -1,0 +1,37 @@
+CurvilinearMotion
+=================
+
+.. currentmodule:: gncpy.dynamics.basic
+
+.. autoclass:: CurvilinearMotion
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~CurvilinearMotion.__init__
+      ~CurvilinearMotion.get_input_mat
+      ~CurvilinearMotion.get_state_mat
+      ~CurvilinearMotion.propagate_state
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CurvilinearMotion.allow_cpp
+      ~CurvilinearMotion.cont_fnc_lst
+      ~CurvilinearMotion.state_names
+   
+   

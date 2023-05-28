@@ -1,0 +1,36 @@
+QuadraturePoints
+================
+
+.. currentmodule:: gncpy.distributions
+
+.. autoclass:: QuadraturePoints
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~QuadraturePoints.__init__
+      ~QuadraturePoints.plot_points
+      ~QuadraturePoints.update_points
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~QuadraturePoints.cov
+      ~QuadraturePoints.mean
+      ~QuadraturePoints.num_points
+   
+   

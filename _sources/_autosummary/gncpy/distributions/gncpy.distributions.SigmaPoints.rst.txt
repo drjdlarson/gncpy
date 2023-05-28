@@ -1,0 +1,40 @@
+SigmaPoints
+===========
+
+.. currentmodule:: gncpy.distributions
+
+.. autoclass:: SigmaPoints
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~SigmaPoints.__init__
+      ~SigmaPoints.init_weights
+      ~SigmaPoints.plot_points
+      ~SigmaPoints.update_points
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~SigmaPoints.cov
+      ~SigmaPoints.lam
+      ~SigmaPoints.mean
+      ~SigmaPoints.num_points
+      ~SigmaPoints.weights_cov
+      ~SigmaPoints.weights_mean
+   
+   

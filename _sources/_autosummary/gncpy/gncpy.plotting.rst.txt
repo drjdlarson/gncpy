@@ -1,0 +1,34 @@
+plotting
+========
+
+.. automodule:: gncpy.plotting
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree: plotting
+      :nosignatures:
+   
+      calc_error_ellipse
+      get_cmap
+      init_plotting_opts
+      set_title_label
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

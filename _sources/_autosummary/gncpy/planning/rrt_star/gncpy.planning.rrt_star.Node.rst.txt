@@ -1,0 +1,26 @@
+Node
+====
+
+.. currentmodule:: gncpy.planning.rrt_star
+
+.. autoclass:: Node
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~Node.__init__
+   
+   
+
+   
+   
+   

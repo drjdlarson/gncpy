@@ -1,0 +1,26 @@
+WindowParams
+============
+
+.. currentmodule:: gncpy.game_engine.base_game
+
+.. autoclass:: WindowParams
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~WindowParams.__init__
+   
+   
+
+   
+   
+   

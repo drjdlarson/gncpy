@@ -1,0 +1,37 @@
+BaseGame
+========
+
+.. currentmodule:: gncpy.game_engine.base_game
+
+.. autoclass:: BaseGame
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~BaseGame.__init__
+      ~BaseGame.parse_config_file
+      ~BaseGame.register_params
+      ~BaseGame.reset
+      ~BaseGame.s_collision
+      ~BaseGame.s_game_over
+      ~BaseGame.s_input
+      ~BaseGame.s_movement
+      ~BaseGame.s_score
+      ~BaseGame.setup
+      ~BaseGame.step
+      ~BaseGame.validate_config_file
+   
+   
+
+   
+   
+   

@@ -1,0 +1,37 @@
+CoordinatedTurnKnown
+====================
+
+.. currentmodule:: gncpy.dynamics.basic
+
+.. autoclass:: CoordinatedTurnKnown
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~CoordinatedTurnKnown.__init__
+      ~CoordinatedTurnKnown.get_dis_process_noise_mat
+      ~CoordinatedTurnKnown.get_input_mat
+      ~CoordinatedTurnKnown.get_state_mat
+      ~CoordinatedTurnKnown.propagate_state
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CoordinatedTurnKnown.allow_cpp
+      ~CoordinatedTurnKnown.state_names
+   
+   

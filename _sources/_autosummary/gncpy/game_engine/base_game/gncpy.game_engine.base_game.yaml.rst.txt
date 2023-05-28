@@ -1,0 +1,6 @@
+gncpy.game\_engine.base\_game.yaml
+==================================
+
+.. currentmodule:: gncpy.game_engine.base_game
+
+.. autodata:: yaml

@@ -1,0 +1,6 @@
+gncpy.math.get\_elem\_sym\_fnc
+==============================
+
+.. currentmodule:: gncpy.math
+
+.. autofunction:: get_elem_sym_fnc

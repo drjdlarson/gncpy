@@ -1,0 +1,32 @@
+students\_t\_filter
+===================
+
+.. automodule:: gncpy.filters.students_t_filter
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: students_t_filter
+      :nosignatures:
+      :template: class.rst_t
+   
+      StudentsTFilter
+   
+   
+
+   
+   
+   
+
+
+

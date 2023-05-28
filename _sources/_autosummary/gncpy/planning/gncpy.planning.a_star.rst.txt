@@ -1,0 +1,33 @@
+a\_star
+=======
+
+.. automodule:: gncpy.planning.a_star
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: a_star
+      :nosignatures:
+      :template: class.rst_t
+   
+      AStar
+      Node
+   
+   
+
+   
+   
+   
+
+
+

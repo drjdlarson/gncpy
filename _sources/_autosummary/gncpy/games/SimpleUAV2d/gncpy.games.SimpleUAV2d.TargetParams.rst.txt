@@ -1,0 +1,26 @@
+TargetParams
+============
+
+.. currentmodule:: gncpy.games.SimpleUAV2d
+
+.. autoclass:: TargetParams
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~TargetParams.__init__
+   
+   
+
+   
+   
+   

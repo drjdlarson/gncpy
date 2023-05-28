@@ -1,0 +1,6 @@
+gncpy.math.rk4
+==============
+
+.. currentmodule:: gncpy.math
+
+.. autofunction:: rk4

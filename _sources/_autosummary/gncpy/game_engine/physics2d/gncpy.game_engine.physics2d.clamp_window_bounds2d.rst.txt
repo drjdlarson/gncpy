@@ -1,0 +1,6 @@
+gncpy.game\_engine.physics2d.clamp\_window\_bounds2d
+====================================================
+
+.. currentmodule:: gncpy.game_engine.physics2d
+
+.. autofunction:: clamp_window_bounds2d

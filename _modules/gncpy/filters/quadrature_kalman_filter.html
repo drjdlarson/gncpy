@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gncpy.filters.quadrature_kalman_filter &mdash; GNCPy 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+    <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_modules/gncpy/filters/quadrature_kalman_filter.html" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #9E1B32" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            GNCPy
+              <img src="../../../_static/logo.svg" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../_autosummary/gncpy.html">gncpy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.control.html">control</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/control/gncpy.control.ELQR.html">ELQR</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/control/gncpy.control.LQR.html">LQR</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.coordinate_transforms.html">coordinate_transforms</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/coordinate_transforms/gncpy.coordinate_transforms.ecef_to_LLA.html">gncpy.coordinate_transforms.ecef_to_LLA</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/coordinate_transforms/gncpy.coordinate_transforms.ecef_to_NED.html">gncpy.coordinate_transforms.ecef_to_NED</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/coordinate_transforms/gncpy.coordinate_transforms.lla_to_ECEF.html">gncpy.coordinate_transforms.lla_to_ECEF</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/coordinate_transforms/gncpy.coordinate_transforms.lla_to_NED.html">gncpy.coordinate_transforms.lla_to_NED</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/coordinate_transforms/gncpy.coordinate_transforms.ned_to_LLA.html">gncpy.coordinate_transforms.ned_to_LLA</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.data_fusion.html">data_fusion</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/data_fusion/gncpy.data_fusion.GeneralizedCovarianceIntersection.html">gncpy.data_fusion.GeneralizedCovarianceIntersection</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.distributions.html">distributions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/distributions/gncpy.distributions.Particle.html">Particle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/distributions/gncpy.distributions.ParticleDistribution.html">ParticleDistribution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/distributions/gncpy.distributions.QuadraturePoints.html">QuadraturePoints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/distributions/gncpy.distributions.SigmaPoints.html">SigmaPoints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/distributions/gncpy.distributions.SimpleParticleDistribution.html">SimpleParticleDistribution</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.dynamics.html">dynamics</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/dynamics/gncpy.dynamics.aircraft.html">aircraft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/dynamics/gncpy.dynamics.basic.html">basic</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.errors.html">errors</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/errors/gncpy.errors.ExtremeMeasurementNoiseError.html">gncpy.errors.ExtremeMeasurementNoiseError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/errors/gncpy.errors.ParticleDepletionError.html">gncpy.errors.ParticleDepletionError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/errors/gncpy.errors.ParticleEstimationDomainError.html">gncpy.errors.ParticleEstimationDomainError</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.filters.html">filters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.bayes_filter.html">bayes_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.bootstrap_filter.html">bootstrap_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.ekf_gaussian_scale_mixture_filter.html">ekf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.extended_kalman_filter.html">extended_kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.gci_filter.html">gci_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.gsm_filter_base.html">gsm_filter_base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.imm_gci_filter.html">imm_gci_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.interacting_multiple_model.html">interacting_multiple_model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.kalman_filter.html">kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.kf_gaussian_scale_mixture_filter.html">kf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.max_corr_ent_ukf.html">max_corr_ent_ukf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.max_corr_ent_upf.html">max_corr_ent_upf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.mcmc_particle_filter_base.html">mcmc_particle_filter_base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.particle_filter.html">particle_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.qkf_gaussian_scale_mixture_filter.html">qkf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.quadrature_kalman_filter.html">quadrature_kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.sqkf_gaussian_scale_mixture_filter.html">sqkf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.square_root_qkf.html">square_root_qkf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.students_t_filter.html">students_t_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.ukf_gaussian_scale_mixture_filter.html">ukf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.unscented_kalman_filter.html">unscented_kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.unscented_particle_filter.html">unscented_particle_filter</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.game_engine.html">game_engine</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/game_engine/gncpy.game_engine.base_game.html">base_game</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/game_engine/gncpy.game_engine.components.html">components</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/game_engine/gncpy.game_engine.entities.html">entities</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/game_engine/gncpy.game_engine.physics2d.html">physics2d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/game_engine/gncpy.game_engine.rendering2d.html">rendering2d</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.games.html">games</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/games/gncpy.games.SimpleUAV2d.html">SimpleUAV2d</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.math.html">math</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.epanechnikov_kernel.html">gncpy.math.epanechnikov_kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.gamma_fnc.html">gncpy.math.gamma_fnc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.gaussian_kernel.html">gncpy.math.gaussian_kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.get_elem_sym_fnc.html">gncpy.math.get_elem_sym_fnc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.get_hessian.html">gncpy.math.get_hessian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.get_input_jacobian.html">gncpy.math.get_input_jacobian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.get_jacobian.html">gncpy.math.get_jacobian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.get_state_jacobian.html">gncpy.math.get_state_jacobian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.log_sum_exp.html">gncpy.math.log_sum_exp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.rk4.html">gncpy.math.rk4</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.rk4_backward.html">gncpy.math.rk4_backward</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.weighted_sum_mat.html">gncpy.math.weighted_sum_mat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.weighted_sum_vec.html">gncpy.math.weighted_sum_vec</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.measurements.html">measurements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.orbital_mechanics.html">orbital_mechanics</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/orbital_mechanics/gncpy.orbital_mechanics.correct_lon_ascend.html">gncpy.orbital_mechanics.correct_lon_ascend</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/orbital_mechanics/gncpy.orbital_mechanics.ecc_anom_from_mean.html">gncpy.orbital_mechanics.ecc_anom_from_mean</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/orbital_mechanics/gncpy.orbital_mechanics.ecef_from_orbit.html">gncpy.orbital_mechanics.ecef_from_orbit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/orbital_mechanics/gncpy.orbital_mechanics.true_anom_from_ecc.html">gncpy.orbital_mechanics.true_anom_from_ecc</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.planning.html">planning</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/planning/gncpy.planning.a_star.html">a_star</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/planning/gncpy.planning.reinforcement_learning.html">reinforcement_learning</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/planning/gncpy.planning.rrt_star.html">rrt_star</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.plotting.html">plotting</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/plotting/gncpy.plotting.calc_error_ellipse.html">gncpy.plotting.calc_error_ellipse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/plotting/gncpy.plotting.get_cmap.html">gncpy.plotting.get_cmap</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/plotting/gncpy.plotting.init_plotting_opts.html">gncpy.plotting.init_plotting_opts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/plotting/gncpy.plotting.set_title_label.html">gncpy.plotting.set_title_label</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.sampling.html">sampling</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/sampling/gncpy.sampling.MetropolisHastings.html">MetropolisHastings</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.utilities.html">utilities</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/utilities/gncpy.utilities.classproperty.html">gncpy.utilities.classproperty</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/utilities/gncpy.utilities.ClassPropertyDescriptor.html">ClassPropertyDescriptor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/utilities/gncpy.utilities.ClassPropertyMetaClass.html">ClassPropertyMetaClass</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.wgs84.html">wgs84</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_earth_rate.html">gncpy.wgs84.calc_earth_rate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_ew_rad.html">gncpy.wgs84.calc_ew_rad</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_gravity.html">gncpy.wgs84.calc_gravity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_ns_rad.html">gncpy.wgs84.calc_ns_rad</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_transport_rate.html">gncpy.wgs84.calc_transport_rate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.convert_msl_to_wgs.html">gncpy.wgs84.convert_msl_to_wgs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.convert_wgs_to_msl.html">gncpy.wgs84.convert_wgs_to_msl</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.init_egm_lookup_table.html">gncpy.wgs84.init_egm_lookup_table</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/control.html">Control Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/control.html#lqr-infinite-horizon-linear-dyanmics">LQR Infinite Horizon Linear Dyanmics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/control.html#lqr-finite-horzon-linear-dynamics">LQR Finite Horzon Linear Dynamics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/control.html#lqr-finite-horzon-non-linear-dynamics">LQR Finite Horzon Non-linear Dynamics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/control.html#elqr">ELQR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/control.html#elqr-modified-quadratization">ELQR Modified Quadratization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/control.html#elqr-linear-dynamics">ELQR Linear Dynamics</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/filters.html">Filter Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/filters.html#kalman-filter">Kalman Filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/filters.html#extended-kalman-filter">Extended Kalman Filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/filters.html#interacting-multiple-model-filter">Interacting Multiple Model Filter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/planning.html">Planning Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/a_star.html">A* Examples</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../usage/a_star.html#normal-a">Normal A*</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../usage/a_star.html#beam-search">Beam Search</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../usage/a_star.html#weighted-a">Weighted A*</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/rrtstar.html">RRT* Examples</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../usage/rrtstar.html#lqr-rrt-with-linear-dynamics">LQR-RRT* with Linear Dynamics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../usage/rrtstar.html#lqr-rrt-with-non-linear-dynamics">LQR-RRT* with Non-Linear Dynamics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../usage/rrtstar.html#elqr-rrt-with-non-linear-dynamics">ELQR-RRT* with Non-Linear Dynamics</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../toolchain.html">Toolchain</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../toolchain.html#development-environment-setup">Development Environment Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../toolchain.html#example-workflow">Example Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../toolchain.html#notes-on-tox">Notes on tox</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cicd.html">CI/CD Pipeline</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../cicd.html#github-actions-quick-guide">Github Actions Quick Guide</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="./reports/coverage/index.html#http://">Test Coverage Report</a></li>
+<li class="toctree-l1"><a class="reference external" href="./reports/junit/junit.html#http://">Test Results Report</a></li>
+<li class="toctree-l1"><a class="reference external" href="http://lager.ua.edu/">LAGER Homepage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../References.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #9E1B32" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">GNCPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gncpy.filters.quadrature_kalman_filter</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gncpy.filters.quadrature_kalman_filter</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numpy.linalg</span> <span class="k">as</span> <span class="nn">la</span>
+
+<span class="kn">import</span> <span class="nn">gncpy.distributions</span> <span class="k">as</span> <span class="nn">gdistrib</span>
+<span class="kn">import</span> <span class="nn">gncpy.dynamics.basic</span> <span class="k">as</span> <span class="nn">gdyn</span>
+<span class="kn">import</span> <span class="nn">gncpy.math</span> <span class="k">as</span> <span class="nn">gmath</span>
+<span class="kn">from</span> <span class="nn">gncpy.filters.kalman_filter</span> <span class="kn">import</span> <span class="n">KalmanFilter</span>
+<span class="kn">from</span> <span class="nn">gncpy.filters.extended_kalman_filter</span> <span class="kn">import</span> <span class="n">ExtendedKalmanFilter</span>
+
+
+<div class="viewcode-block" id="QuadratureKalmanFilter"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/quadrature_kalman_filter/gncpy.filters.quadrature_kalman_filter.QuadratureKalmanFilter.html#gncpy.filters.quadrature_kalman_filter.QuadratureKalmanFilter">[docs]</a><span class="k">class</span> <span class="nc">QuadratureKalmanFilter</span><span class="p">(</span><span class="n">ExtendedKalmanFilter</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Implementation of a Quadrature Kalman Filter.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This implementation is based on</span>
+<span class="sd">    :cite:`Arasaratnam2007_DiscreteTimeNonlinearFilteringAlgorithmsUsingGaussHermiteQuadrature`</span>
+<span class="sd">    and uses Gauss-Hermite quadrature points. It inherits from EKF to allow</span>
+<span class="sd">    for easier implementation of non-linear dynamics.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    quadPoints : :class:`gncpy.distributions.QuadraturePoints`</span>
+<span class="sd">        Quadrature points used by the filter.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="QuadratureKalmanFilter.__init__"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/quadrature_kalman_filter/gncpy.filters.quadrature_kalman_filter.QuadratureKalmanFilter.html#gncpy.filters.quadrature_kalman_filter.QuadratureKalmanFilter.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points_per_axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">quadPoints</span> <span class="o">=</span> <span class="n">gdistrib</span><span class="o">.</span><span class="n">QuadraturePoints</span><span class="p">(</span><span class="n">points_per_axis</span><span class="o">=</span><span class="n">points_per_axis</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sqrt_cov</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[]])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_use_lin_dyn</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_use_non_lin_dyn</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="QuadratureKalmanFilter.save_filter_state"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/quadrature_kalman_filter/gncpy.filters.quadrature_kalman_filter.QuadratureKalmanFilter.html#gncpy.filters.quadrature_kalman_filter.QuadratureKalmanFilter.save_filter_state">[docs]</a>    <span class="k">def</span> <span class="nf">save_filter_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Saves filter variables so they can be restored later.&quot;&quot;&quot;</span>
+        <span class="n">filt_state</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">save_filter_state</span><span class="p">()</span>
+
+        <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;quadPoints&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">quadPoints</span>
+
+        <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_sqrt_cov&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sqrt_cov</span>
+        <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_use_lin_dyn&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_lin_dyn</span>
+        <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_use_non_lin_dyn&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_non_lin_dyn</span>
+
+        <span class="k">return</span> <span class="n">filt_state</span></div>
+
+<div class="viewcode-block" id="QuadratureKalmanFilter.load_filter_state"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/quadrature_kalman_filter/gncpy.filters.quadrature_kalman_filter.QuadratureKalmanFilter.html#gncpy.filters.quadrature_kalman_filter.QuadratureKalmanFilter.load_filter_state">[docs]</a>    <span class="k">def</span> <span class="nf">load_filter_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filt_state</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes filter using saved filter state.</span>
+
+<span class="sd">        Attributes</span>
+<span class="sd">        ----------</span>
+<span class="sd">        filt_state : dict</span>
+<span class="sd">            Dictionary generated by :meth:`save_filter_state`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">load_filter_state</span><span class="p">(</span><span class="n">filt_state</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">quadPoints</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;quadPoints&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sqrt_cov</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_sqrt_cov&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_use_lin_dyn</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_use_lin_dyn&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_use_non_lin_dyn</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_use_non_lin_dyn&quot;</span><span class="p">]</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">points_per_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Wrapper for the  number of quadrature points per axis.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">quadPoints</span><span class="o">.</span><span class="n">points_per_axis</span>
+
+    <span class="nd">@points_per_axis</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">points_per_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">quadPoints</span><span class="o">.</span><span class="n">points_per_axis</span> <span class="o">=</span> <span class="n">val</span>
+
+<div class="viewcode-block" id="QuadratureKalmanFilter.set_state_model"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/quadrature_kalman_filter/gncpy.filters.quadrature_kalman_filter.QuadratureKalmanFilter.html#gncpy.filters.quadrature_kalman_filter.QuadratureKalmanFilter.set_state_model">[docs]</a>    <span class="k">def</span> <span class="nf">set_state_model</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">state_mat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">input_mat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">cont_time</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">state_mat_fun</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">input_mat_fun</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">dyn_obj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">ode_lst</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets the state model for the filter.</span>
+
+<span class="sd">        This can use either linear dynamics (by calling the kalman filters</span>
+<span class="sd">        :meth:`gncpy.filters.KalmanFilter.set_state_model`) or non-linear dynamics</span>
+<span class="sd">        (by calling :meth:`gncpy.filters.ExtendedKalmanFilter.set_state_model`).</span>
+<span class="sd">        The linearness is automatically determined by the input arguments specified.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        state_mat : N x N numpy array, optional</span>
+<span class="sd">            State matrix, continuous or discrete case. The default is None.</span>
+<span class="sd">        input_mat : N x Nu numpy array, optional</span>
+<span class="sd">            Input matrixx, continuous or discrete case. The default is None.</span>
+<span class="sd">        cont_time : bool, optional</span>
+<span class="sd">            Flag inidicating if the continuous model is provided. The default</span>
+<span class="sd">            is False.</span>
+<span class="sd">        state_mat_fun : callable, optional</span>
+<span class="sd">            Function that returns the `state_mat`, must take timestep and</span>
+<span class="sd">            `*args`. The default is None.</span>
+<span class="sd">        input_mat_fun : callable, optional</span>
+<span class="sd">            Function that returns the `input_mat`, must take timestep, and</span>
+<span class="sd">            `*args`. The default is None.</span>
+<span class="sd">        dyn_obj : :class:`gncpy.dynamics.LinearDynamicsBase` or :class:`gncpy.dynamics.NonlinearDynamicsBase`, optional</span>
+<span class="sd">            Sets the dynamics according to the class. The default is None.</span>
+<span class="sd">        ode_lst : list, optional</span>
+<span class="sd">            callable functions, 1 per ode/state. The callabale must have the</span>
+<span class="sd">            signature `f(t, x, *f_args)` just like scipy.integrate&#39;s ode</span>
+<span class="sd">            function. The default is None.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        RuntimeError</span>
+<span class="sd">            If an invalid state model or combination of inputs is specified.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_use_lin_dyn</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">state_mat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="ow">or</span> <span class="n">state_mat_fun</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dyn_obj</span><span class="p">,</span> <span class="n">gdyn</span><span class="o">.</span><span class="n">LinearDynamicsBase</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_use_non_lin_dyn</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="nb">isinstance</span><span class="p">(</span><span class="n">dyn_obj</span><span class="p">,</span> <span class="n">gdyn</span><span class="o">.</span><span class="n">NonlinearDynamicsBase</span><span class="p">)</span> <span class="ow">or</span> <span class="n">ode_lst</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_lin_dyn</span>
+
+        <span class="c1"># allow for linear or non linear dynamics by calling the appropriate parent</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_lin_dyn</span><span class="p">:</span>
+            <span class="n">KalmanFilter</span><span class="o">.</span><span class="n">set_state_model</span><span class="p">(</span>
+                <span class="bp">self</span><span class="p">,</span>
+                <span class="n">state_mat</span><span class="o">=</span><span class="n">state_mat</span><span class="p">,</span>
+                <span class="n">input_mat</span><span class="o">=</span><span class="n">input_mat</span><span class="p">,</span>
+                <span class="n">cont_time</span><span class="o">=</span><span class="n">cont_time</span><span class="p">,</span>
+                <span class="n">state_mat_fun</span><span class="o">=</span><span class="n">state_mat_fun</span><span class="p">,</span>
+                <span class="n">input_mat_fun</span><span class="o">=</span><span class="n">input_mat_fun</span><span class="p">,</span>
+                <span class="n">dyn_obj</span><span class="o">=</span><span class="n">dyn_obj</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_non_lin_dyn</span><span class="p">:</span>
+            <span class="n">ExtendedKalmanFilter</span><span class="o">.</span><span class="n">set_state_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dyn_obj</span><span class="o">=</span><span class="n">dyn_obj</span><span class="p">,</span> <span class="n">ode_lst</span><span class="o">=</span><span class="n">ode_lst</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Invalid state model.&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="QuadratureKalmanFilter.set_measurement_model"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/quadrature_kalman_filter/gncpy.filters.quadrature_kalman_filter.QuadratureKalmanFilter.html#gncpy.filters.quadrature_kalman_filter.QuadratureKalmanFilter.set_measurement_model">[docs]</a>    <span class="k">def</span> <span class="nf">set_measurement_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meas_mat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">meas_fun</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Sets the measurement model for the filter.</span>
+
+<span class="sd">        This can either set the constant measurement matrix, or a potentially</span>
+<span class="sd">        non-linear function.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        This assumes a measurement model of the form</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            \tilde{y}_{k+1} = H x_{k+1}^-</span>
+
+<span class="sd">        for the measurement matrix case. Or of the form</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            \tilde{y}_{k+1} = h(t, x_{k+1}^-)</span>
+
+<span class="sd">        for the potentially non-linear case.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        meas_mat : Nm x N numpy array, optional</span>
+<span class="sd">            Measurement matrix that transforms the state to estimated</span>
+<span class="sd">            measurements. The default is None.</span>
+<span class="sd">        meas_fun : callable, optional</span>
+<span class="sd">            Function that transforms the state to estimated measurements. Must</span>
+<span class="sd">            have the signature :code:`h(t, x, *args)` where `t` is the timestep,</span>
+<span class="sd">            `x` is an N x 1 numpy array of the current state, and return an</span>
+<span class="sd">            Nm x 1 numpy array of the estimated measurement. The default is None.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        RuntimeError</span>
+<span class="sd">            Rasied if no arguments are specified.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">set_measurement_model</span><span class="p">(</span><span class="n">meas_mat</span><span class="o">=</span><span class="n">meas_mat</span><span class="p">,</span> <span class="n">meas_fun_lst</span><span class="o">=</span><span class="n">meas_fun</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_factorize_cov</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cov</span>
+        <span class="c1"># numpy linalg is lower triangular</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sqrt_cov</span> <span class="o">=</span> <span class="n">la</span><span class="o">.</span><span class="n">cholesky</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_pred_update_cov</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cov</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc_noise</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">quadPoints</span><span class="o">.</span><span class="n">cov</span>
+
+    <span class="k">def</span> <span class="nf">_predict_next_state</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">cur_state</span><span class="p">,</span> <span class="n">cur_input</span><span class="p">,</span> <span class="n">state_mat_args</span><span class="p">,</span> <span class="n">input_mat_args</span><span class="p">,</span> <span class="n">dyn_fun_params</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_lin_dyn</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">KalmanFilter</span><span class="o">.</span><span class="n">_predict_next_state</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="p">,</span>
+                        <span class="n">timestep</span><span class="p">,</span>
+                        <span class="n">cur_state</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span>
+                        <span class="n">cur_input</span><span class="p">,</span>
+                        <span class="n">state_mat_args</span><span class="p">,</span>
+                        <span class="n">input_mat_args</span><span class="p">,</span>
+                    <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_non_lin_dyn</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ExtendedKalmanFilter</span><span class="o">.</span><span class="n">_predict_next_state</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">cur_state</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span> <span class="n">dyn_fun_params</span>
+                    <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;State model not specified&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="QuadratureKalmanFilter.predict"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/quadrature_kalman_filter/gncpy.filters.quadrature_kalman_filter.QuadratureKalmanFilter.html#gncpy.filters.quadrature_kalman_filter.QuadratureKalmanFilter.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">cur_state</span><span class="p">,</span> <span class="n">cur_input</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">state_mat_args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">input_mat_args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dyn_fun_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Prediction step of the filter.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        timestep : float</span>
+<span class="sd">            Current timestep.</span>
+<span class="sd">        cur_state : N x 1 numpy array</span>
+<span class="sd">            Current state.</span>
+<span class="sd">        cur_input : N x Nu numpy array, optional</span>
+<span class="sd">            Current input. The default is None.</span>
+<span class="sd">        state_mat_args : tuple, optional</span>
+<span class="sd">            Additional arguments for the get state matrix function if one has</span>
+<span class="sd">            been specified, the propagate state function if using a dynamic</span>
+<span class="sd">            object, or the dynamic function is a non-linear model is used.</span>
+<span class="sd">            The default is ().</span>
+<span class="sd">        input_mat_args : tuple, optional</span>
+<span class="sd">            Additional arguments for the get input matrix function if one has</span>
+<span class="sd">            been specified or the propagate state function if using a dynamic</span>
+<span class="sd">            object. The default is ().</span>
+<span class="sd">        dyn_fun_params : tuple, optional</span>
+<span class="sd">            Additional arguments to pass to the dynamics function if using non-linear</span>
+<span class="sd">            dynamics.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        RuntimeError</span>
+<span class="sd">            If the state model has not been set</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        N x 1 numpy array</span>
+<span class="sd">            The predicted state.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">state_mat_args</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">state_mat_args</span> <span class="o">=</span> <span class="p">()</span>
+        <span class="k">if</span> <span class="n">input_mat_args</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">input_mat_args</span> <span class="o">=</span> <span class="p">()</span>
+        <span class="k">if</span> <span class="n">dyn_fun_params</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dyn_fun_params</span> <span class="o">=</span> <span class="p">()</span>
+
+        <span class="c1"># factorize covariance as P = sqrt(P) * sqrt(P)^T</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_factorize_cov</span><span class="p">()</span>
+
+        <span class="c1"># generate quadrature points as X_i = sqrt(P) * xi_i + x_hat for m points</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">quadPoints</span><span class="o">.</span><span class="n">update_points</span><span class="p">(</span><span class="n">cur_state</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sqrt_cov</span><span class="p">,</span> <span class="n">have_sqrt</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># predict each point using the dynamics</span>
+        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">quadPoints</span><span class="p">):</span>
+            <span class="n">pred_point</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predict_next_state</span><span class="p">(</span>
+                <span class="n">timestep</span><span class="p">,</span> <span class="n">point</span><span class="p">,</span> <span class="n">cur_input</span><span class="p">,</span> <span class="n">state_mat_args</span><span class="p">,</span> <span class="n">input_mat_args</span><span class="p">,</span> <span class="n">dyn_fun_params</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">quadPoints</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">pred_point</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+        <span class="c1"># update covariance as Q - m * x * x^T + sum(w_i * X_i * X_i^T)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pred_update_cov</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">quadPoints</span><span class="o">.</span><span class="n">mean</span></div>
+
+    <span class="k">def</span> <span class="nf">_corr_update_cov</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gain</span><span class="p">,</span> <span class="n">inov_cov</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cov</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cov</span> <span class="o">-</span> <span class="n">gain</span> <span class="o">@</span> <span class="n">inov_cov</span> <span class="o">@</span> <span class="n">gain</span><span class="o">.</span><span class="n">T</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cov</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cov</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">cov</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_est_meas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">cur_state</span><span class="p">,</span> <span class="n">n_meas</span><span class="p">,</span> <span class="n">meas_fun_args</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meas_fnc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meas_fnc</span><span class="p">(</span><span class="n">timestep</span><span class="p">,</span> <span class="n">cur_state</span><span class="p">,</span> <span class="o">*</span><span class="n">meas_fun_args</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_est_meas</span><span class="p">(</span><span class="n">timestep</span><span class="p">,</span> <span class="n">cur_state</span><span class="p">,</span> <span class="n">n_meas</span><span class="p">,</span> <span class="n">meas_fun_args</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_corr_core</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">cur_state</span><span class="p">,</span> <span class="n">meas</span><span class="p">,</span> <span class="n">meas_fun_args</span><span class="p">):</span>
+        <span class="c1"># factorize covariance as P = sqrt(P) * sqrt(P)^T</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_factorize_cov</span><span class="p">()</span>
+
+        <span class="c1"># generate quadrature points as X_i = sqrt(P) * xi_i + x_hat for m points</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">quadPoints</span><span class="o">.</span><span class="n">update_points</span><span class="p">(</span><span class="n">cur_state</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sqrt_cov</span><span class="p">,</span> <span class="n">have_sqrt</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Estimate a measurement for each quad point, Z_i</span>
+        <span class="n">measQuads</span> <span class="o">=</span> <span class="n">gdistrib</span><span class="o">.</span><span class="n">QuadraturePoints</span><span class="p">(</span><span class="n">num_axes</span><span class="o">=</span><span class="n">meas</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+        <span class="n">measQuads</span><span class="o">.</span><span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span>
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">quadPoints</span><span class="o">.</span><span class="n">points</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">meas</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">measQuads</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">quadPoints</span><span class="o">.</span><span class="n">weights</span>
+        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">quadPoints</span><span class="p">):</span>
+            <span class="n">measQuads</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="n">ii</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_est_meas</span><span class="p">(</span>
+                <span class="n">timestep</span><span class="p">,</span> <span class="n">point</span><span class="p">,</span> <span class="n">meas</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">meas_fun_args</span>
+            <span class="p">)</span>
+        <span class="c1"># estimate predicted measurement as sum of est measurement quad points</span>
+        <span class="n">est_meas</span> <span class="o">=</span> <span class="n">measQuads</span><span class="o">.</span><span class="n">mean</span>
+
+        <span class="k">return</span> <span class="n">measQuads</span><span class="p">,</span> <span class="n">est_meas</span>
+
+<div class="viewcode-block" id="QuadratureKalmanFilter.correct"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/quadrature_kalman_filter/gncpy.filters.quadrature_kalman_filter.QuadratureKalmanFilter.html#gncpy.filters.quadrature_kalman_filter.QuadratureKalmanFilter.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">meas</span><span class="p">,</span> <span class="n">cur_state</span><span class="p">,</span> <span class="n">meas_fun_args</span><span class="o">=</span><span class="p">()):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Implements the correction step of the filter.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        timestep : float</span>
+<span class="sd">            Current timestep.</span>
+<span class="sd">        meas : Nm x 1 numpy array</span>
+<span class="sd">            Current measurement.</span>
+<span class="sd">        cur_state : N x 1 numpy array</span>
+<span class="sd">            Current state.</span>
+<span class="sd">        meas_fun_args : tuple, optional</span>
+<span class="sd">            Arguments for the measurement matrix function if one has</span>
+<span class="sd">            been specified. The default is ().</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        :class:`.errors.ExtremeMeasurementNoiseError`</span>
+<span class="sd">            If estimating the measurement noise and the measurement fit calculation fails.</span>
+<span class="sd">        LinAlgError</span>
+<span class="sd">            Numpy exception raised if not estimating noise and measurement fit fails.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        next_state : N x 1 numpy array</span>
+<span class="sd">            The corrected state.</span>
+<span class="sd">        meas_fit_prob : float</span>
+<span class="sd">            Goodness of fit of the measurement based on the state and</span>
+<span class="sd">            covariance assuming Gaussian noise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">measQuads</span><span class="p">,</span> <span class="n">est_meas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_corr_core</span><span class="p">(</span><span class="n">timestep</span><span class="p">,</span> <span class="n">cur_state</span><span class="p">,</span> <span class="n">meas</span><span class="p">,</span> <span class="n">meas_fun_args</span><span class="p">)</span>
+
+        <span class="c1"># estimate the measurement noise online if applicable</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_est_meas_noise_fnc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">meas_noise</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_est_meas_noise_fnc</span><span class="p">(</span><span class="n">est_meas</span><span class="p">,</span> <span class="n">measQuads</span><span class="o">.</span><span class="n">cov</span><span class="p">)</span>
+        <span class="c1"># estimate innovation cov as P_zz = R - m * z_hat * z_hat^T + sum(w_i * Z_i * Z_i^T)</span>
+        <span class="n">inov_cov</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meas_noise</span> <span class="o">+</span> <span class="n">measQuads</span><span class="o">.</span><span class="n">cov</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_cholesky_inverse</span><span class="p">:</span>
+            <span class="n">sqrt_inv_inov_cov</span> <span class="o">=</span> <span class="n">la</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">la</span><span class="o">.</span><span class="n">cholesky</span><span class="p">(</span><span class="n">inov_cov</span><span class="p">))</span>
+            <span class="n">inv_inov_cov</span> <span class="o">=</span> <span class="n">sqrt_inv_inov_cov</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">sqrt_inv_inov_cov</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">inv_inov_cov</span> <span class="o">=</span> <span class="n">la</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">inov_cov</span><span class="p">)</span>
+        <span class="c1"># estimate cross cov as P_xz = sum(w_i * X_i * Z_i^T) - m * x * z_hat^T</span>
+        <span class="n">cov_lst</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">quadPoints</span><span class="o">.</span><span class="n">num_points</span>
+        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="p">(</span><span class="n">qp</span><span class="p">,</span> <span class="n">mp</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">quadPoints</span><span class="p">,</span> <span class="n">measQuads</span><span class="p">)):</span>
+            <span class="n">cov_lst</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">qp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">cur_state</span><span class="p">)</span> <span class="o">@</span> <span class="p">(</span><span class="n">mp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">est_meas</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">cross_cov</span> <span class="o">=</span> <span class="n">gmath</span><span class="o">.</span><span class="n">weighted_sum_mat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">quadPoints</span><span class="o">.</span><span class="n">weights</span><span class="p">,</span> <span class="n">cov_lst</span><span class="p">)</span>
+
+        <span class="c1"># calc Kalman gain as K = P_xz * P_zz^-1</span>
+        <span class="n">gain</span> <span class="o">=</span> <span class="n">cross_cov</span> <span class="o">@</span> <span class="n">inv_inov_cov</span>
+
+        <span class="c1"># state is x_hat + K *(z - z_hat)</span>
+        <span class="n">innov</span> <span class="o">=</span> <span class="n">meas</span> <span class="o">-</span> <span class="n">est_meas</span>
+        <span class="n">cor_state</span> <span class="o">=</span> <span class="n">cur_state</span> <span class="o">+</span> <span class="n">gain</span> <span class="o">@</span> <span class="n">innov</span>
+
+        <span class="c1"># update covariance as P = P_k - K * P_zz * K^T</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_corr_update_cov</span><span class="p">(</span><span class="n">gain</span><span class="p">,</span> <span class="n">inov_cov</span><span class="p">)</span>
+
+        <span class="n">meas_fit_prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_meas_fit</span><span class="p">(</span><span class="n">meas</span><span class="p">,</span> <span class="n">est_meas</span><span class="p">,</span> <span class="n">inov_cov</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">cor_state</span><span class="p">,</span> <span class="n">meas_fit_prob</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="QuadratureKalmanFilter.plot_quadrature"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/quadrature_kalman_filter/gncpy.filters.quadrature_kalman_filter.QuadratureKalmanFilter.html#gncpy.filters.quadrature_kalman_filter.QuadratureKalmanFilter.plot_quadrature">[docs]</a>    <span class="k">def</span> <span class="nf">plot_quadrature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inds</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Wrapper function for :meth:`gncpy.distributions.QuadraturePoints.plot_points`.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">quadPoints</span><span class="o">.</span><span class="n">plot_points</span><span class="p">(</span><span class="n">inds</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Laboratory for Autonomy, GNC, and Estimation Research (LAGER).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

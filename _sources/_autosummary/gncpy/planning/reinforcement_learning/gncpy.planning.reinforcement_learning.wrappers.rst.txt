@@ -1,0 +1,37 @@
+wrappers
+========
+
+.. automodule:: gncpy.planning.reinforcement_learning.wrappers
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: wrappers
+      :nosignatures:
+      :template: class.rst_t
+   
+      BufferFames
+      GrayScaleObservation
+      MaxFrames
+      ResizeImage
+      SkipFrames
+      StackFrames
+   
+   
+
+   
+   
+   
+
+
+

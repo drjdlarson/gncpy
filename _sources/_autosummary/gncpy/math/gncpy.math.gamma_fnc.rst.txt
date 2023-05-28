@@ -1,0 +1,6 @@
+gncpy.math.gamma\_fnc
+=====================
+
+.. currentmodule:: gncpy.math
+
+.. autofunction:: gamma_fnc

@@ -1,0 +1,46 @@
+ResizeImage
+===========
+
+.. currentmodule:: gncpy.planning.reinforcement_learning.wrappers
+
+.. autoclass:: ResizeImage
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~ResizeImage.__init__
+      ~ResizeImage.class_name
+      ~ResizeImage.close
+      ~ResizeImage.observation
+      ~ResizeImage.render
+      ~ResizeImage.reset
+      ~ResizeImage.seed
+      ~ResizeImage.step
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~ResizeImage.action_space
+      ~ResizeImage.metadata
+      ~ResizeImage.np_random
+      ~ResizeImage.observation_space
+      ~ResizeImage.render_mode
+      ~ResizeImage.reward_range
+      ~ResizeImage.spec
+      ~ResizeImage.unwrapped
+   
+   

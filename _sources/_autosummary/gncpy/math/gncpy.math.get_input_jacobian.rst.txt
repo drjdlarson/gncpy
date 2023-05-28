@@ -1,0 +1,6 @@
+gncpy.math.get\_input\_jacobian
+===============================
+
+.. currentmodule:: gncpy.math
+
+.. autofunction:: get_input_jacobian

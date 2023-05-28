@@ -1,0 +1,26 @@
+ScoreParams
+===========
+
+.. currentmodule:: gncpy.games.SimpleUAV2d
+
+.. autoclass:: ScoreParams
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~ScoreParams.__init__
+   
+   
+
+   
+   
+   

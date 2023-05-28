@@ -1,0 +1,32 @@
+quadrature\_kalman\_filter
+==========================
+
+.. automodule:: gncpy.filters.quadrature_kalman_filter
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: quadrature_kalman_filter
+      :nosignatures:
+      :template: class.rst_t
+   
+      QuadratureKalmanFilter
+   
+   
+
+   
+   
+   
+
+
+

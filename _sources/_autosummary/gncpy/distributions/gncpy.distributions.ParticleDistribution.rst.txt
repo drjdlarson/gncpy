@@ -1,0 +1,40 @@
+ParticleDistribution
+====================
+
+.. currentmodule:: gncpy.distributions
+
+.. autoclass:: ParticleDistribution
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~ParticleDistribution.__init__
+      ~ParticleDistribution.add_particle
+      ~ParticleDistribution.clear_particles
+      ~ParticleDistribution.update_weights
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~ParticleDistribution.covariance
+      ~ParticleDistribution.mean
+      ~ParticleDistribution.num_particles
+      ~ParticleDistribution.particles
+      ~ParticleDistribution.uncertainties
+      ~ParticleDistribution.weights
+   
+   

@@ -1,0 +1,6 @@
+gncpy.plotting.get\_cmap
+========================
+
+.. currentmodule:: gncpy.plotting
+
+.. autofunction:: get_cmap

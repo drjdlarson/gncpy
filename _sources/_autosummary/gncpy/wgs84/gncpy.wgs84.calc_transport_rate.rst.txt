@@ -1,0 +1,6 @@
+gncpy.wgs84.calc\_transport\_rate
+=================================
+
+.. currentmodule:: gncpy.wgs84
+
+.. autofunction:: calc_transport_rate

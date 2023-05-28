@@ -1,0 +1,39 @@
+CoordinatedTurnUnknown
+======================
+
+.. currentmodule:: gncpy.dynamics.basic
+
+.. autoclass:: CoordinatedTurnUnknown
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~CoordinatedTurnUnknown.__init__
+      ~CoordinatedTurnUnknown.get_input_mat
+      ~CoordinatedTurnUnknown.get_state_mat
+      ~CoordinatedTurnUnknown.propagate_state
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CoordinatedTurnUnknown.allow_cpp
+      ~CoordinatedTurnUnknown.alpha
+      ~CoordinatedTurnUnknown.beta
+      ~CoordinatedTurnUnknown.cont_fnc_lst
+      ~CoordinatedTurnUnknown.state_names
+   
+   

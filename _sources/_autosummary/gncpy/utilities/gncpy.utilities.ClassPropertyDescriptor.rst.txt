@@ -1,0 +1,27 @@
+ClassPropertyDescriptor
+=======================
+
+.. currentmodule:: gncpy.utilities
+
+.. autoclass:: ClassPropertyDescriptor
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~ClassPropertyDescriptor.__init__
+      ~ClassPropertyDescriptor.setter
+   
+   
+
+   
+   
+   

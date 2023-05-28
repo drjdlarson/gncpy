@@ -1,0 +1,30 @@
+EntityManager
+=============
+
+.. currentmodule:: gncpy.game_engine.entities
+
+.. autoclass:: EntityManager
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~EntityManager.__init__
+      ~EntityManager.add_entity
+      ~EntityManager.get_entities
+      ~EntityManager.get_entity_ids
+      ~EntityManager.update
+   
+   
+
+   
+   
+   

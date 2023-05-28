@@ -1,0 +1,6 @@
+gncpy.orbital\_mechanics.ecef\_from\_orbit
+==========================================
+
+.. currentmodule:: gncpy.orbital_mechanics
+
+.. autofunction:: ecef_from_orbit

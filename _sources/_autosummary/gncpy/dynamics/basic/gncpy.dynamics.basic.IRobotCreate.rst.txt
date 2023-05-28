@@ -1,0 +1,38 @@
+IRobotCreate
+============
+
+.. currentmodule:: gncpy.dynamics.basic
+
+.. autoclass:: IRobotCreate
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~IRobotCreate.__init__
+      ~IRobotCreate.get_input_mat
+      ~IRobotCreate.get_state_mat
+      ~IRobotCreate.propagate_state
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~IRobotCreate.allow_cpp
+      ~IRobotCreate.cont_fnc_lst
+      ~IRobotCreate.state_names
+      ~IRobotCreate.wheel_separation
+   
+   

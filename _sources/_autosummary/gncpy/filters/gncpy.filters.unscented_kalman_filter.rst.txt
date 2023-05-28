@@ -1,0 +1,32 @@
+unscented\_kalman\_filter
+=========================
+
+.. automodule:: gncpy.filters.unscented_kalman_filter
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: unscented_kalman_filter
+      :nosignatures:
+      :template: class.rst_t
+   
+      UnscentedKalmanFilter
+   
+   
+
+   
+   
+   
+
+
+

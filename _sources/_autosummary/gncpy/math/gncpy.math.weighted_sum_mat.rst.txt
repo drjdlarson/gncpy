@@ -1,0 +1,6 @@
+gncpy.math.weighted\_sum\_mat
+=============================
+
+.. currentmodule:: gncpy.math
+
+.. autofunction:: weighted_sum_mat

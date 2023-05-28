@@ -1,0 +1,29 @@
+EventType
+=========
+
+.. currentmodule:: gncpy.games.SimpleUAV2d
+
+.. autoclass:: EventType
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~EventType.HAZARD
+      ~EventType.DEATH
+      ~EventType.TARGET
+      ~EventType.OBSTACLE
+      ~EventType.COL_PLAYER
+   
+   

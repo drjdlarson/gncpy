@@ -1,0 +1,45 @@
+physics2d
+=========
+
+.. automodule:: gncpy.game_engine.physics2d
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree: physics2d
+      :nosignatures:
+   
+      check_collision2d
+      clamp_window_bounds2d
+      dist_to_pixels
+      pixels_to_dist
+      resolve_collision2d
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: physics2d
+      :nosignatures:
+      :template: class.rst_t
+   
+      Collision2dParams
+      Physics2dParams
+   
+   
+
+   
+   
+   
+
+
+

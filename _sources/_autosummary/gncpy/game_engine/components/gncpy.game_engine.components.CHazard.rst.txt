@@ -1,0 +1,33 @@
+CHazard
+=======
+
+.. currentmodule:: gncpy.game_engine.components
+
+.. autoclass:: CHazard
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~CHazard.__init__
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CHazard.prob_of_death
+      ~CHazard.entrance_times
+   
+   

@@ -1,0 +1,6 @@
+gncpy.math.get\_hessian
+=======================
+
+.. currentmodule:: gncpy.math
+
+.. autofunction:: get_hessian

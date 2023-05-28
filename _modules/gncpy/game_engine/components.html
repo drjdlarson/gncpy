@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gncpy.game_engine.components &mdash; GNCPy 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+    <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_modules/gncpy/game_engine/components.html" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #9E1B32" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            GNCPy
+              <img src="../../../_static/logo.svg" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../_autosummary/gncpy.html">gncpy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.control.html">control</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/control/gncpy.control.ELQR.html">ELQR</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/control/gncpy.control.LQR.html">LQR</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.coordinate_transforms.html">coordinate_transforms</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/coordinate_transforms/gncpy.coordinate_transforms.ecef_to_LLA.html">gncpy.coordinate_transforms.ecef_to_LLA</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/coordinate_transforms/gncpy.coordinate_transforms.ecef_to_NED.html">gncpy.coordinate_transforms.ecef_to_NED</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/coordinate_transforms/gncpy.coordinate_transforms.lla_to_ECEF.html">gncpy.coordinate_transforms.lla_to_ECEF</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/coordinate_transforms/gncpy.coordinate_transforms.lla_to_NED.html">gncpy.coordinate_transforms.lla_to_NED</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/coordinate_transforms/gncpy.coordinate_transforms.ned_to_LLA.html">gncpy.coordinate_transforms.ned_to_LLA</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.data_fusion.html">data_fusion</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/data_fusion/gncpy.data_fusion.GeneralizedCovarianceIntersection.html">gncpy.data_fusion.GeneralizedCovarianceIntersection</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.distributions.html">distributions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/distributions/gncpy.distributions.Particle.html">Particle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/distributions/gncpy.distributions.ParticleDistribution.html">ParticleDistribution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/distributions/gncpy.distributions.QuadraturePoints.html">QuadraturePoints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/distributions/gncpy.distributions.SigmaPoints.html">SigmaPoints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/distributions/gncpy.distributions.SimpleParticleDistribution.html">SimpleParticleDistribution</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.dynamics.html">dynamics</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/dynamics/gncpy.dynamics.aircraft.html">aircraft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/dynamics/gncpy.dynamics.basic.html">basic</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.errors.html">errors</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/errors/gncpy.errors.ExtremeMeasurementNoiseError.html">gncpy.errors.ExtremeMeasurementNoiseError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/errors/gncpy.errors.ParticleDepletionError.html">gncpy.errors.ParticleDepletionError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/errors/gncpy.errors.ParticleEstimationDomainError.html">gncpy.errors.ParticleEstimationDomainError</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.filters.html">filters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.bayes_filter.html">bayes_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.bootstrap_filter.html">bootstrap_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.ekf_gaussian_scale_mixture_filter.html">ekf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.extended_kalman_filter.html">extended_kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.gci_filter.html">gci_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.gsm_filter_base.html">gsm_filter_base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.imm_gci_filter.html">imm_gci_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.interacting_multiple_model.html">interacting_multiple_model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.kalman_filter.html">kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.kf_gaussian_scale_mixture_filter.html">kf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.max_corr_ent_ukf.html">max_corr_ent_ukf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.max_corr_ent_upf.html">max_corr_ent_upf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.mcmc_particle_filter_base.html">mcmc_particle_filter_base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.particle_filter.html">particle_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.qkf_gaussian_scale_mixture_filter.html">qkf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.quadrature_kalman_filter.html">quadrature_kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.sqkf_gaussian_scale_mixture_filter.html">sqkf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.square_root_qkf.html">square_root_qkf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.students_t_filter.html">students_t_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.ukf_gaussian_scale_mixture_filter.html">ukf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.unscented_kalman_filter.html">unscented_kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.unscented_particle_filter.html">unscented_particle_filter</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.game_engine.html">game_engine</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/game_engine/gncpy.game_engine.base_game.html">base_game</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/game_engine/gncpy.game_engine.components.html">components</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/game_engine/gncpy.game_engine.entities.html">entities</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/game_engine/gncpy.game_engine.physics2d.html">physics2d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/game_engine/gncpy.game_engine.rendering2d.html">rendering2d</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.games.html">games</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/games/gncpy.games.SimpleUAV2d.html">SimpleUAV2d</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.math.html">math</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.epanechnikov_kernel.html">gncpy.math.epanechnikov_kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.gamma_fnc.html">gncpy.math.gamma_fnc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.gaussian_kernel.html">gncpy.math.gaussian_kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.get_elem_sym_fnc.html">gncpy.math.get_elem_sym_fnc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.get_hessian.html">gncpy.math.get_hessian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.get_input_jacobian.html">gncpy.math.get_input_jacobian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.get_jacobian.html">gncpy.math.get_jacobian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.get_state_jacobian.html">gncpy.math.get_state_jacobian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.log_sum_exp.html">gncpy.math.log_sum_exp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.rk4.html">gncpy.math.rk4</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.rk4_backward.html">gncpy.math.rk4_backward</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.weighted_sum_mat.html">gncpy.math.weighted_sum_mat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.weighted_sum_vec.html">gncpy.math.weighted_sum_vec</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.measurements.html">measurements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.orbital_mechanics.html">orbital_mechanics</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/orbital_mechanics/gncpy.orbital_mechanics.correct_lon_ascend.html">gncpy.orbital_mechanics.correct_lon_ascend</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/orbital_mechanics/gncpy.orbital_mechanics.ecc_anom_from_mean.html">gncpy.orbital_mechanics.ecc_anom_from_mean</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/orbital_mechanics/gncpy.orbital_mechanics.ecef_from_orbit.html">gncpy.orbital_mechanics.ecef_from_orbit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/orbital_mechanics/gncpy.orbital_mechanics.true_anom_from_ecc.html">gncpy.orbital_mechanics.true_anom_from_ecc</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.planning.html">planning</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/planning/gncpy.planning.a_star.html">a_star</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/planning/gncpy.planning.reinforcement_learning.html">reinforcement_learning</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/planning/gncpy.planning.rrt_star.html">rrt_star</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.plotting.html">plotting</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/plotting/gncpy.plotting.calc_error_ellipse.html">gncpy.plotting.calc_error_ellipse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/plotting/gncpy.plotting.get_cmap.html">gncpy.plotting.get_cmap</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/plotting/gncpy.plotting.init_plotting_opts.html">gncpy.plotting.init_plotting_opts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/plotting/gncpy.plotting.set_title_label.html">gncpy.plotting.set_title_label</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.sampling.html">sampling</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/sampling/gncpy.sampling.MetropolisHastings.html">MetropolisHastings</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.utilities.html">utilities</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/utilities/gncpy.utilities.classproperty.html">gncpy.utilities.classproperty</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/utilities/gncpy.utilities.ClassPropertyDescriptor.html">ClassPropertyDescriptor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/utilities/gncpy.utilities.ClassPropertyMetaClass.html">ClassPropertyMetaClass</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.wgs84.html">wgs84</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_earth_rate.html">gncpy.wgs84.calc_earth_rate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_ew_rad.html">gncpy.wgs84.calc_ew_rad</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_gravity.html">gncpy.wgs84.calc_gravity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_ns_rad.html">gncpy.wgs84.calc_ns_rad</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_transport_rate.html">gncpy.wgs84.calc_transport_rate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.convert_msl_to_wgs.html">gncpy.wgs84.convert_msl_to_wgs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.convert_wgs_to_msl.html">gncpy.wgs84.convert_wgs_to_msl</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.init_egm_lookup_table.html">gncpy.wgs84.init_egm_lookup_table</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/control.html">Control Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/control.html#lqr-infinite-horizon-linear-dyanmics">LQR Infinite Horizon Linear Dyanmics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/control.html#lqr-finite-horzon-linear-dynamics">LQR Finite Horzon Linear Dynamics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/control.html#lqr-finite-horzon-non-linear-dynamics">LQR Finite Horzon Non-linear Dynamics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/control.html#elqr">ELQR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/control.html#elqr-modified-quadratization">ELQR Modified Quadratization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/control.html#elqr-linear-dynamics">ELQR Linear Dynamics</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/filters.html">Filter Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/filters.html#kalman-filter">Kalman Filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/filters.html#extended-kalman-filter">Extended Kalman Filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/filters.html#interacting-multiple-model-filter">Interacting Multiple Model Filter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/planning.html">Planning Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/a_star.html">A* Examples</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../usage/a_star.html#normal-a">Normal A*</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../usage/a_star.html#beam-search">Beam Search</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../usage/a_star.html#weighted-a">Weighted A*</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/rrtstar.html">RRT* Examples</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../usage/rrtstar.html#lqr-rrt-with-linear-dynamics">LQR-RRT* with Linear Dynamics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../usage/rrtstar.html#lqr-rrt-with-non-linear-dynamics">LQR-RRT* with Non-Linear Dynamics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../usage/rrtstar.html#elqr-rrt-with-non-linear-dynamics">ELQR-RRT* with Non-Linear Dynamics</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../toolchain.html">Toolchain</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../toolchain.html#development-environment-setup">Development Environment Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../toolchain.html#example-workflow">Example Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../toolchain.html#notes-on-tox">Notes on tox</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cicd.html">CI/CD Pipeline</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../cicd.html#github-actions-quick-guide">Github Actions Quick Guide</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="./reports/coverage/index.html#http://">Test Coverage Report</a></li>
+<li class="toctree-l1"><a class="reference external" href="./reports/junit/junit.html#http://">Test Results Report</a></li>
+<li class="toctree-l1"><a class="reference external" href="http://lager.ua.edu/">LAGER Homepage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../References.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #9E1B32" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">GNCPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gncpy.game_engine.components</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gncpy.game_engine.components</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Defines components for use by game entities.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pathlib</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pygame</span>
+
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;PYGAME_HIDE_SUPPORT_PROMPT&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;hide&quot;</span>
+<span class="kn">import</span> <span class="nn">serums.models</span> <span class="k">as</span> <span class="nn">smodels</span>  <span class="c1"># noqa</span>
+
+
+<span class="n">library_asset_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+    <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">resolve</span><span class="p">(),</span> <span class="s2">&quot;games&quot;</span><span class="p">,</span> <span class="s2">&quot;assets&quot;</span>
+<span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Directory containing common game assets.&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="CShape"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CShape.html#gncpy.game_engine.components.CShape">[docs]</a><span class="k">class</span> <span class="nc">CShape</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Contains properties related to the drawn shape.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    type : string</span>
+<span class="sd">        Type of shape to create.</span>
+<span class="sd">    shape : pygame object</span>
+<span class="sd">        Shape to render.</span>
+<span class="sd">    color : tuple</span>
+<span class="sd">        RGB triplet for the color in range [0, 255].</span>
+<span class="sd">    zorder : int</span>
+<span class="sd">        Determines draw order, lower numbers are drawn first.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="s2">&quot;shape&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">,</span> <span class="s2">&quot;zorder&quot;</span>
+
+<div class="viewcode-block" id="CShape.__init__"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CShape.html#gncpy.game_engine.components.CShape.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">s_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fpath</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize an object.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        s_type : string</span>
+<span class="sd">            Type of shape to create. Options are :code:`&#39;rect&#39;`, or</span>
+<span class="sd">            :code:`&#39;sprite&#39;`.</span>
+<span class="sd">        w : int</span>
+<span class="sd">            Width in pixels. Must be specified if type :code:`&#39;rect&#39;`, optional</span>
+<span class="sd">            for sprites (will scale image to this width).</span>
+<span class="sd">        h : int</span>
+<span class="sd">            Height in pixels. Must be specified if type :code:`&#39;rect&#39;`, optional</span>
+<span class="sd">            for sprites (will sacle image to this height).</span>
+<span class="sd">        color : tuple</span>
+<span class="sd">            RGB triplet for the color in range [0, 255]. Only used by type</span>
+<span class="sd">            :code:`&#39;rect&#39;`.</span>
+<span class="sd">        zorder : int</span>
+<span class="sd">            Determines draw order, lower numbers are drawn first.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="n">s_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;rect&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">Rect</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">))</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;sprite&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">fpath</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                    <span class="s2">&quot;File path cannot be None for type </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">s_type</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="n">succ</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">fpath</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">succ</span><span class="p">:</span>
+                <span class="n">fp</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">library_asset_dir</span><span class="p">,</span> <span class="n">fpath</span><span class="p">)</span>
+                <span class="n">succ</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">fp</span> <span class="o">=</span> <span class="n">fpath</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">succ</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="s2">&quot;Failed to find file </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fpath</span><span class="p">))</span>
+
+            <span class="n">img</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">fp</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">:]</span> <span class="o">==</span> <span class="s2">&quot;png&quot;</span><span class="p">:</span>
+                <span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">convert_alpha</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">convert</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">w</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">h</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">img</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Shape type </span><span class="si">{}</span><span class="s2"> not implemented&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">s_type</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">color</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zorder</span> <span class="o">=</span> <span class="n">zorder</span></div></div>
+
+
+<div class="viewcode-block" id="CTransform"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CTransform.html#gncpy.game_engine.components.CTransform">[docs]</a><span class="k">class</span> <span class="nc">CTransform</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Contains properties relating to the spatial components.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    pos : 2 x 1 numpy array</span>
+<span class="sd">        position of the center in pixels</span>
+<span class="sd">    last_pos : 2 x 1 numpy array</span>
+<span class="sd">        last position of the center in pixels.</span>
+<span class="sd">    vel 2 x 1 numpy array</span>
+<span class="sd">        velocity of the center in pixels per timestep</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="s2">&quot;pos&quot;</span><span class="p">,</span> <span class="s2">&quot;last_pos&quot;</span><span class="p">,</span> <span class="s2">&quot;vel&quot;</span>
+
+<div class="viewcode-block" id="CTransform.__init__"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CTransform.html#gncpy.game_engine.components.CTransform.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span></div></div>
+
+
+<div class="viewcode-block" id="CCollision"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CCollision.html#gncpy.game_engine.components.CCollision">[docs]</a><span class="k">class</span> <span class="nc">CCollision</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Handles the bounding box used for collisions.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ---------</span>
+<span class="sd">    aabb : pygame Rect</span>
+<span class="sd">        Rectangle representing the axis aligned bounding box.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="s2">&quot;aabb&quot;</span>
+
+<div class="viewcode-block" id="CCollision.__init__"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CCollision.html#gncpy.game_engine.components.CCollision.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">w</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">h</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">aabb</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">Rect</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">aabb</span> <span class="o">=</span> <span class="kc">None</span></div></div>
+
+
+<div class="viewcode-block" id="CBirth"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CBirth.html#gncpy.game_engine.components.CBirth">[docs]</a><span class="k">class</span> <span class="nc">CBirth</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Handles the birth model properties.</span>
+
+<span class="sd">    Also handles the generation of the birth location through the use of</span>
+<span class="sd">    a distribution object from SERUMS.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    loc : numpy array</span>
+<span class="sd">        Location parameter for distribution</span>
+<span class="sd">    randomize : bool</span>
+<span class="sd">        Flag indicating if the state should be randomly sampled.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="s2">&quot;_model&quot;</span><span class="p">,</span> <span class="s2">&quot;loc&quot;</span><span class="p">,</span> <span class="s2">&quot;_rng&quot;</span><span class="p">,</span> <span class="s2">&quot;randomize&quot;</span>
+
+<div class="viewcode-block" id="CBirth.__init__"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CBirth.html#gncpy.game_engine.components.CBirth.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">b_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">randomize</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes an object.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        b_type : string</span>
+<span class="sd">            Model type. Options are :code:`&#39;gaussian&#39;`.</span>
+<span class="sd">        loc : numpy array</span>
+<span class="sd">            location parameter of the model.</span>
+<span class="sd">        scale : N x N numpy array</span>
+<span class="sd">            scale parameter of the model.</span>
+<span class="sd">        params : dict</span>
+<span class="sd">            additional parameters for the model.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">b_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;gaussian&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">scale</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">std</span> <span class="o">=</span> <span class="n">scale</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="o">=</span> <span class="n">smodels</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">(</span><span class="n">mean</span><span class="o">=</span><span class="n">loc</span><span class="p">,</span> <span class="n">covariance</span><span class="o">=</span><span class="n">std</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loc</span> <span class="o">=</span> <span class="n">loc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span> <span class="o">=</span> <span class="n">rng</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">randomize</span> <span class="o">=</span> <span class="n">randomize</span></div>
+
+<div class="viewcode-block" id="CBirth.sample"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CBirth.html#gncpy.game_engine.components.CBirth.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Draw a sample from the distribution.</span>
+
+<span class="sd">        Will provide the location parameter if not randomizing.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        N x 1 numpy array</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">randomize</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">rng</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">location</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="CEvents"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CEvents.html#gncpy.game_engine.components.CEvents">[docs]</a><span class="k">class</span> <span class="nc">CEvents</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Holds the events properties.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    events : list</span>
+<span class="sd">        Each element is a tuple with the first being an event identifier and</span>
+<span class="sd">        the second a dict with extra info.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="s2">&quot;events&quot;</span>
+
+<div class="viewcode-block" id="CEvents.__init__"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CEvents.html#gncpy.game_engine.components.CEvents.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">events</span> <span class="o">=</span> <span class="p">[]</span></div></div>
+
+
+<div class="viewcode-block" id="CHazard"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CHazard.html#gncpy.game_engine.components.CHazard">[docs]</a><span class="k">class</span> <span class="nc">CHazard</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Hold the properties for hazard info.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    prob_of_death : float</span>
+<span class="sd">        Probability of death at each timestep in the hazard. Must be in the</span>
+<span class="sd">        range (0, 1].</span>
+<span class="sd">    entrance_times : dict</span>
+<span class="sd">        mapping of player id to entrance time.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="s2">&quot;prob_of_death&quot;</span><span class="p">,</span> <span class="s2">&quot;entrance_times&quot;</span>
+
+<div class="viewcode-block" id="CHazard.__init__"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CHazard.html#gncpy.game_engine.components.CHazard.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prob_of_death</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize an object.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        prob_of_death : float</span>
+<span class="sd">            Probability of death at each timestep.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prob_of_death</span> <span class="o">=</span> <span class="n">prob_of_death</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">entrance_times</span> <span class="o">=</span> <span class="p">{}</span></div></div>
+
+
+<div class="viewcode-block" id="CCapabilities"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CCapabilities.html#gncpy.game_engine.components.CCapabilities">[docs]</a><span class="k">class</span> <span class="nc">CCapabilities</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Hold properties about player/target capabilities.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    capabilities : list</span>
+<span class="sd">        Each element defines a capability. The :code:`in` keyword must work</span>
+<span class="sd">        for chcking if an item is in the list.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="s2">&quot;capabilities&quot;</span>
+
+<div class="viewcode-block" id="CCapabilities.__init__"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CCapabilities.html#gncpy.game_engine.components.CCapabilities.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">capabilities</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize an object.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        capabilities : list</span>
+<span class="sd">            List of capabilities.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">capabilities</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">capabilities</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">capabilities</span> <span class="o">=</span> <span class="n">capabilities</span></div></div>
+
+
+<div class="viewcode-block" id="CPriority"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CPriority.html#gncpy.game_engine.components.CPriority">[docs]</a><span class="k">class</span> <span class="nc">CPriority</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Hold properties about the priority.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    priority : float</span>
+<span class="sd">        Priority value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="s2">&quot;priority&quot;</span>
+
+<div class="viewcode-block" id="CPriority.__init__"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CPriority.html#gncpy.game_engine.components.CPriority.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize an object.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        priority : float</span>
+<span class="sd">            priority of the object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">priority</span> <span class="o">=</span> <span class="n">priority</span></div></div>
+
+
+<div class="viewcode-block" id="CDynamics"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CDynamics.html#gncpy.game_engine.components.CDynamics">[docs]</a><span class="k">class</span> <span class="nc">CDynamics</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Handles all the properties relaing to the dynamics.</span>
+
+<span class="sd">    Also implements the logic for propagating the state via a dynamics</span>
+<span class="sd">    object.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dynObj : :class:`gncpy.dynamics.DynamicsBase`</span>
+<span class="sd">        Implements the dynamics equations, control, and state constraints.</span>
+<span class="sd">    last_state : numpy array</span>
+<span class="sd">        Last state for the dynamics.</span>
+<span class="sd">    pos_inds : list</span>
+<span class="sd">        Indices of the state vector containing the position info.</span>
+<span class="sd">    vel_inds : list</span>
+<span class="sd">        Indices of the state vector containing the velocity info.</span>
+<span class="sd">    state_args : tuple</span>
+<span class="sd">        Additional arguments for propagating the state.</span>
+<span class="sd">    ctrl_args : tuple</span>
+<span class="sd">        Additional arguments for propagating the state.</span>
+<span class="sd">    state_low : numpy array</span>
+<span class="sd">        Lower limit of each state.</span>
+<span class="sd">    state_high : numpy array</span>
+<span class="sd">        Upper limit of each state.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;dynObj&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;last_state&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;state&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;pos_inds&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;vel_inds&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;state_args&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ctrl_args&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;state_low&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;state_high&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+<div class="viewcode-block" id="CDynamics.__init__"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CDynamics.html#gncpy.game_engine.components.CDynamics.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">dynObj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">pos_inds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">vel_inds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">state_args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">ctrl_args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">state_low</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">state_high</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize an object.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dynObj : :class:`gncpy.dynamics.DynamicsBase`</span>
+<span class="sd">            Implements the dynamics equations, control, and state constraints.</span>
+<span class="sd">        pos_inds : list</span>
+<span class="sd">            Indices of the state vector containing the position info.</span>
+<span class="sd">        vel_inds : list</span>
+<span class="sd">            Indices of the state vector containing the velocity info.</span>
+<span class="sd">        state_args : tuple</span>
+<span class="sd">            Additional arguments for propagating the state.</span>
+<span class="sd">        ctrl_args : tuple</span>
+<span class="sd">            Additional arguments for propagating the state.</span>
+<span class="sd">        state_low : numpy array</span>
+<span class="sd">            Lower limit of each state.</span>
+<span class="sd">        state_high : numpy array</span>
+<span class="sd">            Upper limit of each state.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dynObj</span> <span class="o">=</span> <span class="n">dynObj</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynObj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">n_states</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dynObj</span><span class="o">.</span><span class="n">state_names</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">last_state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">n_states</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_states</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos_inds</span> <span class="o">=</span> <span class="n">pos_inds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vel_inds</span> <span class="o">=</span> <span class="n">vel_inds</span>
+        <span class="k">if</span> <span class="n">state_args</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">state_args</span> <span class="o">=</span> <span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state_args</span> <span class="o">=</span> <span class="n">state_args</span>
+        <span class="k">if</span> <span class="n">ctrl_args</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ctrl_args</span> <span class="o">=</span> <span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ctrl_args</span> <span class="o">=</span> <span class="n">ctrl_args</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state_low</span> <span class="o">=</span> <span class="n">state_low</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state_high</span> <span class="o">=</span> <span class="n">state_high</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Laboratory for Autonomy, GNC, and Estimation Research (LAGER).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

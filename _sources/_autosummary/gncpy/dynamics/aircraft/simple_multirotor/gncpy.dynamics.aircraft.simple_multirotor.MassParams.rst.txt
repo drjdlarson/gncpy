@@ -1,0 +1,26 @@
+MassParams
+==========
+
+.. currentmodule:: gncpy.dynamics.aircraft.simple_multirotor
+
+.. autoclass:: MassParams
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~MassParams.__init__
+   
+   
+
+   
+   
+   

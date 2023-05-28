@@ -1,0 +1,43 @@
+SimpleUAV2d
+===========
+
+.. automodule:: gncpy.games.SimpleUAV2d
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: SimpleUAV2d
+      :nosignatures:
+      :template: class.rst_t
+   
+      BirthModelParams
+      ControlModelParams
+      DynamicsParams
+      EventType
+      HazardParams
+      ObstacleParams
+      Params
+      PlayerParams
+      ScoreParams
+      SimpleUAV2d
+      StateConstraintParams
+      TargetParams
+   
+   
+
+   
+   
+   
+
+
+

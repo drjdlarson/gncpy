@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gncpy.game_engine.entities &mdash; GNCPy 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+    <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_modules/gncpy/game_engine/entities.html" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #9E1B32" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            GNCPy
+              <img src="../../../_static/logo.svg" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../_autosummary/gncpy.html">gncpy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.control.html">control</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/control/gncpy.control.ELQR.html">ELQR</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/control/gncpy.control.LQR.html">LQR</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.coordinate_transforms.html">coordinate_transforms</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/coordinate_transforms/gncpy.coordinate_transforms.ecef_to_LLA.html">gncpy.coordinate_transforms.ecef_to_LLA</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/coordinate_transforms/gncpy.coordinate_transforms.ecef_to_NED.html">gncpy.coordinate_transforms.ecef_to_NED</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/coordinate_transforms/gncpy.coordinate_transforms.lla_to_ECEF.html">gncpy.coordinate_transforms.lla_to_ECEF</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/coordinate_transforms/gncpy.coordinate_transforms.lla_to_NED.html">gncpy.coordinate_transforms.lla_to_NED</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/coordinate_transforms/gncpy.coordinate_transforms.ned_to_LLA.html">gncpy.coordinate_transforms.ned_to_LLA</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.data_fusion.html">data_fusion</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/data_fusion/gncpy.data_fusion.GeneralizedCovarianceIntersection.html">gncpy.data_fusion.GeneralizedCovarianceIntersection</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.distributions.html">distributions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/distributions/gncpy.distributions.Particle.html">Particle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/distributions/gncpy.distributions.ParticleDistribution.html">ParticleDistribution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/distributions/gncpy.distributions.QuadraturePoints.html">QuadraturePoints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/distributions/gncpy.distributions.SigmaPoints.html">SigmaPoints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/distributions/gncpy.distributions.SimpleParticleDistribution.html">SimpleParticleDistribution</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.dynamics.html">dynamics</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/dynamics/gncpy.dynamics.aircraft.html">aircraft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/dynamics/gncpy.dynamics.basic.html">basic</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.errors.html">errors</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/errors/gncpy.errors.ExtremeMeasurementNoiseError.html">gncpy.errors.ExtremeMeasurementNoiseError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/errors/gncpy.errors.ParticleDepletionError.html">gncpy.errors.ParticleDepletionError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/errors/gncpy.errors.ParticleEstimationDomainError.html">gncpy.errors.ParticleEstimationDomainError</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.filters.html">filters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.bayes_filter.html">bayes_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.bootstrap_filter.html">bootstrap_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.ekf_gaussian_scale_mixture_filter.html">ekf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.extended_kalman_filter.html">extended_kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.gci_filter.html">gci_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.gsm_filter_base.html">gsm_filter_base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.imm_gci_filter.html">imm_gci_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.interacting_multiple_model.html">interacting_multiple_model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.kalman_filter.html">kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.kf_gaussian_scale_mixture_filter.html">kf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.max_corr_ent_ukf.html">max_corr_ent_ukf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.max_corr_ent_upf.html">max_corr_ent_upf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.mcmc_particle_filter_base.html">mcmc_particle_filter_base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.particle_filter.html">particle_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.qkf_gaussian_scale_mixture_filter.html">qkf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.quadrature_kalman_filter.html">quadrature_kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.sqkf_gaussian_scale_mixture_filter.html">sqkf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.square_root_qkf.html">square_root_qkf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.students_t_filter.html">students_t_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.ukf_gaussian_scale_mixture_filter.html">ukf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.unscented_kalman_filter.html">unscented_kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.unscented_particle_filter.html">unscented_particle_filter</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.game_engine.html">game_engine</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/game_engine/gncpy.game_engine.base_game.html">base_game</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/game_engine/gncpy.game_engine.components.html">components</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/game_engine/gncpy.game_engine.entities.html">entities</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/game_engine/gncpy.game_engine.physics2d.html">physics2d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/game_engine/gncpy.game_engine.rendering2d.html">rendering2d</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.games.html">games</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/games/gncpy.games.SimpleUAV2d.html">SimpleUAV2d</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.math.html">math</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.epanechnikov_kernel.html">gncpy.math.epanechnikov_kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.gamma_fnc.html">gncpy.math.gamma_fnc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.gaussian_kernel.html">gncpy.math.gaussian_kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.get_elem_sym_fnc.html">gncpy.math.get_elem_sym_fnc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.get_hessian.html">gncpy.math.get_hessian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.get_input_jacobian.html">gncpy.math.get_input_jacobian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.get_jacobian.html">gncpy.math.get_jacobian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.get_state_jacobian.html">gncpy.math.get_state_jacobian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.log_sum_exp.html">gncpy.math.log_sum_exp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.rk4.html">gncpy.math.rk4</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.rk4_backward.html">gncpy.math.rk4_backward</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.weighted_sum_mat.html">gncpy.math.weighted_sum_mat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.weighted_sum_vec.html">gncpy.math.weighted_sum_vec</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.measurements.html">measurements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.orbital_mechanics.html">orbital_mechanics</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/orbital_mechanics/gncpy.orbital_mechanics.correct_lon_ascend.html">gncpy.orbital_mechanics.correct_lon_ascend</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/orbital_mechanics/gncpy.orbital_mechanics.ecc_anom_from_mean.html">gncpy.orbital_mechanics.ecc_anom_from_mean</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/orbital_mechanics/gncpy.orbital_mechanics.ecef_from_orbit.html">gncpy.orbital_mechanics.ecef_from_orbit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/orbital_mechanics/gncpy.orbital_mechanics.true_anom_from_ecc.html">gncpy.orbital_mechanics.true_anom_from_ecc</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.planning.html">planning</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/planning/gncpy.planning.a_star.html">a_star</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/planning/gncpy.planning.reinforcement_learning.html">reinforcement_learning</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/planning/gncpy.planning.rrt_star.html">rrt_star</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.plotting.html">plotting</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/plotting/gncpy.plotting.calc_error_ellipse.html">gncpy.plotting.calc_error_ellipse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/plotting/gncpy.plotting.get_cmap.html">gncpy.plotting.get_cmap</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/plotting/gncpy.plotting.init_plotting_opts.html">gncpy.plotting.init_plotting_opts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/plotting/gncpy.plotting.set_title_label.html">gncpy.plotting.set_title_label</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.sampling.html">sampling</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/sampling/gncpy.sampling.MetropolisHastings.html">MetropolisHastings</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.utilities.html">utilities</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/utilities/gncpy.utilities.classproperty.html">gncpy.utilities.classproperty</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/utilities/gncpy.utilities.ClassPropertyDescriptor.html">ClassPropertyDescriptor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/utilities/gncpy.utilities.ClassPropertyMetaClass.html">ClassPropertyMetaClass</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.wgs84.html">wgs84</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_earth_rate.html">gncpy.wgs84.calc_earth_rate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_ew_rad.html">gncpy.wgs84.calc_ew_rad</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_gravity.html">gncpy.wgs84.calc_gravity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_ns_rad.html">gncpy.wgs84.calc_ns_rad</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_transport_rate.html">gncpy.wgs84.calc_transport_rate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.convert_msl_to_wgs.html">gncpy.wgs84.convert_msl_to_wgs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.convert_wgs_to_msl.html">gncpy.wgs84.convert_wgs_to_msl</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.init_egm_lookup_table.html">gncpy.wgs84.init_egm_lookup_table</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/control.html">Control Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/control.html#lqr-infinite-horizon-linear-dyanmics">LQR Infinite Horizon Linear Dyanmics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/control.html#lqr-finite-horzon-linear-dynamics">LQR Finite Horzon Linear Dynamics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/control.html#lqr-finite-horzon-non-linear-dynamics">LQR Finite Horzon Non-linear Dynamics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/control.html#elqr">ELQR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/control.html#elqr-modified-quadratization">ELQR Modified Quadratization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/control.html#elqr-linear-dynamics">ELQR Linear Dynamics</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/filters.html">Filter Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/filters.html#kalman-filter">Kalman Filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/filters.html#extended-kalman-filter">Extended Kalman Filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/filters.html#interacting-multiple-model-filter">Interacting Multiple Model Filter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/planning.html">Planning Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/a_star.html">A* Examples</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../usage/a_star.html#normal-a">Normal A*</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../usage/a_star.html#beam-search">Beam Search</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../usage/a_star.html#weighted-a">Weighted A*</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/rrtstar.html">RRT* Examples</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../usage/rrtstar.html#lqr-rrt-with-linear-dynamics">LQR-RRT* with Linear Dynamics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../usage/rrtstar.html#lqr-rrt-with-non-linear-dynamics">LQR-RRT* with Non-Linear Dynamics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../usage/rrtstar.html#elqr-rrt-with-non-linear-dynamics">ELQR-RRT* with Non-Linear Dynamics</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../toolchain.html">Toolchain</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../toolchain.html#development-environment-setup">Development Environment Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../toolchain.html#example-workflow">Example Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../toolchain.html#notes-on-tox">Notes on tox</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cicd.html">CI/CD Pipeline</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../cicd.html#github-actions-quick-guide">Github Actions Quick Guide</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="./reports/coverage/index.html#http://">Test Coverage Report</a></li>
+<li class="toctree-l1"><a class="reference external" href="./reports/junit/junit.html#http://">Test Results Report</a></li>
+<li class="toctree-l1"><a class="reference external" href="http://lager.ua.edu/">LAGER Homepage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../References.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #9E1B32" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">GNCPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gncpy.game_engine.entities</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gncpy.game_engine.entities</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Defines game entities and a manager class.&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="Entity"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/entities/gncpy.game_engine.entities.Entity.html#gncpy.game_engine.entities.Entity">[docs]</a><span class="k">class</span> <span class="nc">Entity</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Elements in a game.</span>
+
+<span class="sd">    These should not be created or deleted directly, the manager class should</span>
+<span class="sd">    be used instead.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;_active&quot;</span><span class="p">,</span> <span class="s2">&quot;_id&quot;</span><span class="p">,</span> <span class="s2">&quot;_tag&quot;</span><span class="p">,</span> <span class="s2">&quot;_components&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Entity.__init__"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/entities/gncpy.game_engine.entities.Entity.html#gncpy.game_engine.entities.Entity.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e_id</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize an object.</span>
+
+<span class="sd">        This should not be called outside of the :class:`.EntityManager` class.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        e_id : int</span>
+<span class="sd">            Unique ID number for the entity.</span>
+<span class="sd">        tag : string</span>
+<span class="sd">            Type of entity.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_active</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="n">e_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tag</span> <span class="o">=</span> <span class="n">tag</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_components</span> <span class="o">=</span> <span class="p">{}</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">active</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Flag indicating if the entity is alive.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_active</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read only tag of for the entity.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tag</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read only unique id of the entity.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span>
+
+<div class="viewcode-block" id="Entity.destroy"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/entities/gncpy.game_engine.entities.Entity.html#gncpy.game_engine.entities.Entity.destroy">[docs]</a>    <span class="k">def</span> <span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handles destruction of the entity.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_active</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="Entity.has_component"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/entities/gncpy.game_engine.entities.Entity.html#gncpy.game_engine.entities.Entity.has_component">[docs]</a>    <span class="k">def</span> <span class="nf">has_component</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">comp</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns true if the entity has the given component.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        comp : object</span>
+<span class="sd">            Component class from :mod:`gncpy.game_engine.components`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+<span class="sd">            Flag indicating if the entity has the component.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">comp</span><span class="o">.</span><span class="vm">__name__</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_components</span></div>
+
+<div class="viewcode-block" id="Entity.get_component"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/entities/gncpy.game_engine.entities.Entity.html#gncpy.game_engine.entities.Entity.get_component">[docs]</a>    <span class="k">def</span> <span class="nf">get_component</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">comp</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns a reference to the given component.</span>
+
+<span class="sd">        This assumes the component exists.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        comp : object</span>
+<span class="sd">            Component class from :mod:`gncpy.game_engine.components`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        object</span>
+<span class="sd">            reference to a class instance from :mod:`gncpy.game_engine.components`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_components</span><span class="p">[</span><span class="n">comp</span><span class="o">.</span><span class="vm">__name__</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Entity.add_component"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/entities/gncpy.game_engine.entities.Entity.html#gncpy.game_engine.entities.Entity.add_component">[docs]</a>    <span class="k">def</span> <span class="nf">add_component</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">comp</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds a component to the entity.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        comp : class constructor</span>
+<span class="sd">            Component class constructor from :mod:`gncpy.game_engine.components`.</span>
+<span class="sd">        **kwargs : dict, optional</span>
+<span class="sd">            Additional arguments to pass to the constructor.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        component : object</span>
+<span class="sd">            Reference to the new component class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">component</span> <span class="o">=</span> <span class="n">comp</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_components</span><span class="p">[</span><span class="n">comp</span><span class="o">.</span><span class="vm">__name__</span><span class="p">]</span> <span class="o">=</span> <span class="n">component</span>
+        <span class="k">return</span> <span class="n">component</span></div></div>
+
+
+<div class="viewcode-block" id="EntityManager"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/entities/gncpy.game_engine.entities.EntityManager.html#gncpy.game_engine.entities.EntityManager">[docs]</a><span class="k">class</span> <span class="nc">EntityManager</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Handles creation and deletion of entities.&quot;&quot;&quot;</span>
+
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;_entities&quot;</span><span class="p">,</span> <span class="s2">&quot;_entities_to_add&quot;</span><span class="p">,</span> <span class="s2">&quot;_entity_map&quot;</span><span class="p">,</span> <span class="s2">&quot;_total_entities&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="EntityManager.__init__"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/entities/gncpy.game_engine.entities.EntityManager.html#gncpy.game_engine.entities.EntityManager.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_entities</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_entities_to_add</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_entity_map</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_total_entities</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+    <span class="k">def</span> <span class="nf">_remove_dead_entities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vec</span><span class="p">):</span>
+        <span class="n">e_to_rm</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">vec</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">e</span><span class="o">.</span><span class="n">active</span><span class="p">:</span>
+                <span class="n">e_to_rm</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ii</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="n">e_to_rm</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="k">del</span> <span class="n">vec</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+
+<div class="viewcode-block" id="EntityManager.update"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/entities/gncpy.game_engine.entities.EntityManager.html#gncpy.game_engine.entities.EntityManager.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates the list of entities.</span>
+
+<span class="sd">        Should be called once per timestep. Adds new entities to the list and</span>
+<span class="sd">        and removes dead ones.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entities_to_add</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_entities</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">tag</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entity_map</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_entity_map</span><span class="p">[</span><span class="n">e</span><span class="o">.</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_entity_map</span><span class="p">[</span><span class="n">e</span><span class="o">.</span><span class="n">tag</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_entities_to_add</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_remove_dead_entities</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_entities</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">tag</span><span class="p">,</span> <span class="n">ev</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entity_map</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_remove_dead_entities</span><span class="p">(</span><span class="n">ev</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="EntityManager.add_entity"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/entities/gncpy.game_engine.entities.EntityManager.html#gncpy.game_engine.entities.EntityManager.add_entity">[docs]</a>    <span class="k">def</span> <span class="nf">add_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a new entity.</span>
+
+<span class="sd">        The entity is queued to be added. It is not part of the entity list</span>
+<span class="sd">        until after the update function has been called.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        tag : string</span>
+<span class="sd">            Tag to identify the type of entity.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        e : :class:`.Entity`</span>
+<span class="sd">            Reference to the created entity.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_total_entities</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="n">Entity</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_total_entities</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_entities_to_add</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">e</span></div>
+
+<div class="viewcode-block" id="EntityManager.get_entities"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/entities/gncpy.game_engine.entities.EntityManager.html#gncpy.game_engine.entities.EntityManager.get_entities">[docs]</a>    <span class="k">def</span> <span class="nf">get_entities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a list of references to entities.</span>
+
+<span class="sd">        Can also get all entities with a given tag. Note that changing entities</span>
+<span class="sd">        returned by this function modifies the entities managed by this class.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        tag : string, optional</span>
+<span class="sd">            If provided only return entities with this tag. The default is None.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list</span>
+<span class="sd">            Each element is an :class:`.Entity`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">tag</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entities</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">tag</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entity_map</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entity_map</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">[]</span></div>
+
+<div class="viewcode-block" id="EntityManager.get_entity_ids"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/entities/gncpy.game_engine.entities.EntityManager.html#gncpy.game_engine.entities.EntityManager.get_entity_ids">[docs]</a>    <span class="k">def</span> <span class="nf">get_entity_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a list of the entity ids.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        tag : string, optional</span>
+<span class="sd">            If provided only return ids for entities with this tag. The default</span>
+<span class="sd">            is None.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list</span>
+<span class="sd">            Each element is an entity id.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">e</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_entities</span><span class="p">(</span><span class="n">tag</span><span class="o">=</span><span class="n">tag</span><span class="p">)]</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Laboratory for Autonomy, GNC, and Estimation Research (LAGER).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

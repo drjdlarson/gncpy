@@ -1,0 +1,46 @@
+GrayScaleObservation
+====================
+
+.. currentmodule:: gncpy.planning.reinforcement_learning.wrappers
+
+.. autoclass:: GrayScaleObservation
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~GrayScaleObservation.__init__
+      ~GrayScaleObservation.class_name
+      ~GrayScaleObservation.close
+      ~GrayScaleObservation.observation
+      ~GrayScaleObservation.render
+      ~GrayScaleObservation.reset
+      ~GrayScaleObservation.seed
+      ~GrayScaleObservation.step
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GrayScaleObservation.action_space
+      ~GrayScaleObservation.metadata
+      ~GrayScaleObservation.np_random
+      ~GrayScaleObservation.observation_space
+      ~GrayScaleObservation.render_mode
+      ~GrayScaleObservation.reward_range
+      ~GrayScaleObservation.spec
+      ~GrayScaleObservation.unwrapped
+   
+   

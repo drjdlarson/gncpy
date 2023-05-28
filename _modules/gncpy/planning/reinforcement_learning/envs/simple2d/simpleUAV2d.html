@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d &mdash; GNCPy 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../../../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../../../_static/copybutton.css" type="text/css" />
+    <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_modules/gncpy/planning/reinforcement_learning/envs/simple2d/simpleUAV2d.html" />
+  <!--[if lt IE 9]>
+    <script src="../../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../../../_static/jquery.js"></script>
+        <script src="../../../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../../../../../" id="documentation_options" src="../../../../../../_static/documentation_options.js"></script>
+        <script src="../../../../../../_static/doctools.js"></script>
+        <script src="../../../../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../../../../_static/clipboard.min.js"></script>
+        <script src="../../../../../../_static/copybutton.js"></script>
+    <script src="../../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #9E1B32" >
+
+          
+          
+          <a href="../../../../../../index.html" class="icon icon-home">
+            GNCPy
+              <img src="../../../../../../_static/logo.svg" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../api.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../../_autosummary/gncpy.html">gncpy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../_autosummary/gncpy/gncpy.control.html">control</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/control/gncpy.control.ELQR.html">ELQR</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/control/gncpy.control.LQR.html">LQR</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../_autosummary/gncpy/gncpy.coordinate_transforms.html">coordinate_transforms</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/coordinate_transforms/gncpy.coordinate_transforms.ecef_to_LLA.html">gncpy.coordinate_transforms.ecef_to_LLA</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/coordinate_transforms/gncpy.coordinate_transforms.ecef_to_NED.html">gncpy.coordinate_transforms.ecef_to_NED</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/coordinate_transforms/gncpy.coordinate_transforms.lla_to_ECEF.html">gncpy.coordinate_transforms.lla_to_ECEF</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/coordinate_transforms/gncpy.coordinate_transforms.lla_to_NED.html">gncpy.coordinate_transforms.lla_to_NED</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/coordinate_transforms/gncpy.coordinate_transforms.ned_to_LLA.html">gncpy.coordinate_transforms.ned_to_LLA</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../_autosummary/gncpy/gncpy.data_fusion.html">data_fusion</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/data_fusion/gncpy.data_fusion.GeneralizedCovarianceIntersection.html">gncpy.data_fusion.GeneralizedCovarianceIntersection</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../_autosummary/gncpy/gncpy.distributions.html">distributions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/distributions/gncpy.distributions.Particle.html">Particle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/distributions/gncpy.distributions.ParticleDistribution.html">ParticleDistribution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/distributions/gncpy.distributions.QuadraturePoints.html">QuadraturePoints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/distributions/gncpy.distributions.SigmaPoints.html">SigmaPoints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/distributions/gncpy.distributions.SimpleParticleDistribution.html">SimpleParticleDistribution</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../_autosummary/gncpy/gncpy.dynamics.html">dynamics</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/dynamics/gncpy.dynamics.aircraft.html">aircraft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/dynamics/gncpy.dynamics.basic.html">basic</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../_autosummary/gncpy/gncpy.errors.html">errors</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/errors/gncpy.errors.ExtremeMeasurementNoiseError.html">gncpy.errors.ExtremeMeasurementNoiseError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/errors/gncpy.errors.ParticleDepletionError.html">gncpy.errors.ParticleDepletionError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/errors/gncpy.errors.ParticleEstimationDomainError.html">gncpy.errors.ParticleEstimationDomainError</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../_autosummary/gncpy/gncpy.filters.html">filters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/filters/gncpy.filters.bayes_filter.html">bayes_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/filters/gncpy.filters.bootstrap_filter.html">bootstrap_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/filters/gncpy.filters.ekf_gaussian_scale_mixture_filter.html">ekf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/filters/gncpy.filters.extended_kalman_filter.html">extended_kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/filters/gncpy.filters.gci_filter.html">gci_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/filters/gncpy.filters.gsm_filter_base.html">gsm_filter_base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/filters/gncpy.filters.imm_gci_filter.html">imm_gci_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/filters/gncpy.filters.interacting_multiple_model.html">interacting_multiple_model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/filters/gncpy.filters.kalman_filter.html">kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/filters/gncpy.filters.kf_gaussian_scale_mixture_filter.html">kf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/filters/gncpy.filters.max_corr_ent_ukf.html">max_corr_ent_ukf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/filters/gncpy.filters.max_corr_ent_upf.html">max_corr_ent_upf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/filters/gncpy.filters.mcmc_particle_filter_base.html">mcmc_particle_filter_base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/filters/gncpy.filters.particle_filter.html">particle_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/filters/gncpy.filters.qkf_gaussian_scale_mixture_filter.html">qkf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/filters/gncpy.filters.quadrature_kalman_filter.html">quadrature_kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/filters/gncpy.filters.sqkf_gaussian_scale_mixture_filter.html">sqkf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/filters/gncpy.filters.square_root_qkf.html">square_root_qkf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/filters/gncpy.filters.students_t_filter.html">students_t_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/filters/gncpy.filters.ukf_gaussian_scale_mixture_filter.html">ukf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/filters/gncpy.filters.unscented_kalman_filter.html">unscented_kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/filters/gncpy.filters.unscented_particle_filter.html">unscented_particle_filter</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../_autosummary/gncpy/gncpy.game_engine.html">game_engine</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/game_engine/gncpy.game_engine.base_game.html">base_game</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/game_engine/gncpy.game_engine.components.html">components</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/game_engine/gncpy.game_engine.entities.html">entities</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/game_engine/gncpy.game_engine.physics2d.html">physics2d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/game_engine/gncpy.game_engine.rendering2d.html">rendering2d</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../_autosummary/gncpy/gncpy.games.html">games</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/games/gncpy.games.SimpleUAV2d.html">SimpleUAV2d</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../_autosummary/gncpy/gncpy.math.html">math</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/math/gncpy.math.epanechnikov_kernel.html">gncpy.math.epanechnikov_kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/math/gncpy.math.gamma_fnc.html">gncpy.math.gamma_fnc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/math/gncpy.math.gaussian_kernel.html">gncpy.math.gaussian_kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/math/gncpy.math.get_elem_sym_fnc.html">gncpy.math.get_elem_sym_fnc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/math/gncpy.math.get_hessian.html">gncpy.math.get_hessian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/math/gncpy.math.get_input_jacobian.html">gncpy.math.get_input_jacobian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/math/gncpy.math.get_jacobian.html">gncpy.math.get_jacobian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/math/gncpy.math.get_state_jacobian.html">gncpy.math.get_state_jacobian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/math/gncpy.math.log_sum_exp.html">gncpy.math.log_sum_exp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/math/gncpy.math.rk4.html">gncpy.math.rk4</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/math/gncpy.math.rk4_backward.html">gncpy.math.rk4_backward</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/math/gncpy.math.weighted_sum_mat.html">gncpy.math.weighted_sum_mat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/math/gncpy.math.weighted_sum_vec.html">gncpy.math.weighted_sum_vec</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../_autosummary/gncpy/gncpy.measurements.html">measurements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../_autosummary/gncpy/gncpy.orbital_mechanics.html">orbital_mechanics</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/orbital_mechanics/gncpy.orbital_mechanics.correct_lon_ascend.html">gncpy.orbital_mechanics.correct_lon_ascend</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/orbital_mechanics/gncpy.orbital_mechanics.ecc_anom_from_mean.html">gncpy.orbital_mechanics.ecc_anom_from_mean</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/orbital_mechanics/gncpy.orbital_mechanics.ecef_from_orbit.html">gncpy.orbital_mechanics.ecef_from_orbit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/orbital_mechanics/gncpy.orbital_mechanics.true_anom_from_ecc.html">gncpy.orbital_mechanics.true_anom_from_ecc</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../_autosummary/gncpy/gncpy.planning.html">planning</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/planning/gncpy.planning.a_star.html">a_star</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/planning/gncpy.planning.reinforcement_learning.html">reinforcement_learning</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/planning/gncpy.planning.rrt_star.html">rrt_star</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../_autosummary/gncpy/gncpy.plotting.html">plotting</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/plotting/gncpy.plotting.calc_error_ellipse.html">gncpy.plotting.calc_error_ellipse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/plotting/gncpy.plotting.get_cmap.html">gncpy.plotting.get_cmap</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/plotting/gncpy.plotting.init_plotting_opts.html">gncpy.plotting.init_plotting_opts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/plotting/gncpy.plotting.set_title_label.html">gncpy.plotting.set_title_label</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../_autosummary/gncpy/gncpy.sampling.html">sampling</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/sampling/gncpy.sampling.MetropolisHastings.html">MetropolisHastings</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../_autosummary/gncpy/gncpy.utilities.html">utilities</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/utilities/gncpy.utilities.classproperty.html">gncpy.utilities.classproperty</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/utilities/gncpy.utilities.ClassPropertyDescriptor.html">ClassPropertyDescriptor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/utilities/gncpy.utilities.ClassPropertyMetaClass.html">ClassPropertyMetaClass</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../_autosummary/gncpy/gncpy.wgs84.html">wgs84</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_earth_rate.html">gncpy.wgs84.calc_earth_rate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_ew_rad.html">gncpy.wgs84.calc_ew_rad</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_gravity.html">gncpy.wgs84.calc_gravity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_ns_rad.html">gncpy.wgs84.calc_ns_rad</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_transport_rate.html">gncpy.wgs84.calc_transport_rate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/wgs84/gncpy.wgs84.convert_msl_to_wgs.html">gncpy.wgs84.convert_msl_to_wgs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/wgs84/gncpy.wgs84.convert_wgs_to_msl.html">gncpy.wgs84.convert_wgs_to_msl</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../_autosummary/gncpy/wgs84/gncpy.wgs84.init_egm_lookup_table.html">gncpy.wgs84.init_egm_lookup_table</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../usage.html">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../../usage/control.html">Control Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../usage/control.html#lqr-infinite-horizon-linear-dyanmics">LQR Infinite Horizon Linear Dyanmics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../usage/control.html#lqr-finite-horzon-linear-dynamics">LQR Finite Horzon Linear Dynamics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../usage/control.html#lqr-finite-horzon-non-linear-dynamics">LQR Finite Horzon Non-linear Dynamics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../usage/control.html#elqr">ELQR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../usage/control.html#elqr-modified-quadratization">ELQR Modified Quadratization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../usage/control.html#elqr-linear-dynamics">ELQR Linear Dynamics</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../../usage/filters.html">Filter Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../usage/filters.html#kalman-filter">Kalman Filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../usage/filters.html#extended-kalman-filter">Extended Kalman Filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../usage/filters.html#interacting-multiple-model-filter">Interacting Multiple Model Filter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../../usage/planning.html">Planning Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../usage/a_star.html">A* Examples</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../usage/a_star.html#normal-a">Normal A*</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../usage/a_star.html#beam-search">Beam Search</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../usage/a_star.html#weighted-a">Weighted A*</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../usage/rrtstar.html">RRT* Examples</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../usage/rrtstar.html#lqr-rrt-with-linear-dynamics">LQR-RRT* with Linear Dynamics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../usage/rrtstar.html#lqr-rrt-with-non-linear-dynamics">LQR-RRT* with Non-Linear Dynamics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../usage/rrtstar.html#elqr-rrt-with-non-linear-dynamics">ELQR-RRT* with Non-Linear Dynamics</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../toolchain.html">Toolchain</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../../toolchain.html#development-environment-setup">Development Environment Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../../toolchain.html#example-workflow">Example Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../../toolchain.html#notes-on-tox">Notes on tox</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../cicd.html">CI/CD Pipeline</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../../cicd.html#github-actions-quick-guide">Github Actions Quick Guide</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="./reports/coverage/index.html#http://">Test Coverage Report</a></li>
+<li class="toctree-l1"><a class="reference external" href="./reports/junit/junit.html#http://">Test Results Report</a></li>
+<li class="toctree-l1"><a class="reference external" href="http://lager.ua.edu/">LAGER Homepage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../References.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #9E1B32" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../../index.html">GNCPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Implements RL environments for the SimpleUAV2d game.</span>
+
+<span class="sd">This follows the new format for the OpenAI Gym environment API. They provide</span>
+<span class="sd">default wrappers for backwards compatibility with some learning libraries.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">gym</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">gym</span> <span class="kn">import</span> <span class="n">spaces</span>
+<span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
+
+<span class="kn">from</span> <span class="nn">gncpy.games.SimpleUAV2d</span> <span class="kn">import</span> <span class="n">SimpleUAV2d</span> <span class="k">as</span> <span class="n">UAVGame</span>
+
+
+<div class="viewcode-block" id="SimpleUAV2d"><a class="viewcode-back" href="../../../../../../_autosummary/gncpy/planning/reinforcement_learning/envs/simple2d/simpleUAV2d/gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAV2d.html#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAV2d">[docs]</a><span class="k">class</span> <span class="nc">SimpleUAV2d</span><span class="p">(</span><span class="n">gym</span><span class="o">.</span><span class="n">Env</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;RL environment for the :class:`gncpy.games.SimpleUAV2d.SimpleUAV2d` game.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    render_mode : string</span>
+<span class="sd">        Mode to render in. See :attr:`.metadata` for available modes.</span>
+<span class="sd">    game : :class:`gncpy.games.SimpleUAV2d.SimpleUAV2d`</span>
+<span class="sd">        Main game to play.</span>
+<span class="sd">    fig : matplotlib figure</span>
+<span class="sd">        For legacy support of rendering function</span>
+<span class="sd">    obs_type : string</span>
+<span class="sd">        Observation type to use. Options are :code:`&#39;image&#39;` or :code:`&#39;player_state&#39;`.</span>
+<span class="sd">    aux_use_n_targets : bool</span>
+<span class="sd">        Flag indicating if auxilary state uses the number of targets.</span>
+<span class="sd">    aux_use_time : bool</span>
+<span class="sd">        Flag indicating if auxilary state uses the current time.</span>
+<span class="sd">    max_time : float</span>
+<span class="sd">        Maximum time in real units for the environment. It is recommended to</span>
+<span class="sd">        set the game to have unlimited time and use this instead as this allows</span>
+<span class="sd">        the RL algorithms more visibility. Once this time is surpassed the</span>
+<span class="sd">        episode is truncated and appropriate flags are set.</span>
+<span class="sd">    observation_space : :class:`gym.spaces.Box` or :class:`gym.spaces.Dict`</span>
+<span class="sd">        Observation space. This depends on the observation type and auxilary</span>
+<span class="sd">        flags.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;render_modes&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;human&quot;</span><span class="p">,</span> <span class="s2">&quot;single_rgb_array&quot;</span><span class="p">],</span> <span class="s2">&quot;render_fps&quot;</span><span class="p">:</span> <span class="mi">60</span><span class="p">}</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Additional metadata for the class.&quot;&quot;&quot;</span>
+
+    <span class="n">action_space</span> <span class="o">=</span> <span class="n">spaces</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span>
+        <span class="n">low</span><span class="o">=-</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">high</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span>
+    <span class="p">)</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Space for available actions.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="SimpleUAV2d.__init__"><a class="viewcode-back" href="../../../../../../_autosummary/gncpy/planning/reinforcement_learning/envs/simple2d/simpleUAV2d/gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAV2d.html#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAV2d.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">config_file</span><span class="o">=</span><span class="s2">&quot;SimpleUAV2d.yaml&quot;</span><span class="p">,</span>
+        <span class="n">render_mode</span><span class="o">=</span><span class="s2">&quot;single_rgb_array&quot;</span><span class="p">,</span>
+        <span class="n">obs_type</span><span class="o">=</span><span class="s2">&quot;player_state&quot;</span><span class="p">,</span>
+        <span class="n">max_time</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">aux_use_n_targets</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">aux_use_time</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize an object.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        config_file : string, optional</span>
+<span class="sd">            Full path of the configuration file. The default is &quot;SimpleUAV2d.yaml&quot;.</span>
+<span class="sd">        render_mode : string, optional</span>
+<span class="sd">            Render mode to use. Must be specified at initialization time, then</span>
+<span class="sd">            the render function does not need to be called. The default is</span>
+<span class="sd">            &quot;single_rgb_array&quot;.</span>
+<span class="sd">        obs_type : string, optional</span>
+<span class="sd">            Observation type to use. The default is &quot;player_state&quot;.</span>
+<span class="sd">        max_time : float, optional</span>
+<span class="sd">            Maximum time for an episode in game&#39;s real units. The default is 10.</span>
+<span class="sd">        aux_use_n_targets : bool, optional</span>
+<span class="sd">            Flag indicating if auxilary state uses the number of targets. The</span>
+<span class="sd">            default is False.</span>
+<span class="sd">        aux_use_time : bool, optional</span>
+<span class="sd">            Flag indicating if auxilary state uses the current time. The default</span>
+<span class="sd">            is False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">render_mode</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;render_modes&quot;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">render_mode</span> <span class="o">=</span> <span class="n">render_mode</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">render_mode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;render_modes&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;Invalid render mode (</span><span class="si">{}</span><span class="s2">) defaulting to </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">render_mode</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">render_mode</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="c1"># self.action_space = spaces.Box(</span>
+        <span class="c1">#     low=-np.ones(2), high=np.ones(2), dtype=np.float32</span>
+        <span class="c1"># )</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">game</span> <span class="o">=</span> <span class="n">UAVGame</span><span class="p">(</span><span class="n">config_file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">render_mode</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">np_random</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">game</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">game</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gen_act_map</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">low</span><span class="p">)))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># for legacy support of render function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">obs_type</span> <span class="o">=</span> <span class="n">obs_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aux_use_n_targets</span> <span class="o">=</span> <span class="n">aux_use_n_targets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aux_use_time</span> <span class="o">=</span> <span class="n">aux_use_time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_time</span> <span class="o">=</span> <span class="n">max_time</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">observation_space</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_obs_space</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;render_fps&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">game</span><span class="o">.</span><span class="n">render_fps</span></div>
+
+<div class="viewcode-block" id="SimpleUAV2d.step"><a class="viewcode-back" href="../../../../../../_autosummary/gncpy/planning/reinforcement_learning/envs/simple2d/simpleUAV2d/gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAV2d.html#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAV2d.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Perform one iteration of the game loop.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        action : numpy array</span>
+<span class="sd">            Action to take in the game.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        observation : :class:`gym.spaces.Box` or :class:`gym.spaces.Dict`</span>
+<span class="sd">            Current observation of the game.</span>
+<span class="sd">        reward : float</span>
+<span class="sd">            Reward from current step.</span>
+<span class="sd">        done : bool</span>
+<span class="sd">            Flag indicating if the episode met the end conditions.</span>
+<span class="sd">        truncated : bool</span>
+<span class="sd">            Flag indicating if the episode has ended due to time constraints.</span>
+<span class="sd">        info : dict</span>
+<span class="sd">            Extra debugging info.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">truncated</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">game</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gen_act_map</span><span class="p">(</span><span class="n">action</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">truncated</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">truncated</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">game</span><span class="o">.</span><span class="n">elapsed_time</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_time</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_obs</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">game</span><span class="o">.</span><span class="n">score</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">game</span><span class="o">.</span><span class="n">game_over</span><span class="p">,</span> <span class="n">truncated</span><span class="p">,</span> <span class="n">info</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Deprecated. Handles rendering a frame of the environment.</span>
+
+<span class="sd">        This is deprecated and the render mode should instead be set at</span>
+<span class="sd">        initialization.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        mode : string, optional</span>
+<span class="sd">            The rendering mode to use. The default is None, which does nothing.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">render_mode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="ne">DeprecationWarning</span><span class="p">(</span>
+                <span class="s2">&quot;Calling render directly is deprecated, &quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;specify the render mode during initialization instead.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;single_rgb_array&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">game</span><span class="o">.</span><span class="n">img</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">render_mode</span> <span class="o">==</span> <span class="s2">&quot;human&quot;</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;human&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">px2in</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;figure.dpi&quot;</span><span class="p">]</span>  <span class="c1"># pixel in inches</span>
+                <span class="n">orig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;toolbar&quot;</span><span class="p">]</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;toolbar&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;None&quot;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span>
+                    <span class="n">figsize</span><span class="o">=</span><span class="p">(</span>
+                        <span class="n">px2in</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">game</span><span class="o">.</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                        <span class="n">px2in</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">game</span><span class="o">.</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">frame_on</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">rasterized</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;toolbar&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">orig</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fig</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">game</span><span class="o">.</span><span class="n">img</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">game</span><span class="o">.</span><span class="n">render_fps</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Invalid render mode: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mode</span><span class="p">))</span>
+
+<div class="viewcode-block" id="SimpleUAV2d.reset"><a class="viewcode-back" href="../../../../../../_autosummary/gncpy/planning/reinforcement_learning/envs/simple2d/simpleUAV2d/gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAV2d.html#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAV2d.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_info</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Resets the environment to an initial state.</span>
+
+<span class="sd">        This method can reset the environment’s random number generator(s)</span>
+<span class="sd">        if seed is an integer or if the environment has not yet initialized a</span>
+<span class="sd">        random number generator. If the environment already has a random number</span>
+<span class="sd">        generator and reset() is called with seed=None, the RNG should not be</span>
+<span class="sd">        reset. Moreover, reset() should (in the typical use case) be called</span>
+<span class="sd">        with an integer seed right after initialization and then never again.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        seed : int, optional</span>
+<span class="sd">            The seed that is used to initialize the environment’s PRNG. If the</span>
+<span class="sd">            environment does not already have a PRNG and :code:`seed=None`</span>
+<span class="sd">            (the default option) is passed, a seed will be chosen from some</span>
+<span class="sd">            source of entropy (e.g. timestamp or /dev/urandom). However, if the</span>
+<span class="sd">            environment already has a PRNG and :code:`seed=None` is passed, the</span>
+<span class="sd">            PRNG will not be reset. If you pass an integer, the PRNG will be</span>
+<span class="sd">            reset even if it already exists. Usually, you want to pass an</span>
+<span class="sd">            integer right after the environment has been initialized and then</span>
+<span class="sd">            never again. The default is None.</span>
+<span class="sd">        return_info : bool, optional</span>
+<span class="sd">            If true, return additional information along with initial</span>
+<span class="sd">            observation. This info should be analogous to the info returned in</span>
+<span class="sd">            :meth:`.step`. The default is False.</span>
+<span class="sd">        options : dict, optional</span>
+<span class="sd">            Not used by this environment. The default is None.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        observation : :class:`gym.spaces.Box` or :class:`gym.spaces.Dict`</span>
+<span class="sd">            Initial observation of the environment.</span>
+<span class="sd">        info : dict, optional</span>
+<span class="sd">            Additonal debugging info, only returned if :code:`return_info=True`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">seed</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">game</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">rng</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">np_random</span><span class="p">)</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">game</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gen_act_map</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">low</span><span class="p">)))</span>
+        <span class="n">observation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_obs</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">observation</span><span class="p">,</span> <span class="n">info</span><span class="p">)</span> <span class="k">if</span> <span class="n">return_info</span> <span class="k">else</span> <span class="n">observation</span></div>
+
+<div class="viewcode-block" id="SimpleUAV2d.close"><a class="viewcode-back" href="../../../../../../_autosummary/gncpy/planning/reinforcement_learning/envs/simple2d/simpleUAV2d/gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAV2d.html#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAV2d.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Nicely shuts down the environment.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">game</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="SimpleUAV2d.calc_obs_space"><a class="viewcode-back" href="../../../../../../_autosummary/gncpy/planning/reinforcement_learning/envs/simple2d/simpleUAV2d/gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAV2d.html#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAV2d.calc_obs_space">[docs]</a>    <span class="k">def</span> <span class="nf">calc_obs_space</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Determines the observation space based on specified options.</span>
+
+<span class="sd">        If a dictionary space is used, the keys are :code:`&#39;img&#39;` for the image</span>
+<span class="sd">        of the game screen and :code:`&#39;aux&#39;` for the auxilary state vector. Both</span>
+<span class="sd">        values are boxes.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        RuntimeError</span>
+<span class="sd">            Invalid observation type specified.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        out : :class:`gym.spaces.Box` or :class:`gym.spaces.Dict`</span>
+<span class="sd">            Observation space.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># determine main state</span>
+        <span class="n">main_state</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs_type</span> <span class="o">==</span> <span class="s2">&quot;image&quot;</span><span class="p">:</span>
+            <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">game</span><span class="o">.</span><span class="n">get_image_size</span><span class="p">(),</span> <span class="mi">3</span><span class="p">)</span>
+            <span class="n">main_state</span> <span class="o">=</span> <span class="n">spaces</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs_type</span> <span class="o">==</span> <span class="s2">&quot;player_state&quot;</span><span class="p">:</span>
+            <span class="n">state_bnds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">game</span><span class="o">.</span><span class="n">get_player_state_bounds</span><span class="p">()</span>
+            <span class="n">main_state</span> <span class="o">=</span> <span class="n">spaces</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span>
+                <span class="n">low</span><span class="o">=</span><span class="n">state_bnds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">high</span><span class="o">=</span><span class="n">state_bnds</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span>
+            <span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Invalid observation type (</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obs_type</span><span class="p">))</span>
+
+        <span class="c1"># create aux state if needed</span>
+        <span class="n">aux_state_low</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+        <span class="n">aux_state_high</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">aux_use_n_targets</span><span class="p">:</span>
+            <span class="n">aux_state_low</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">aux_state_low</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">aux_state_high</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">aux_state_high</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">aux_use_time</span><span class="p">:</span>
+            <span class="n">aux_state_low</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">aux_state_low</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">aux_state_high</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">aux_state_high</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>
+
+        <span class="c1"># combine into final space</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs_type</span> <span class="o">==</span> <span class="s2">&quot;image&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">aux_state_low</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">aux_state</span> <span class="o">=</span> <span class="n">spaces</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="n">aux_state_low</span><span class="p">,</span> <span class="n">aux_state_high</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+                <span class="n">out</span> <span class="o">=</span> <span class="n">spaces</span><span class="o">.</span><span class="n">Dict</span><span class="p">({</span><span class="s2">&quot;img&quot;</span><span class="p">:</span> <span class="n">main_state</span><span class="p">,</span> <span class="s2">&quot;aux&quot;</span><span class="p">:</span> <span class="n">aux_state</span><span class="p">})</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">out</span> <span class="o">=</span> <span class="n">main_state</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">aux_state_low</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">low</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">main_state</span><span class="o">.</span><span class="n">low</span><span class="p">,</span> <span class="n">aux_state_low</span><span class="p">))</span>
+                <span class="n">high</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">main_state</span><span class="o">.</span><span class="n">high</span><span class="p">,</span> <span class="n">aux_state_high</span><span class="p">))</span>
+                <span class="n">out</span> <span class="o">=</span> <span class="n">spaces</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">out</span> <span class="o">=</span> <span class="n">main_state</span>
+
+        <span class="k">return</span> <span class="n">out</span></div>
+
+<div class="viewcode-block" id="SimpleUAV2d.gen_act_map"><a class="viewcode-back" href="../../../../../../_autosummary/gncpy/planning/reinforcement_learning/envs/simple2d/simpleUAV2d/gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAV2d.html#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAV2d.gen_act_map">[docs]</a>    <span class="k">def</span> <span class="nf">gen_act_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Maps actions to entity ids for the game.</span>
+
+<span class="sd">        This assumes there is only 1 player and if there are more then all</span>
+<span class="sd">        players get the same action.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        action : numpy array</span>
+<span class="sd">            Action to take in the game.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        act_map : dict</span>
+<span class="sd">            Each key is an entity id and each value is a numpy array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Note: should only have 1 player</span>
+        <span class="n">ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">game</span><span class="o">.</span><span class="n">get_player_ids</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;Multi-player environment not supported, &quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;all players using same action.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">act_map</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">_id</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+            <span class="n">act_map</span><span class="p">[</span><span class="n">_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">action</span>
+        <span class="k">return</span> <span class="n">act_map</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_obs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generates an observation.&quot;&quot;&quot;</span>
+        <span class="c1"># get main state</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs_type</span> <span class="o">==</span> <span class="s2">&quot;image&quot;</span><span class="p">:</span>
+            <span class="n">main_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">game</span><span class="o">.</span><span class="n">img</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs_type</span> <span class="o">==</span> <span class="s2">&quot;player_state&quot;</span><span class="p">:</span>
+            <span class="n">p_states</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">game</span><span class="o">.</span><span class="n">get_players_state</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">p_states</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;No players alive&quot;</span><span class="p">)</span>
+            <span class="n">main_state</span> <span class="o">=</span> <span class="n">p_states</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">p_states</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># catch all in case a new case is forgotten</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Failed to generate observation for type </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obs_type</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="c1"># get aux state, if any</span>
+        <span class="n">aux_state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">aux_use_n_targets</span><span class="p">:</span>
+            <span class="n">aux_state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">aux_state</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">game</span><span class="o">.</span><span class="n">get_num_targets</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">aux_use_time</span><span class="p">:</span>
+            <span class="n">aux_state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">aux_state</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">game</span><span class="o">.</span><span class="n">elapsed_time</span><span class="p">)</span>
+
+        <span class="c1"># combine into output</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs_type</span> <span class="o">==</span> <span class="s2">&quot;image&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">aux_state</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">img</span><span class="o">=</span><span class="n">main_state</span><span class="p">,</span> <span class="n">aux</span><span class="o">=</span><span class="n">aux_state</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">main_state</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">aux_state</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">main_state</span><span class="p">,</span> <span class="n">aux_state</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">main_state</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SimpleUAVHazards2d"><a class="viewcode-back" href="../../../../../../_autosummary/gncpy/planning/reinforcement_learning/envs/simple2d/simpleUAV2d/gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.html#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d">[docs]</a><span class="k">class</span> <span class="nc">SimpleUAVHazards2d</span><span class="p">(</span><span class="n">SimpleUAV2d</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Simple 2d UAV environment with hazards.</span>
+
+<span class="sd">    This follows the same underlying game logic as the :class:`.SimpleUAV2d`</span>
+<span class="sd">    environment but has some hazards added to its default configuration.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="SimpleUAVHazards2d.__init__"><a class="viewcode-back" href="../../../../../../_autosummary/gncpy/planning/reinforcement_learning/envs/simple2d/simpleUAV2d/gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.html#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="o">=</span><span class="s2">&quot;SimpleUAVHazards2d.yaml&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize an object.&quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">config_file</span><span class="o">=</span><span class="n">config_file</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Laboratory for Autonomy, GNC, and Estimation Research (LAGER).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

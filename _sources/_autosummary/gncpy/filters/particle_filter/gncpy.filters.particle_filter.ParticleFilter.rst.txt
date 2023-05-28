@@ -1,0 +1,50 @@
+ParticleFilter
+==============
+
+.. currentmodule:: gncpy.filters.particle_filter
+
+.. autoclass:: ParticleFilter
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~ParticleFilter.__init__
+      ~ParticleFilter.correct
+      ~ParticleFilter.extract_dist
+      ~ParticleFilter.init_from_dist
+      ~ParticleFilter.init_particles
+      ~ParticleFilter.load_filter_state
+      ~ParticleFilter.plot_particles
+      ~ParticleFilter.plot_weighted_particles
+      ~ParticleFilter.predict
+      ~ParticleFilter.save_filter_state
+      ~ParticleFilter.set_measurement_model
+      ~ParticleFilter.set_state_model
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~ParticleFilter.cov
+      ~ParticleFilter.meas_likelihood_fnc
+      ~ParticleFilter.num_particles
+      ~ParticleFilter.proposal_fnc
+      ~ParticleFilter.proposal_sampling_fnc
+      ~ParticleFilter.require_copy_can_dist
+      ~ParticleFilter.require_copy_prop_parts
+      ~ParticleFilter.transition_prob_fnc
+   
+   

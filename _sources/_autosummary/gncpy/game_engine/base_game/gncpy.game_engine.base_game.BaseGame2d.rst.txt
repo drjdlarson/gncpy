@@ -1,0 +1,48 @@
+BaseGame2d
+==========
+
+.. currentmodule:: gncpy.game_engine.base_game
+
+.. autoclass:: BaseGame2d
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~BaseGame2d.__init__
+      ~BaseGame2d.append_name_to_keys
+      ~BaseGame2d.close
+      ~BaseGame2d.get_image_size
+      ~BaseGame2d.parse_config_file
+      ~BaseGame2d.register_params
+      ~BaseGame2d.reset
+      ~BaseGame2d.s_collision
+      ~BaseGame2d.s_game_over
+      ~BaseGame2d.s_input
+      ~BaseGame2d.s_movement
+      ~BaseGame2d.s_render
+      ~BaseGame2d.s_score
+      ~BaseGame2d.setup
+      ~BaseGame2d.step
+      ~BaseGame2d.validate_config_file
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~BaseGame2d.current_time
+      ~BaseGame2d.elapsed_time
+   
+   

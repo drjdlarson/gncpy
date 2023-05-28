@@ -1,0 +1,46 @@
+StackFrames
+===========
+
+.. currentmodule:: gncpy.planning.reinforcement_learning.wrappers
+
+.. autoclass:: StackFrames
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~StackFrames.__init__
+      ~StackFrames.class_name
+      ~StackFrames.close
+      ~StackFrames.observation
+      ~StackFrames.render
+      ~StackFrames.reset
+      ~StackFrames.seed
+      ~StackFrames.step
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~StackFrames.action_space
+      ~StackFrames.metadata
+      ~StackFrames.np_random
+      ~StackFrames.observation_space
+      ~StackFrames.render_mode
+      ~StackFrames.reward_range
+      ~StackFrames.spec
+      ~StackFrames.unwrapped
+   
+   

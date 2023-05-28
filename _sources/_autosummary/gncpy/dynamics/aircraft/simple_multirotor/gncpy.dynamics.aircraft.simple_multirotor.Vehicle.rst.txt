@@ -1,0 +1,40 @@
+Vehicle
+=======
+
+.. currentmodule:: gncpy.dynamics.aircraft.simple_multirotor
+
+.. autoclass:: Vehicle
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~Vehicle.__init__
+      ~Vehicle.calc_derived_states
+      ~Vehicle.eul_to_dcm
+      ~Vehicle.set_dcm_earth2body
+      ~Vehicle.step
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Vehicle.state
+      ~Vehicle.params
+      ~Vehicle.ref_lat
+      ~Vehicle.ref_lon
+      ~Vehicle.takenoff
+   
+   

@@ -1,0 +1,32 @@
+bootstrap\_filter
+=================
+
+.. automodule:: gncpy.filters.bootstrap_filter
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: bootstrap_filter
+      :nosignatures:
+      :template: class.rst_t
+   
+      BootstrapFilter
+   
+   
+
+   
+   
+   
+
+
+

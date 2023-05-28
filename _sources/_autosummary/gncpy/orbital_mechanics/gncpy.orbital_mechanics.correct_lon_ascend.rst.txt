@@ -1,0 +1,6 @@
+gncpy.orbital\_mechanics.correct\_lon\_ascend
+=============================================
+
+.. currentmodule:: gncpy.orbital_mechanics
+
+.. autofunction:: correct_lon_ascend

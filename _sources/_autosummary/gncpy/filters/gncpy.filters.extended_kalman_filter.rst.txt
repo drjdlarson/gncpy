@@ -1,0 +1,32 @@
+extended\_kalman\_filter
+========================
+
+.. automodule:: gncpy.filters.extended_kalman_filter
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: extended_kalman_filter
+      :nosignatures:
+      :template: class.rst_t
+   
+      ExtendedKalmanFilter
+   
+   
+
+   
+   
+   
+
+
+

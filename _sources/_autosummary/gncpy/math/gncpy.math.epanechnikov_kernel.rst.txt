@@ -1,0 +1,6 @@
+gncpy.math.epanechnikov\_kernel
+===============================
+
+.. currentmodule:: gncpy.math
+
+.. autofunction:: epanechnikov_kernel

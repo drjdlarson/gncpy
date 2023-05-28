@@ -1,0 +1,32 @@
+gci\_filter
+===========
+
+.. automodule:: gncpy.filters.gci_filter
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: gci_filter
+      :nosignatures:
+      :template: class.rst_t
+   
+      GCIFilter
+   
+   
+
+   
+   
+   
+
+
+

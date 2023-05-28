@@ -1,0 +1,46 @@
+BufferFames
+===========
+
+.. currentmodule:: gncpy.planning.reinforcement_learning.wrappers
+
+.. autoclass:: BufferFames
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~BufferFames.__init__
+      ~BufferFames.class_name
+      ~BufferFames.close
+      ~BufferFames.observation
+      ~BufferFames.render
+      ~BufferFames.reset
+      ~BufferFames.seed
+      ~BufferFames.step
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~BufferFames.action_space
+      ~BufferFames.metadata
+      ~BufferFames.np_random
+      ~BufferFames.observation_space
+      ~BufferFames.render_mode
+      ~BufferFames.reward_range
+      ~BufferFames.spec
+      ~BufferFames.unwrapped
+   
+   

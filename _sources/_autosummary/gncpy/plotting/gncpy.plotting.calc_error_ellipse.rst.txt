@@ -1,0 +1,6 @@
+gncpy.plotting.calc\_error\_ellipse
+===================================
+
+.. currentmodule:: gncpy.plotting
+
+.. autofunction:: calc_error_ellipse

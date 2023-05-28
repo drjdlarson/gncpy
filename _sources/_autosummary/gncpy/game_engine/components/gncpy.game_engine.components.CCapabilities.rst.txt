@@ -1,0 +1,32 @@
+CCapabilities
+=============
+
+.. currentmodule:: gncpy.game_engine.components
+
+.. autoclass:: CCapabilities
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~CCapabilities.__init__
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CCapabilities.capabilities
+   
+   

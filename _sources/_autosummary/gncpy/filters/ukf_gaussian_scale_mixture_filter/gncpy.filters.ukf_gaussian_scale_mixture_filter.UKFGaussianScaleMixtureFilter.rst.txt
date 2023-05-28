@@ -1,0 +1,48 @@
+UKFGaussianScaleMixtureFilter
+=============================
+
+.. currentmodule:: gncpy.filters.ukf_gaussian_scale_mixture_filter
+
+.. autoclass:: UKFGaussianScaleMixtureFilter
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~UKFGaussianScaleMixtureFilter.__init__
+      ~UKFGaussianScaleMixtureFilter.correct
+      ~UKFGaussianScaleMixtureFilter.init_sigma_points
+      ~UKFGaussianScaleMixtureFilter.load_filter_state
+      ~UKFGaussianScaleMixtureFilter.plot_particles
+      ~UKFGaussianScaleMixtureFilter.predict
+      ~UKFGaussianScaleMixtureFilter.save_filter_state
+      ~UKFGaussianScaleMixtureFilter.set_meas_noise_model
+      ~UKFGaussianScaleMixtureFilter.set_measurement_model
+      ~UKFGaussianScaleMixtureFilter.set_process_noise_model
+      ~UKFGaussianScaleMixtureFilter.set_state_model
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~UKFGaussianScaleMixtureFilter.alpha
+      ~UKFGaussianScaleMixtureFilter.beta
+      ~UKFGaussianScaleMixtureFilter.cov
+      ~UKFGaussianScaleMixtureFilter.dt
+      ~UKFGaussianScaleMixtureFilter.kappa
+      ~UKFGaussianScaleMixtureFilter.meas_noise
+      ~UKFGaussianScaleMixtureFilter.proc_noise
+   
+   

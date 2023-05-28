@@ -1,0 +1,26 @@
+HazardParams
+============
+
+.. currentmodule:: gncpy.games.SimpleUAV2d
+
+.. autoclass:: HazardParams
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~HazardParams.__init__
+   
+   
+
+   
+   
+   

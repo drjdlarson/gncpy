@@ -1,0 +1,37 @@
+LinearDynamicsBase
+==================
+
+.. currentmodule:: gncpy.dynamics.basic
+
+.. autoclass:: LinearDynamicsBase
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~LinearDynamicsBase.__init__
+      ~LinearDynamicsBase.get_dis_process_noise_mat
+      ~LinearDynamicsBase.get_input_mat
+      ~LinearDynamicsBase.get_state_mat
+      ~LinearDynamicsBase.propagate_state
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~LinearDynamicsBase.allow_cpp
+      ~LinearDynamicsBase.state_names
+   
+   

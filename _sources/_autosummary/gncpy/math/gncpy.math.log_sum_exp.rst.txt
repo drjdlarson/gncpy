@@ -1,0 +1,6 @@
+gncpy.math.log\_sum\_exp
+========================
+
+.. currentmodule:: gncpy.math
+
+.. autofunction:: log_sum_exp

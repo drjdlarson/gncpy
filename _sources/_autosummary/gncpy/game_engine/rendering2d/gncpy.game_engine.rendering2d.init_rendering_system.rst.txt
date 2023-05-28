@@ -1,0 +1,6 @@
+gncpy.game\_engine.rendering2d.init\_rendering\_system
+======================================================
+
+.. currentmodule:: gncpy.game_engine.rendering2d
+
+.. autofunction:: init_rendering_system

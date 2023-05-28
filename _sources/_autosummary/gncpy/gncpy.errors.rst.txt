@@ -1,0 +1,32 @@
+errors
+======
+
+.. automodule:: gncpy.errors
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Exceptions
+
+   .. autosummary::
+      :toctree: errors
+   
+      ExtremeMeasurementNoiseError
+      ParticleDepletionError
+      ParticleEstimationDomainError
+   
+   
+
+
+

@@ -1,0 +1,6 @@
+gncpy.game\_engine.physics2d.check\_collision2d
+===============================================
+
+.. currentmodule:: gncpy.game_engine.physics2d
+
+.. autofunction:: check_collision2d

@@ -1,0 +1,32 @@
+kf\_gaussian\_scale\_mixture\_filter
+====================================
+
+.. automodule:: gncpy.filters.kf_gaussian_scale_mixture_filter
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: kf_gaussian_scale_mixture_filter
+      :nosignatures:
+      :template: class.rst_t
+   
+      KFGaussianScaleMixtureFilter
+   
+   
+
+   
+   
+   
+
+
+

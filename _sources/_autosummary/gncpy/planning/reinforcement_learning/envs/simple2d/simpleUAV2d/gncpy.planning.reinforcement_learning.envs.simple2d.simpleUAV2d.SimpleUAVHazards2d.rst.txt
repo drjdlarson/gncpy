@@ -1,0 +1,46 @@
+SimpleUAVHazards2d
+==================
+
+.. currentmodule:: gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d
+
+.. autoclass:: SimpleUAVHazards2d
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~SimpleUAVHazards2d.__init__
+      ~SimpleUAVHazards2d.calc_obs_space
+      ~SimpleUAVHazards2d.close
+      ~SimpleUAVHazards2d.gen_act_map
+      ~SimpleUAVHazards2d.render
+      ~SimpleUAVHazards2d.reset
+      ~SimpleUAVHazards2d.seed
+      ~SimpleUAVHazards2d.step
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~SimpleUAVHazards2d.action_space
+      ~SimpleUAVHazards2d.metadata
+      ~SimpleUAVHazards2d.np_random
+      ~SimpleUAVHazards2d.render_mode
+      ~SimpleUAVHazards2d.reward_range
+      ~SimpleUAVHazards2d.spec
+      ~SimpleUAVHazards2d.unwrapped
+      ~SimpleUAVHazards2d.observation_space
+   
+   

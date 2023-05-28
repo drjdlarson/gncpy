@@ -1,0 +1,6 @@
+gncpy.plotting.init\_plotting\_opts
+===================================
+
+.. currentmodule:: gncpy.plotting
+
+.. autofunction:: init_plotting_opts

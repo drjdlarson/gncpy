@@ -1,0 +1,45 @@
+SkipFrames
+==========
+
+.. currentmodule:: gncpy.planning.reinforcement_learning.wrappers
+
+.. autoclass:: SkipFrames
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~SkipFrames.__init__
+      ~SkipFrames.class_name
+      ~SkipFrames.close
+      ~SkipFrames.render
+      ~SkipFrames.reset
+      ~SkipFrames.seed
+      ~SkipFrames.step
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~SkipFrames.action_space
+      ~SkipFrames.metadata
+      ~SkipFrames.np_random
+      ~SkipFrames.observation_space
+      ~SkipFrames.render_mode
+      ~SkipFrames.reward_range
+      ~SkipFrames.spec
+      ~SkipFrames.unwrapped
+   
+   

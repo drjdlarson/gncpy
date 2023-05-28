@@ -1,0 +1,6 @@
+gncpy.orbital\_mechanics.true\_anom\_from\_ecc
+==============================================
+
+.. currentmodule:: gncpy.orbital_mechanics
+
+.. autofunction:: true_anom_from_ecc

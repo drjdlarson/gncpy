@@ -1,0 +1,6 @@
+gncpy.plotting.set\_title\_label
+================================
+
+.. currentmodule:: gncpy.plotting
+
+.. autofunction:: set_title_label

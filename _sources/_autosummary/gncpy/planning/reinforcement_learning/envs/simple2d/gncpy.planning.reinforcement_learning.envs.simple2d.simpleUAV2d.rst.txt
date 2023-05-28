@@ -1,0 +1,33 @@
+simpleUAV2d
+===========
+
+.. automodule:: gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: simpleUAV2d
+      :nosignatures:
+      :template: class.rst_t
+   
+      SimpleUAV2d
+      SimpleUAVHazards2d
+   
+   
+
+   
+   
+   
+
+
+

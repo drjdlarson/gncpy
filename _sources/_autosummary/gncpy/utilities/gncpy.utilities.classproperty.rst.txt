@@ -1,0 +1,6 @@
+gncpy.utilities.classproperty
+=============================
+
+.. currentmodule:: gncpy.utilities
+
+.. autofunction:: classproperty

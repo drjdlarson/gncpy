@@ -1,0 +1,40 @@
+MaxCorrEntUKF
+=============
+
+.. currentmodule:: gncpy.filters.max_corr_ent_ukf
+
+.. autoclass:: MaxCorrEntUKF
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~MaxCorrEntUKF.__init__
+      ~MaxCorrEntUKF.correct
+      ~MaxCorrEntUKF.init_sigma_points
+      ~MaxCorrEntUKF.load_filter_state
+      ~MaxCorrEntUKF.predict
+      ~MaxCorrEntUKF.save_filter_state
+      ~MaxCorrEntUKF.set_measurement_model
+      ~MaxCorrEntUKF.set_measurement_noise_estimator
+      ~MaxCorrEntUKF.set_state_model
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MaxCorrEntUKF.cov
+   
+   

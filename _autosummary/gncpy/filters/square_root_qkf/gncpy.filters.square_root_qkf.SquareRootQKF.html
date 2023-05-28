@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SquareRootQKF &mdash; GNCPy 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
+    <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_autosummary/gncpy/filters/square_root_qkf/gncpy.filters.square_root_qkf.SquareRootQKF.html" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../../_static/clipboard.min.js"></script>
+        <script src="../../../../_static/copybutton.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="students_t_filter" href="../gncpy.filters.students_t_filter.html" />
+    <link rel="prev" title="square_root_qkf" href="../gncpy.filters.square_root_qkf.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #9E1B32" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            GNCPy
+              <img src="../../../../_static/logo.svg" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../../../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../../gncpy.html">gncpy</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.control.html">control</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../control/gncpy.control.ELQR.html">ELQR</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../control/gncpy.control.LQR.html">LQR</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.coordinate_transforms.html">coordinate_transforms</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../coordinate_transforms/gncpy.coordinate_transforms.ecef_to_LLA.html">gncpy.coordinate_transforms.ecef_to_LLA</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../coordinate_transforms/gncpy.coordinate_transforms.ecef_to_NED.html">gncpy.coordinate_transforms.ecef_to_NED</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../coordinate_transforms/gncpy.coordinate_transforms.lla_to_ECEF.html">gncpy.coordinate_transforms.lla_to_ECEF</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../coordinate_transforms/gncpy.coordinate_transforms.lla_to_NED.html">gncpy.coordinate_transforms.lla_to_NED</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../coordinate_transforms/gncpy.coordinate_transforms.ned_to_LLA.html">gncpy.coordinate_transforms.ned_to_LLA</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.data_fusion.html">data_fusion</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../data_fusion/gncpy.data_fusion.GeneralizedCovarianceIntersection.html">gncpy.data_fusion.GeneralizedCovarianceIntersection</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.distributions.html">distributions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../distributions/gncpy.distributions.Particle.html">Particle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../distributions/gncpy.distributions.ParticleDistribution.html">ParticleDistribution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../distributions/gncpy.distributions.QuadraturePoints.html">QuadraturePoints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../distributions/gncpy.distributions.SigmaPoints.html">SigmaPoints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../distributions/gncpy.distributions.SimpleParticleDistribution.html">SimpleParticleDistribution</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.dynamics.html">dynamics</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../dynamics/gncpy.dynamics.aircraft.html">aircraft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../dynamics/gncpy.dynamics.basic.html">basic</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.errors.html">errors</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../errors/gncpy.errors.ExtremeMeasurementNoiseError.html">gncpy.errors.ExtremeMeasurementNoiseError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../errors/gncpy.errors.ParticleDepletionError.html">gncpy.errors.ParticleDepletionError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../errors/gncpy.errors.ParticleEstimationDomainError.html">gncpy.errors.ParticleEstimationDomainError</a></li>
+</ul>
+</li>
+<li class="toctree-l3 current"><a class="reference internal" href="../../gncpy.filters.html">filters</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../gncpy.filters.bayes_filter.html">bayes_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gncpy.filters.bootstrap_filter.html">bootstrap_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gncpy.filters.ekf_gaussian_scale_mixture_filter.html">ekf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gncpy.filters.extended_kalman_filter.html">extended_kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gncpy.filters.gci_filter.html">gci_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gncpy.filters.gsm_filter_base.html">gsm_filter_base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gncpy.filters.imm_gci_filter.html">imm_gci_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gncpy.filters.interacting_multiple_model.html">interacting_multiple_model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gncpy.filters.kalman_filter.html">kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gncpy.filters.kf_gaussian_scale_mixture_filter.html">kf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gncpy.filters.max_corr_ent_ukf.html">max_corr_ent_ukf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gncpy.filters.max_corr_ent_upf.html">max_corr_ent_upf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gncpy.filters.mcmc_particle_filter_base.html">mcmc_particle_filter_base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gncpy.filters.particle_filter.html">particle_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gncpy.filters.qkf_gaussian_scale_mixture_filter.html">qkf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gncpy.filters.quadrature_kalman_filter.html">quadrature_kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gncpy.filters.sqkf_gaussian_scale_mixture_filter.html">sqkf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../gncpy.filters.square_root_qkf.html">square_root_qkf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gncpy.filters.students_t_filter.html">students_t_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gncpy.filters.ukf_gaussian_scale_mixture_filter.html">ukf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gncpy.filters.unscented_kalman_filter.html">unscented_kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gncpy.filters.unscented_particle_filter.html">unscented_particle_filter</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.game_engine.html">game_engine</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../game_engine/gncpy.game_engine.base_game.html">base_game</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../game_engine/gncpy.game_engine.components.html">components</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../game_engine/gncpy.game_engine.entities.html">entities</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../game_engine/gncpy.game_engine.physics2d.html">physics2d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../game_engine/gncpy.game_engine.rendering2d.html">rendering2d</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.games.html">games</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../games/gncpy.games.SimpleUAV2d.html">SimpleUAV2d</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.math.html">math</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.epanechnikov_kernel.html">gncpy.math.epanechnikov_kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.gamma_fnc.html">gncpy.math.gamma_fnc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.gaussian_kernel.html">gncpy.math.gaussian_kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.get_elem_sym_fnc.html">gncpy.math.get_elem_sym_fnc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.get_hessian.html">gncpy.math.get_hessian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.get_input_jacobian.html">gncpy.math.get_input_jacobian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.get_jacobian.html">gncpy.math.get_jacobian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.get_state_jacobian.html">gncpy.math.get_state_jacobian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.log_sum_exp.html">gncpy.math.log_sum_exp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.rk4.html">gncpy.math.rk4</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.rk4_backward.html">gncpy.math.rk4_backward</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.weighted_sum_mat.html">gncpy.math.weighted_sum_mat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.weighted_sum_vec.html">gncpy.math.weighted_sum_vec</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.measurements.html">measurements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.orbital_mechanics.html">orbital_mechanics</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../orbital_mechanics/gncpy.orbital_mechanics.correct_lon_ascend.html">gncpy.orbital_mechanics.correct_lon_ascend</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../orbital_mechanics/gncpy.orbital_mechanics.ecc_anom_from_mean.html">gncpy.orbital_mechanics.ecc_anom_from_mean</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../orbital_mechanics/gncpy.orbital_mechanics.ecef_from_orbit.html">gncpy.orbital_mechanics.ecef_from_orbit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../orbital_mechanics/gncpy.orbital_mechanics.true_anom_from_ecc.html">gncpy.orbital_mechanics.true_anom_from_ecc</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.planning.html">planning</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../planning/gncpy.planning.a_star.html">a_star</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../planning/gncpy.planning.reinforcement_learning.html">reinforcement_learning</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../planning/gncpy.planning.rrt_star.html">rrt_star</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.plotting.html">plotting</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../plotting/gncpy.plotting.calc_error_ellipse.html">gncpy.plotting.calc_error_ellipse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotting/gncpy.plotting.get_cmap.html">gncpy.plotting.get_cmap</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotting/gncpy.plotting.init_plotting_opts.html">gncpy.plotting.init_plotting_opts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotting/gncpy.plotting.set_title_label.html">gncpy.plotting.set_title_label</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.sampling.html">sampling</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../sampling/gncpy.sampling.MetropolisHastings.html">MetropolisHastings</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.utilities.html">utilities</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../utilities/gncpy.utilities.classproperty.html">gncpy.utilities.classproperty</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../utilities/gncpy.utilities.ClassPropertyDescriptor.html">ClassPropertyDescriptor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../utilities/gncpy.utilities.ClassPropertyMetaClass.html">ClassPropertyMetaClass</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.wgs84.html">wgs84</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../wgs84/gncpy.wgs84.calc_earth_rate.html">gncpy.wgs84.calc_earth_rate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../wgs84/gncpy.wgs84.calc_ew_rad.html">gncpy.wgs84.calc_ew_rad</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../wgs84/gncpy.wgs84.calc_gravity.html">gncpy.wgs84.calc_gravity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../wgs84/gncpy.wgs84.calc_ns_rad.html">gncpy.wgs84.calc_ns_rad</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../wgs84/gncpy.wgs84.calc_transport_rate.html">gncpy.wgs84.calc_transport_rate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../wgs84/gncpy.wgs84.convert_msl_to_wgs.html">gncpy.wgs84.convert_msl_to_wgs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../wgs84/gncpy.wgs84.convert_wgs_to_msl.html">gncpy.wgs84.convert_wgs_to_msl</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../wgs84/gncpy.wgs84.init_egm_lookup_table.html">gncpy.wgs84.init_egm_lookup_table</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../usage.html">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/control.html">Control Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/control.html#lqr-infinite-horizon-linear-dyanmics">LQR Infinite Horizon Linear Dyanmics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/control.html#lqr-finite-horzon-linear-dynamics">LQR Finite Horzon Linear Dynamics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/control.html#lqr-finite-horzon-non-linear-dynamics">LQR Finite Horzon Non-linear Dynamics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/control.html#elqr">ELQR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/control.html#elqr-modified-quadratization">ELQR Modified Quadratization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/control.html#elqr-linear-dynamics">ELQR Linear Dynamics</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/filters.html">Filter Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/filters.html#kalman-filter">Kalman Filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/filters.html#extended-kalman-filter">Extended Kalman Filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/filters.html#interacting-multiple-model-filter">Interacting Multiple Model Filter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/planning.html">Planning Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/a_star.html">A* Examples</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../usage/a_star.html#normal-a">Normal A*</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../usage/a_star.html#beam-search">Beam Search</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../usage/a_star.html#weighted-a">Weighted A*</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/rrtstar.html">RRT* Examples</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../usage/rrtstar.html#lqr-rrt-with-linear-dynamics">LQR-RRT* with Linear Dynamics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../usage/rrtstar.html#lqr-rrt-with-non-linear-dynamics">LQR-RRT* with Non-Linear Dynamics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../usage/rrtstar.html#elqr-rrt-with-non-linear-dynamics">ELQR-RRT* with Non-Linear Dynamics</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../toolchain.html">Toolchain</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../toolchain.html#development-environment-setup">Development Environment Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../toolchain.html#example-workflow">Example Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../toolchain.html#notes-on-tox">Notes on tox</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../cicd.html">CI/CD Pipeline</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../cicd.html#github-actions-quick-guide">Github Actions Quick Guide</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="./reports/coverage/index.html#http://">Test Coverage Report</a></li>
+<li class="toctree-l1"><a class="reference external" href="./reports/junit/junit.html#http://">Test Results Report</a></li>
+<li class="toctree-l1"><a class="reference external" href="http://lager.ua.edu/">LAGER Homepage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../References.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #9E1B32" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">GNCPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../api.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="../../../gncpy.html">gncpy</a></li>
+          <li class="breadcrumb-item"><a href="../../gncpy.filters.html">filters</a></li>
+          <li class="breadcrumb-item"><a href="../gncpy.filters.square_root_qkf.html">square_root_qkf</a></li>
+      <li class="breadcrumb-item active">SquareRootQKF</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="squarerootqkf">
+<h1>SquareRootQKF<a class="headerlink" href="#squarerootqkf" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="gncpy.filters.square_root_qkf.SquareRootQKF">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SquareRootQKF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/square_root_qkf.html#SquareRootQKF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.square_root_qkf.SquareRootQKF" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="../quadrature_kalman_filter/gncpy.filters.quadrature_kalman_filter.QuadratureKalmanFilter.html#gncpy.filters.quadrature_kalman_filter.QuadratureKalmanFilter" title="gncpy.filters.quadrature_kalman_filter.QuadratureKalmanFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuadratureKalmanFilter</span></code></a></p>
+<p>Implementation of a Square root Quadrature Kalman Filter (SQKF).</p>
+<p class="rubric">Notes</p>
+<p>This is based on <span id="id1">[<a class="reference internal" href="../../../../References.html#id26" title="Ienkaran Arasaratnam and Simon Haykin. Square-root quadrature kalman filtering. IEEE Transactions on Signal Processing, 56(6):2589–2593, jun 2008. doi:10.1109/tsp.2007.914964.">1</a>]</span>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.filters.square_root_qkf.SquareRootQKF.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/square_root_qkf.html#SquareRootQKF.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.square_root_qkf.SquareRootQKF.__init__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.filters.square_root_qkf.SquareRootQKF.__init__" title="gncpy.filters.square_root_qkf.SquareRootQKF.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.filters.square_root_qkf.SquareRootQKF.correct" title="gncpy.filters.square_root_qkf.SquareRootQKF.correct"><code class="xref py py-obj docutils literal notranslate"><span class="pre">correct</span></code></a></p></td>
+<td><p>Implements the correction step of the filter.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.filters.square_root_qkf.SquareRootQKF.load_filter_state" title="gncpy.filters.square_root_qkf.SquareRootQKF.load_filter_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_filter_state</span></code></a></p></td>
+<td><p>Initializes filter using saved filter state.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.filters.square_root_qkf.SquareRootQKF.plot_quadrature" title="gncpy.filters.square_root_qkf.SquareRootQKF.plot_quadrature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_quadrature</span></code></a></p></td>
+<td><p>Wrapper function for <a class="reference internal" href="../../distributions/gncpy.distributions.QuadraturePoints.html#gncpy.distributions.QuadraturePoints.plot_points" title="gncpy.distributions.QuadraturePoints.plot_points"><code class="xref py py-meth docutils literal notranslate"><span class="pre">gncpy.distributions.QuadraturePoints.plot_points()</span></code></a>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.filters.square_root_qkf.SquareRootQKF.predict" title="gncpy.filters.square_root_qkf.SquareRootQKF.predict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">predict</span></code></a></p></td>
+<td><p>Prediction step of the filter.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.filters.square_root_qkf.SquareRootQKF.save_filter_state" title="gncpy.filters.square_root_qkf.SquareRootQKF.save_filter_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_filter_state</span></code></a></p></td>
+<td><p>Saves filter variables so they can be restored later.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.filters.square_root_qkf.SquareRootQKF.set_measurement_model" title="gncpy.filters.square_root_qkf.SquareRootQKF.set_measurement_model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_measurement_model</span></code></a></p></td>
+<td><p>Sets the measurement model for the filter.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.filters.square_root_qkf.SquareRootQKF.set_measurement_noise_estimator" title="gncpy.filters.square_root_qkf.SquareRootQKF.set_measurement_noise_estimator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_measurement_noise_estimator</span></code></a></p></td>
+<td><p>Sets the model used for estimating the measurement noise parameters.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.filters.square_root_qkf.SquareRootQKF.set_state_model" title="gncpy.filters.square_root_qkf.SquareRootQKF.set_state_model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_state_model</span></code></a></p></td>
+<td><p>Sets the state model for the filter.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.filters.square_root_qkf.SquareRootQKF.cov" title="gncpy.filters.square_root_qkf.SquareRootQKF.cov"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cov</span></code></a></p></td>
+<td><p>Covariance of the filter.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.filters.square_root_qkf.SquareRootQKF.meas_noise" title="gncpy.filters.square_root_qkf.SquareRootQKF.meas_noise"><code class="xref py py-obj docutils literal notranslate"><span class="pre">meas_noise</span></code></a></p></td>
+<td><p>Measurement noise of the filter.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.filters.square_root_qkf.SquareRootQKF.points_per_axis" title="gncpy.filters.square_root_qkf.SquareRootQKF.points_per_axis"><code class="xref py py-obj docutils literal notranslate"><span class="pre">points_per_axis</span></code></a></p></td>
+<td><p>Wrapper for the  number of quadrature points per axis.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.filters.square_root_qkf.SquareRootQKF.proc_noise" title="gncpy.filters.square_root_qkf.SquareRootQKF.proc_noise"><code class="xref py py-obj docutils literal notranslate"><span class="pre">proc_noise</span></code></a></p></td>
+<td><p>Process noise of the filter.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.filters.square_root_qkf.SquareRootQKF.correct">
+<span class="sig-name descname"><span class="pre">correct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cur_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas_fun_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/square_root_qkf.html#SquareRootQKF.correct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.square_root_qkf.SquareRootQKF.correct" title="Permalink to this definition"></a></dt>
+<dd><p>Implements the correction step of the filter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timestep</strong> (<em>float</em>) – Current timestep.</p></li>
+<li><p><strong>meas</strong> (<em>Nm x 1 numpy array</em>) – Current measurement.</p></li>
+<li><p><strong>cur_state</strong> (<em>N x 1 numpy array</em>) – Current state.</p></li>
+<li><p><strong>meas_fun_args</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Arguments for the measurement matrix function if one has
+been specified. The default is ().</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>.errors.ExtremeMeasurementNoiseError</strong> – If estimating the measurement noise and the measurement fit calculation fails.</p></li>
+<li><p><strong>LinAlgError</strong> – Numpy exception raised if not estimating noise and measurement fit fails.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>next_state</strong> (<em>N x 1 numpy array</em>) – The corrected state.</p></li>
+<li><p><strong>meas_fit_prob</strong> (<em>float</em>) – Goodness of fit of the measurement based on the state and
+covariance assuming Gaussian noise.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.filters.square_root_qkf.SquareRootQKF.load_filter_state">
+<span class="sig-name descname"><span class="pre">load_filter_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filt_state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/square_root_qkf.html#SquareRootQKF.load_filter_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.square_root_qkf.SquareRootQKF.load_filter_state" title="Permalink to this definition"></a></dt>
+<dd><p>Initializes filter using saved filter state.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gncpy.filters.square_root_qkf.SquareRootQKF.filt_state">
+<span class="sig-name descname"><span class="pre">filt_state</span></span><a class="headerlink" href="#gncpy.filters.square_root_qkf.SquareRootQKF.filt_state" title="Permalink to this definition"></a></dt>
+<dd><p>Dictionary generated by <a class="reference internal" href="#gncpy.filters.square_root_qkf.SquareRootQKF.save_filter_state" title="gncpy.filters.square_root_qkf.SquareRootQKF.save_filter_state"><code class="xref py py-meth docutils literal notranslate"><span class="pre">save_filter_state()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.filters.square_root_qkf.SquareRootQKF.plot_quadrature">
+<span class="sig-name descname"><span class="pre">plot_quadrature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inds</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.filters.square_root_qkf.SquareRootQKF.plot_quadrature" title="Permalink to this definition"></a></dt>
+<dd><p>Wrapper function for <a class="reference internal" href="../../distributions/gncpy.distributions.QuadraturePoints.html#gncpy.distributions.QuadraturePoints.plot_points" title="gncpy.distributions.QuadraturePoints.plot_points"><code class="xref py py-meth docutils literal notranslate"><span class="pre">gncpy.distributions.QuadraturePoints.plot_points()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.filters.square_root_qkf.SquareRootQKF.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cur_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cur_input</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_mat_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_mat_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dyn_fun_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.filters.square_root_qkf.SquareRootQKF.predict" title="Permalink to this definition"></a></dt>
+<dd><p>Prediction step of the filter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timestep</strong> (<em>float</em>) – Current timestep.</p></li>
+<li><p><strong>cur_state</strong> (<em>N x 1 numpy array</em>) – Current state.</p></li>
+<li><p><strong>cur_input</strong> (<em>N x Nu numpy array</em><em>, </em><em>optional</em>) – Current input. The default is None.</p></li>
+<li><p><strong>state_mat_args</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Additional arguments for the get state matrix function if one has
+been specified, the propagate state function if using a dynamic
+object, or the dynamic function is a non-linear model is used.
+The default is ().</p></li>
+<li><p><strong>input_mat_args</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Additional arguments for the get input matrix function if one has
+been specified or the propagate state function if using a dynamic
+object. The default is ().</p></li>
+<li><p><strong>dyn_fun_params</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Additional arguments to pass to the dynamics function if using non-linear
+dynamics.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>RuntimeError</strong> – If the state model has not been set</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The predicted state.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>N x 1 numpy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.filters.square_root_qkf.SquareRootQKF.save_filter_state">
+<span class="sig-name descname"><span class="pre">save_filter_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/square_root_qkf.html#SquareRootQKF.save_filter_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.square_root_qkf.SquareRootQKF.save_filter_state" title="Permalink to this definition"></a></dt>
+<dd><p>Saves filter variables so they can be restored later.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.filters.square_root_qkf.SquareRootQKF.set_measurement_model">
+<span class="sig-name descname"><span class="pre">set_measurement_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meas_mat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas_fun</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.filters.square_root_qkf.SquareRootQKF.set_measurement_model" title="Permalink to this definition"></a></dt>
+<dd><p>Sets the measurement model for the filter.</p>
+<p>This can either set the constant measurement matrix, or a potentially
+non-linear function.</p>
+<p class="rubric">Notes</p>
+<p>This assumes a measurement model of the form</p>
+<div class="math notranslate nohighlight">
+\[\tilde{y}_{k+1} = H x_{k+1}^-\]</div>
+<p>for the measurement matrix case. Or of the form</p>
+<div class="math notranslate nohighlight">
+\[\tilde{y}_{k+1} = h(t, x_{k+1}^-)\]</div>
+<p>for the potentially non-linear case.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>meas_mat</strong> (<em>Nm x N numpy array</em><em>, </em><em>optional</em>) – Measurement matrix that transforms the state to estimated
+measurements. The default is None.</p></li>
+<li><p><strong>meas_fun</strong> (<em>callable</em><em>, </em><em>optional</em>) – Function that transforms the state to estimated measurements. Must
+have the signature <code class="code docutils literal notranslate"><span class="pre">h(t,</span> <span class="pre">x,</span> <span class="pre">*args)</span></code> where <cite>t</cite> is the timestep,
+<cite>x</cite> is an N x 1 numpy array of the current state, and return an
+Nm x 1 numpy array of the estimated measurement. The default is None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>RuntimeError</strong> – Rasied if no arguments are specified.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.filters.square_root_qkf.SquareRootQKF.set_measurement_noise_estimator">
+<span class="sig-name descname"><span class="pre">set_measurement_noise_estimator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/square_root_qkf.html#SquareRootQKF.set_measurement_noise_estimator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.square_root_qkf.SquareRootQKF.set_measurement_noise_estimator" title="Permalink to this definition"></a></dt>
+<dd><p>Sets the model used for estimating the measurement noise parameters.</p>
+<p>This is an optional step and the filter will work properly if this is
+not called. If it is called, the measurement noise will be estimated
+during the filter’s correction step and the measurement noise attribute
+will not be used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>function</strong> (<em>callable</em>) – A function that implements the prediction and correction steps for
+an appropriate filter to estimate the measurement noise covariance
+matrix. It must have the signature <cite>f(est_meas)</cite> where <cite>est_meas</cite>
+is an Nm x 1 numpy array and it must return an Nm x Nm numpy array
+representing the measurement noise covariance matrix.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.filters.square_root_qkf.SquareRootQKF.set_state_model">
+<span class="sig-name descname"><span class="pre">set_state_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state_mat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_mat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cont_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_mat_fun</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_mat_fun</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dyn_obj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ode_lst</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.filters.square_root_qkf.SquareRootQKF.set_state_model" title="Permalink to this definition"></a></dt>
+<dd><p>Sets the state model for the filter.</p>
+<p>This can use either linear dynamics (by calling the kalman filters
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">gncpy.filters.KalmanFilter.set_state_model()</span></code>) or non-linear dynamics
+(by calling <code class="xref py py-meth docutils literal notranslate"><span class="pre">gncpy.filters.ExtendedKalmanFilter.set_state_model()</span></code>).
+The linearness is automatically determined by the input arguments specified.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>state_mat</strong> (<em>N x N numpy array</em><em>, </em><em>optional</em>) – State matrix, continuous or discrete case. The default is None.</p></li>
+<li><p><strong>input_mat</strong> (<em>N x Nu numpy array</em><em>, </em><em>optional</em>) – Input matrixx, continuous or discrete case. The default is None.</p></li>
+<li><p><strong>cont_time</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag inidicating if the continuous model is provided. The default
+is False.</p></li>
+<li><p><strong>state_mat_fun</strong> (<em>callable</em><em>, </em><em>optional</em>) – Function that returns the <cite>state_mat</cite>, must take timestep and
+<cite>*args</cite>. The default is None.</p></li>
+<li><p><strong>input_mat_fun</strong> (<em>callable</em><em>, </em><em>optional</em>) – Function that returns the <cite>input_mat</cite>, must take timestep, and
+<cite>*args</cite>. The default is None.</p></li>
+<li><p><strong>dyn_obj</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">gncpy.dynamics.LinearDynamicsBase</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">gncpy.dynamics.NonlinearDynamicsBase</span></code>, optional) – Sets the dynamics according to the class. The default is None.</p></li>
+<li><p><strong>ode_lst</strong> (<em>list</em><em>, </em><em>optional</em>) – callable functions, 1 per ode/state. The callabale must have the
+signature <cite>f(t, x, *f_args)</cite> just like scipy.integrate’s ode
+function. The default is None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>RuntimeError</strong> – If an invalid state model or combination of inputs is specified.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gncpy.filters.square_root_qkf.SquareRootQKF.cov">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cov</span></span><a class="headerlink" href="#gncpy.filters.square_root_qkf.SquareRootQKF.cov" title="Permalink to this definition"></a></dt>
+<dd><p>Covariance of the filter.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gncpy.filters.square_root_qkf.SquareRootQKF.meas_noise">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">meas_noise</span></span><a class="headerlink" href="#gncpy.filters.square_root_qkf.SquareRootQKF.meas_noise" title="Permalink to this definition"></a></dt>
+<dd><p>Measurement noise of the filter.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gncpy.filters.square_root_qkf.SquareRootQKF.points_per_axis">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">points_per_axis</span></span><a class="headerlink" href="#gncpy.filters.square_root_qkf.SquareRootQKF.points_per_axis" title="Permalink to this definition"></a></dt>
+<dd><p>Wrapper for the  number of quadrature points per axis.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gncpy.filters.square_root_qkf.SquareRootQKF.proc_noise">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">proc_noise</span></span><a class="headerlink" href="#gncpy.filters.square_root_qkf.SquareRootQKF.proc_noise" title="Permalink to this definition"></a></dt>
+<dd><p>Process noise of the filter.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../gncpy.filters.square_root_qkf.html" class="btn btn-neutral float-left" title="square_root_qkf" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../gncpy.filters.students_t_filter.html" class="btn btn-neutral float-right" title="students_t_filter" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Laboratory for Autonomy, GNC, and Estimation Research (LAGER).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

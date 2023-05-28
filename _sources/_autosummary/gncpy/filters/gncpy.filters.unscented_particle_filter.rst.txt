@@ -1,0 +1,32 @@
+unscented\_particle\_filter
+===========================
+
+.. automodule:: gncpy.filters.unscented_particle_filter
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: unscented_particle_filter
+      :nosignatures:
+      :template: class.rst_t
+   
+      UnscentedParticleFilter
+   
+   
+
+   
+   
+   
+
+
+

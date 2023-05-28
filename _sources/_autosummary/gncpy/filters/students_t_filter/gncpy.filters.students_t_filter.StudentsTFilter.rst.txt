@@ -1,0 +1,39 @@
+StudentsTFilter
+===============
+
+.. currentmodule:: gncpy.filters.students_t_filter
+
+.. autoclass:: StudentsTFilter
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~StudentsTFilter.__init__
+      ~StudentsTFilter.correct
+      ~StudentsTFilter.load_filter_state
+      ~StudentsTFilter.predict
+      ~StudentsTFilter.save_filter_state
+      ~StudentsTFilter.set_measurement_model
+      ~StudentsTFilter.set_measurement_noise_estimator
+      ~StudentsTFilter.set_state_model
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~StudentsTFilter.cov
+   
+   

@@ -1,0 +1,51 @@
+MCMCParticleFilterBase
+======================
+
+.. currentmodule:: gncpy.filters.mcmc_particle_filter_base
+
+.. autoclass:: MCMCParticleFilterBase
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~MCMCParticleFilterBase.__init__
+      ~MCMCParticleFilterBase.correct
+      ~MCMCParticleFilterBase.extract_dist
+      ~MCMCParticleFilterBase.init_from_dist
+      ~MCMCParticleFilterBase.init_particles
+      ~MCMCParticleFilterBase.load_filter_state
+      ~MCMCParticleFilterBase.move_particles
+      ~MCMCParticleFilterBase.plot_particles
+      ~MCMCParticleFilterBase.plot_weighted_particles
+      ~MCMCParticleFilterBase.predict
+      ~MCMCParticleFilterBase.save_filter_state
+      ~MCMCParticleFilterBase.set_measurement_model
+      ~MCMCParticleFilterBase.set_state_model
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MCMCParticleFilterBase.cov
+      ~MCMCParticleFilterBase.meas_likelihood_fnc
+      ~MCMCParticleFilterBase.num_particles
+      ~MCMCParticleFilterBase.proposal_fnc
+      ~MCMCParticleFilterBase.proposal_sampling_fnc
+      ~MCMCParticleFilterBase.require_copy_can_dist
+      ~MCMCParticleFilterBase.require_copy_prop_parts
+      ~MCMCParticleFilterBase.transition_prob_fnc
+   
+   

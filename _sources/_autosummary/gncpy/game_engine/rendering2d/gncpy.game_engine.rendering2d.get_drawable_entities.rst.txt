@@ -1,0 +1,6 @@
+gncpy.game\_engine.rendering2d.get\_drawable\_entities
+======================================================
+
+.. currentmodule:: gncpy.game_engine.rendering2d
+
+.. autofunction:: get_drawable_entities

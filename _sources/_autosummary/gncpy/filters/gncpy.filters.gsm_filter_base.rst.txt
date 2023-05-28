@@ -1,0 +1,32 @@
+gsm\_filter\_base
+=================
+
+.. automodule:: gncpy.filters.gsm_filter_base
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: gsm_filter_base
+      :nosignatures:
+      :template: class.rst_t
+   
+      GSMFilterBase
+   
+   
+
+   
+   
+   
+
+
+

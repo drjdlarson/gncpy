@@ -1,0 +1,6 @@
+gncpy.data\_fusion.GeneralizedCovarianceIntersection
+====================================================
+
+.. currentmodule:: gncpy.data_fusion
+
+.. autofunction:: GeneralizedCovarianceIntersection

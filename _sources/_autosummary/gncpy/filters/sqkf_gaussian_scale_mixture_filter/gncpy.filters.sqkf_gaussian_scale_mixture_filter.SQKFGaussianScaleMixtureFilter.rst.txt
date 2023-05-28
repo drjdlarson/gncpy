@@ -1,0 +1,44 @@
+SQKFGaussianScaleMixtureFilter
+==============================
+
+.. currentmodule:: gncpy.filters.sqkf_gaussian_scale_mixture_filter
+
+.. autoclass:: SQKFGaussianScaleMixtureFilter
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~SQKFGaussianScaleMixtureFilter.__init__
+      ~SQKFGaussianScaleMixtureFilter.correct
+      ~SQKFGaussianScaleMixtureFilter.load_filter_state
+      ~SQKFGaussianScaleMixtureFilter.plot_particles
+      ~SQKFGaussianScaleMixtureFilter.predict
+      ~SQKFGaussianScaleMixtureFilter.save_filter_state
+      ~SQKFGaussianScaleMixtureFilter.set_meas_noise_model
+      ~SQKFGaussianScaleMixtureFilter.set_measurement_model
+      ~SQKFGaussianScaleMixtureFilter.set_process_noise_model
+      ~SQKFGaussianScaleMixtureFilter.set_state_model
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~SQKFGaussianScaleMixtureFilter.cov
+      ~SQKFGaussianScaleMixtureFilter.meas_noise
+      ~SQKFGaussianScaleMixtureFilter.points_per_axis
+      ~SQKFGaussianScaleMixtureFilter.proc_noise
+   
+   

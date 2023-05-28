@@ -1,0 +1,32 @@
+games
+=====
+
+.. automodule:: gncpy.games
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree: games
+   :template: module.rst_t
+   :recursive:
+
+   ~gncpy.games.SimpleUAV2d
+

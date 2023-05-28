@@ -1,0 +1,6 @@
+gncpy.wgs84.calc\_ew\_rad
+=========================
+
+.. currentmodule:: gncpy.wgs84
+
+.. autofunction:: calc_ew_rad

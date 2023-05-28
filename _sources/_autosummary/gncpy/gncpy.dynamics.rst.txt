@@ -1,0 +1,33 @@
+dynamics
+========
+
+.. automodule:: gncpy.dynamics
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree: dynamics
+   :template: module.rst_t
+   :recursive:
+
+   ~gncpy.dynamics.aircraft
+   ~gncpy.dynamics.basic
+

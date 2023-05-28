@@ -1,0 +1,39 @@
+KalmanFilter
+============
+
+.. currentmodule:: gncpy.filters.kalman_filter
+
+.. autoclass:: KalmanFilter
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~KalmanFilter.__init__
+      ~KalmanFilter.correct
+      ~KalmanFilter.load_filter_state
+      ~KalmanFilter.predict
+      ~KalmanFilter.save_filter_state
+      ~KalmanFilter.set_measurement_model
+      ~KalmanFilter.set_measurement_noise_estimator
+      ~KalmanFilter.set_state_model
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~KalmanFilter.cov
+   
+   

@@ -1,0 +1,6 @@
+gncpy.math.get\_state\_jacobian
+===============================
+
+.. currentmodule:: gncpy.math
+
+.. autofunction:: get_state_jacobian

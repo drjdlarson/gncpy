@@ -1,0 +1,6 @@
+gncpy.math.rk4\_backward
+========================
+
+.. currentmodule:: gncpy.math
+
+.. autofunction:: rk4_backward

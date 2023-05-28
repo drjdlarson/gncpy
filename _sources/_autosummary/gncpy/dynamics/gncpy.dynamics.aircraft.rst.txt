@@ -1,0 +1,32 @@
+aircraft
+========
+
+.. automodule:: gncpy.dynamics.aircraft
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree: aircraft
+   :template: module.rst_t
+   :recursive:
+
+   ~gncpy.dynamics.aircraft.simple_multirotor
+

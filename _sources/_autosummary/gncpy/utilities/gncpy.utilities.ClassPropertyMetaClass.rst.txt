@@ -1,0 +1,27 @@
+ClassPropertyMetaClass
+======================
+
+.. currentmodule:: gncpy.utilities
+
+.. autoclass:: ClassPropertyMetaClass
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~ClassPropertyMetaClass.__init__
+      ~ClassPropertyMetaClass.mro
+   
+   
+
+   
+   
+   

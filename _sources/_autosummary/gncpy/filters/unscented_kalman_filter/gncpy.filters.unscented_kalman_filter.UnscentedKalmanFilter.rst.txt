@@ -1,0 +1,40 @@
+UnscentedKalmanFilter
+=====================
+
+.. currentmodule:: gncpy.filters.unscented_kalman_filter
+
+.. autoclass:: UnscentedKalmanFilter
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~UnscentedKalmanFilter.__init__
+      ~UnscentedKalmanFilter.correct
+      ~UnscentedKalmanFilter.init_sigma_points
+      ~UnscentedKalmanFilter.load_filter_state
+      ~UnscentedKalmanFilter.predict
+      ~UnscentedKalmanFilter.save_filter_state
+      ~UnscentedKalmanFilter.set_measurement_model
+      ~UnscentedKalmanFilter.set_measurement_noise_estimator
+      ~UnscentedKalmanFilter.set_state_model
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~UnscentedKalmanFilter.cov
+   
+   

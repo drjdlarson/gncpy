@@ -1,0 +1,35 @@
+CShape
+======
+
+.. currentmodule:: gncpy.game_engine.components
+
+.. autoclass:: CShape
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~CShape.__init__
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CShape.type
+      ~CShape.shape
+      ~CShape.color
+      ~CShape.zorder
+   
+   

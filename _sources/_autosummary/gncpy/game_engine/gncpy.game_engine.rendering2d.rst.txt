@@ -1,0 +1,44 @@
+rendering2d
+===========
+
+.. automodule:: gncpy.game_engine.rendering2d
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree: rendering2d
+      :nosignatures:
+   
+      get_drawable_entities
+      init_rendering_system
+      init_window
+      render
+      shutdown
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: rendering2d
+      :nosignatures:
+      :template: class.rst_t
+   
+      Shape2dParams
+   
+   
+
+   
+   
+   
+
+
+

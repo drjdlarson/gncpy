@@ -1,0 +1,37 @@
+KarlgaardOrbit
+==============
+
+.. currentmodule:: gncpy.dynamics.basic
+
+.. autoclass:: KarlgaardOrbit
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~KarlgaardOrbit.__init__
+      ~KarlgaardOrbit.get_input_mat
+      ~KarlgaardOrbit.get_state_mat
+      ~KarlgaardOrbit.propagate_state
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~KarlgaardOrbit.allow_cpp
+      ~KarlgaardOrbit.cont_fnc_lst
+      ~KarlgaardOrbit.state_names
+   
+   

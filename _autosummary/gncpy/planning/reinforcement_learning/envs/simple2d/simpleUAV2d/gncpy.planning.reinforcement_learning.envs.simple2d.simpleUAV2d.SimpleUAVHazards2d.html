@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SimpleUAVHazards2d &mdash; GNCPy 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../../../../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../../../../_static/copybutton.css" type="text/css" />
+    <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_autosummary/gncpy/planning/reinforcement_learning/envs/simple2d/simpleUAV2d/gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.html" />
+  <!--[if lt IE 9]>
+    <script src="../../../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../../../../_static/jquery.js"></script>
+        <script src="../../../../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../../../../../../" id="documentation_options" src="../../../../../../../_static/documentation_options.js"></script>
+        <script src="../../../../../../../_static/doctools.js"></script>
+        <script src="../../../../../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../../../../../_static/clipboard.min.js"></script>
+        <script src="../../../../../../../_static/copybutton.js"></script>
+    <script src="../../../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../../../search.html" />
+    <link rel="next" title="wrappers" href="../../../gncpy.planning.reinforcement_learning.wrappers.html" />
+    <link rel="prev" title="SimpleUAV2d" href="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAV2d.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #9E1B32" >
+
+          
+          
+          <a href="../../../../../../../index.html" class="icon icon-home">
+            GNCPy
+              <img src="../../../../../../../_static/logo.svg" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../../../../../../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../../../../../gncpy.html">gncpy</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../../../../../gncpy.control.html">control</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../control/gncpy.control.ELQR.html">ELQR</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../control/gncpy.control.LQR.html">LQR</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../gncpy.coordinate_transforms.html">coordinate_transforms</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../coordinate_transforms/gncpy.coordinate_transforms.ecef_to_LLA.html">gncpy.coordinate_transforms.ecef_to_LLA</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../coordinate_transforms/gncpy.coordinate_transforms.ecef_to_NED.html">gncpy.coordinate_transforms.ecef_to_NED</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../coordinate_transforms/gncpy.coordinate_transforms.lla_to_ECEF.html">gncpy.coordinate_transforms.lla_to_ECEF</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../coordinate_transforms/gncpy.coordinate_transforms.lla_to_NED.html">gncpy.coordinate_transforms.lla_to_NED</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../coordinate_transforms/gncpy.coordinate_transforms.ned_to_LLA.html">gncpy.coordinate_transforms.ned_to_LLA</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../gncpy.data_fusion.html">data_fusion</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../data_fusion/gncpy.data_fusion.GeneralizedCovarianceIntersection.html">gncpy.data_fusion.GeneralizedCovarianceIntersection</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../gncpy.distributions.html">distributions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../distributions/gncpy.distributions.Particle.html">Particle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../distributions/gncpy.distributions.ParticleDistribution.html">ParticleDistribution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../distributions/gncpy.distributions.QuadraturePoints.html">QuadraturePoints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../distributions/gncpy.distributions.SigmaPoints.html">SigmaPoints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../distributions/gncpy.distributions.SimpleParticleDistribution.html">SimpleParticleDistribution</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../gncpy.dynamics.html">dynamics</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dynamics/gncpy.dynamics.aircraft.html">aircraft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../dynamics/gncpy.dynamics.basic.html">basic</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../gncpy.errors.html">errors</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../errors/gncpy.errors.ExtremeMeasurementNoiseError.html">gncpy.errors.ExtremeMeasurementNoiseError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../errors/gncpy.errors.ParticleDepletionError.html">gncpy.errors.ParticleDepletionError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../errors/gncpy.errors.ParticleEstimationDomainError.html">gncpy.errors.ParticleEstimationDomainError</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../gncpy.filters.html">filters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../filters/gncpy.filters.bayes_filter.html">bayes_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../filters/gncpy.filters.bootstrap_filter.html">bootstrap_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../filters/gncpy.filters.ekf_gaussian_scale_mixture_filter.html">ekf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../filters/gncpy.filters.extended_kalman_filter.html">extended_kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../filters/gncpy.filters.gci_filter.html">gci_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../filters/gncpy.filters.gsm_filter_base.html">gsm_filter_base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../filters/gncpy.filters.imm_gci_filter.html">imm_gci_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../filters/gncpy.filters.interacting_multiple_model.html">interacting_multiple_model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../filters/gncpy.filters.kalman_filter.html">kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../filters/gncpy.filters.kf_gaussian_scale_mixture_filter.html">kf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../filters/gncpy.filters.max_corr_ent_ukf.html">max_corr_ent_ukf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../filters/gncpy.filters.max_corr_ent_upf.html">max_corr_ent_upf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../filters/gncpy.filters.mcmc_particle_filter_base.html">mcmc_particle_filter_base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../filters/gncpy.filters.particle_filter.html">particle_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../filters/gncpy.filters.qkf_gaussian_scale_mixture_filter.html">qkf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../filters/gncpy.filters.quadrature_kalman_filter.html">quadrature_kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../filters/gncpy.filters.sqkf_gaussian_scale_mixture_filter.html">sqkf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../filters/gncpy.filters.square_root_qkf.html">square_root_qkf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../filters/gncpy.filters.students_t_filter.html">students_t_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../filters/gncpy.filters.ukf_gaussian_scale_mixture_filter.html">ukf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../filters/gncpy.filters.unscented_kalman_filter.html">unscented_kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../filters/gncpy.filters.unscented_particle_filter.html">unscented_particle_filter</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../gncpy.game_engine.html">game_engine</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../game_engine/gncpy.game_engine.base_game.html">base_game</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../game_engine/gncpy.game_engine.components.html">components</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../game_engine/gncpy.game_engine.entities.html">entities</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../game_engine/gncpy.game_engine.physics2d.html">physics2d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../game_engine/gncpy.game_engine.rendering2d.html">rendering2d</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../gncpy.games.html">games</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../games/gncpy.games.SimpleUAV2d.html">SimpleUAV2d</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../gncpy.math.html">math</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../math/gncpy.math.epanechnikov_kernel.html">gncpy.math.epanechnikov_kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../math/gncpy.math.gamma_fnc.html">gncpy.math.gamma_fnc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../math/gncpy.math.gaussian_kernel.html">gncpy.math.gaussian_kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../math/gncpy.math.get_elem_sym_fnc.html">gncpy.math.get_elem_sym_fnc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../math/gncpy.math.get_hessian.html">gncpy.math.get_hessian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../math/gncpy.math.get_input_jacobian.html">gncpy.math.get_input_jacobian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../math/gncpy.math.get_jacobian.html">gncpy.math.get_jacobian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../math/gncpy.math.get_state_jacobian.html">gncpy.math.get_state_jacobian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../math/gncpy.math.log_sum_exp.html">gncpy.math.log_sum_exp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../math/gncpy.math.rk4.html">gncpy.math.rk4</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../math/gncpy.math.rk4_backward.html">gncpy.math.rk4_backward</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../math/gncpy.math.weighted_sum_mat.html">gncpy.math.weighted_sum_mat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../math/gncpy.math.weighted_sum_vec.html">gncpy.math.weighted_sum_vec</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../gncpy.measurements.html">measurements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../gncpy.orbital_mechanics.html">orbital_mechanics</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../orbital_mechanics/gncpy.orbital_mechanics.correct_lon_ascend.html">gncpy.orbital_mechanics.correct_lon_ascend</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../orbital_mechanics/gncpy.orbital_mechanics.ecc_anom_from_mean.html">gncpy.orbital_mechanics.ecc_anom_from_mean</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../orbital_mechanics/gncpy.orbital_mechanics.ecef_from_orbit.html">gncpy.orbital_mechanics.ecef_from_orbit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../orbital_mechanics/gncpy.orbital_mechanics.true_anom_from_ecc.html">gncpy.orbital_mechanics.true_anom_from_ecc</a></li>
+</ul>
+</li>
+<li class="toctree-l3 current"><a class="reference internal" href="../../../../../gncpy.planning.html">planning</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../../../../gncpy.planning.a_star.html">a_star</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../../../../gncpy.planning.reinforcement_learning.html">reinforcement_learning</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../gncpy.planning.rrt_star.html">rrt_star</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../gncpy.plotting.html">plotting</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../plotting/gncpy.plotting.calc_error_ellipse.html">gncpy.plotting.calc_error_ellipse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../plotting/gncpy.plotting.get_cmap.html">gncpy.plotting.get_cmap</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../plotting/gncpy.plotting.init_plotting_opts.html">gncpy.plotting.init_plotting_opts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../plotting/gncpy.plotting.set_title_label.html">gncpy.plotting.set_title_label</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../gncpy.sampling.html">sampling</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sampling/gncpy.sampling.MetropolisHastings.html">MetropolisHastings</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../gncpy.utilities.html">utilities</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../utilities/gncpy.utilities.classproperty.html">gncpy.utilities.classproperty</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../utilities/gncpy.utilities.ClassPropertyDescriptor.html">ClassPropertyDescriptor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../utilities/gncpy.utilities.ClassPropertyMetaClass.html">ClassPropertyMetaClass</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../gncpy.wgs84.html">wgs84</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../wgs84/gncpy.wgs84.calc_earth_rate.html">gncpy.wgs84.calc_earth_rate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../wgs84/gncpy.wgs84.calc_ew_rad.html">gncpy.wgs84.calc_ew_rad</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../wgs84/gncpy.wgs84.calc_gravity.html">gncpy.wgs84.calc_gravity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../wgs84/gncpy.wgs84.calc_ns_rad.html">gncpy.wgs84.calc_ns_rad</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../wgs84/gncpy.wgs84.calc_transport_rate.html">gncpy.wgs84.calc_transport_rate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../wgs84/gncpy.wgs84.convert_msl_to_wgs.html">gncpy.wgs84.convert_msl_to_wgs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../wgs84/gncpy.wgs84.convert_wgs_to_msl.html">gncpy.wgs84.convert_wgs_to_msl</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../wgs84/gncpy.wgs84.init_egm_lookup_table.html">gncpy.wgs84.init_egm_lookup_table</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../../usage.html">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../../../usage/control.html">Control Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../../usage/control.html#lqr-infinite-horizon-linear-dyanmics">LQR Infinite Horizon Linear Dyanmics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../../usage/control.html#lqr-finite-horzon-linear-dynamics">LQR Finite Horzon Linear Dynamics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../../usage/control.html#lqr-finite-horzon-non-linear-dynamics">LQR Finite Horzon Non-linear Dynamics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../../usage/control.html#elqr">ELQR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../../usage/control.html#elqr-modified-quadratization">ELQR Modified Quadratization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../../usage/control.html#elqr-linear-dynamics">ELQR Linear Dynamics</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../../../usage/filters.html">Filter Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../../usage/filters.html#kalman-filter">Kalman Filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../../usage/filters.html#extended-kalman-filter">Extended Kalman Filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../../usage/filters.html#interacting-multiple-model-filter">Interacting Multiple Model Filter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../../../usage/planning.html">Planning Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../../usage/a_star.html">A* Examples</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../../usage/a_star.html#normal-a">Normal A*</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../../usage/a_star.html#beam-search">Beam Search</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../../usage/a_star.html#weighted-a">Weighted A*</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../../../usage/rrtstar.html">RRT* Examples</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../../usage/rrtstar.html#lqr-rrt-with-linear-dynamics">LQR-RRT* with Linear Dynamics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../../usage/rrtstar.html#lqr-rrt-with-non-linear-dynamics">LQR-RRT* with Non-Linear Dynamics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../../../usage/rrtstar.html#elqr-rrt-with-non-linear-dynamics">ELQR-RRT* with Non-Linear Dynamics</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../../toolchain.html">Toolchain</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../../../toolchain.html#development-environment-setup">Development Environment Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../../../toolchain.html#example-workflow">Example Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../../../toolchain.html#notes-on-tox">Notes on tox</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../../cicd.html">CI/CD Pipeline</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../../../cicd.html#github-actions-quick-guide">Github Actions Quick Guide</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="./reports/coverage/index.html#http://">Test Coverage Report</a></li>
+<li class="toctree-l1"><a class="reference external" href="./reports/junit/junit.html#http://">Test Results Report</a></li>
+<li class="toctree-l1"><a class="reference external" href="http://lager.ua.edu/">LAGER Homepage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../../References.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #9E1B32" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../../../index.html">GNCPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../../../../api.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="../../../../../../gncpy.html">gncpy</a></li>
+          <li class="breadcrumb-item"><a href="../../../../../gncpy.planning.html">planning</a></li>
+          <li class="breadcrumb-item"><a href="../../../../gncpy.planning.reinforcement_learning.html">reinforcement_learning</a></li>
+          <li class="breadcrumb-item"><a href="../../../gncpy.planning.reinforcement_learning.envs.html">envs</a></li>
+          <li class="breadcrumb-item"><a href="../../gncpy.planning.reinforcement_learning.envs.simple2d.html">simple2d</a></li>
+          <li class="breadcrumb-item"><a href="../gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.html">simpleUAV2d</a></li>
+      <li class="breadcrumb-item active">SimpleUAVHazards2d</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="simpleuavhazards2d">
+<h1>SimpleUAVHazards2d<a class="headerlink" href="#simpleuavhazards2d" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SimpleUAVHazards2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'SimpleUAVHazards2d.yaml'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/gncpy/planning/reinforcement_learning/envs/simple2d/simpleUAV2d.html#SimpleUAVHazards2d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAV2d.html#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAV2d" title="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAV2d"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleUAV2d</span></code></a></p>
+<p>Simple 2d UAV environment with hazards.</p>
+<p>This follows the same underlying game logic as the <a class="reference internal" href="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAV2d.html#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAV2d" title="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAV2d"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleUAV2d</span></code></a>
+environment but has some hazards added to its default configuration.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'SimpleUAVHazards2d.yaml'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/gncpy/planning/reinforcement_learning/envs/simple2d/simpleUAV2d.html#SimpleUAVHazards2d.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize an object.</p>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.__init__" title="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a></p></td>
+<td><p>Initialize an object.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.calc_obs_space" title="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.calc_obs_space"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_obs_space</span></code></a></p></td>
+<td><p>Determines the observation space based on specified options.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.close" title="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.close"><code class="xref py py-obj docutils literal notranslate"><span class="pre">close</span></code></a></p></td>
+<td><p>Nicely shuts down the environment.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.gen_act_map" title="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.gen_act_map"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gen_act_map</span></code></a></p></td>
+<td><p>Maps actions to entity ids for the game.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">render</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.reset" title="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.reset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset</span></code></a></p></td>
+<td><p>Resets the environment to an initial state.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.seed" title="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.seed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">seed</span></code></a></p></td>
+<td><p><dl class="field-list simple">
+<dt class="field-odd">deprecated<span class="colon">:</span></dt>
+<dd class="field-odd"><p>function that sets the seed for the environment's random number generator(s).</p>
+</dd>
+</dl>
+</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.step" title="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.step"><code class="xref py py-obj docutils literal notranslate"><span class="pre">step</span></code></a></p></td>
+<td><p>Perform one iteration of the game loop.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.action_space" title="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.action_space"><code class="xref py py-obj docutils literal notranslate"><span class="pre">action_space</span></code></a></p></td>
+<td><p>Space for available actions.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.metadata" title="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.metadata"><code class="xref py py-obj docutils literal notranslate"><span class="pre">metadata</span></code></a></p></td>
+<td><p>Additional metadata for the class.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.np_random" title="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.np_random"><code class="xref py py-obj docutils literal notranslate"><span class="pre">np_random</span></code></a></p></td>
+<td><p>Returns the environment's internal <code class="xref py py-attr docutils literal notranslate"><span class="pre">_np_random</span></code> that if not set will initialise with a random seed.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">render_mode</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">reward_range</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">spec</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.unwrapped" title="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.unwrapped"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unwrapped</span></code></a></p></td>
+<td><p>Returns the base non-wrapped environment.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">observation_space</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.calc_obs_space">
+<span class="sig-name descname"><span class="pre">calc_obs_space</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.calc_obs_space" title="Permalink to this definition"></a></dt>
+<dd><p>Determines the observation space based on specified options.</p>
+<p>If a dictionary space is used, the keys are <code class="code docutils literal notranslate"><span class="pre">'img'</span></code> for the image
+of the game screen and <code class="code docutils literal notranslate"><span class="pre">'aux'</span></code> for the auxilary state vector. Both
+values are boxes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>RuntimeError</strong> – Invalid observation type specified.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out</strong> – Observation space.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">gym.spaces.Box</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">gym.spaces.Dict</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.close" title="Permalink to this definition"></a></dt>
+<dd><p>Nicely shuts down the environment.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.gen_act_map">
+<span class="sig-name descname"><span class="pre">gen_act_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.gen_act_map" title="Permalink to this definition"></a></dt>
+<dd><p>Maps actions to entity ids for the game.</p>
+<p>This assumes there is only 1 player and if there are more then all
+players get the same action.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>action</strong> (<em>numpy array</em>) – Action to take in the game.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>act_map</strong> – Each key is an entity id and each value is a numpy array.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.reset" title="Permalink to this definition"></a></dt>
+<dd><p>Resets the environment to an initial state.</p>
+<p>This method can reset the environment’s random number generator(s)
+if seed is an integer or if the environment has not yet initialized a
+random number generator. If the environment already has a random number
+generator and reset() is called with seed=None, the RNG should not be
+reset. Moreover, reset() should (in the typical use case) be called
+with an integer seed right after initialization and then never again.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>seed</strong> (<em>int</em><em>, </em><em>optional</em>) – The seed that is used to initialize the environment’s PRNG. If the
+environment does not already have a PRNG and <code class="code docutils literal notranslate"><span class="pre">seed=None</span></code>
+(the default option) is passed, a seed will be chosen from some
+source of entropy (e.g. timestamp or /dev/urandom). However, if the
+environment already has a PRNG and <code class="code docutils literal notranslate"><span class="pre">seed=None</span></code> is passed, the
+PRNG will not be reset. If you pass an integer, the PRNG will be
+reset even if it already exists. Usually, you want to pass an
+integer right after the environment has been initialized and then
+never again. The default is None.</p></li>
+<li><p><strong>return_info</strong> (<em>bool</em><em>, </em><em>optional</em>) – If true, return additional information along with initial
+observation. This info should be analogous to the info returned in
+<a class="reference internal" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.step" title="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.step"><code class="xref py py-meth docutils literal notranslate"><span class="pre">step()</span></code></a>. The default is False.</p></li>
+<li><p><strong>options</strong> (<em>dict</em><em>, </em><em>optional</em>) – Not used by this environment. The default is None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>observation</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">gym.spaces.Box</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">gym.spaces.Dict</span></code>) – Initial observation of the environment.</p></li>
+<li><p><strong>info</strong> (<em>dict, optional</em>) – Additonal debugging info, only returned if <code class="code docutils literal notranslate"><span class="pre">return_info=True</span></code>.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.seed">
+<span class="sig-name descname"><span class="pre">seed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.seed" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Deprecated<span class="colon">:</span></dt>
+<dd class="field-odd"><p>function that sets the seed for the environment’s random number generator(s).</p>
+</dd>
+</dl>
+<p>Use <cite>env.reset(seed=seed)</cite> as the new API for setting the seed of the environment.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Some environments use multiple pseudorandom number generators.
+We want to capture all such seeds used in order to ensure that
+there aren’t accidental correlations between multiple generators.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>seed</strong> (<em>Optional int</em>) – The seed value for the random number generator</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Returns the list of seeds used in this environment’s random</dt><dd><p>number generators. The first value in the list should be the
+“main” seed, or the value which a reproducer should pass to
+‘seed’. Often, the main seed equals the provided ‘seed’, but
+this won’t be true <cite>if seed=None</cite>, for example.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>seeds (List[int])</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.step">
+<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.step" title="Permalink to this definition"></a></dt>
+<dd><p>Perform one iteration of the game loop.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>action</strong> (<em>numpy array</em>) – Action to take in the game.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>observation</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">gym.spaces.Box</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">gym.spaces.Dict</span></code>) – Current observation of the game.</p></li>
+<li><p><strong>reward</strong> (<em>float</em>) – Reward from current step.</p></li>
+<li><p><strong>done</strong> (<em>bool</em>) – Flag indicating if the episode met the end conditions.</p></li>
+<li><p><strong>truncated</strong> (<em>bool</em>) – Flag indicating if the episode has ended due to time constraints.</p></li>
+<li><p><strong>info</strong> (<em>dict</em>) – Extra debugging info.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.action_space">
+<span class="sig-name descname"><span class="pre">action_space</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Space</span><span class="p"><span class="pre">[</span></span><span class="pre">ActType</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Box(-1.0,</span> <span class="pre">1.0,</span> <span class="pre">(2,),</span> <span class="pre">float32)</span></em><a class="headerlink" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.action_space" title="Permalink to this definition"></a></dt>
+<dd><p>Space for available actions.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.metadata">
+<span class="sig-name descname"><span class="pre">metadata</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'render_fps':</span> <span class="pre">60,</span> <span class="pre">'render_modes':</span> <span class="pre">['human',</span> <span class="pre">'single_rgb_array']}</span></em><a class="headerlink" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.metadata" title="Permalink to this definition"></a></dt>
+<dd><p>Additional metadata for the class.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.np_random">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">np_random</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">RandomNumberGenerator</span></em><a class="headerlink" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.np_random" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the environment’s internal <code class="xref py py-attr docutils literal notranslate"><span class="pre">_np_random</span></code> that if not set will initialise with a random seed.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.unwrapped">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">unwrapped</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Env</span></em><a class="headerlink" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.unwrapped" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the base non-wrapped environment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The base non-wrapped gym.Env instance</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Env</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAV2d.html" class="btn btn-neutral float-left" title="SimpleUAV2d" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../../gncpy.planning.reinforcement_learning.wrappers.html" class="btn btn-neutral float-right" title="wrappers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Laboratory for Autonomy, GNC, and Estimation Research (LAGER).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

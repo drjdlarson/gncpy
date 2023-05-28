@@ -1,0 +1,42 @@
+IMMGCIFilter
+============
+
+.. currentmodule:: gncpy.filters.imm_gci_filter
+
+.. autoclass:: IMMGCIFilter
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~IMMGCIFilter.__init__
+      ~IMMGCIFilter.correct
+      ~IMMGCIFilter.initialize_filters
+      ~IMMGCIFilter.initialize_states
+      ~IMMGCIFilter.load_filter_state
+      ~IMMGCIFilter.predict
+      ~IMMGCIFilter.save_filter_state
+      ~IMMGCIFilter.set_measurement_model
+      ~IMMGCIFilter.set_models
+      ~IMMGCIFilter.set_state_model
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~IMMGCIFilter.cov
+      ~IMMGCIFilter.proc_noise
+   
+   

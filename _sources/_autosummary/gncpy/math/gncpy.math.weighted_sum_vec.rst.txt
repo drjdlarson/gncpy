@@ -1,0 +1,6 @@
+gncpy.math.weighted\_sum\_vec
+=============================
+
+.. currentmodule:: gncpy.math
+
+.. autofunction:: weighted_sum_vec

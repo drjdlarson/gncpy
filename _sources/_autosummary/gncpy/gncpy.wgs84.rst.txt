@@ -1,0 +1,38 @@
+wgs84
+=====
+
+.. automodule:: gncpy.wgs84
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree: wgs84
+      :nosignatures:
+   
+      calc_earth_rate
+      calc_ew_rad
+      calc_gravity
+      calc_ns_rad
+      calc_transport_rate
+      convert_msl_to_wgs
+      convert_wgs_to_msl
+      init_egm_lookup_table
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

@@ -1,0 +1,41 @@
+utilities
+=========
+
+.. automodule:: gncpy.utilities
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree: utilities
+      :nosignatures:
+   
+      classproperty
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: utilities
+      :nosignatures:
+      :template: class.rst_t
+   
+      ClassPropertyDescriptor
+      ClassPropertyMetaClass
+   
+   
+
+   
+   
+   
+
+
+

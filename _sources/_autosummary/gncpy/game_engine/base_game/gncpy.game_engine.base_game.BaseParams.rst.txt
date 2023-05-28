@@ -1,0 +1,26 @@
+BaseParams
+==========
+
+.. currentmodule:: gncpy.game_engine.base_game
+
+.. autoclass:: BaseParams
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~BaseParams.__init__
+   
+   
+
+   
+   
+   

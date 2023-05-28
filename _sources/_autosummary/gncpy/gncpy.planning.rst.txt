@@ -1,0 +1,34 @@
+planning
+========
+
+.. automodule:: gncpy.planning
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree: planning
+   :template: module.rst_t
+   :recursive:
+
+   ~gncpy.planning.a_star
+   ~gncpy.planning.reinforcement_learning
+   ~gncpy.planning.rrt_star
+

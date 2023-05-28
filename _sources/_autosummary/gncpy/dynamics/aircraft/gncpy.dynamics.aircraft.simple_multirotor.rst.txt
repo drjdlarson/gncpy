@@ -1,0 +1,41 @@
+simple\_multirotor
+==================
+
+.. automodule:: gncpy.dynamics.aircraft.simple_multirotor
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: simple_multirotor
+      :nosignatures:
+      :template: class.rst_t
+   
+      AeroParams
+      AircraftParams
+      Effector
+      Environment
+      GeoParams
+      MassParams
+      MotorParams
+      PropParams
+      SimpleMultirotor
+      Vehicle
+   
+   
+
+   
+   
+   
+
+
+

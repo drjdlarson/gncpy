@@ -1,0 +1,43 @@
+GSMFilterBase
+=============
+
+.. currentmodule:: gncpy.filters.gsm_filter_base
+
+.. autoclass:: GSMFilterBase
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~GSMFilterBase.__init__
+      ~GSMFilterBase.correct
+      ~GSMFilterBase.load_filter_state
+      ~GSMFilterBase.plot_particles
+      ~GSMFilterBase.predict
+      ~GSMFilterBase.save_filter_state
+      ~GSMFilterBase.set_meas_noise_model
+      ~GSMFilterBase.set_measurement_model
+      ~GSMFilterBase.set_process_noise_model
+      ~GSMFilterBase.set_state_model
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GSMFilterBase.cov
+      ~GSMFilterBase.meas_noise
+      ~GSMFilterBase.proc_noise
+   
+   

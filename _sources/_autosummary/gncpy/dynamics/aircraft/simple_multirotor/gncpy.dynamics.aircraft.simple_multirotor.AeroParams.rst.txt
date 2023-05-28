@@ -1,0 +1,26 @@
+AeroParams
+==========
+
+.. currentmodule:: gncpy.dynamics.aircraft.simple_multirotor
+
+.. autoclass:: AeroParams
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~AeroParams.__init__
+   
+   
+
+   
+   
+   

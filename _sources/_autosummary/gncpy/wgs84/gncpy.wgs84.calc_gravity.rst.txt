@@ -1,0 +1,6 @@
+gncpy.wgs84.calc\_gravity
+=========================
+
+.. currentmodule:: gncpy.wgs84
+
+.. autofunction:: calc_gravity

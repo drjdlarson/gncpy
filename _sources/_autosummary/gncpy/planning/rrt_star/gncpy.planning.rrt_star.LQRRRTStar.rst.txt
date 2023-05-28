@@ -1,0 +1,57 @@
+LQRRRTStar
+==========
+
+.. currentmodule:: gncpy.planning.rrt_star
+
+.. autoclass:: LQRRRTStar
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~LQRRRTStar.__init__
+      ~LQRRRTStar.calc_dist_to_goal
+      ~LQRRRTStar.calc_new_cost
+      ~LQRRRTStar.call_planner
+      ~LQRRRTStar.choose_parent
+      ~LQRRRTStar.draw_end
+      ~LQRRRTStar.draw_obstacles
+      ~LQRRRTStar.draw_start
+      ~LQRRRTStar.dx
+      ~LQRRRTStar.find_near_nodes
+      ~LQRRRTStar.generate_final_course
+      ~LQRRRTStar.get_nearest_node_index
+      ~LQRRRTStar.get_random_node
+      ~LQRRRTStar.not_colliding
+      ~LQRRRTStar.plan
+      ~LQRRRTStar.plan_helper
+      ~LQRRRTStar.propagate_cost_to_leaves
+      ~LQRRRTStar.reset_controller_plot
+      ~LQRRRTStar.rewire
+      ~LQRRRTStar.sample_path
+      ~LQRRRTStar.save_frame
+      ~LQRRRTStar.search_best_goal_node
+      ~LQRRRTStar.set_control_model
+      ~LQRRRTStar.set_environment
+      ~LQRRRTStar.steer
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~LQRRRTStar.numPos
+      ~LQRRRTStar.use_box
+   
+   

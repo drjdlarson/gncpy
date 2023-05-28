@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SimpleUAV2d &mdash; GNCPy 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
+    <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.SimpleUAV2d.html" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../../_static/clipboard.min.js"></script>
+        <script src="../../../../_static/copybutton.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="StateConstraintParams" href="gncpy.games.SimpleUAV2d.StateConstraintParams.html" />
+    <link rel="prev" title="ScoreParams" href="gncpy.games.SimpleUAV2d.ScoreParams.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #9E1B32" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            GNCPy
+              <img src="../../../../_static/logo.svg" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../../../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../../gncpy.html">gncpy</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.control.html">control</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../control/gncpy.control.ELQR.html">ELQR</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../control/gncpy.control.LQR.html">LQR</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.coordinate_transforms.html">coordinate_transforms</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../coordinate_transforms/gncpy.coordinate_transforms.ecef_to_LLA.html">gncpy.coordinate_transforms.ecef_to_LLA</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../coordinate_transforms/gncpy.coordinate_transforms.ecef_to_NED.html">gncpy.coordinate_transforms.ecef_to_NED</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../coordinate_transforms/gncpy.coordinate_transforms.lla_to_ECEF.html">gncpy.coordinate_transforms.lla_to_ECEF</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../coordinate_transforms/gncpy.coordinate_transforms.lla_to_NED.html">gncpy.coordinate_transforms.lla_to_NED</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../coordinate_transforms/gncpy.coordinate_transforms.ned_to_LLA.html">gncpy.coordinate_transforms.ned_to_LLA</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.data_fusion.html">data_fusion</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../data_fusion/gncpy.data_fusion.GeneralizedCovarianceIntersection.html">gncpy.data_fusion.GeneralizedCovarianceIntersection</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.distributions.html">distributions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../distributions/gncpy.distributions.Particle.html">Particle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../distributions/gncpy.distributions.ParticleDistribution.html">ParticleDistribution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../distributions/gncpy.distributions.QuadraturePoints.html">QuadraturePoints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../distributions/gncpy.distributions.SigmaPoints.html">SigmaPoints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../distributions/gncpy.distributions.SimpleParticleDistribution.html">SimpleParticleDistribution</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.dynamics.html">dynamics</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../dynamics/gncpy.dynamics.aircraft.html">aircraft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../dynamics/gncpy.dynamics.basic.html">basic</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.errors.html">errors</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../errors/gncpy.errors.ExtremeMeasurementNoiseError.html">gncpy.errors.ExtremeMeasurementNoiseError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../errors/gncpy.errors.ParticleDepletionError.html">gncpy.errors.ParticleDepletionError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../errors/gncpy.errors.ParticleEstimationDomainError.html">gncpy.errors.ParticleEstimationDomainError</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.filters.html">filters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.bayes_filter.html">bayes_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.bootstrap_filter.html">bootstrap_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.ekf_gaussian_scale_mixture_filter.html">ekf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.extended_kalman_filter.html">extended_kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.gci_filter.html">gci_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.gsm_filter_base.html">gsm_filter_base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.imm_gci_filter.html">imm_gci_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.interacting_multiple_model.html">interacting_multiple_model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.kalman_filter.html">kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.kf_gaussian_scale_mixture_filter.html">kf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.max_corr_ent_ukf.html">max_corr_ent_ukf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.max_corr_ent_upf.html">max_corr_ent_upf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.mcmc_particle_filter_base.html">mcmc_particle_filter_base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.particle_filter.html">particle_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.qkf_gaussian_scale_mixture_filter.html">qkf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.quadrature_kalman_filter.html">quadrature_kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.sqkf_gaussian_scale_mixture_filter.html">sqkf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.square_root_qkf.html">square_root_qkf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.students_t_filter.html">students_t_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.ukf_gaussian_scale_mixture_filter.html">ukf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.unscented_kalman_filter.html">unscented_kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.unscented_particle_filter.html">unscented_particle_filter</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.game_engine.html">game_engine</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../game_engine/gncpy.game_engine.base_game.html">base_game</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../game_engine/gncpy.game_engine.components.html">components</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../game_engine/gncpy.game_engine.entities.html">entities</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../game_engine/gncpy.game_engine.physics2d.html">physics2d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../game_engine/gncpy.game_engine.rendering2d.html">rendering2d</a></li>
+</ul>
+</li>
+<li class="toctree-l3 current"><a class="reference internal" href="../../gncpy.games.html">games</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="../gncpy.games.SimpleUAV2d.html">SimpleUAV2d</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.math.html">math</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.epanechnikov_kernel.html">gncpy.math.epanechnikov_kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.gamma_fnc.html">gncpy.math.gamma_fnc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.gaussian_kernel.html">gncpy.math.gaussian_kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.get_elem_sym_fnc.html">gncpy.math.get_elem_sym_fnc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.get_hessian.html">gncpy.math.get_hessian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.get_input_jacobian.html">gncpy.math.get_input_jacobian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.get_jacobian.html">gncpy.math.get_jacobian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.get_state_jacobian.html">gncpy.math.get_state_jacobian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.log_sum_exp.html">gncpy.math.log_sum_exp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.rk4.html">gncpy.math.rk4</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.rk4_backward.html">gncpy.math.rk4_backward</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.weighted_sum_mat.html">gncpy.math.weighted_sum_mat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.weighted_sum_vec.html">gncpy.math.weighted_sum_vec</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.measurements.html">measurements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.orbital_mechanics.html">orbital_mechanics</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../orbital_mechanics/gncpy.orbital_mechanics.correct_lon_ascend.html">gncpy.orbital_mechanics.correct_lon_ascend</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../orbital_mechanics/gncpy.orbital_mechanics.ecc_anom_from_mean.html">gncpy.orbital_mechanics.ecc_anom_from_mean</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../orbital_mechanics/gncpy.orbital_mechanics.ecef_from_orbit.html">gncpy.orbital_mechanics.ecef_from_orbit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../orbital_mechanics/gncpy.orbital_mechanics.true_anom_from_ecc.html">gncpy.orbital_mechanics.true_anom_from_ecc</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.planning.html">planning</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../planning/gncpy.planning.a_star.html">a_star</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../planning/gncpy.planning.reinforcement_learning.html">reinforcement_learning</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../planning/gncpy.planning.rrt_star.html">rrt_star</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.plotting.html">plotting</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../plotting/gncpy.plotting.calc_error_ellipse.html">gncpy.plotting.calc_error_ellipse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotting/gncpy.plotting.get_cmap.html">gncpy.plotting.get_cmap</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotting/gncpy.plotting.init_plotting_opts.html">gncpy.plotting.init_plotting_opts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotting/gncpy.plotting.set_title_label.html">gncpy.plotting.set_title_label</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.sampling.html">sampling</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../sampling/gncpy.sampling.MetropolisHastings.html">MetropolisHastings</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.utilities.html">utilities</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../utilities/gncpy.utilities.classproperty.html">gncpy.utilities.classproperty</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../utilities/gncpy.utilities.ClassPropertyDescriptor.html">ClassPropertyDescriptor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../utilities/gncpy.utilities.ClassPropertyMetaClass.html">ClassPropertyMetaClass</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.wgs84.html">wgs84</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../wgs84/gncpy.wgs84.calc_earth_rate.html">gncpy.wgs84.calc_earth_rate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../wgs84/gncpy.wgs84.calc_ew_rad.html">gncpy.wgs84.calc_ew_rad</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../wgs84/gncpy.wgs84.calc_gravity.html">gncpy.wgs84.calc_gravity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../wgs84/gncpy.wgs84.calc_ns_rad.html">gncpy.wgs84.calc_ns_rad</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../wgs84/gncpy.wgs84.calc_transport_rate.html">gncpy.wgs84.calc_transport_rate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../wgs84/gncpy.wgs84.convert_msl_to_wgs.html">gncpy.wgs84.convert_msl_to_wgs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../wgs84/gncpy.wgs84.convert_wgs_to_msl.html">gncpy.wgs84.convert_wgs_to_msl</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../wgs84/gncpy.wgs84.init_egm_lookup_table.html">gncpy.wgs84.init_egm_lookup_table</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../usage.html">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/control.html">Control Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/control.html#lqr-infinite-horizon-linear-dyanmics">LQR Infinite Horizon Linear Dyanmics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/control.html#lqr-finite-horzon-linear-dynamics">LQR Finite Horzon Linear Dynamics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/control.html#lqr-finite-horzon-non-linear-dynamics">LQR Finite Horzon Non-linear Dynamics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/control.html#elqr">ELQR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/control.html#elqr-modified-quadratization">ELQR Modified Quadratization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/control.html#elqr-linear-dynamics">ELQR Linear Dynamics</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/filters.html">Filter Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/filters.html#kalman-filter">Kalman Filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/filters.html#extended-kalman-filter">Extended Kalman Filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/filters.html#interacting-multiple-model-filter">Interacting Multiple Model Filter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/planning.html">Planning Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/a_star.html">A* Examples</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../usage/a_star.html#normal-a">Normal A*</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../usage/a_star.html#beam-search">Beam Search</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../usage/a_star.html#weighted-a">Weighted A*</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/rrtstar.html">RRT* Examples</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../usage/rrtstar.html#lqr-rrt-with-linear-dynamics">LQR-RRT* with Linear Dynamics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../usage/rrtstar.html#lqr-rrt-with-non-linear-dynamics">LQR-RRT* with Non-Linear Dynamics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../usage/rrtstar.html#elqr-rrt-with-non-linear-dynamics">ELQR-RRT* with Non-Linear Dynamics</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../toolchain.html">Toolchain</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../toolchain.html#development-environment-setup">Development Environment Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../toolchain.html#example-workflow">Example Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../toolchain.html#notes-on-tox">Notes on tox</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../cicd.html">CI/CD Pipeline</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../cicd.html#github-actions-quick-guide">Github Actions Quick Guide</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="./reports/coverage/index.html#http://">Test Coverage Report</a></li>
+<li class="toctree-l1"><a class="reference external" href="./reports/junit/junit.html#http://">Test Results Report</a></li>
+<li class="toctree-l1"><a class="reference external" href="http://lager.ua.edu/">LAGER Homepage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../References.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #9E1B32" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">GNCPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../api.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="../../../gncpy.html">gncpy</a></li>
+          <li class="breadcrumb-item"><a href="../../gncpy.games.html">games</a></li>
+          <li class="breadcrumb-item"><a href="../gncpy.games.SimpleUAV2d.html">SimpleUAV2d</a></li>
+      <li class="breadcrumb-item active">SimpleUAV2d</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="simpleuav2d">
+<h1>SimpleUAV2d<a class="headerlink" href="#simpleuav2d" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.SimpleUAV2d">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SimpleUAV2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">render_mode</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/games/SimpleUAV2d.html#SimpleUAV2d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="../../game_engine/base_game/gncpy.game_engine.base_game.BaseGame2d.html#gncpy.game_engine.base_game.BaseGame2d" title="gncpy.game_engine.base_game.BaseGame2d"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseGame2d</span></code></a></p>
+<p>Simple 2D UAV game.</p>
+<p>Assumes obstacles and hazards are static, and all players have the same
+state and action spaces.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.SimpleUAV2d.cur_target_seq">
+<span class="sig-name descname"><span class="pre">cur_target_seq</span></span><a class="headerlink" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.cur_target_seq" title="Permalink to this definition"></a></dt>
+<dd><p>Current index into the target_seq list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.SimpleUAV2d.target_seq">
+<span class="sig-name descname"><span class="pre">target_seq</span></span><a class="headerlink" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.target_seq" title="Permalink to this definition"></a></dt>
+<dd><p>Each element is an order value from the target parameters, only has
+unique values and is sorted in ascending order.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.SimpleUAV2d.all_capabilities">
+<span class="sig-name descname"><span class="pre">all_capabilities</span></span><a class="headerlink" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.all_capabilities" title="Permalink to this definition"></a></dt>
+<dd><p>Each element is a string, holds all (unique) possible values from target
+and player capabilities.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.SimpleUAV2d.has_random_player_birth_times">
+<span class="sig-name descname"><span class="pre">has_random_player_birth_times</span></span><a class="headerlink" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.has_random_player_birth_times" title="Permalink to this definition"></a></dt>
+<dd><p>Flag indicating if any player can have random birth times.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.SimpleUAV2d.max_player_birth_time">
+<span class="sig-name descname"><span class="pre">max_player_birth_time</span></span><a class="headerlink" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.max_player_birth_time" title="Permalink to this definition"></a></dt>
+<dd><p>Maximum time a new player can be born.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.SimpleUAV2d.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">render_mode</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/games/SimpleUAV2d.html#SimpleUAV2d.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize an object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config_file</strong> (<em>string</em>) – Full path of the configuratin file.</p></li>
+<li><p><strong>render_mode</strong> (<em>string</em>) – Mode to render the game.</p></li>
+<li><p><strong>**kwargs</strong> (<em>dict</em>) – Additional arguments for the parent classes.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.__init__" title="gncpy.games.SimpleUAV2d.SimpleUAV2d.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a></p></td>
+<td><p>Initialize an object.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.append_name_to_keys" title="gncpy.games.SimpleUAV2d.SimpleUAV2d.append_name_to_keys"><code class="xref py py-obj docutils literal notranslate"><span class="pre">append_name_to_keys</span></code></a></p></td>
+<td><p>Append a prefix to every key in a dictionary.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.basic_reward" title="gncpy.games.SimpleUAV2d.SimpleUAV2d.basic_reward"><code class="xref py py-obj docutils literal notranslate"><span class="pre">basic_reward</span></code></a></p></td>
+<td><p>Calculate the reward for a timestep for the basic reward type.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.close" title="gncpy.games.SimpleUAV2d.SimpleUAV2d.close"><code class="xref py py-obj docutils literal notranslate"><span class="pre">close</span></code></a></p></td>
+<td><p>Shutdown the rendering system.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.create_dynamics" title="gncpy.games.SimpleUAV2d.SimpleUAV2d.create_dynamics"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_dynamics</span></code></a></p></td>
+<td><p>Create the dynamics system for a player.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.create_hazards" title="gncpy.games.SimpleUAV2d.SimpleUAV2d.create_hazards"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_hazards</span></code></a></p></td>
+<td><p>Creates all hazards based on config values.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.create_obstacles" title="gncpy.games.SimpleUAV2d.SimpleUAV2d.create_obstacles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_obstacles</span></code></a></p></td>
+<td><p>Creates all obstacles based on config values.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.create_player" title="gncpy.games.SimpleUAV2d.SimpleUAV2d.create_player"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_player</span></code></a></p></td>
+<td><p>Creates a player entity.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.create_targets" title="gncpy.games.SimpleUAV2d.SimpleUAV2d.create_targets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_targets</span></code></a></p></td>
+<td><p>Creates current targets based on config values.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.get_image_size" title="gncpy.games.SimpleUAV2d.SimpleUAV2d.get_image_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_image_size</span></code></a></p></td>
+<td><p>Gets the size of the window.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.get_player_ids" title="gncpy.games.SimpleUAV2d.SimpleUAV2d.get_player_ids"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_player_ids</span></code></a></p></td>
+<td><p>Get the entity ids of all players.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.get_player_pos_vel_inds" title="gncpy.games.SimpleUAV2d.SimpleUAV2d.get_player_pos_vel_inds"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_player_pos_vel_inds</span></code></a></p></td>
+<td><p>Determines the position and velocity indices in the state vector.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.get_player_state_bounds" title="gncpy.games.SimpleUAV2d.SimpleUAV2d.get_player_state_bounds"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_player_state_bounds</span></code></a></p></td>
+<td><p>Calculate the bounds on the player state.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.get_players_state" title="gncpy.games.SimpleUAV2d.SimpleUAV2d.get_players_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_players_state</span></code></a></p></td>
+<td><p>Returns current dynamic state of all players.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.parse_config_file" title="gncpy.games.SimpleUAV2d.SimpleUAV2d.parse_config_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_config_file</span></code></a></p></td>
+<td><p>Parses the config file and saves the parameters.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.propagate_dynamics" title="gncpy.games.SimpleUAV2d.SimpleUAV2d.propagate_dynamics"><code class="xref py py-obj docutils literal notranslate"><span class="pre">propagate_dynamics</span></code></a></p></td>
+<td><p>Propagates the dynamics with the given action.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.register_params" title="gncpy.games.SimpleUAV2d.SimpleUAV2d.register_params"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_params</span></code></a></p></td>
+<td><p>Register custom classes for this game with the yaml parser.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.reset" title="gncpy.games.SimpleUAV2d.SimpleUAV2d.reset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset</span></code></a></p></td>
+<td><p>Resets the game to the base state.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.s_collision" title="gncpy.games.SimpleUAV2d.SimpleUAV2d.s_collision"><code class="xref py py-obj docutils literal notranslate"><span class="pre">s_collision</span></code></a></p></td>
+<td><p>Check for collisions between entities.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.s_game_over" title="gncpy.games.SimpleUAV2d.SimpleUAV2d.s_game_over"><code class="xref py py-obj docutils literal notranslate"><span class="pre">s_game_over</span></code></a></p></td>
+<td><p>Determines if the game has met the end conditions.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.s_input" title="gncpy.games.SimpleUAV2d.SimpleUAV2d.s_input"><code class="xref py py-obj docutils literal notranslate"><span class="pre">s_input</span></code></a></p></td>
+<td><p>Validate user input.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.s_movement" title="gncpy.games.SimpleUAV2d.SimpleUAV2d.s_movement"><code class="xref py py-obj docutils literal notranslate"><span class="pre">s_movement</span></code></a></p></td>
+<td><p>Move entities according to their dynamics.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.s_render" title="gncpy.games.SimpleUAV2d.SimpleUAV2d.s_render"><code class="xref py py-obj docutils literal notranslate"><span class="pre">s_render</span></code></a></p></td>
+<td><p>Render a frame of the game.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.s_score" title="gncpy.games.SimpleUAV2d.SimpleUAV2d.s_score"><code class="xref py py-obj docutils literal notranslate"><span class="pre">s_score</span></code></a></p></td>
+<td><p>Determines the total score for the timestep.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.setup" title="gncpy.games.SimpleUAV2d.SimpleUAV2d.setup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setup</span></code></a></p></td>
+<td><p>Sets up the game and should be called before any game functions.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.spawn_players" title="gncpy.games.SimpleUAV2d.SimpleUAV2d.spawn_players"><code class="xref py py-obj docutils literal notranslate"><span class="pre">spawn_players</span></code></a></p></td>
+<td><p>Spawns a new player if needed.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.step" title="gncpy.games.SimpleUAV2d.SimpleUAV2d.step"><code class="xref py py-obj docutils literal notranslate"><span class="pre">step</span></code></a></p></td>
+<td><p>Perform one iteration of the game loop.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.validate_config_file" title="gncpy.games.SimpleUAV2d.SimpleUAV2d.validate_config_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_config_file</span></code></a></p></td>
+<td><p>Validate that the config file exists.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.current_time" title="gncpy.games.SimpleUAV2d.SimpleUAV2d.current_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">current_time</span></code></a></p></td>
+<td><p>Current time in real units.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.elapsed_time" title="gncpy.games.SimpleUAV2d.SimpleUAV2d.elapsed_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">elapsed_time</span></code></a></p></td>
+<td><p>Amount of time elapsed in game in real units.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.SimpleUAV2d.append_name_to_keys">
+<span class="sig-name descname"><span class="pre">append_name_to_keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.append_name_to_keys" title="Permalink to this definition"></a></dt>
+<dd><p>Append a prefix to every key in a dictionary.</p>
+<p>A dot is placed between the prefix and the original key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>in_dict</strong> (<em>dict</em>) – Original dictionary.</p></li>
+<li><p><strong>prefix</strong> (<em>string</em>) – string to prepend.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out</strong> – updated dictionary.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.SimpleUAV2d.basic_reward">
+<span class="sig-name descname"><span class="pre">basic_reward</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/games/SimpleUAV2d.html#SimpleUAV2d.basic_reward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.basic_reward" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the reward for a timestep for the basic reward type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>reward</strong> (<em>float</em>) – reward for the timestep.</p></li>
+<li><p><strong>info</strong> (<em>dict</em>) – extra info useful for debugging.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.SimpleUAV2d.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.close" title="Permalink to this definition"></a></dt>
+<dd><p>Shutdown the rendering system.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.SimpleUAV2d.create_dynamics">
+<span class="sig-name descname"><span class="pre">create_dynamics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cBirth</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/games/SimpleUAV2d.html#SimpleUAV2d.create_dynamics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.create_dynamics" title="Permalink to this definition"></a></dt>
+<dd><p>Create the dynamics system for a player.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>params</strong> (<a class="reference internal" href="gncpy.games.SimpleUAV2d.DynamicsParams.html#gncpy.games.SimpleUAV2d.DynamicsParams" title="gncpy.games.SimpleUAV2d.DynamicsParams"><code class="xref py py-class docutils literal notranslate"><span class="pre">DynamicsParams</span></code></a>) – Parameters to use when making the dynamics.</p></li>
+<li><p><strong>cBirth</strong> (<a class="reference internal" href="../../game_engine/components/gncpy.game_engine.components.CBirth.html#gncpy.game_engine.components.CBirth" title="gncpy.game_engine.components.CBirth"><code class="xref py py-class docutils literal notranslate"><span class="pre">gncpy.game_engine.components.CBirth</span></code></a>) – Birth component associated with this player.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>RuntimeError</strong> – Incorrect parameters are set.</p></li>
+<li><p><strong>NotImplementedError</strong> – Wrong dynamics, control model and/or state constraint combo specified.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>dynObj</strong> (<a class="reference internal" href="../../dynamics/basic/gncpy.dynamics.basic.DynamicsBase.html#gncpy.dynamics.basic.DynamicsBase" title="gncpy.dynamics.basic.DynamicsBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">gncpy.dynamics.basic.DynamicsBase</span></code></a>) – Dynamic object created</p></li>
+<li><p><strong>pos_inds</strong> (<em>list</em>) – indices of the position variables in the state</p></li>
+<li><p><strong>vel_inds</strong> (<em>list</em>) – indices of the velocity variables in the state</p></li>
+<li><p><strong>state_args</strong> (<em>tuple</em>) – additional arguments for the dynObj propagate function</p></li>
+<li><p><em>ctrl_args</em> – additional arguments for the dynObj propagate function</p></li>
+<li><p><strong>state_low</strong> (<em>numpy array</em>) – lower state bounds</p></li>
+<li><p><strong>state_high</strong> (<em>numpy array</em>) – upper state bounds</p></li>
+<li><p><strong>state0</strong> (<em>numpy array</em>) – initial state of the dynObj</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.SimpleUAV2d.create_hazards">
+<span class="sig-name descname"><span class="pre">create_hazards</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/games/SimpleUAV2d.html#SimpleUAV2d.create_hazards"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.create_hazards" title="Permalink to this definition"></a></dt>
+<dd><p>Creates all hazards based on config values.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.SimpleUAV2d.create_obstacles">
+<span class="sig-name descname"><span class="pre">create_obstacles</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/games/SimpleUAV2d.html#SimpleUAV2d.create_obstacles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.create_obstacles" title="Permalink to this definition"></a></dt>
+<dd><p>Creates all obstacles based on config values.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.SimpleUAV2d.create_player">
+<span class="sig-name descname"><span class="pre">create_player</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/games/SimpleUAV2d.html#SimpleUAV2d.create_player"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.create_player" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a player entity.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>params</strong> (<a class="reference internal" href="gncpy.games.SimpleUAV2d.PlayerParams.html#gncpy.games.SimpleUAV2d.PlayerParams" title="gncpy.games.SimpleUAV2d.PlayerParams"><code class="xref py py-class docutils literal notranslate"><span class="pre">gncpy.games.SimpleUAV2d.PlayerParams</span></code></a>) – Parameters for the player being created.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>p</strong> – Reference to the player entity that was created.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../../game_engine/entities/gncpy.game_engine.entities.Entity.html#gncpy.game_engine.entities.Entity" title="gncpy.game_engine.entities.Entity"><code class="xref py py-class docutils literal notranslate"><span class="pre">gncpy.game_engine.entities.Entity</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.SimpleUAV2d.create_targets">
+<span class="sig-name descname"><span class="pre">create_targets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/games/SimpleUAV2d.html#SimpleUAV2d.create_targets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.create_targets" title="Permalink to this definition"></a></dt>
+<dd><p>Creates current targets based on config values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Flag indicating if targets were generated</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.SimpleUAV2d.get_image_size">
+<span class="sig-name descname"><span class="pre">get_image_size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.get_image_size" title="Permalink to this definition"></a></dt>
+<dd><p>Gets the size of the window.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>first is the height next is the width, in pixels.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.SimpleUAV2d.get_player_ids">
+<span class="sig-name descname"><span class="pre">get_player_ids</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/games/SimpleUAV2d.html#SimpleUAV2d.get_player_ids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.get_player_ids" title="Permalink to this definition"></a></dt>
+<dd><p>Get the entity ids of all players.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>all entity ids of the players.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.SimpleUAV2d.get_player_pos_vel_inds">
+<span class="sig-name descname"><span class="pre">get_player_pos_vel_inds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/games/SimpleUAV2d.html#SimpleUAV2d.get_player_pos_vel_inds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.get_player_pos_vel_inds" title="Permalink to this definition"></a></dt>
+<dd><p>Determines the position and velocity indices in the state vector.</p>
+<p>Note, this assumes all players have the same state bounds when params is
+not specified.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>params</strong> (<a class="reference internal" href="gncpy.games.SimpleUAV2d.DynamicsParams.html#gncpy.games.SimpleUAV2d.DynamicsParams" title="gncpy.games.SimpleUAV2d.DynamicsParams"><code class="xref py py-class docutils literal notranslate"><span class="pre">DynamicsParams</span></code></a>, optional) – Player parameter structure. The default is None which uses the first
+player in the player’s list.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>pos_inds</strong> (<em>list</em>) – indices for the position components (x, y).</p></li>
+<li><p><strong>vel_inds</strong> (<em>list</em>) – indices for the velocity components (x, y).</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.SimpleUAV2d.get_player_state_bounds">
+<span class="sig-name descname"><span class="pre">get_player_state_bounds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/games/SimpleUAV2d.html#SimpleUAV2d.get_player_state_bounds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.get_player_state_bounds" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the bounds on the player state.</p>
+<p>Note, this assumes all players have the same state bounds when params is
+not specified.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>params</strong> (<a class="reference internal" href="gncpy.games.SimpleUAV2d.DynamicsParams.html#gncpy.games.SimpleUAV2d.DynamicsParams" title="gncpy.games.SimpleUAV2d.DynamicsParams"><code class="xref py py-class docutils literal notranslate"><span class="pre">DynamicsParams</span></code></a>, optional) – Player parameter structure. The default is None which uses the first
+player in the player’s list.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>minimum and maximum values of the player state.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>2 x N numpy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.SimpleUAV2d.get_players_state">
+<span class="sig-name descname"><span class="pre">get_players_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/games/SimpleUAV2d.html#SimpleUAV2d.get_players_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.get_players_state" title="Permalink to this definition"></a></dt>
+<dd><p>Returns current dynamic state of all players.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>states</strong> – Each key is the entity id and each value is a numpy array.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.SimpleUAV2d.parse_config_file">
+<span class="sig-name descname"><span class="pre">parse_config_file</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.parse_config_file" title="Permalink to this definition"></a></dt>
+<dd><p>Parses the config file and saves the parameters.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.SimpleUAV2d.propagate_dynamics">
+<span class="sig-name descname"><span class="pre">propagate_dynamics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eDyn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/games/SimpleUAV2d.html#SimpleUAV2d.propagate_dynamics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.propagate_dynamics" title="Permalink to this definition"></a></dt>
+<dd><p>Propagates the dynamics with the given action.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>eDyn</strong> (<a class="reference internal" href="../../game_engine/components/gncpy.game_engine.components.CDynamics.html#gncpy.game_engine.components.CDynamics" title="gncpy.game_engine.components.CDynamics"><code class="xref py py-class docutils literal notranslate"><span class="pre">gncpy.game_engine.components.CDynamics</span></code></a>) – dynamics component to propagate.</p></li>
+<li><p><strong>action</strong> (<em>numpy array</em>) – Control input for the dynamics object.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.SimpleUAV2d.register_params">
+<span class="sig-name descname"><span class="pre">register_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yaml</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/games/SimpleUAV2d.html#SimpleUAV2d.register_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.register_params" title="Permalink to this definition"></a></dt>
+<dd><p>Register custom classes for this game with the yaml parser.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>yaml</strong> (<em>ruamel.yaml YAML object</em>) – yaml parser to use.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.SimpleUAV2d.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/games/SimpleUAV2d.html#SimpleUAV2d.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.reset" title="Permalink to this definition"></a></dt>
+<dd><p>Resets the game to the base state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kwargs</strong> (<em>dict</em>) – Additional arguments for the parent classes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.SimpleUAV2d.s_collision">
+<span class="sig-name descname"><span class="pre">s_collision</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/games/SimpleUAV2d.html#SimpleUAV2d.s_collision"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.s_collision" title="Permalink to this definition"></a></dt>
+<dd><p>Check for collisions between entities.</p>
+<p>This also handles player death if a hazard destroys a player, and
+updates the events.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Flag indicating if a target was hit.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.SimpleUAV2d.s_game_over">
+<span class="sig-name descname"><span class="pre">s_game_over</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/games/SimpleUAV2d.html#SimpleUAV2d.s_game_over"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.s_game_over" title="Permalink to this definition"></a></dt>
+<dd><p>Determines if the game has met the end conditions.</p>
+<p>End conditions are if all players are dead and no random births, or
+all targets have been reached, or it has past the maximum time.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.SimpleUAV2d.s_input">
+<span class="sig-name descname"><span class="pre">s_input</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/games/SimpleUAV2d.html#SimpleUAV2d.s_input"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.s_input" title="Permalink to this definition"></a></dt>
+<dd><p>Validate user input.</p>
+<p>Only allows actions that correspond to a current entity.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>user_input</strong> (<em>dict</em>) – Each key is an entity id. Each value is a numpy array representing
+the action for that entity.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out</strong> – Each key is an entity id. Each value is a numpy array for the action.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.SimpleUAV2d.s_movement">
+<span class="sig-name descname"><span class="pre">s_movement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/games/SimpleUAV2d.html#SimpleUAV2d.s_movement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.s_movement" title="Permalink to this definition"></a></dt>
+<dd><p>Move entities according to their dynamics.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>action</strong> (<em>dict</em>) – Each key is an entity id and its value is a 2 x 1 numpy array
+corresponding to control inputs for the given dynamics model. This
+comes from the input system.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.SimpleUAV2d.s_render">
+<span class="sig-name descname"><span class="pre">s_render</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.s_render" title="Permalink to this definition"></a></dt>
+<dd><p>Render a frame of the game.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.SimpleUAV2d.s_score">
+<span class="sig-name descname"><span class="pre">s_score</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/games/SimpleUAV2d.html#SimpleUAV2d.s_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.s_score" title="Permalink to this definition"></a></dt>
+<dd><p>Determines the total score for the timestep.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>NotImplementedError</strong> – An incorrect type is specified.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>score</strong> (<em>flaot</em>) – total score for this timestep.</p></li>
+<li><p><strong>info</strong> (<em>dict</em>) – extra info from the score system</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.SimpleUAV2d.setup">
+<span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.setup" title="Permalink to this definition"></a></dt>
+<dd><p>Sets up the game and should be called before any game functions.</p>
+<p>Sets up the physics and rendering system and resets to the base state.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.SimpleUAV2d.spawn_players">
+<span class="sig-name descname"><span class="pre">spawn_players</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/games/SimpleUAV2d.html#SimpleUAV2d.spawn_players"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.spawn_players" title="Permalink to this definition"></a></dt>
+<dd><p>Spawns a new player if needed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.SimpleUAV2d.step">
+<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/games/SimpleUAV2d.html#SimpleUAV2d.step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.step" title="Permalink to this definition"></a></dt>
+<dd><p>Perform one iteration of the game loop.</p>
+<p>Multiple physics updates can be made between rendering calls. Also
+spwans players if needed and updates the targets based on what has been
+reached.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>user_input</strong> (<em>dict</em>) – Each key is an integer representing the entity id that the action
+applies to. Each value is a numpy array for the action to take.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>info</strong> – Extra infomation for debugging.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.SimpleUAV2d.validate_config_file">
+<span class="sig-name descname"><span class="pre">validate_config_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_library</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.validate_config_file" title="Permalink to this definition"></a></dt>
+<dd><p>Validate that the config file exists.</p>
+<p>First checks if the file exists as provided, then checks the library
+directory if the use_library flag is true or it failed to find the file
+as provided.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config_file</strong> (<em>string</em>) – Full path to the config file.</p></li>
+<li><p><strong>use_library</strong> (<em>bool</em>) – Flag indicating if the library directory will be checked.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>FileNotFoundError</strong> – If the file cannot be found.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>cf</strong> – full path to the config file that was found.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.SimpleUAV2d.current_time">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">current_time</span></span><a class="headerlink" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.current_time" title="Permalink to this definition"></a></dt>
+<dd><p>Current time in real units.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.SimpleUAV2d.elapsed_time">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">elapsed_time</span></span><a class="headerlink" href="#gncpy.games.SimpleUAV2d.SimpleUAV2d.elapsed_time" title="Permalink to this definition"></a></dt>
+<dd><p>Amount of time elapsed in game in real units.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="gncpy.games.SimpleUAV2d.ScoreParams.html" class="btn btn-neutral float-left" title="ScoreParams" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="gncpy.games.SimpleUAV2d.StateConstraintParams.html" class="btn btn-neutral float-right" title="StateConstraintParams" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Laboratory for Autonomy, GNC, and Estimation Research (LAGER).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

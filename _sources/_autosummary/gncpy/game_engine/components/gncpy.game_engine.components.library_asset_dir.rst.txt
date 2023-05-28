@@ -1,0 +1,6 @@
+gncpy.game\_engine.components.library\_asset\_dir
+=================================================
+
+.. currentmodule:: gncpy.game_engine.components
+
+.. autodata:: library_asset_dir

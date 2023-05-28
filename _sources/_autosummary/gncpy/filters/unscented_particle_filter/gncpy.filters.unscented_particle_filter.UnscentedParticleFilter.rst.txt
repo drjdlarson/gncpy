@@ -1,0 +1,53 @@
+UnscentedParticleFilter
+=======================
+
+.. currentmodule:: gncpy.filters.unscented_particle_filter
+
+.. autoclass:: UnscentedParticleFilter
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~UnscentedParticleFilter.__init__
+      ~UnscentedParticleFilter.correct
+      ~UnscentedParticleFilter.extract_dist
+      ~UnscentedParticleFilter.init_from_dist
+      ~UnscentedParticleFilter.init_particles
+      ~UnscentedParticleFilter.load_filter_state
+      ~UnscentedParticleFilter.move_particles
+      ~UnscentedParticleFilter.plot_particles
+      ~UnscentedParticleFilter.plot_weighted_particles
+      ~UnscentedParticleFilter.predict
+      ~UnscentedParticleFilter.save_filter_state
+      ~UnscentedParticleFilter.set_measurement_model
+      ~UnscentedParticleFilter.set_state_model
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~UnscentedParticleFilter.cov
+      ~UnscentedParticleFilter.meas_likelihood_fnc
+      ~UnscentedParticleFilter.meas_noise
+      ~UnscentedParticleFilter.num_particles
+      ~UnscentedParticleFilter.proc_noise
+      ~UnscentedParticleFilter.proposal_fnc
+      ~UnscentedParticleFilter.proposal_sampling_fnc
+      ~UnscentedParticleFilter.require_copy_can_dist
+      ~UnscentedParticleFilter.require_copy_prop_parts
+      ~UnscentedParticleFilter.transition_prob_fnc
+   
+   

@@ -1,0 +1,40 @@
+CDynamics
+=========
+
+.. currentmodule:: gncpy.game_engine.components
+
+.. autoclass:: CDynamics
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~CDynamics.__init__
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CDynamics.dynObj
+      ~CDynamics.last_state
+      ~CDynamics.state
+      ~CDynamics.pos_inds
+      ~CDynamics.vel_inds
+      ~CDynamics.state_args
+      ~CDynamics.ctrl_args
+      ~CDynamics.state_low
+      ~CDynamics.state_high
+   
+   

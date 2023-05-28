@@ -1,0 +1,33 @@
+BootstrapFilter
+===============
+
+.. currentmodule:: gncpy.filters.bootstrap_filter
+
+.. autoclass:: BootstrapFilter
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~BootstrapFilter.__init__
+      ~BootstrapFilter.correct
+      ~BootstrapFilter.load_filter_state
+      ~BootstrapFilter.plot_particles
+      ~BootstrapFilter.predict
+      ~BootstrapFilter.save_filter_state
+      ~BootstrapFilter.set_measurement_model
+      ~BootstrapFilter.set_state_model
+   
+   
+
+   
+   
+   

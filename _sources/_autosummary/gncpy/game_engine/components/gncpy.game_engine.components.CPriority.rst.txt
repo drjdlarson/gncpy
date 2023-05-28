@@ -1,0 +1,32 @@
+CPriority
+=========
+
+.. currentmodule:: gncpy.game_engine.components
+
+.. autoclass:: CPriority
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~CPriority.__init__
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~CPriority.priority
+   
+   

@@ -1,0 +1,47 @@
+components
+==========
+
+.. automodule:: gncpy.game_engine.components
+
+   
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+      :toctree: components
+   
+      library_asset_dir
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: components
+      :nosignatures:
+      :template: class.rst_t
+   
+      CBirth
+      CCapabilities
+      CCollision
+      CDynamics
+      CEvents
+      CHazard
+      CPriority
+      CShape
+      CTransform
+   
+   
+
+   
+   
+   
+
+
+

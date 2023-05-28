@@ -1,0 +1,32 @@
+sampling
+========
+
+.. automodule:: gncpy.sampling
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: sampling
+      :nosignatures:
+      :template: class.rst_t
+   
+      MetropolisHastings
+   
+   
+
+   
+   
+   
+
+
+

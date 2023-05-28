@@ -1,0 +1,32 @@
+max\_corr\_ent\_ukf
+===================
+
+.. automodule:: gncpy.filters.max_corr_ent_ukf
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: max_corr_ent_ukf
+      :nosignatures:
+      :template: class.rst_t
+   
+      MaxCorrEntUKF
+   
+   
+
+   
+   
+   
+
+
+

@@ -1,0 +1,26 @@
+ObstacleParams
+==============
+
+.. currentmodule:: gncpy.games.SimpleUAV2d
+
+.. autoclass:: ObstacleParams
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~ObstacleParams.__init__
+   
+   
+
+   
+   
+   

@@ -1,0 +1,36 @@
+DynamicsBase
+============
+
+.. currentmodule:: gncpy.dynamics.basic
+
+.. autoclass:: DynamicsBase
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~DynamicsBase.__init__
+      ~DynamicsBase.get_input_mat
+      ~DynamicsBase.get_state_mat
+      ~DynamicsBase.propagate_state
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~DynamicsBase.allow_cpp
+      ~DynamicsBase.state_names
+   
+   

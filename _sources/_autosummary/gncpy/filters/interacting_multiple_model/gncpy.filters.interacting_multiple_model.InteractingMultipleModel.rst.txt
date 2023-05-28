@@ -1,0 +1,40 @@
+InteractingMultipleModel
+========================
+
+.. currentmodule:: gncpy.filters.interacting_multiple_model
+
+.. autoclass:: InteractingMultipleModel
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~InteractingMultipleModel.__init__
+      ~InteractingMultipleModel.correct
+      ~InteractingMultipleModel.initialize_filters
+      ~InteractingMultipleModel.initialize_states
+      ~InteractingMultipleModel.load_filter_state
+      ~InteractingMultipleModel.predict
+      ~InteractingMultipleModel.save_filter_state
+      ~InteractingMultipleModel.set_measurement_model
+      ~InteractingMultipleModel.set_models
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~InteractingMultipleModel.cov
+   
+   

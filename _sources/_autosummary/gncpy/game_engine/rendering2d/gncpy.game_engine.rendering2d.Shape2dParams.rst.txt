@@ -1,0 +1,26 @@
+Shape2dParams
+=============
+
+.. currentmodule:: gncpy.game_engine.rendering2d
+
+.. autoclass:: Shape2dParams
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~Shape2dParams.__init__
+   
+   
+
+   
+   
+   

@@ -1,0 +1,54 @@
+MaxCorrEntUPF
+=============
+
+.. currentmodule:: gncpy.filters.max_corr_ent_upf
+
+.. autoclass:: MaxCorrEntUPF
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~MaxCorrEntUPF.__init__
+      ~MaxCorrEntUPF.correct
+      ~MaxCorrEntUPF.extract_dist
+      ~MaxCorrEntUPF.init_from_dist
+      ~MaxCorrEntUPF.init_particles
+      ~MaxCorrEntUPF.load_filter_state
+      ~MaxCorrEntUPF.move_particles
+      ~MaxCorrEntUPF.plot_particles
+      ~MaxCorrEntUPF.plot_weighted_particles
+      ~MaxCorrEntUPF.predict
+      ~MaxCorrEntUPF.save_filter_state
+      ~MaxCorrEntUPF.set_measurement_model
+      ~MaxCorrEntUPF.set_state_model
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MaxCorrEntUPF.cov
+      ~MaxCorrEntUPF.kernel_bandwidth
+      ~MaxCorrEntUPF.meas_likelihood_fnc
+      ~MaxCorrEntUPF.meas_noise
+      ~MaxCorrEntUPF.num_particles
+      ~MaxCorrEntUPF.proc_noise
+      ~MaxCorrEntUPF.proposal_fnc
+      ~MaxCorrEntUPF.proposal_sampling_fnc
+      ~MaxCorrEntUPF.require_copy_can_dist
+      ~MaxCorrEntUPF.require_copy_prop_parts
+      ~MaxCorrEntUPF.transition_prob_fnc
+   
+   

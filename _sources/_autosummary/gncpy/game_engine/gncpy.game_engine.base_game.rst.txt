@@ -1,0 +1,51 @@
+base\_game
+==========
+
+.. automodule:: gncpy.game_engine.base_game
+
+   
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+      :toctree: base_game
+   
+      yaml
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree: base_game
+      :nosignatures:
+   
+      ndarray_representer
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: base_game
+      :nosignatures:
+      :template: class.rst_t
+   
+      Base2dParams
+      BaseGame
+      BaseGame2d
+      BaseParams
+      WindowParams
+   
+   
+
+   
+   
+   
+
+
+

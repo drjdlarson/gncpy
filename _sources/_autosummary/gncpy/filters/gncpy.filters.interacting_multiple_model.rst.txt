@@ -1,0 +1,32 @@
+interacting\_multiple\_model
+============================
+
+.. automodule:: gncpy.filters.interacting_multiple_model
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: interacting_multiple_model
+      :nosignatures:
+      :template: class.rst_t
+   
+      InteractingMultipleModel
+   
+   
+
+   
+   
+   
+
+
+

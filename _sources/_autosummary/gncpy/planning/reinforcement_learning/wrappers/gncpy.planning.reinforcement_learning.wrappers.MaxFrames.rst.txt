@@ -1,0 +1,46 @@
+MaxFrames
+=========
+
+.. currentmodule:: gncpy.planning.reinforcement_learning.wrappers
+
+.. autoclass:: MaxFrames
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~MaxFrames.__init__
+      ~MaxFrames.class_name
+      ~MaxFrames.close
+      ~MaxFrames.observation
+      ~MaxFrames.render
+      ~MaxFrames.reset
+      ~MaxFrames.seed
+      ~MaxFrames.step
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MaxFrames.action_space
+      ~MaxFrames.metadata
+      ~MaxFrames.np_random
+      ~MaxFrames.observation_space
+      ~MaxFrames.render_mode
+      ~MaxFrames.reward_range
+      ~MaxFrames.spec
+      ~MaxFrames.unwrapped
+   
+   

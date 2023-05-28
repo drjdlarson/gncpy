@@ -1,0 +1,33 @@
+SimpleParticleDistribution
+==========================
+
+.. currentmodule:: gncpy.distributions
+
+.. autoclass:: SimpleParticleDistribution
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~SimpleParticleDistribution.__init__
+      ~SimpleParticleDistribution.plot_particles
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~SimpleParticleDistribution.num_particles
+   
+   

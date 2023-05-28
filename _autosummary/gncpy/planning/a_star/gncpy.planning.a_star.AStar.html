@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AStar &mdash; GNCPy 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
+    <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_autosummary/gncpy/planning/a_star/gncpy.planning.a_star.AStar.html" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../../_static/clipboard.min.js"></script>
+        <script src="../../../../_static/copybutton.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="Node" href="gncpy.planning.a_star.Node.html" />
+    <link rel="prev" title="a_star" href="../gncpy.planning.a_star.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #9E1B32" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            GNCPy
+              <img src="../../../../_static/logo.svg" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../../../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../../gncpy.html">gncpy</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.control.html">control</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../control/gncpy.control.ELQR.html">ELQR</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../control/gncpy.control.LQR.html">LQR</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.coordinate_transforms.html">coordinate_transforms</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../coordinate_transforms/gncpy.coordinate_transforms.ecef_to_LLA.html">gncpy.coordinate_transforms.ecef_to_LLA</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../coordinate_transforms/gncpy.coordinate_transforms.ecef_to_NED.html">gncpy.coordinate_transforms.ecef_to_NED</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../coordinate_transforms/gncpy.coordinate_transforms.lla_to_ECEF.html">gncpy.coordinate_transforms.lla_to_ECEF</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../coordinate_transforms/gncpy.coordinate_transforms.lla_to_NED.html">gncpy.coordinate_transforms.lla_to_NED</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../coordinate_transforms/gncpy.coordinate_transforms.ned_to_LLA.html">gncpy.coordinate_transforms.ned_to_LLA</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.data_fusion.html">data_fusion</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../data_fusion/gncpy.data_fusion.GeneralizedCovarianceIntersection.html">gncpy.data_fusion.GeneralizedCovarianceIntersection</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.distributions.html">distributions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../distributions/gncpy.distributions.Particle.html">Particle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../distributions/gncpy.distributions.ParticleDistribution.html">ParticleDistribution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../distributions/gncpy.distributions.QuadraturePoints.html">QuadraturePoints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../distributions/gncpy.distributions.SigmaPoints.html">SigmaPoints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../distributions/gncpy.distributions.SimpleParticleDistribution.html">SimpleParticleDistribution</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.dynamics.html">dynamics</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../dynamics/gncpy.dynamics.aircraft.html">aircraft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../dynamics/gncpy.dynamics.basic.html">basic</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.errors.html">errors</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../errors/gncpy.errors.ExtremeMeasurementNoiseError.html">gncpy.errors.ExtremeMeasurementNoiseError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../errors/gncpy.errors.ParticleDepletionError.html">gncpy.errors.ParticleDepletionError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../errors/gncpy.errors.ParticleEstimationDomainError.html">gncpy.errors.ParticleEstimationDomainError</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.filters.html">filters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.bayes_filter.html">bayes_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.bootstrap_filter.html">bootstrap_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.ekf_gaussian_scale_mixture_filter.html">ekf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.extended_kalman_filter.html">extended_kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.gci_filter.html">gci_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.gsm_filter_base.html">gsm_filter_base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.imm_gci_filter.html">imm_gci_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.interacting_multiple_model.html">interacting_multiple_model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.kalman_filter.html">kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.kf_gaussian_scale_mixture_filter.html">kf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.max_corr_ent_ukf.html">max_corr_ent_ukf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.max_corr_ent_upf.html">max_corr_ent_upf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.mcmc_particle_filter_base.html">mcmc_particle_filter_base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.particle_filter.html">particle_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.qkf_gaussian_scale_mixture_filter.html">qkf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.quadrature_kalman_filter.html">quadrature_kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.sqkf_gaussian_scale_mixture_filter.html">sqkf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.square_root_qkf.html">square_root_qkf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.students_t_filter.html">students_t_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.ukf_gaussian_scale_mixture_filter.html">ukf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.unscented_kalman_filter.html">unscented_kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.unscented_particle_filter.html">unscented_particle_filter</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.game_engine.html">game_engine</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../game_engine/gncpy.game_engine.base_game.html">base_game</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../game_engine/gncpy.game_engine.components.html">components</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../game_engine/gncpy.game_engine.entities.html">entities</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../game_engine/gncpy.game_engine.physics2d.html">physics2d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../game_engine/gncpy.game_engine.rendering2d.html">rendering2d</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.games.html">games</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../games/gncpy.games.SimpleUAV2d.html">SimpleUAV2d</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.math.html">math</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.epanechnikov_kernel.html">gncpy.math.epanechnikov_kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.gamma_fnc.html">gncpy.math.gamma_fnc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.gaussian_kernel.html">gncpy.math.gaussian_kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.get_elem_sym_fnc.html">gncpy.math.get_elem_sym_fnc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.get_hessian.html">gncpy.math.get_hessian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.get_input_jacobian.html">gncpy.math.get_input_jacobian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.get_jacobian.html">gncpy.math.get_jacobian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.get_state_jacobian.html">gncpy.math.get_state_jacobian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.log_sum_exp.html">gncpy.math.log_sum_exp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.rk4.html">gncpy.math.rk4</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.rk4_backward.html">gncpy.math.rk4_backward</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.weighted_sum_mat.html">gncpy.math.weighted_sum_mat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.weighted_sum_vec.html">gncpy.math.weighted_sum_vec</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.measurements.html">measurements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.orbital_mechanics.html">orbital_mechanics</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../orbital_mechanics/gncpy.orbital_mechanics.correct_lon_ascend.html">gncpy.orbital_mechanics.correct_lon_ascend</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../orbital_mechanics/gncpy.orbital_mechanics.ecc_anom_from_mean.html">gncpy.orbital_mechanics.ecc_anom_from_mean</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../orbital_mechanics/gncpy.orbital_mechanics.ecef_from_orbit.html">gncpy.orbital_mechanics.ecef_from_orbit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../orbital_mechanics/gncpy.orbital_mechanics.true_anom_from_ecc.html">gncpy.orbital_mechanics.true_anom_from_ecc</a></li>
+</ul>
+</li>
+<li class="toctree-l3 current"><a class="reference internal" href="../../gncpy.planning.html">planning</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="../gncpy.planning.a_star.html">a_star</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gncpy.planning.reinforcement_learning.html">reinforcement_learning</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../gncpy.planning.rrt_star.html">rrt_star</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.plotting.html">plotting</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../plotting/gncpy.plotting.calc_error_ellipse.html">gncpy.plotting.calc_error_ellipse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotting/gncpy.plotting.get_cmap.html">gncpy.plotting.get_cmap</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotting/gncpy.plotting.init_plotting_opts.html">gncpy.plotting.init_plotting_opts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotting/gncpy.plotting.set_title_label.html">gncpy.plotting.set_title_label</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.sampling.html">sampling</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../sampling/gncpy.sampling.MetropolisHastings.html">MetropolisHastings</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.utilities.html">utilities</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../utilities/gncpy.utilities.classproperty.html">gncpy.utilities.classproperty</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../utilities/gncpy.utilities.ClassPropertyDescriptor.html">ClassPropertyDescriptor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../utilities/gncpy.utilities.ClassPropertyMetaClass.html">ClassPropertyMetaClass</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.wgs84.html">wgs84</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../wgs84/gncpy.wgs84.calc_earth_rate.html">gncpy.wgs84.calc_earth_rate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../wgs84/gncpy.wgs84.calc_ew_rad.html">gncpy.wgs84.calc_ew_rad</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../wgs84/gncpy.wgs84.calc_gravity.html">gncpy.wgs84.calc_gravity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../wgs84/gncpy.wgs84.calc_ns_rad.html">gncpy.wgs84.calc_ns_rad</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../wgs84/gncpy.wgs84.calc_transport_rate.html">gncpy.wgs84.calc_transport_rate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../wgs84/gncpy.wgs84.convert_msl_to_wgs.html">gncpy.wgs84.convert_msl_to_wgs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../wgs84/gncpy.wgs84.convert_wgs_to_msl.html">gncpy.wgs84.convert_wgs_to_msl</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../wgs84/gncpy.wgs84.init_egm_lookup_table.html">gncpy.wgs84.init_egm_lookup_table</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../usage.html">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/control.html">Control Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/control.html#lqr-infinite-horizon-linear-dyanmics">LQR Infinite Horizon Linear Dyanmics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/control.html#lqr-finite-horzon-linear-dynamics">LQR Finite Horzon Linear Dynamics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/control.html#lqr-finite-horzon-non-linear-dynamics">LQR Finite Horzon Non-linear Dynamics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/control.html#elqr">ELQR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/control.html#elqr-modified-quadratization">ELQR Modified Quadratization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/control.html#elqr-linear-dynamics">ELQR Linear Dynamics</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/filters.html">Filter Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/filters.html#kalman-filter">Kalman Filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/filters.html#extended-kalman-filter">Extended Kalman Filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/filters.html#interacting-multiple-model-filter">Interacting Multiple Model Filter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/planning.html">Planning Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/a_star.html">A* Examples</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../usage/a_star.html#normal-a">Normal A*</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../usage/a_star.html#beam-search">Beam Search</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../usage/a_star.html#weighted-a">Weighted A*</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/rrtstar.html">RRT* Examples</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../usage/rrtstar.html#lqr-rrt-with-linear-dynamics">LQR-RRT* with Linear Dynamics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../usage/rrtstar.html#lqr-rrt-with-non-linear-dynamics">LQR-RRT* with Non-Linear Dynamics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../usage/rrtstar.html#elqr-rrt-with-non-linear-dynamics">ELQR-RRT* with Non-Linear Dynamics</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../toolchain.html">Toolchain</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../toolchain.html#development-environment-setup">Development Environment Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../toolchain.html#example-workflow">Example Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../toolchain.html#notes-on-tox">Notes on tox</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../cicd.html">CI/CD Pipeline</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../cicd.html#github-actions-quick-guide">Github Actions Quick Guide</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="./reports/coverage/index.html#http://">Test Coverage Report</a></li>
+<li class="toctree-l1"><a class="reference external" href="./reports/junit/junit.html#http://">Test Results Report</a></li>
+<li class="toctree-l1"><a class="reference external" href="http://lager.ua.edu/">LAGER Homepage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../References.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #9E1B32" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">GNCPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../api.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="../../../gncpy.html">gncpy</a></li>
+          <li class="breadcrumb-item"><a href="../../gncpy.planning.html">planning</a></li>
+          <li class="breadcrumb-item"><a href="../gncpy.planning.a_star.html">a_star</a></li>
+      <li class="breadcrumb-item active">AStar</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="astar">
+<h1>AStar<a class="headerlink" href="#astar" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="gncpy.planning.a_star.AStar">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AStar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_beam_search</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beam_search_max_nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/planning/a_star.html#AStar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.planning.a_star.AStar" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Implements various forms of the A* gird search algorithm.</p>
+<p>This is based on the example implementation found
+<a class="reference external" href="https://github.com/AtsushiSakai/PythonRobotics">here</a>. It currently
+implements</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Normal A*</p></li>
+<li><p>Beam search</p></li>
+<li><p>Weighted</p></li>
+</ul>
+</div></blockquote>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gncpy.planning.a_star.AStar.resolution">
+<span class="sig-name descname"><span class="pre">resolution</span></span><a class="headerlink" href="#gncpy.planning.a_star.AStar.resolution" title="Permalink to this definition"></a></dt>
+<dd><p>Real distance per gird square for x and y dimensions. Should not be set
+directly, use the <a class="reference internal" href="#gncpy.planning.a_star.AStar.set_map" title="gncpy.planning.a_star.AStar.set_map"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set_map()</span></code></a> function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>2 numpy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gncpy.planning.a_star.AStar.min">
+<span class="sig-name descname"><span class="pre">min</span></span><a class="headerlink" href="#gncpy.planning.a_star.AStar.min" title="Permalink to this definition"></a></dt>
+<dd><p>Minimum x and y positions in real units. Should not be set directly, use
+the <a class="reference internal" href="#gncpy.planning.a_star.AStar.set_map" title="gncpy.planning.a_star.AStar.set_map"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set_map()</span></code></a> function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>2 numpy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gncpy.planning.a_star.AStar.max">
+<span class="sig-name descname"><span class="pre">max</span></span><a class="headerlink" href="#gncpy.planning.a_star.AStar.max" title="Permalink to this definition"></a></dt>
+<dd><p>Maximum x/y positions in real units. Should not be set directly, use
+the <a class="reference internal" href="#gncpy.planning.a_star.AStar.set_map" title="gncpy.planning.a_star.AStar.set_map"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set_map()</span></code></a> function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>2 numpy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gncpy.planning.a_star.AStar.weight">
+<span class="sig-name descname"><span class="pre">weight</span></span><a class="headerlink" href="#gncpy.planning.a_star.AStar.weight" title="Permalink to this definition"></a></dt>
+<dd><p>Constant weighting factor applied to the heuristic. The default is 1 and
+is only used if the weighting funtion is not overwritten.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gncpy.planning.a_star.AStar.use_beam_search">
+<span class="sig-name descname"><span class="pre">use_beam_search</span></span><a class="headerlink" href="#gncpy.planning.a_star.AStar.use_beam_search" title="Permalink to this definition"></a></dt>
+<dd><p>Flag indicating if the beam search variation is used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gncpy.planning.a_star.AStar.beam_search_max_nodes">
+<span class="sig-name descname"><span class="pre">beam_search_max_nodes</span></span><a class="headerlink" href="#gncpy.planning.a_star.AStar.beam_search_max_nodes" title="Permalink to this definition"></a></dt>
+<dd><p>Maximum nuber of grid nodes to keep when using the beam search variation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gncpy.planning.a_star.AStar.motion">
+<span class="sig-name descname"><span class="pre">motion</span></span><a class="headerlink" href="#gncpy.planning.a_star.AStar.motion" title="Permalink to this definition"></a></dt>
+<dd><p>Each row represents a potential action, with the first column being row
+motion in gird squares, second column being column motion, and third
+being the cost of moving.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>8 x 3 numpy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.planning.a_star.AStar.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_beam_search</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beam_search_max_nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/planning/a_star.html#AStar.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.planning.a_star.AStar.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize an object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>use_beam_search</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag indicating if the beam search variation is used. The default
+is False.</p></li>
+<li><p><strong>beam_search_max_nodes</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum nuber of grid nodes to keep when using the beam search
+variation. The default is 30.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.planning.a_star.AStar.__init__" title="gncpy.planning.a_star.AStar.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a></p></td>
+<td><p>Initialize an object.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.planning.a_star.AStar.calc_heuristic" title="gncpy.planning.a_star.AStar.calc_heuristic"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_heuristic</span></code></a></p></td>
+<td><p>Calculates the heuristic cost.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.planning.a_star.AStar.calc_weight" title="gncpy.planning.a_star.AStar.calc_weight"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_weight</span></code></a></p></td>
+<td><p>Calculates the weight of applied to the heuristic.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.planning.a_star.AStar.draw_end" title="gncpy.planning.a_star.AStar.draw_end"><code class="xref py py-obj docutils literal notranslate"><span class="pre">draw_end</span></code></a></p></td>
+<td><p>Draw the ending node on the figure.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.planning.a_star.AStar.draw_map" title="gncpy.planning.a_star.AStar.draw_map"><code class="xref py py-obj docutils literal notranslate"><span class="pre">draw_map</span></code></a></p></td>
+<td><p>Draws the map to the figure.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.planning.a_star.AStar.draw_start" title="gncpy.planning.a_star.AStar.draw_start"><code class="xref py py-obj docutils literal notranslate"><span class="pre">draw_start</span></code></a></p></td>
+<td><p>Draw starting node on the figure.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.planning.a_star.AStar.final_path" title="gncpy.planning.a_star.AStar.final_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">final_path</span></code></a></p></td>
+<td><p>Calculate the final path and total cost.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.planning.a_star.AStar.get_map_cost" title="gncpy.planning.a_star.AStar.get_map_cost"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_map_cost</span></code></a></p></td>
+<td><p>Returns the cost of being at the given map indices.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.planning.a_star.AStar.ind_to_pos" title="gncpy.planning.a_star.AStar.ind_to_pos"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ind_to_pos</span></code></a></p></td>
+<td><p>Convert a set of row/colum indices to real positions.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.planning.a_star.AStar.is_valid" title="gncpy.planning.a_star.AStar.is_valid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_valid</span></code></a></p></td>
+<td><p>Checks if the node is valid.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.planning.a_star.AStar.plan" title="gncpy.planning.a_star.AStar.plan"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plan</span></code></a></p></td>
+<td><p>Runs the search algorithm.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.planning.a_star.AStar.pos_to_ind" title="gncpy.planning.a_star.AStar.pos_to_ind"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pos_to_ind</span></code></a></p></td>
+<td><p>Convert a set of x/y positions to grid indices.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.planning.a_star.AStar.ravel_ind" title="gncpy.planning.a_star.AStar.ravel_ind"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ravel_ind</span></code></a></p></td>
+<td><p>Convert row/column indices into a single index into flattened array.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.planning.a_star.AStar.set_map" title="gncpy.planning.a_star.AStar.set_map"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_map</span></code></a></p></td>
+<td><p>Sets up the map with obstacles and hazards.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.planning.a_star.AStar.calc_heuristic">
+<span class="sig-name descname"><span class="pre">calc_heuristic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">endNode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curNode</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/planning/a_star.html#AStar.calc_heuristic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.planning.a_star.AStar.calc_heuristic" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates the heuristic cost.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>endNode</strong> (<a class="reference internal" href="gncpy.planning.a_star.Node.html#gncpy.planning.a_star.Node" title="gncpy.planning.a_star.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code></a>) – Goal node.</p></li>
+<li><p><strong>curNode</strong> (<a class="reference internal" href="gncpy.planning.a_star.Node.html#gncpy.planning.a_star.Node" title="gncpy.planning.a_star.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code></a>) – Current node.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>heuristic cost.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.planning.a_star.AStar.calc_weight">
+<span class="sig-name descname"><span class="pre">calc_weight</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/planning/a_star.html#AStar.calc_weight"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.planning.a_star.AStar.calc_weight" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates the weight of applied to the heuristic.</p>
+<p>This can be overriddent to calculate custom weights.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>node</strong> (<a class="reference internal" href="gncpy.planning.a_star.Node.html#gncpy.planning.a_star.Node" title="gncpy.planning.a_star.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code></a>) – Current node.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>weight value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.planning.a_star.AStar.draw_end">
+<span class="sig-name descname"><span class="pre">draw_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endNode</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/planning/a_star.html#AStar.draw_end"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.planning.a_star.AStar.draw_end" title="Permalink to this definition"></a></dt>
+<dd><p>Draw the ending node on the figure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fig</strong> (<em>matplotlib figure</em>) – Figure to draw on.</p></li>
+<li><p><strong>endNode</strong> (<a class="reference internal" href="gncpy.planning.a_star.Node.html#gncpy.planning.a_star.Node" title="gncpy.planning.a_star.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code></a>) – Ending node.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.planning.a_star.AStar.draw_map">
+<span class="sig-name descname"><span class="pre">draw_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/planning/a_star.html#AStar.draw_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.planning.a_star.AStar.draw_map" title="Permalink to this definition"></a></dt>
+<dd><p>Draws the map to the figure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>fig</strong> (<em>matplotlib figure</em>) – Figure to draw on.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.planning.a_star.AStar.draw_start">
+<span class="sig-name descname"><span class="pre">draw_start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startNode</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/planning/a_star.html#AStar.draw_start"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.planning.a_star.AStar.draw_start" title="Permalink to this definition"></a></dt>
+<dd><p>Draw starting node on the figure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fig</strong> (<em>matplotlib figure</em>) – Figure to draw on.</p></li>
+<li><p><strong>startNode</strong> (<a class="reference internal" href="gncpy.planning.a_star.Node.html#gncpy.planning.a_star.Node" title="gncpy.planning.a_star.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code></a>) – Starting node.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.planning.a_star.AStar.final_path">
+<span class="sig-name descname"><span class="pre">final_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">endNode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">closed_set</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/planning/a_star.html#AStar.final_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.planning.a_star.AStar.final_path" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the final path and total cost.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>endNode</strong> (<em>:class`.Node`</em>) – Ending position.</p></li>
+<li><p><strong>closed_set</strong> (<em>dict</em>) – Dictionary of path nodes. The keys are flattened indices and the
+values are <a class="reference internal" href="gncpy.planning.a_star.Node.html#gncpy.planning.a_star.Node" title="gncpy.planning.a_star.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>N x 2 numpy array</em> – Real x/y positions of the path nodes.</p></li>
+<li><p><em>float</em> – total cost of the path.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.planning.a_star.AStar.get_map_cost">
+<span class="sig-name descname"><span class="pre">get_map_cost</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/planning/a_star.html#AStar.get_map_cost"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.planning.a_star.AStar.get_map_cost" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the cost of being at the given map indices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>indices</strong> (<em>2 numpy array</em>) – Row/col indices.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Cost of the gird node.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.planning.a_star.AStar.ind_to_pos">
+<span class="sig-name descname"><span class="pre">ind_to_pos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/planning/a_star.html#AStar.ind_to_pos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.planning.a_star.AStar.ind_to_pos" title="Permalink to this definition"></a></dt>
+<dd><p>Convert a set of row/colum indices to real positions.</p>
+<p>Note that rows are y positions and columns are x positions, this function
+handles the conversion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>indices</strong> (<em>2 numpy array</em>) – row/column index into grid.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>real x/y position.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>2 numpy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.planning.a_star.AStar.is_valid">
+<span class="sig-name descname"><span class="pre">is_valid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/planning/a_star.html#AStar.is_valid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.planning.a_star.AStar.is_valid" title="Permalink to this definition"></a></dt>
+<dd><p>Checks if the node is valid.</p>
+<p>Bounds checks the indices and determines  if node corresponds to a wall.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>node</strong> (<a class="reference internal" href="gncpy.planning.a_star.Node.html#gncpy.planning.a_star.Node" title="gncpy.planning.a_star.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code></a>) – Node to check.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the node is valid.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.planning.a_star.AStar.plan">
+<span class="sig-name descname"><span class="pre">plan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_animation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_animation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plt_opts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ttl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/planning/a_star.html#AStar.plan"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.planning.a_star.AStar.plan" title="Permalink to this definition"></a></dt>
+<dd><p>Runs the search algorithm.</p>
+<p>The setup functoins should be called prior to this.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start_pos</strong> (<em>2 numpy array</em>) – Starting x/y pos in real units.</p></li>
+<li><p><strong>end_pos</strong> (<em>2 numpy array</em>) – ending x/y pos in real units.</p></li>
+<li><p><strong>show_animation</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag indicating if an animated plot should be shown during planning.
+The default is False. If shown, escape key can be used to quit.</p></li>
+<li><p><strong>save_animation</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag for saving each frame of the animation as a PIL image. This
+can later be saved to a gif. The default is False. The animation must
+be shown for this to have an effect.</p></li>
+<li><p><strong>plt_opts</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional options for the plot from
+<a class="reference internal" href="../../plotting/gncpy.plotting.init_plotting_opts.html#gncpy.plotting.init_plotting_opts" title="gncpy.plotting.init_plotting_opts"><code class="xref py py-meth docutils literal notranslate"><span class="pre">gncpy.plotting.init_plotting_opts()</span></code></a>. The default is None.</p></li>
+<li><p><strong>ttl</strong> (<em>string</em><em>, </em><em>optional</em>) – title string of the plot. The default is None which gives a generic
+name of the algorithm.</p></li>
+<li><p><strong>fig</strong> (<em>matplotlib figure</em><em>, </em><em>optional</em>) – Figure object to plot on. The default is None which makes a new
+figure. If a figure is provided, then only the ending state,
+searched nodes, and best path are added to the figure.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>path</strong> (<em>Nx2 numpy array</em>) – Real positions of the path.</p></li>
+<li><p><strong>cost</strong> (<em>float</em>) – total cost of the path.</p></li>
+<li><p><strong>fig</strong> (<em>matplotlib figure</em>) – Figure that was drawn, None if the animation is not shown.</p></li>
+<li><p><strong>frame_list</strong> (<em>list</em>) – Each element is a PIL image corresponding to an animation frame.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.planning.a_star.AStar.pos_to_ind">
+<span class="sig-name descname"><span class="pre">pos_to_ind</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/planning/a_star.html#AStar.pos_to_ind"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.planning.a_star.AStar.pos_to_ind" title="Permalink to this definition"></a></dt>
+<dd><p>Convert a set of x/y positions to grid indices.</p>
+<p>Note that rows are y positions and columns are x positions, this function
+handles the conversion. This does not bounds check the indices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pos</strong> (<em>2 numpy array</em>) – Real x/y position.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>grid row/column index.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>2 numpy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.planning.a_star.AStar.ravel_ind">
+<span class="sig-name descname"><span class="pre">ravel_ind</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">multi_index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/planning/a_star.html#AStar.ravel_ind"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.planning.a_star.AStar.ravel_ind" title="Permalink to this definition"></a></dt>
+<dd><p>Convert row/column indices into a single index into flattened array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>multi_index</strong> (<em>2 numpy array</em>) – Row/col indices into the gird.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Flattened index</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.planning.a_star.AStar.set_map">
+<span class="sig-name descname"><span class="pre">set_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_res</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obstacles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hazards</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/planning/a_star.html#AStar.set_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.planning.a_star.AStar.set_map" title="Permalink to this definition"></a></dt>
+<dd><p>Sets up the map with obstacles and hazards.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>min_pos</strong> (<em>2 numpy array</em>) – Min x/y position in real units.</p></li>
+<li><p><strong>max_pos</strong> (<em>2 numpy array</em>) – Max x/y position in real units.</p></li>
+<li><p><strong>grid_res</strong> (<em>2 numpy array</em>) – Real distance per gird square for x/y positions.</p></li>
+<li><p><strong>obstacles</strong> (<em>N x 4 numpy array</em><em>, </em><em>optional</em>) – Locations of walls, each row is one wall. First column is x position
+second column is y position, third is width, and fourth is height.
+The position is the location of the center. All distances are in
+real units. The default is None.</p></li>
+<li><p><strong>hazards</strong> (<em>N x 5 numpy array</em><em>, </em><em>optional</em>) – Locations of walls, each row is one wall. First column is x position
+second column is y position, third is width, fourth is height, and
+the last is the cost of being on that node. The position is the
+location of the center. All distances are in real units. The
+default is None.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../gncpy.planning.a_star.html" class="btn btn-neutral float-left" title="a_star" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="gncpy.planning.a_star.Node.html" class="btn btn-neutral float-right" title="Node" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Laboratory for Autonomy, GNC, and Estimation Research (LAGER).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

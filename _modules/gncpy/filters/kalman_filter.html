@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gncpy.filters.kalman_filter &mdash; GNCPy 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+    <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_modules/gncpy/filters/kalman_filter.html" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #9E1B32" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            GNCPy
+              <img src="../../../_static/logo.svg" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../_autosummary/gncpy.html">gncpy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.control.html">control</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/control/gncpy.control.ELQR.html">ELQR</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/control/gncpy.control.LQR.html">LQR</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.coordinate_transforms.html">coordinate_transforms</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/coordinate_transforms/gncpy.coordinate_transforms.ecef_to_LLA.html">gncpy.coordinate_transforms.ecef_to_LLA</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/coordinate_transforms/gncpy.coordinate_transforms.ecef_to_NED.html">gncpy.coordinate_transforms.ecef_to_NED</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/coordinate_transforms/gncpy.coordinate_transforms.lla_to_ECEF.html">gncpy.coordinate_transforms.lla_to_ECEF</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/coordinate_transforms/gncpy.coordinate_transforms.lla_to_NED.html">gncpy.coordinate_transforms.lla_to_NED</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/coordinate_transforms/gncpy.coordinate_transforms.ned_to_LLA.html">gncpy.coordinate_transforms.ned_to_LLA</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.data_fusion.html">data_fusion</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/data_fusion/gncpy.data_fusion.GeneralizedCovarianceIntersection.html">gncpy.data_fusion.GeneralizedCovarianceIntersection</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.distributions.html">distributions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/distributions/gncpy.distributions.Particle.html">Particle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/distributions/gncpy.distributions.ParticleDistribution.html">ParticleDistribution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/distributions/gncpy.distributions.QuadraturePoints.html">QuadraturePoints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/distributions/gncpy.distributions.SigmaPoints.html">SigmaPoints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/distributions/gncpy.distributions.SimpleParticleDistribution.html">SimpleParticleDistribution</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.dynamics.html">dynamics</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/dynamics/gncpy.dynamics.aircraft.html">aircraft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/dynamics/gncpy.dynamics.basic.html">basic</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.errors.html">errors</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/errors/gncpy.errors.ExtremeMeasurementNoiseError.html">gncpy.errors.ExtremeMeasurementNoiseError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/errors/gncpy.errors.ParticleDepletionError.html">gncpy.errors.ParticleDepletionError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/errors/gncpy.errors.ParticleEstimationDomainError.html">gncpy.errors.ParticleEstimationDomainError</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.filters.html">filters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.bayes_filter.html">bayes_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.bootstrap_filter.html">bootstrap_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.ekf_gaussian_scale_mixture_filter.html">ekf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.extended_kalman_filter.html">extended_kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.gci_filter.html">gci_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.gsm_filter_base.html">gsm_filter_base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.imm_gci_filter.html">imm_gci_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.interacting_multiple_model.html">interacting_multiple_model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.kalman_filter.html">kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.kf_gaussian_scale_mixture_filter.html">kf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.max_corr_ent_ukf.html">max_corr_ent_ukf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.max_corr_ent_upf.html">max_corr_ent_upf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.mcmc_particle_filter_base.html">mcmc_particle_filter_base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.particle_filter.html">particle_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.qkf_gaussian_scale_mixture_filter.html">qkf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.quadrature_kalman_filter.html">quadrature_kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.sqkf_gaussian_scale_mixture_filter.html">sqkf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.square_root_qkf.html">square_root_qkf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.students_t_filter.html">students_t_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.ukf_gaussian_scale_mixture_filter.html">ukf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.unscented_kalman_filter.html">unscented_kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/filters/gncpy.filters.unscented_particle_filter.html">unscented_particle_filter</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.game_engine.html">game_engine</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/game_engine/gncpy.game_engine.base_game.html">base_game</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/game_engine/gncpy.game_engine.components.html">components</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/game_engine/gncpy.game_engine.entities.html">entities</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/game_engine/gncpy.game_engine.physics2d.html">physics2d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/game_engine/gncpy.game_engine.rendering2d.html">rendering2d</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.games.html">games</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/games/gncpy.games.SimpleUAV2d.html">SimpleUAV2d</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.math.html">math</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.epanechnikov_kernel.html">gncpy.math.epanechnikov_kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.gamma_fnc.html">gncpy.math.gamma_fnc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.gaussian_kernel.html">gncpy.math.gaussian_kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.get_elem_sym_fnc.html">gncpy.math.get_elem_sym_fnc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.get_hessian.html">gncpy.math.get_hessian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.get_input_jacobian.html">gncpy.math.get_input_jacobian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.get_jacobian.html">gncpy.math.get_jacobian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.get_state_jacobian.html">gncpy.math.get_state_jacobian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.log_sum_exp.html">gncpy.math.log_sum_exp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.rk4.html">gncpy.math.rk4</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.rk4_backward.html">gncpy.math.rk4_backward</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.weighted_sum_mat.html">gncpy.math.weighted_sum_mat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/math/gncpy.math.weighted_sum_vec.html">gncpy.math.weighted_sum_vec</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.measurements.html">measurements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.orbital_mechanics.html">orbital_mechanics</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/orbital_mechanics/gncpy.orbital_mechanics.correct_lon_ascend.html">gncpy.orbital_mechanics.correct_lon_ascend</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/orbital_mechanics/gncpy.orbital_mechanics.ecc_anom_from_mean.html">gncpy.orbital_mechanics.ecc_anom_from_mean</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/orbital_mechanics/gncpy.orbital_mechanics.ecef_from_orbit.html">gncpy.orbital_mechanics.ecef_from_orbit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/orbital_mechanics/gncpy.orbital_mechanics.true_anom_from_ecc.html">gncpy.orbital_mechanics.true_anom_from_ecc</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.planning.html">planning</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/planning/gncpy.planning.a_star.html">a_star</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/planning/gncpy.planning.reinforcement_learning.html">reinforcement_learning</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/planning/gncpy.planning.rrt_star.html">rrt_star</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.plotting.html">plotting</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/plotting/gncpy.plotting.calc_error_ellipse.html">gncpy.plotting.calc_error_ellipse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/plotting/gncpy.plotting.get_cmap.html">gncpy.plotting.get_cmap</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/plotting/gncpy.plotting.init_plotting_opts.html">gncpy.plotting.init_plotting_opts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/plotting/gncpy.plotting.set_title_label.html">gncpy.plotting.set_title_label</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.sampling.html">sampling</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/sampling/gncpy.sampling.MetropolisHastings.html">MetropolisHastings</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.utilities.html">utilities</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/utilities/gncpy.utilities.classproperty.html">gncpy.utilities.classproperty</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/utilities/gncpy.utilities.ClassPropertyDescriptor.html">ClassPropertyDescriptor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/utilities/gncpy.utilities.ClassPropertyMetaClass.html">ClassPropertyMetaClass</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.wgs84.html">wgs84</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_earth_rate.html">gncpy.wgs84.calc_earth_rate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_ew_rad.html">gncpy.wgs84.calc_ew_rad</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_gravity.html">gncpy.wgs84.calc_gravity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_ns_rad.html">gncpy.wgs84.calc_ns_rad</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_transport_rate.html">gncpy.wgs84.calc_transport_rate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.convert_msl_to_wgs.html">gncpy.wgs84.convert_msl_to_wgs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.convert_wgs_to_msl.html">gncpy.wgs84.convert_wgs_to_msl</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/wgs84/gncpy.wgs84.init_egm_lookup_table.html">gncpy.wgs84.init_egm_lookup_table</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage.html">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/control.html">Control Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/control.html#lqr-infinite-horizon-linear-dyanmics">LQR Infinite Horizon Linear Dyanmics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/control.html#lqr-finite-horzon-linear-dynamics">LQR Finite Horzon Linear Dynamics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/control.html#lqr-finite-horzon-non-linear-dynamics">LQR Finite Horzon Non-linear Dynamics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/control.html#elqr">ELQR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/control.html#elqr-modified-quadratization">ELQR Modified Quadratization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/control.html#elqr-linear-dynamics">ELQR Linear Dynamics</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/filters.html">Filter Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/filters.html#kalman-filter">Kalman Filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/filters.html#extended-kalman-filter">Extended Kalman Filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/filters.html#interacting-multiple-model-filter">Interacting Multiple Model Filter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/planning.html">Planning Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/a_star.html">A* Examples</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../usage/a_star.html#normal-a">Normal A*</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../usage/a_star.html#beam-search">Beam Search</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../usage/a_star.html#weighted-a">Weighted A*</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/rrtstar.html">RRT* Examples</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../usage/rrtstar.html#lqr-rrt-with-linear-dynamics">LQR-RRT* with Linear Dynamics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../usage/rrtstar.html#lqr-rrt-with-non-linear-dynamics">LQR-RRT* with Non-Linear Dynamics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../usage/rrtstar.html#elqr-rrt-with-non-linear-dynamics">ELQR-RRT* with Non-Linear Dynamics</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../toolchain.html">Toolchain</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../toolchain.html#development-environment-setup">Development Environment Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../toolchain.html#example-workflow">Example Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../toolchain.html#notes-on-tox">Notes on tox</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cicd.html">CI/CD Pipeline</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../cicd.html#github-actions-quick-guide">Github Actions Quick Guide</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="./reports/coverage/index.html#http://">Test Coverage Report</a></li>
+<li class="toctree-l1"><a class="reference external" href="./reports/junit/junit.html#http://">Test Results Report</a></li>
+<li class="toctree-l1"><a class="reference external" href="http://lager.ua.edu/">LAGER Homepage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../References.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #9E1B32" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">GNCPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gncpy.filters.kalman_filter</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gncpy.filters.kalman_filter</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numpy.linalg</span> <span class="k">as</span> <span class="nn">la</span>
+<span class="kn">import</span> <span class="nn">scipy.linalg</span> <span class="k">as</span> <span class="nn">sla</span>
+<span class="kn">import</span> <span class="nn">scipy.stats</span> <span class="k">as</span> <span class="nn">stats</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+
+<span class="kn">import</span> <span class="nn">gncpy.errors</span> <span class="k">as</span> <span class="nn">gerr</span>
+<span class="kn">import</span> <span class="nn">gncpy.filters._filters</span> <span class="k">as</span> <span class="nn">cpp_bindings</span>
+<span class="kn">from</span> <span class="nn">gncpy.filters.bayes_filter</span> <span class="kn">import</span> <span class="n">BayesFilter</span>
+
+
+<div class="viewcode-block" id="KalmanFilter"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/kalman_filter/gncpy.filters.kalman_filter.KalmanFilter.html#gncpy.filters.kalman_filter.KalmanFilter">[docs]</a><span class="k">class</span> <span class="nc">KalmanFilter</span><span class="p">(</span><span class="n">BayesFilter</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Implementation of a discrete time Kalman Filter.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This is loosely based on :cite:`Crassidis2011_OptimalEstimationofDynamicSystems`</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cov : N x N numpy array</span>
+<span class="sd">        Covariance matrix</span>
+<span class="sd">    meas_noise : Nm x Nm numpy array</span>
+<span class="sd">        Measurement noise matrix</span>
+<span class="sd">    proc_noise : N x N numpy array</span>
+<span class="sd">        Process noise matrix</span>
+<span class="sd">    dt : float</span>
+<span class="sd">        Time difference between simulation steps. Required if not using a</span>
+<span class="sd">        dynamic object for the state model.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="KalmanFilter.__init__"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/kalman_filter/gncpy.filters.kalman_filter.KalmanFilter.html#gncpy.filters.kalman_filter.KalmanFilter.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">cov</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[]]),</span> <span class="n">meas_noise</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[]]),</span> <span class="n">dt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cov</span> <span class="o">=</span> <span class="n">cov</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meas_noise</span> <span class="o">=</span> <span class="n">meas_noise</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proc_noise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[]])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="n">dt</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dyn_obj</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_state_mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[]])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_input_mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[]])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_get_state_mat</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_get_input_mat</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_meas_mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[]])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_meas_fnc</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_measObj</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_est_meas_noise_fnc</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__model</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__predParams</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__corrParams</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__model</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__model</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">cov</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__model</span><span class="o">.</span><span class="n">cov</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cov</span>
+
+    <span class="nd">@cov</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">cov</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__model</span><span class="o">.</span><span class="n">cov</span> <span class="o">=</span> <span class="n">val</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cov</span> <span class="o">=</span> <span class="n">val</span>
+
+<div class="viewcode-block" id="KalmanFilter.save_filter_state"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/kalman_filter/gncpy.filters.kalman_filter.KalmanFilter.html#gncpy.filters.kalman_filter.KalmanFilter.save_filter_state">[docs]</a>    <span class="k">def</span> <span class="nf">save_filter_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Saves filter variables so they can be restored later.&quot;&quot;&quot;</span>
+        <span class="n">filt_state</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">save_filter_state</span><span class="p">()</span>
+
+        <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;cov&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cov</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">meas_noise</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;meas_noise&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meas_noise</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;meas_noise&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meas_noise</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc_noise</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;proc_noise&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc_noise</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;proc_noise&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc_noise</span>
+        <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;dt&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span>
+        <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_dyn_obj&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dyn_obj</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state_mat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_state_mat&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state_mat</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_state_mat&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state_mat</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_mat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_input_mat&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_mat</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_input_mat&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_mat</span>
+        <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_get_state_mat&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_state_mat</span>
+        <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_get_input_mat&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_input_mat</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meas_mat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_meas_mat&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meas_mat</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_meas_mat&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meas_mat</span>
+        <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_meas_fnc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meas_fnc</span>
+        <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_est_meas_noise_fnc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_est_meas_noise_fnc</span>
+
+        <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_measObj&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_measObj</span>
+        <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;__model&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__model</span>
+        <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;__predParams&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__predParams</span>
+        <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;__corrParams&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__corrParams</span>
+
+        <span class="k">return</span> <span class="n">filt_state</span></div>
+
+<div class="viewcode-block" id="KalmanFilter.load_filter_state"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/kalman_filter/gncpy.filters.kalman_filter.KalmanFilter.html#gncpy.filters.kalman_filter.KalmanFilter.load_filter_state">[docs]</a>    <span class="k">def</span> <span class="nf">load_filter_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filt_state</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes filter using saved filter state.</span>
+
+<span class="sd">        Attributes</span>
+<span class="sd">        ----------</span>
+<span class="sd">        filt_state : dict</span>
+<span class="sd">            Dictionary generated by :meth:`save_filter_state`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">load_filter_state</span><span class="p">(</span><span class="n">filt_state</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cov</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;cov&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meas_noise</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;meas_noise&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proc_noise</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;proc_noise&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;dt&quot;</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dyn_obj</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_dyn_obj&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_state_mat</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_state_mat&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_input_mat</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_input_mat&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_get_state_mat</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_get_state_mat&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_get_input_mat</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_get_input_mat&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_meas_mat</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_meas_mat&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_meas_fnc</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_meas_fnc&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_est_meas_noise_fnc</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_est_meas_noise_fnc&quot;</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_measObj</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_measObj&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__model</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;__model&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__predParams</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;__predParams&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__corrParams</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;__corrParams&quot;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="KalmanFilter.set_state_model"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/kalman_filter/gncpy.filters.kalman_filter.KalmanFilter.html#gncpy.filters.kalman_filter.KalmanFilter.set_state_model">[docs]</a>    <span class="k">def</span> <span class="nf">set_state_model</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">state_mat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">input_mat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">cont_time</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">state_mat_fun</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">input_mat_fun</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">dyn_obj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Sets the state model equation for the filter.</span>
+
+<span class="sd">        If the continuous time model is used then a `dt` must be provided, see</span>
+<span class="sd">        the note for algorithm details. Alternatively, if the system is time</span>
+<span class="sd">        varying then functions can be specified to return the matrices at each</span>
+<span class="sd">        time step.</span>
+
+<span class="sd">        Note</span>
+<span class="sd">        -----</span>
+<span class="sd">        This can use a continuous or discrete model. The continuous model will</span>
+<span class="sd">        be automatically discretized so standard matrix equations can be used.</span>
+
+<span class="sd">        If the discrete model is used it is assumed to have the form</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            x_{k+1} = F x_k + G u_k</span>
+
+<span class="sd">        If the continuous model is used it is assumed to have the form</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            \dot{x} = A x + B u</span>
+
+<span class="sd">        and is discretized according to</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            expm\left[\begin{bmatrix}</span>
+<span class="sd">                A &amp; B\\</span>
+<span class="sd">                0 &amp; 0</span>
+<span class="sd">                \end{bmatrix}dt\right]=\begin{bmatrix}</span>
+<span class="sd">                F &amp; G\\</span>
+<span class="sd">                0 &amp; I</span>
+<span class="sd">                \end{bmatrix}</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        state_mat : N x N numpy array, optional</span>
+<span class="sd">            State matrix, continuous or discrete case. The default is None.</span>
+<span class="sd">        input_mat : N x Nu numpy array, optional</span>
+<span class="sd">            Input matrixx, continuous or discrete case. The default is None.</span>
+<span class="sd">        cont_time : bool, optional</span>
+<span class="sd">            Flag inidicating if the continuous model is provided. The default</span>
+<span class="sd">            is False.</span>
+<span class="sd">        state_mat_fun : callable, optional</span>
+<span class="sd">            Function that returns the `state_mat`, must take timestep and</span>
+<span class="sd">            `*args`. The default is None.</span>
+<span class="sd">        input_mat_fun : callable, optional</span>
+<span class="sd">            Function that returns the `input_mat`, must take timestep, and</span>
+<span class="sd">            `*args`. The default is None.</span>
+<span class="sd">        dyn_obj : :class:`gncpy.dynamics.LinearDynamicsBase`, optional</span>
+<span class="sd">            Sets the dynamics according to the class. The default is None.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        RuntimeError</span>
+<span class="sd">            If the improper combination of input arguments are specified.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">have_obj</span> <span class="o">=</span> <span class="n">dyn_obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="n">have_mats</span> <span class="o">=</span> <span class="n">state_mat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="n">have_funs</span> <span class="o">=</span> <span class="n">state_mat_fun</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">have_obj</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dyn_obj</span> <span class="o">=</span> <span class="n">dyn_obj</span>
+        <span class="k">elif</span> <span class="n">have_mats</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">cont_time</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__model</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_state_mat</span> <span class="o">=</span> <span class="n">state_mat</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_input_mat</span> <span class="o">=</span> <span class="n">input_mat</span>
+        <span class="k">elif</span> <span class="n">have_mats</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__model</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;dt must be specified when using continuous time model&quot;</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="n">n_cols</span> <span class="o">=</span> <span class="n">state_mat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">input_mat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">big_mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">state_mat</span><span class="p">,</span> <span class="n">input_mat</span><span class="p">)),</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">input_mat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">n_cols</span><span class="p">)),</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">sla</span><span class="o">.</span><span class="n">expm</span><span class="p">(</span><span class="n">big_mat</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span><span class="p">)</span>
+            <span class="n">r_s</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">r_e</span> <span class="o">=</span> <span class="n">state_mat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">c_s</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">c_e</span> <span class="o">=</span> <span class="n">state_mat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_state_mat</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="n">r_s</span><span class="p">:</span><span class="n">r_e</span><span class="p">,</span> <span class="n">c_s</span><span class="p">:</span><span class="n">c_e</span><span class="p">]</span>
+            <span class="n">c_s</span> <span class="o">=</span> <span class="n">c_e</span>
+            <span class="n">c_e</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_input_mat</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="n">r_s</span><span class="p">:</span><span class="n">r_e</span><span class="p">,</span> <span class="n">c_s</span><span class="p">:</span><span class="n">c_e</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">have_funs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__model</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_get_state_mat</span> <span class="o">=</span> <span class="n">state_mat_fun</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_get_input_mat</span> <span class="o">=</span> <span class="n">input_mat_fun</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Invalid combination of inputs&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="KalmanFilter.set_measurement_model"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/kalman_filter/gncpy.filters.kalman_filter.KalmanFilter.html#gncpy.filters.kalman_filter.KalmanFilter.set_measurement_model">[docs]</a>    <span class="k">def</span> <span class="nf">set_measurement_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meas_mat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">meas_fun</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">measObj</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Sets the measurement model for the filter.</span>
+
+<span class="sd">        This can either set the constant measurement matrix, or the matrix can</span>
+<span class="sd">        be time varying.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        This assumes a measurement model of the form</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            \tilde{y}_{k+1} = H_{k+1} x_{k+1}^-</span>
+
+<span class="sd">        where :math:`H_{k+1}` can be constant over time.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        meas_mat : Nm x N numpy array, optional</span>
+<span class="sd">            Measurement matrix that transforms the state to estimated</span>
+<span class="sd">            measurements. The default is None.</span>
+<span class="sd">        meas_fun : callable, optional</span>
+<span class="sd">            Function that returns the matrix for transforming the state to</span>
+<span class="sd">            estimated measurements. Must take timestep, and `*args` as</span>
+<span class="sd">            arguments. The default is None.</span>
+<span class="sd">        measObj : class instance</span>
+<span class="sd">            Measurement class instance</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        RuntimeError</span>
+<span class="sd">            Rasied if no arguments are specified.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">measObj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_measObj</span> <span class="o">=</span> <span class="n">measObj</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_meas_mat</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_meas_fnc</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="n">meas_mat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__model</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_measObj</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_meas_mat</span> <span class="o">=</span> <span class="n">meas_mat</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_meas_fnc</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="n">meas_fun</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__model</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_measObj</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_meas_mat</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_meas_fnc</span> <span class="o">=</span> <span class="n">meas_fun</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Invalid combination of inputs&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="KalmanFilter.set_measurement_noise_estimator"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/kalman_filter/gncpy.filters.kalman_filter.KalmanFilter.html#gncpy.filters.kalman_filter.KalmanFilter.set_measurement_noise_estimator">[docs]</a>    <span class="k">def</span> <span class="nf">set_measurement_noise_estimator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets the model used for estimating the measurement noise parameters.</span>
+
+<span class="sd">        This is an optional step and the filter will work properly if this is</span>
+<span class="sd">        not called. If it is called, the measurement noise will be estimated</span>
+<span class="sd">        during the filter&#39;s correction step and the measurement noise attribute</span>
+<span class="sd">        will not be used.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        function : callable</span>
+<span class="sd">            A function that implements the prediction and correction steps for</span>
+<span class="sd">            an appropriate filter to estimate the measurement noise covariance</span>
+<span class="sd">            matrix. It must have the signature `f(est_meas)` where `est_meas`</span>
+<span class="sd">            is an Nm x 1 numpy array and it must return an Nm x Nm numpy array</span>
+<span class="sd">            representing the measurement noise covariance matrix.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_est_meas_noise_fnc</span> <span class="o">=</span> <span class="n">function</span></div>
+
+    <span class="k">def</span> <span class="nf">_predict_next_state</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">cur_state</span><span class="p">,</span> <span class="n">cur_input</span><span class="p">,</span> <span class="n">state_mat_args</span><span class="p">,</span> <span class="n">input_mat_args</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dyn_obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">next_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dyn_obj</span><span class="o">.</span><span class="n">propagate_state</span><span class="p">(</span>
+                <span class="n">timestep</span><span class="p">,</span>
+                <span class="n">cur_state</span><span class="p">,</span>
+                <span class="n">u</span><span class="o">=</span><span class="n">cur_input</span><span class="p">,</span>
+                <span class="n">state_args</span><span class="o">=</span><span class="n">state_mat_args</span><span class="p">,</span>
+                <span class="n">ctrl_args</span><span class="o">=</span><span class="n">input_mat_args</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">state_mat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dyn_obj</span><span class="o">.</span><span class="n">get_state_mat</span><span class="p">(</span><span class="n">timestep</span><span class="p">,</span> <span class="o">*</span><span class="n">state_mat_args</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_state_mat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">state_mat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_state_mat</span><span class="p">(</span><span class="n">timestep</span><span class="p">,</span> <span class="o">*</span><span class="n">state_mat_args</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state_mat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">state_mat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state_mat</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;State model not set&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_input_mat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">input_mat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_input_mat</span><span class="p">(</span><span class="n">timestep</span><span class="p">,</span> <span class="o">*</span><span class="n">input_mat_args</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_mat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">input_mat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input_mat</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">input_mat</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">next_state</span> <span class="o">=</span> <span class="n">state_mat</span> <span class="o">@</span> <span class="n">cur_state</span>
+
+            <span class="k">if</span> <span class="n">input_mat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">cur_input</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">next_state</span> <span class="o">+=</span> <span class="n">input_mat</span> <span class="o">@</span> <span class="n">cur_input</span>
+        <span class="k">return</span> <span class="n">next_state</span><span class="p">,</span> <span class="n">state_mat</span>
+
+    <span class="k">def</span> <span class="nf">_init_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">cpp_needs_init</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__model</span> <span class="ow">is</span> <span class="kc">None</span>
+            <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dyn_obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dyn_obj</span><span class="o">.</span><span class="n">allow_cpp</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_measObj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">cpp_needs_init</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__model</span> <span class="o">=</span> <span class="n">cpp_bindings</span><span class="o">.</span><span class="n">Kalman</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__predParams</span> <span class="o">=</span> <span class="n">cpp_bindings</span><span class="o">.</span><span class="n">BayesPredictParams</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__corrParams</span> <span class="o">=</span> <span class="n">cpp_bindings</span><span class="o">.</span><span class="n">BayesCorrectParams</span><span class="p">()</span>
+
+            <span class="c1"># make sure the cpp filter has its values set based on what python user gave (init only)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__model</span><span class="o">.</span><span class="n">cov</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cov</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__model</span><span class="o">.</span><span class="n">set_state_model</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dyn_obj</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc_noise</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__model</span><span class="o">.</span><span class="n">set_measurement_model</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_measObj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">meas_noise</span><span class="p">)</span>
+
+<div class="viewcode-block" id="KalmanFilter.predict"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/kalman_filter/gncpy.filters.kalman_filter.KalmanFilter.html#gncpy.filters.kalman_filter.KalmanFilter.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">cur_state</span><span class="p">,</span> <span class="n">cur_input</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">state_mat_args</span><span class="o">=</span><span class="p">(),</span> <span class="n">input_mat_args</span><span class="o">=</span><span class="p">()</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Implements a discrete time prediction step for a Kalman Filter.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        timestep : float</span>
+<span class="sd">            Current timestep.</span>
+<span class="sd">        cur_state : N x 1 numpy array</span>
+<span class="sd">            Current state.</span>
+<span class="sd">        cur_input : N x Nu numpy array, optional</span>
+<span class="sd">            Current input. The default is None.</span>
+<span class="sd">        state_mat_args : tuple, optional</span>
+<span class="sd">            keyword arguments for the get state matrix function if one has</span>
+<span class="sd">            been specified or the propagate state function if using a dynamic</span>
+<span class="sd">            object. The default is ().</span>
+<span class="sd">        input_mat_args : tuple, optional</span>
+<span class="sd">            keyword arguments for the get input matrix function if one has</span>
+<span class="sd">            been specified or the propagate state function if using a dynamic</span>
+<span class="sd">            object. The default is ().</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        RuntimeError</span>
+<span class="sd">            If the state model has not been set</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        next_state : N x 1 numpy array</span>
+<span class="sd">            Next state.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_model</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__predParams</span><span class="o">.</span><span class="n">stateTransParams</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__predParams</span><span class="o">.</span><span class="n">controlParams</span><span class="p">,</span>
+            <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dyn_obj</span><span class="o">.</span><span class="n">args_to_params</span><span class="p">(</span><span class="n">state_mat_args</span><span class="p">,</span> <span class="n">input_mat_args</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span>
+                <span class="n">timestep</span><span class="p">,</span> <span class="n">cur_state</span><span class="p">,</span> <span class="n">cur_input</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__predParams</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">next_state</span><span class="p">,</span> <span class="n">state_mat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predict_next_state</span><span class="p">(</span>
+                <span class="n">timestep</span><span class="p">,</span> <span class="n">cur_state</span><span class="p">,</span> <span class="n">cur_input</span><span class="p">,</span> <span class="n">state_mat_args</span><span class="p">,</span> <span class="n">input_mat_args</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">cov</span> <span class="o">=</span> <span class="n">state_mat</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">cov</span> <span class="o">@</span> <span class="n">state_mat</span><span class="o">.</span><span class="n">T</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc_noise</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cov</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cov</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">cov</span><span class="o">.</span><span class="n">T</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span>
+            <span class="k">return</span> <span class="n">next_state</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_meas_mat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">n_meas</span><span class="p">,</span> <span class="n">meas_fun_args</span><span class="p">):</span>
+        <span class="c1"># time varying matrix</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meas_fnc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">meas_mat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meas_fnc</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="o">*</span><span class="n">meas_fun_args</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># constant matrix</span>
+            <span class="n">meas_mat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meas_mat</span>
+        <span class="k">return</span> <span class="n">meas_mat</span>
+
+    <span class="k">def</span> <span class="nf">_est_meas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">cur_state</span><span class="p">,</span> <span class="n">n_meas</span><span class="p">,</span> <span class="n">meas_fun_args</span><span class="p">):</span>
+        <span class="n">meas_mat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_meas_mat</span><span class="p">(</span><span class="n">timestep</span><span class="p">,</span> <span class="n">cur_state</span><span class="p">,</span> <span class="n">n_meas</span><span class="p">,</span> <span class="n">meas_fun_args</span><span class="p">)</span>
+
+        <span class="n">est_meas</span> <span class="o">=</span> <span class="n">meas_mat</span> <span class="o">@</span> <span class="n">cur_state</span>
+
+        <span class="k">return</span> <span class="n">est_meas</span><span class="p">,</span> <span class="n">meas_mat</span>
+
+    <span class="k">def</span> <span class="nf">_meas_fit_pdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meas</span><span class="p">,</span> <span class="n">est_meas</span><span class="p">,</span> <span class="n">meas_cov</span><span class="p">):</span>
+        <span class="n">extra_args</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">meas_cov</span><span class="p">))</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span><span class="p">:</span>
+            <span class="n">extra_args</span><span class="p">[</span><span class="s2">&quot;allow_singular&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">stats</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="o">.</span><span class="n">pdf</span><span class="p">(</span>
+            <span class="n">meas</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">mean</span><span class="o">=</span><span class="n">est_meas</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">cov</span><span class="o">=</span><span class="n">meas_cov</span><span class="p">,</span> <span class="o">**</span><span class="n">extra_args</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_calc_meas_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meas</span><span class="p">,</span> <span class="n">est_meas</span><span class="p">,</span> <span class="n">meas_cov</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">meas_fit_prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meas_fit_pdf</span><span class="p">(</span><span class="n">meas</span><span class="p">,</span> <span class="n">est_meas</span><span class="p">,</span> <span class="n">meas_cov</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">la</span><span class="o">.</span><span class="n">LinAlgError</span><span class="p">:</span>
+            <span class="c1"># if self._est_meas_noise_fnc is None:</span>
+            <span class="c1">#     raise</span>
+
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">&quot;Inovation matrix is singular, likely from bad &quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;measurement-state pairing for measurement noise estimation.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">gerr</span><span class="o">.</span><span class="n">ExtremeMeasurementNoiseError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="kn">from</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">meas_fit_prob</span>
+
+<div class="viewcode-block" id="KalmanFilter.correct"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/kalman_filter/gncpy.filters.kalman_filter.KalmanFilter.html#gncpy.filters.kalman_filter.KalmanFilter.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">meas</span><span class="p">,</span> <span class="n">cur_state</span><span class="p">,</span> <span class="n">meas_fun_args</span><span class="o">=</span><span class="p">()):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Implements a discrete time correction step for a Kalman Filter.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        timestep : float</span>
+<span class="sd">            Current timestep.</span>
+<span class="sd">        meas : Nm x 1 numpy array</span>
+<span class="sd">            Current measurement.</span>
+<span class="sd">        cur_state : N x 1 numpy array</span>
+<span class="sd">            Current state.</span>
+<span class="sd">        meas_fun_args : tuple, optional</span>
+<span class="sd">            Arguments for the measurement matrix function if one has</span>
+<span class="sd">            been specified. The default is ().</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        gncpy.errors.ExtremeMeasurementNoiseError</span>
+<span class="sd">            If the measurement fit probability calculation fails.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        next_state : N x 1 numpy array</span>
+<span class="sd">            The corrected state.</span>
+<span class="sd">        meas_fit_prob : float</span>
+<span class="sd">            Goodness of fit of the measurement based on the state and</span>
+<span class="sd">            covariance assuming Gaussian noise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_model</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__corrParams</span><span class="o">.</span><span class="n">measParams</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_measObj</span><span class="o">.</span><span class="n">args_to_params</span><span class="p">(</span><span class="n">meas_fun_args</span><span class="p">)</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__model</span><span class="o">.</span><span class="n">correct</span><span class="p">(</span><span class="n">timestep</span><span class="p">,</span> <span class="n">meas</span><span class="p">,</span> <span class="n">cur_state</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__corrParams</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">out</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span> <span class="n">out</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">est_meas</span><span class="p">,</span> <span class="n">meas_mat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_est_meas</span><span class="p">(</span>
+                <span class="n">timestep</span><span class="p">,</span> <span class="n">cur_state</span><span class="p">,</span> <span class="n">meas</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">meas_fun_args</span>
+            <span class="p">)</span>
+
+            <span class="c1"># get the Kalman gain</span>
+            <span class="n">cov_meas_T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cov</span> <span class="o">@</span> <span class="n">meas_mat</span><span class="o">.</span><span class="n">T</span>
+            <span class="n">inov_cov</span> <span class="o">=</span> <span class="n">meas_mat</span> <span class="o">@</span> <span class="n">cov_meas_T</span>
+
+            <span class="c1"># estimate the measurement noise online if applicable</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_est_meas_noise_fnc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">meas_noise</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_est_meas_noise_fnc</span><span class="p">(</span><span class="n">est_meas</span><span class="p">,</span> <span class="n">inov_cov</span><span class="p">)</span>
+            <span class="n">inov_cov</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meas_noise</span>
+            <span class="n">inov_cov</span> <span class="o">=</span> <span class="p">(</span><span class="n">inov_cov</span> <span class="o">+</span> <span class="n">inov_cov</span><span class="o">.</span><span class="n">T</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_cholesky_inverse</span><span class="p">:</span>
+                <span class="n">sqrt_inv_inov_cov</span> <span class="o">=</span> <span class="n">la</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">la</span><span class="o">.</span><span class="n">cholesky</span><span class="p">(</span><span class="n">inov_cov</span><span class="p">))</span>
+                <span class="n">inv_inov_cov</span> <span class="o">=</span> <span class="n">sqrt_inv_inov_cov</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">sqrt_inv_inov_cov</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">inv_inov_cov</span> <span class="o">=</span> <span class="n">la</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">inov_cov</span><span class="p">)</span>
+            <span class="n">kalman_gain</span> <span class="o">=</span> <span class="n">cov_meas_T</span> <span class="o">@</span> <span class="n">inv_inov_cov</span>
+
+            <span class="c1"># update the state with measurement</span>
+            <span class="n">inov</span> <span class="o">=</span> <span class="n">meas</span> <span class="o">-</span> <span class="n">est_meas</span>
+            <span class="n">next_state</span> <span class="o">=</span> <span class="n">cur_state</span> <span class="o">+</span> <span class="n">kalman_gain</span> <span class="o">@</span> <span class="n">inov</span>
+
+            <span class="c1"># update the covariance</span>
+            <span class="n">n_states</span> <span class="o">=</span> <span class="n">cur_state</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cov</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">n_states</span><span class="p">)</span> <span class="o">-</span> <span class="n">kalman_gain</span> <span class="o">@</span> <span class="n">meas_mat</span><span class="p">)</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">cov</span>
+
+            <span class="c1"># calculate the measuremnt fit probability assuming Gaussian</span>
+            <span class="n">meas_fit_prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_meas_fit</span><span class="p">(</span><span class="n">meas</span><span class="p">,</span> <span class="n">est_meas</span><span class="p">,</span> <span class="n">inov_cov</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="p">(</span><span class="n">next_state</span><span class="p">,</span> <span class="n">meas_fit_prob</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Laboratory for Autonomy, GNC, and Estimation Research (LAGER).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

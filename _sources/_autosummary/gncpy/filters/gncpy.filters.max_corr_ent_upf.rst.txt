@@ -1,0 +1,32 @@
+max\_corr\_ent\_upf
+===================
+
+.. automodule:: gncpy.filters.max_corr_ent_upf
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: max_corr_ent_upf
+      :nosignatures:
+      :template: class.rst_t
+   
+      MaxCorrEntUPF
+   
+   
+
+   
+   
+   
+
+
+
