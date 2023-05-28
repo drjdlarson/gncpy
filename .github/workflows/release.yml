@@ -130,8 +130,7 @@ jobs:
       - name: Build Documentation
         run: |
           tox -e docs_html
-          tox -e docs_pdf
-      
+
       - uses: actions/upload-artifact@v3
         with:
           name: documentation-artifact
@@ -162,8 +161,6 @@ jobs:
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false
-          files: |
-            docs/build/pdf/gncpy.pdf
   
   build_wheels:
     # build on each os

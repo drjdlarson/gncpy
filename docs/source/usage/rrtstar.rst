@@ -35,7 +35,7 @@ which gives this as output.
 
 
 ELQR-RRT* with Non-Linear Dynamics
----------------------------------
+----------------------------------
 The ELQR-RRT* algorithm can be run with non-linear dynamics using the following.
 
 .. literalinclude:: /examples/planning/rrt_star.py
