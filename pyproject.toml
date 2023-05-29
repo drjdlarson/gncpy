@@ -72,6 +72,7 @@ cmake.build-type = "Release"
 # cmake.build-type = "Debug"
 cmake.args = ["-DGNCPY_CPP_VERSION=0.2.1", "-DGNCPY_CPP_BRANCH=master"] # version used if in "Release" mode, branch used if in Debug mode
 
+sdist.include = [".git"]
 
 # activates the extension
 [tool.setuptools_scm]
