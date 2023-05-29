@@ -76,7 +76,7 @@ sdist.include = [".git"]
 
 # activates the extension
 [tool.setuptools_scm]
-
+local_scheme = "no-local-version"
 
 [tool.pytest.ini_options]
 minversion = "6.0"
