@@ -1,9 +1,10 @@
 [project]
 name = "gncpy"
-version = "1.0.0"
+# version = "1.0.0"
+dynamic = ["version"]
 description = "A package for Guidance, Navigation, and Control (GNC) algorithms."
 readme = "README.rst"
-python_requires = ">=3.7"
+requires-python = ">=3.7, <3.10"
 license = {file = "LICENSE"}
 keywords = [
     "Guidance Navigation and Control",
@@ -35,6 +36,7 @@ dependencies = [
     "ruamel.yaml>=0.17.21",
 ]
 
+
 [project.optional-dependencies]
 games = [
     "pygame>=2.1.2"
@@ -49,27 +51,85 @@ all = [
     "pygame>=2.1.2"
 ]
 
+
 [project.urls]
 homepage = "http://lager.ua.edu/"
 documentation = "https://drjdlarson.github.io/gncpy/"
 repository = "https://github.com/drjdlarson/gncpy"
 # changelog = "https://github.com/me/spam/blob/master/CHANGELOG.md"
 
+
 [build-system]
-requires = ["scikit-build-core>=0.2.1", "pybind11"]
+requires = ["scikit-build-core>=0.3", "pybind11"]
 build-backend = "scikit_build_core.build"
 
 
 [tool.scikit-build]
-# This controls the CMake build type
+cmake.minimum-version = "3.25"
+metadata.version.provider = "scikit_build_core.metadata.setuptools_scm"
+
 cmake.build-type = "Release"
 # cmake.build-type = "Debug"
-
-# Build directory (empty will use a temporary directory). {cache_tag} is
-# available to provide a unique directory per interpreter.
-# build-dir = "./build"
-
-# Extra args for CMake. Pip, unlike build, does not support lists, so semicolon
-# can be used to separate. Setting this in config or envvar will override the
-# entire list. See also cmake.define.
 cmake.args = ["-DGNCPY_CPP_VERSION=0.2.1", "-DGNCPY_CPP_BRANCH=master"] # version used if in "Release" mode, branch used if in Debug mode
+
+sdist.include = [".git"]
+
+# activates the extension
+[tool.setuptools_scm]
+local_scheme = "no-local-version"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+junit_suite_name = "gncpy"
+junit_log_passing_tests = true
+junit_duration_report = "call"
+junit_logging = "all"
+
+
+[tool.cibuildwheel]
+build = "*"
+skip = ""
+test-skip = ""
+
+archs = ["auto"]
+build-frontend = "build"
+config-settings = {}
+dependency-versions = "pinned"
+environment = {}
+environment-pass = []
+build-verbosity = ""
+
+before-all = ""
+before-build = ""
+repair-wheel-command = ""
+
+test-command = ""
+before-test = ""
+test-requires = []
+test-extras = []
+
+container-engine = "docker"
+
+manylinux-x86_64-image = "manylinux2014"
+manylinux-i686-image = "manylinux2014"
+manylinux-aarch64-image = "manylinux2014"
+manylinux-ppc64le-image = "manylinux2014"
+manylinux-s390x-image = "manylinux2014"
+manylinux-pypy_x86_64-image = "manylinux2014"
+manylinux-pypy_i686-image = "manylinux2014"
+manylinux-pypy_aarch64-image = "manylinux2014"
+
+musllinux-x86_64-image = "musllinux_1_1"
+musllinux-i686-image = "musllinux_1_1"
+musllinux-aarch64-image = "musllinux_1_1"
+musllinux-ppc64le-image = "musllinux_1_1"
+musllinux-s390x-image = "musllinux_1_1"
+
+
+[tool.cibuildwheel.linux]
+repair-wheel-command = "auditwheel repair -w {dest_dir} {wheel}"
+
+[tool.cibuildwheel.macos]
+repair-wheel-command = "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}"
+
+[tool.cibuildwheel.windows]
