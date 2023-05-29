@@ -57,7 +57,9 @@ def define_parser() -> argparse.ArgumentParser:
 if __name__ == "__main__":
     args = define_parser().parse_args()
 
-    version_parts = get_version(root='.', relative_to=__file__, version_scheme="no-guess-dev").split('.')
+    version_parts = get_version(
+        root=".", relative_to=__file__, version_scheme="no-guess-dev"
+    ).split(".")
     major = int(version_parts[0])
     minor = int(version_parts[1])
     patch = int(version_parts[2])
@@ -71,7 +73,7 @@ if __name__ == "__main__":
                 cur_branch
             )
         )
-        # sys.exit(-1)
+        sys.exit(-1)
 
     if not args.skip_increment:
         if args.type == "major":
