@@ -1,0 +1,31 @@
+name: Build and upload to test PyPI
+
+on:
+  push:
+    branches: 'master'
+  pull_request:
+    branches: 'master'
+
+jobs:
+  build_package:
+    name: Build package
+    uses: ./.github/workflows/build_package.yml
+    secrets: inherit
+
+  upload_test_pypi:
+    name: Upload to Test PyPI
+    runs-on: ubuntu-latest
+    needs: [build_package]
+    if: github.event.action != 'published'
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          # unpacks default artifact into dist/
+          # if `name: artifact` is omitted, the action will create extra parent dir
+          name: artifact
+          path: dist
+      - name: Publish distribution package to Test PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1.8
+        with:
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          repository-url: https://test.pypi.org/legacy/

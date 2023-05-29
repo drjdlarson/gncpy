@@ -162,57 +162,14 @@ jobs:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false
   
-  build_wheels:
-    name: Build wheels on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Build wheels
-        uses: pypa/cibuildwheel@v2.13.0
-        with:
-          output-dir: dist
-
-      - uses: actions/upload-artifact@v3
-        with:
-          path: dist/*.whl
-          if-no-files-found: error
-
-  build_sdist:
-    name: Build source distribution
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Build sdist
-        run: pipx run build --sdist
-
-      - uses: actions/upload-artifact@v3
-        with:
-          path: dist/*.tar.gz
-          if-no-files-found: error
-  
-  # build_win_sdist:
-  #   name: Build Windows source distribution
-  #   runs-on: windows-latest
-  #   steps:
-  #     - uses: actions/checkout@v3
-
-  #     - name: Build sdist
-  #       run: pipx run build --sdist
-
-  #     - uses: actions/upload-artifact@v3
-  #       with:
-  #         path: dist/*.zip
+  build_package:
+    name: Build package
+    uses: ./.github/workflows/build_package.yml
+    secrets: inherit
 
   upload_pypi:
     name: Upload to PyPI
-    # needs: [build_wheels, build_sdist, build_win_sdist, publish]
-    needs: [build_wheels, build_sdist, publish]
+    needs: [build_package, publish]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v3

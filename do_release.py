@@ -6,9 +6,7 @@ import sys
 
 from typing import Tuple
 from pathlib import Path
-
-
-VERSION_FILE = os.path.join(os.path.dirname(__file__), "pyproject.toml")
+from setuptools_scm import get_version
 
 
 def get_active_branch_name():
@@ -56,45 +54,14 @@ def define_parser() -> argparse.ArgumentParser:
     return p
 
 
-def get_match(line: str):
-    return re.search('version\s*=\s*"(\d+).(\d+).(\d+)"', line)
-
-
-def get_version() -> Tuple[int, int, int]:
-    with open(VERSION_FILE, "r") as fin:
-        for line in fin:
-            matched = get_match(line)
-            if matched:
-                major = int(matched.groups()[0])
-                minor = int(matched.groups()[1])
-                patch = int(matched.groups()[2])
-                return major, minor, patch
-
-    raise RuntimeError("Failed to extract version from {:s}".format(VERSION_FILE))
-
-
-def set_version(major: int, minor: int, patch: int):
-    tmp_file = VERSION_FILE + ".tmp"
-    with open(VERSION_FILE, "r") as fin:
-        with open(tmp_file, "w") as fout:
-            for line in fin:
-                matched = get_match(line)
-                if matched:
-                    ind = line.find('"')
-                    new_line = line[:ind] + '"{:d}.{:d}.{:d}"\n'.format(
-                        major, minor, patch
-                    )
-                    fout.write(new_line)
-                else:
-                    fout.write(line)
-
-    os.replace(tmp_file, VERSION_FILE)
-
-
 if __name__ == "__main__":
     args = define_parser().parse_args()
 
-    major, minor, patch = get_version()
+    version_parts = get_version(root='.', relative_to=__file__, version_scheme="no-guess-dev").split('.')
+    major = int(version_parts[0])
+    minor = int(version_parts[1])
+    patch = int(version_parts[2])
+
     print("Current version: {:d}.{:d}.{:d}".format(major, minor, patch))
 
     cur_branch = get_active_branch_name()
@@ -104,7 +71,7 @@ if __name__ == "__main__":
                 cur_branch
             )
         )
-        sys.exit(-1)
+        # sys.exit(-1)
 
     if not args.skip_increment:
         if args.type == "major":
@@ -119,19 +86,18 @@ if __name__ == "__main__":
         else:
             raise RuntimeError("Invalid type: {} should not be here".format(args.type))
 
-        set_version(major, minor, patch)
-
-    else:
-        print("Skipping incrementing of version number!")
-
     version_str = "v{:d}.{:d}.{:d}".format(major, minor, patch)
-    print("Releasing version: {:s}".format(version_str[1:]))
-
-    if not args.skip_increment:
-        cmd_str = "git add -u && git commit -m 'bump version' && git push"
+    if args.skip_increment:
+        print("Skipping incrementing of version number!")
+        print("Removing old version tag")
+        cmd_str = f"git tag -d {version_str}"
+        print(cmd_str)
         subprocess.run(cmd_str, shell=True)
 
+    print("Releasing version: {:s}".format(version_str[1:]))
+
     cmd_str = "git tag -a {:s} -m '{:s}'".format(version_str, args.message)
+    print(cmd_str)
     subprocess.run(cmd_str, shell=True)
 
     cmd_str = "git push origin {:s}".format(version_str)

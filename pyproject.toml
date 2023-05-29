@@ -1,6 +1,7 @@
 [project]
 name = "gncpy"
-version = "1.0.0"
+# version = "1.0.0"
+dynamic = ["version"]
 description = "A package for Guidance, Navigation, and Control (GNC) algorithms."
 readme = "README.rst"
 requires-python = ">=3.7, <3.10"
@@ -35,6 +36,7 @@ dependencies = [
     "ruamel.yaml>=0.17.21",
 ]
 
+
 [project.optional-dependencies]
 games = [
     "pygame>=2.1.2"
@@ -49,14 +51,16 @@ all = [
     "pygame>=2.1.2"
 ]
 
+
 [project.urls]
 homepage = "http://lager.ua.edu/"
 documentation = "https://drjdlarson.github.io/gncpy/"
 repository = "https://github.com/drjdlarson/gncpy"
 # changelog = "https://github.com/me/spam/blob/master/CHANGELOG.md"
 
+
 [build-system]
-requires = ["scikit-build-core>=0.2.1", "pybind11"]
+requires = ["scikit-build-core>=0.2.1", "pybind11", "setuptools_scm[toml]>=6.2"]
 build-backend = "scikit_build_core.build"
 
 
@@ -73,6 +77,19 @@ cmake.build-type = "Release"
 # can be used to separate. Setting this in config or envvar will override the
 # entire list. See also cmake.define.
 cmake.args = ["-DGNCPY_CPP_VERSION=0.2.1", "-DGNCPY_CPP_BRANCH=master"] # version used if in "Release" mode, branch used if in Debug mode
+
+
+# activates the extension
+[tool.setuptools_scm]
+
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+junit_suite_name = "gncpy"
+junit_log_passing_tests = true
+junit_duration_report = "call"
+junit_logging = "all"
+
 
 [tool.cibuildwheel]
 build = "*"
