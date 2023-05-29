@@ -1,5 +1,17 @@
-cmake_minimum_required(VERSION 3.15)
-project(${SKBUILD_PROJECT_NAME} VERSION ${SKBUILD_PROJECT_VERSION})
+cmake_minimum_required(VERSION 3.25)
+
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
+    "${CMAKE_CURRENT_SOURCE_DIR}/support/cmake"
+)
+
+# Import `CMakeExtraUtils` or bundle `DynamicVersion.cmake` from there
+cmake_policy(SET CMP0140 NEW)
+include(DynamicVersion)
+
+# Set ${PROJECT_VERSION} according to git tag or `.git_archival.txt`
+dynamic_version(PROJECT_PREFIX GNCPY_CPP_)
+
+project(${SKBUILD_PROJECT_NAME} VERSION ${PROJECT_VERSION})
 
 option(GNCPY_CPP_VERSION "Version of the c++ backend (without the v prefix) for release builds")
 set(GNCPY_CPP_BRANCH "master" CACHE STRING "Branch of the c++ backend for debug builds")
@@ -19,7 +31,7 @@ endif()
 
 message(STATUS "CMake version: ${CMAKE_VERSION}")
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
-message(STATUS "Wrapping GNCPy version: ${SKBUILD_PROJECT_VERSION}")
+message(STATUS "Wrapping GNCPy version: ${PROJECT_VERSION}")
 
 
 
