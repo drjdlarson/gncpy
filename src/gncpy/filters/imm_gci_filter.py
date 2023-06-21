@@ -86,6 +86,7 @@ class IMMGCIFilter(InteractingMultipleModel, GCIFilter):
         cov_list = []
         meas_fit_prob_list = []
         new_weight_list = []
+        new_gci_weights = []
         all_weights = []
         eye_list = [
             np.eye(self.cov_list[0].shape[0]) for ii in range(len(self.meas_model_list))
@@ -95,6 +96,7 @@ class IMMGCIFilter(InteractingMultipleModel, GCIFilter):
             cur_est_list = []
             cur_cov_list = []
             cur_weight_list = []
+            cur_gci_weights = []
             saved_state = filt.save_filter_state()
             # loop over measurements
             for jj, meas in enumerate(meas_list):
@@ -121,16 +123,29 @@ class IMMGCIFilter(InteractingMultipleModel, GCIFilter):
                 eye_list,
                 optimizer=self.optimizer,
             )
+            cur_gci_weights.extend([mw * self.filt_weights[ii] for mw in model_weights])
             filt.cov = model_cov.copy()
             self.mean_list[ii] = model_est.copy()
             self.cov_list[ii] = filt.cov.copy()
-            all_weights = all_weights + model_weights
+            all_weights.extend(list(np.array(model_weights) * self.filt_weights[ii]))
             new_weight_list.append(np.sum(cur_weight_list))
+            new_gci_weights.append(cur_gci_weights)
         if np.sum(new_weight_list) == 0:
             new_weight_list = new_weight_list * 0
         else:
             new_weight_list = new_weight_list / np.sum(new_weight_list)
+        tngw = np.array(new_gci_weights)
+        out_gci_weights = []
+        for col in range(tngw.shape[1]):
+            # if np.sum(tngw[;,col]) == 0:
+            #     out_gci_weights.append(np.sum(tngw[:, col]) * 0)
+            # else:
+            out_gci_weights.append(np.sum(tngw[:, col]))
+                # new_gci_weights = new_gci_weights / np.sum(new_gci_weights)
+        
         self.filt_weights = new_weight_list
+        # self.weight_list = new_gci_weights
+        self.weight_list = list(np.array(out_gci_weights)/np.sum(out_gci_weights))
 
         out_meas_fit_prob = 0
         for ii, prob in enumerate(meas_fit_prob_list):
