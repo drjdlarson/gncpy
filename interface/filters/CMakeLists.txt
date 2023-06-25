@@ -3,6 +3,7 @@ pybind11_add_module(_filters MODULE
     Interface.cpp
     Parameters.cpp
     Kalman.cpp
+    ExtendedKalman.cpp
     Common.h
     ${CMAKE_CURRENT_SOURCE_DIR}/../Macros.h
 )

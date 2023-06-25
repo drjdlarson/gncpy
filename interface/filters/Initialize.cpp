@@ -7,6 +7,7 @@ PYBIND11_MODULE(_filters, m) {
     initParameters(m);
 
     initKalman(m);
+    initExtendedKalman(m);
 
     #ifdef VERSION_INFO
     m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);

@@ -367,12 +367,12 @@ class KalmanFilter(BayesFilter):
         return next_state, state_mat
 
     def _init_model(self):
-        cpp_needs_init = (
+        self._cpp_needs_init = (
             self.__model is None
             and (self._dyn_obj is not None and self._dyn_obj.allow_cpp)
             and self._measObj is not None
         )
-        if cpp_needs_init:
+        if self._cpp_needs_init:
             self.__model = cpp_bindings.Kalman()
             self.__predParams = cpp_bindings.BayesPredictParams()
             self.__corrParams = cpp_bindings.BayesCorrectParams()

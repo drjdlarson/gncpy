@@ -3,6 +3,7 @@
 #include <pybind11/stl.h> // needed because some backend gncpy functions retrun stl types
 #include <pybind11/eigen.h>
 #include <gncpy/filters/IBayesFilter.h>
+#include <gncpy/filters/Kalman.h>
 #include <gncpy/filters/ExtendedKalman.h>
 
 #include "Common.h"
@@ -16,7 +17,7 @@ void initExtendedKalman(py::module& m) {
 
     using namespace lager;
 
-    GNCPY_PY_CHILD_CLASS(gncpy::filters::Kalman, gncpy::filters::IBayesFilter)(m, "Kalman")
+    GNCPY_PY_CHILD_CLASS(gncpy::filters::ExtendedKalman,gncpy::filters::Kalman)(m, "ExtendedKalman")
         .def(py::init())
         .def("set_state_model", &gncpy::filters::ExtendedKalman::setStateModel)
         .def("set_measurement_model", &gncpy::filters::ExtendedKalman::setMeasurementModel)
@@ -32,5 +33,5 @@ void initExtendedKalman(py::module& m) {
         }, [](gncpy::filters::ExtendedKalman& self, py::EigenDRef<Eigen::MatrixXd> val){
             self.getCov() = val;
         }, py::return_value_policy::reference_internal)
-        GNCPY_PICKLE(gncpy::filters::Kalman);
+        GNCPY_PICKLE(gncpy::filters::ExtendedKalman);
 }

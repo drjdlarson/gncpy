@@ -17,6 +17,7 @@ class BayesFilter(metaclass=abc.ABCMeta):
 
     def __init__(self, use_cholesky_inverse=True, **kwargs):
         self.use_cholesky_inverse = use_cholesky_inverse
+        self._cpp_needs_init = 0
 
         super().__init__()
 
