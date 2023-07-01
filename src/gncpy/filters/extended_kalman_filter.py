@@ -1,4 +1,6 @@
 import numpy as np
+import numpy.linalg as la
+import scipy.linalg as sla
 import scipy.integrate as s_integrate
 from copy import deepcopy
 
