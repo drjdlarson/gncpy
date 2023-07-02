@@ -13,6 +13,7 @@ target_link_libraries(_measurements
         Eigen3::Eigen
         lager::gncpy
 )
+compiler_options(COMPILE_TARGET _measurements)
 install(TARGETS _measurements 
     DESTINATION 
         ${SKBUILD_PROJECT_NAME}/measurements

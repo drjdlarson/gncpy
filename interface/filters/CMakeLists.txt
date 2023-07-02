@@ -13,6 +13,7 @@ target_link_libraries(_filters
         Eigen3::Eigen
         lager::gncpy
 )
+compiler_options(COMPILE_TARGET _filters)
 install(TARGETS _filters 
     DESTINATION 
         ${SKBUILD_PROJECT_NAME}/filters

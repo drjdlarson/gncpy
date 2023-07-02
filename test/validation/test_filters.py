@@ -3338,7 +3338,8 @@ if __name__ == "__main__":
     from timeit import default_timer as timer
     import matplotlib
 
-    matplotlib.use("WebAgg")
+    # Vaughn uses this for plotting
+    matplotlib.use("TkAgg")
 
     plt.close("all")
     debug_figs = True
