@@ -12,6 +12,7 @@ target_link_libraries(_dynamics
         Eigen3::Eigen
         lager::gncpy
 )
+compiler_options(COMPILE_TARGET _dynamics)
 install(TARGETS _dynamics 
     DESTINATION 
         ${SKBUILD_PROJECT_NAME}/dynamics
