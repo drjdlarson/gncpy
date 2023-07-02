@@ -10,10 +10,15 @@ function (compiler_options)
 
     cmake_parse_arguments(ARGS "${ARGS_Options}" "${ARGS_OneValue}" "${ARGS_MultiValue}" ${ARGN})
 
+    # Set default values
+	if (NOT DEFINED ARGS_COMPILE_TARGET)
+        message(FATAL "MUST SPECIFY COMPILE_TARGET")
+    endif ()
+
     if(CMAKE_BUILD_TYPE MATCHES "^[Dd]ebug")
         if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
             message(STATUS "Using GNU compiler, adding full set of compiler flags")
-            target_compile_options(${COMPILE_TARGET} PRIVATE
+            target_compile_options(${ARGS_COMPILE_TARGET} PRIVATE
                 "-fPIC"
                 "-Wall"
                 "-Wextra"
@@ -28,14 +33,14 @@ function (compiler_options)
             )
         elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
             message(STATUS "Using MSVC compiler, adding reduced set of compiler flags")
-                target_compile_options(${COMPILE_TARGET} PRIVATE
+                target_compile_options(${ARGS_COMPILE_TARGET} PRIVATE
                 "-Wall"
                 "-bigobj"
                 "-Od"
             )
         else()
             message(STATUS "Not using GNU or MSVC compiler, adding reduced set of compiler flags")
-                target_compile_options(${COMPILE_TARGET} PRIVATE
+                target_compile_options(${ARGS_COMPILE_TARGET} PRIVATE
                 "-fPIC"
                 "-Wall"
                 "-Wextra"
@@ -47,14 +52,14 @@ function (compiler_options)
     else()
         if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
             message(STATUS "Using MSVC compiler, adding reduced set of compiler flags")
-                target_compile_options(${COMPILE_TARGET} PRIVATE
+                target_compile_options(${ARGS_COMPILE_TARGET} PRIVATE
                 "-Wall"
                 "-bigobj"
                 "-O3"
             )
         else()
             message(STATUS "Not using MSVC compiler, adding full set of compiler flags")
-            target_compile_options(${COMPILE_TARGET} PRIVATE
+            target_compile_options(${ARGS_COMPILE_TARGET} PRIVATE
                 "-fPIC"
                 "-Wall"
                 "-Wextra"
