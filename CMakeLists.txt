@@ -7,6 +7,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
 # Import `CMakeExtraUtils` or bundle `DynamicVersion.cmake` from there
 cmake_policy(SET CMP0140 NEW)
 include(DynamicVersion)
+include(CompileOptions)
 
 # Set ${PROJECT_VERSION} according to git tag or `.git_archival.txt`
 dynamic_version(PROJECT_PREFIX GNCPY_CPP_)
@@ -19,15 +20,6 @@ set(GNCPY_EIGEN_VERSION "3.4.0" CACHE STRING "Version of Eigen to use when compi
 
 set(CMAKE_CXX_STANDARD 20)
 set(CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_FLAGS "-fPIC -Wall -Wextra -Wpedantic")
-
-if(CMAKE_BUILD_TYPE MATCHES "^[Dd]ebug")
-    set(CMAKE_CXX_FLAGS_DEBUG "-gdwarf-4 -gstatement-frontiers -gvariable-location-views -ginline-points -fno-eliminate-unused-debug-symbols -fvar-tracking -fvar-tracking-assignments -Og")
-
-elseif(CMAKE_BUILD_TYPE MATCHES "^[Rr]elease")
-    set(CMAKE_CXX_FLAGS_RELEASE "-O3")
-
-endif()
 
 message(STATUS "CMake version: ${CMAKE_VERSION}")
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
@@ -80,3 +72,4 @@ FetchContent_MakeAvailable(eigen)
 # ------------------- create wrapper modules ----------------------
 # -----------------------------------------------------------------
 add_subdirectory(interface)
+
