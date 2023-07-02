@@ -1,6 +1,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/eigen.h>
+#include <gncpy/Exceptions.h>
 #include <gncpy/measurements/RangeAndBearing.h>
 #include <gncpy/measurements/Parameters.h>
 #include "../Macros.h"
@@ -22,5 +23,13 @@ void initRangeAndBearing(py::module& m) {
     GNCPY_PY_CHILD_CLASS(gncpy::measurements::RangeAndBearing, gncpy::measurements::INonLinearMeasModel)(m, "RangeAndBearing")
         .def(py::init())
         GNCPY_MEASUREMENTS_IMEASMODEL_INTERFACE(gncpy::measurements::RangeAndBearing)
+        .def("args_to_params", []([[maybe_unused]] gncpy::measurements::RangeAndBearing& self, py::tuple args) {
+            if(args.size() != 2){
+                throw gncpy::exceptions::BadParams("Must pass x and y indices to the range and bearing model");
+            }
+            std::uint8_t xind = py::cast<uint8_t>(args[0]);
+            std::uint8_t yind = py::cast<uint8_t>(args[1]);
+            return gncpy::measurements::RangeAndBearingParams(xind, yind);
+        })
         GNCPY_PICKLE(gncpy::measurements::RangeAndBearing);
 }

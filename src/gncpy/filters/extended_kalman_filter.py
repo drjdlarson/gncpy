@@ -1,9 +1,12 @@
 import numpy as np
+import numpy.linalg as la
+import scipy.linalg as sla
 import scipy.integrate as s_integrate
 from copy import deepcopy
 
 import gncpy.dynamics.basic as gdyn
 import gncpy.math as gmath
+import gncpy.filters._filters as cpp_bindings
 from gncpy.filters.kalman_filter import KalmanFilter
 
 
@@ -39,6 +42,10 @@ class ExtendedKalmanFilter(KalmanFilter):
 
         self._integrator = None
 
+        self.__model = None
+        self.__predParams = None
+        self.__corrParams = None
+
     def save_filter_state(self):
         """Saves filter variables so they can be restored later."""
         filt_state = super().save_filter_state()
@@ -48,6 +55,10 @@ class ExtendedKalmanFilter(KalmanFilter):
         filt_state["integrator_params"] = deepcopy(self.integrator_params)
         filt_state["_ode_lst"] = self._ode_lst
         filt_state["_integrator"] = self._integrator
+
+        filt_state["__model"] = self.__model
+        filt_state["__predParams"] = self.__predParams
+        filt_state["__corrParams"] = self.__corrParams
 
         return filt_state
 
@@ -66,6 +77,10 @@ class ExtendedKalmanFilter(KalmanFilter):
         self.integrator_params = filt_state["integrator_params"]
         self._ode_lst = filt_state["_ode_lst"]
         self._integrator = filt_state["_integrator"]
+
+        self.__model = filt_state["__model"]
+        self.__predParams = filt_state["__predParams"]
+        self.__corrParams = filt_state["__corrParams"]
 
     def set_state_model(self, dyn_obj=None, ode_lst=None):
         r"""Sets the state model equations.
@@ -161,7 +176,30 @@ class ExtendedKalmanFilter(KalmanFilter):
             raise RuntimeError("State model not set")
         return next_state, state_mat, dt
 
-    def predict(self, timestep, cur_state, dyn_fun_params=None):
+    def _init_model(self):
+        self._cpp_needs_init = (
+            self.__model is None
+            and (self._dyn_obj is not None and self._dyn_obj.allow_cpp)
+            and self._measObj is not None
+        )
+        if self._cpp_needs_init:
+            self.__model = cpp_bindings.ExtendedKalman()
+            self.__predParams = cpp_bindings.BayesPredictParams()
+            self.__corrParams = cpp_bindings.BayesCorrectParams()
+
+            # make sure the cpp filter has its values set based on what python user gave (init only)
+            self.__model.cov = self._cov.astype(np.float64)
+            self.__model.set_state_model(self._dyn_obj.model, self.proc_noise)
+            self.__model.set_measurement_model(self._measObj, self.meas_noise)
+
+    def predict(
+        self,
+        timestep,
+        cur_state,
+        cur_input=None,
+        dyn_fun_params=None,
+        control_fun_params=None,
+    ):
         r"""Prediction step of the EKF.
 
         This assumes continuous time dynamics and integrates the ode's to get
@@ -182,6 +220,8 @@ class ExtendedKalmanFilter(KalmanFilter):
         dyn_fun_params : tuple, optional
             Extra arguments to be passed to the dynamics function. The default
             is None.
+        control_fun_params : tuple, optional
+            Extra arguments to be passed to the control input function. The default is None.
 
         Raises
         ------
@@ -194,33 +234,50 @@ class ExtendedKalmanFilter(KalmanFilter):
             The predicted state.
 
         """
-        if dyn_fun_params is None:
-            dyn_fun_params = ()
-        next_state, state_mat, dt = self._predict_next_state(
-            timestep, cur_state, dyn_fun_params
-        )
+        self._init_model()
+        if self.__model is not None:
+            if control_fun_params is None:
+                control_fun_params = ()
+            (
+                self.__predParams.stateTransParams,
+                self.__predParams.controlParams,
+            ) = self._dyn_obj.args_to_params(dyn_fun_params, control_fun_params)
+            return self.__model.predict(
+                timestep, cur_state, cur_input, self.__predParams
+            ).reshape((-1, 1))
 
-        if self.cont_cov:
-            if dt is None:
-                raise RuntimeError("dt can not be None when using a continuous covariance model")
-
-            def ode(t, x, n_states, F, proc_noise):
-                P = x.reshape((n_states, n_states))
-                P_dot = F @ P + P @ F.T + proc_noise
-                return P_dot.ravel()
-
-            integrator = s_integrate.ode(ode)
-            integrator.set_integrator(self.integrator_type, **self.integrator_params)
-            integrator.set_initial_value(self.cov.flatten(), timestep)
-            integrator.set_f_params(cur_state.size, state_mat, self.proc_noise)
-            tmp = integrator.integrate(timestep + dt)
-            if not integrator.successful():
-                msg = "Failed to integrate covariance at {}".format(timestep)
-                raise RuntimeError(msg)
-            self.cov = tmp.reshape(self.cov.shape)
         else:
-            self.cov = state_mat @ self.cov @ state_mat.T + self.proc_noise
-        return next_state
+            if dyn_fun_params is None:
+                dyn_fun_params = ()
+            next_state, state_mat, dt = self._predict_next_state(
+                timestep, cur_state, dyn_fun_params
+            )
+
+            if self.cont_cov:
+                if dt is None:
+                    raise RuntimeError(
+                        "dt can not be None when using a continuous covariance model"
+                    )
+
+                def ode(t, x, n_states, F, proc_noise):
+                    P = x.reshape((n_states, n_states))
+                    P_dot = F @ P + P @ F.T + proc_noise
+                    return P_dot.ravel()
+
+                integrator = s_integrate.ode(ode)
+                integrator.set_integrator(
+                    self.integrator_type, **self.integrator_params
+                )
+                integrator.set_initial_value(self.cov.flatten(), timestep)
+                integrator.set_f_params(cur_state.size, state_mat, self.proc_noise)
+                tmp = integrator.integrate(timestep + dt)
+                if not integrator.successful():
+                    msg = "Failed to integrate covariance at {}".format(timestep)
+                    raise RuntimeError(msg)
+                self.cov = tmp.reshape(self.cov.shape)
+            else:
+                self.cov = state_mat @ self.cov @ state_mat.T + self.proc_noise
+            return next_state
 
     def _get_meas_mat(self, t, state, n_meas, meas_fun_args):
         # non-linear mapping, potentially time varying
@@ -250,7 +307,7 @@ class ExtendedKalmanFilter(KalmanFilter):
             est_meas = meas_mat @ cur_state
         return est_meas, meas_mat
 
-    def set_measurement_model(self, meas_mat=None, meas_fun_lst=None):
+    def set_measurement_model(self, meas_mat=None, meas_fun_lst=None, measObj=None):
         r"""Sets the measurement model for the filter.
 
         This can either set the constant measurement matrix, or a set of
@@ -288,4 +345,76 @@ class ExtendedKalmanFilter(KalmanFilter):
         -------
         None.
         """
-        super().set_measurement_model(meas_mat=meas_mat, meas_fun=meas_fun_lst)
+        super().set_measurement_model(
+            meas_mat=meas_mat, meas_fun=meas_fun_lst, measObj=measObj
+        )
+
+    def correct(self, timestep, meas, cur_state, meas_fun_args=()):
+        """Implements a discrete time correction step for a Kalman Filter.
+
+        Parameters
+        ----------
+        timestep : float
+            Current timestep.
+        meas : Nm x 1 numpy array
+            Current measurement.
+        cur_state : N x 1 numpy array
+            Current state.
+        meas_fun_args : tuple, optional
+            Arguments for the measurement matrix function if one has
+            been specified. The default is ().
+
+        Raises
+        ------
+        gncpy.errors.ExtremeMeasurementNoiseError
+            If the measurement fit probability calculation fails.
+
+        Returns
+        -------
+        next_state : N x 1 numpy array
+            The corrected state.
+        meas_fit_prob : float
+            Goodness of fit of the measurement based on the state and
+            covariance assuming Gaussian noise.
+
+        """
+        self._init_model()
+
+        if self.__model is not None:
+            self.__corrParams.measParams = self._measObj.args_to_params(meas_fun_args)
+            out = self.__model.correct(timestep, meas, cur_state, self.__corrParams)
+            return out[0].reshape((-1, 1)), out[1]
+
+        else:
+            est_meas, meas_mat = self._est_meas(
+                timestep, cur_state, meas.size, meas_fun_args
+            )
+
+            # get the Kalman gain
+            cov_meas_T = self.cov @ meas_mat.T
+            inov_cov = meas_mat @ cov_meas_T
+
+            # estimate the measurement noise online if applicable
+            if self._est_meas_noise_fnc is not None:
+                self.meas_noise = self._est_meas_noise_fnc(est_meas, inov_cov)
+            inov_cov += self.meas_noise
+            inov_cov = (inov_cov + inov_cov.T) * 0.5
+            if self.use_cholesky_inverse:
+                sqrt_inv_inov_cov = la.inv(la.cholesky(inov_cov))
+                inv_inov_cov = sqrt_inv_inov_cov.T @ sqrt_inv_inov_cov
+            else:
+                inv_inov_cov = la.inv(inov_cov)
+            kalman_gain = cov_meas_T @ inv_inov_cov
+
+            # update the state with measurement
+            inov = meas - est_meas
+            next_state = cur_state + kalman_gain @ inov
+
+            # update the covariance
+            n_states = cur_state.shape[0]
+            self.cov = (np.eye(n_states) - kalman_gain @ meas_mat) @ self.cov
+
+            # calculate the measuremnt fit probability assuming Gaussian
+            meas_fit_prob = self._calc_meas_fit(meas, est_meas, inov_cov)
+
+            return (next_state, meas_fit_prob)
