@@ -8,6 +8,8 @@
 extern void initInterface(pybind11::module&);
 extern void initParameters(pybind11::module&);
 extern void initDoubleIntegrator(pybind11::module&);
+extern void initClohessyWiltshire2D(pybind11::module&);
+extern void initClohessyWiltshire(pybind11::module&);
 
 
 #define GNCPY_DYNAMICS_PROPAGATE_STATE_INTERFACE(cName) \
