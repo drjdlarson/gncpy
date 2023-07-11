@@ -3,6 +3,8 @@ pybind11_add_module(_dynamics MODULE
     Interface.cpp
     Parameters.cpp
     DoubleIntegrator.cpp
+    ClohessyWiltshire2D.cpp
+    ClohessyWiltshire.cpp
     Common.h
     ${CMAKE_CURRENT_SOURCE_DIR}/../Macros.h
 )

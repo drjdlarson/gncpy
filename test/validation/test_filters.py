@@ -3339,7 +3339,7 @@ if __name__ == "__main__":
     import matplotlib
 
     # Vaughn uses this for plotting
-    matplotlib.use("TkAgg")
+    matplotlib.use("WebAgg")
 
     plt.close("all")
     debug_figs = True

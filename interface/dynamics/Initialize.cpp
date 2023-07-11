@@ -9,6 +9,8 @@ PYBIND11_MODULE(_dynamics, m) {
     initParameters(m);
 
     initDoubleIntegrator(m);
+    initClohessyWiltshire2D(m);
+    initClohessyWiltshire(m);
 
 
     #ifdef VERSION_INFO
