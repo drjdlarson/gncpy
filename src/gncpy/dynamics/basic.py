@@ -1111,7 +1111,9 @@ class ClohessyWiltshireOrbit2d(LinearDynamicsBase):
         super().__init__(**kwargs)
         self.__controlParams = cpp_bindings.ControlParams()
         self.__stateTransParams = cpp_bindings.StateTransParams()
-        self.__model = cpp_bindings.ClohessyWiltshire2D(0.1)
+        self.__model = cpp_bindings.ClohessyWiltshire2D(0.01, mean_motion)
+        if self.mean_motion is not None:
+            self.__model.mean_motion = self.mean_motion
 
     @property
     def allow_cpp(self):
@@ -1231,7 +1233,9 @@ class ClohessyWiltshireOrbit(ClohessyWiltshireOrbit2d):
         super().__init__(**kwargs)
         self.__controlParams = cpp_bindings.ControlParams()
         self.__stateTransParams = cpp_bindings.StateTransParams()
-        self.__model = cpp_bindings.ClohessyWiltshire(0.1)
+        self.__model = cpp_bindings.ClohessyWiltshire(0.1, 0.01)
+        if self.mean_motion is not None:
+            self.__model.mean_motion = self.mean_motion
 
     @property
     def allow_cpp(self):
