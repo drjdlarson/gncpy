@@ -12,6 +12,7 @@ from warnings import warn
 import gncpy.math as gmath
 
 import gncpy.dynamics._dynamics as cpp_bindings
+import gncpy.control._control as cpp_control
 
 
 class DynamicsBase(ABC):
@@ -38,6 +39,11 @@ class DynamicsBase(ABC):
     """Tuple of strings for the name of each state. The order should match
     that of the state vector.
     """
+
+    # def __init__(self, state_constraint=None):
+    #     super().__init__()
+    #     # self.control_model = control_model
+    #     self.state_constraint = state_constraint
 
     def __init__(self, control_model=None, state_constraint=None):
         super().__init__()
@@ -141,7 +147,7 @@ class LinearDynamicsBase(DynamicsBase):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def get_input_mat(self, timestep, *ctrl_args):
+    def get_input_mat(self, timestep, state, *ctrl_args):
         """Calculates the input matrix from the control model.
 
         This calculates the jacobian of the control model. If no control model
@@ -163,7 +169,7 @@ class LinearDynamicsBase(DynamicsBase):
         """
         if self.control_model is None:
             raise RuntimeWarning("Control model is not set.")
-        return self.control_model(timestep, *ctrl_args)
+        return self.control_model.getInputMat(timestep, state, *ctrl_args)
 
     def get_dis_process_noise_mat(self, dt, *f_args):
         """Class method for getting the process noise.
@@ -227,7 +233,7 @@ class LinearDynamicsBase(DynamicsBase):
         next_state = state_trans_mat @ state
 
         if self.control_model is not None:
-            input_mat = self.control_model(timestep, state, *ctrl_args)
+            input_mat = self.control_model.getInputMat(timestep, state, *ctrl_args)
             ctrl = input_mat @ u
             next_state += ctrl
         if self.state_constraint is not None:
@@ -481,9 +487,11 @@ class DoubleIntegrator(LinearDynamicsBase):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.__controlParams = cpp_bindings.ControlParams()
+        self.__controlParams = cpp_control.ControlParams()
         self.__stateTransParams = cpp_bindings.StateTransParams()
         self.__model = cpp_bindings.DoubleIntegrator(0.1)
+        # if kwargs("control_model") is not None:
+        #     self.__model.setControlModel(kwargs("control_model"))
 
     @property
     def allow_cpp(self):
@@ -505,7 +513,7 @@ class DoubleIntegrator(LinearDynamicsBase):
                 warn(
                     "Supplied control model does not support c++ backend but model is supposed to allow c++ backend. Not generating parameters"
                 )
-                self.__controlParams = cpp_bindings.ControlParams()
+                self.__controlParams = cpp_control.ControlParams()
 
         # hack since state params is empty but things are set in the model
         self.__model.dt = state_args[0]
@@ -519,6 +527,20 @@ class DoubleIntegrator(LinearDynamicsBase):
     @property
     def state_names(self):
         return self.__model.state_names()
+
+    @property
+    def control_model(self):
+        if self.__model is None:
+            return self.control_model
+        else:
+            return self.__model.controlModel()
+
+    @control_model.setter
+    def control_model(self, control_model):
+        if self.__model is None:
+            self.control_model = control_model
+        else:
+            self.__model.setControlModel(control_model)
 
     def propagate_state(self, timestep, state, u=None, state_args=None, ctrl_args=None):
         if state_args is None:
@@ -1109,11 +1131,13 @@ class ClohessyWiltshireOrbit2d(LinearDynamicsBase):
         self.mean_motion = mean_motion
 
         super().__init__(**kwargs)
-        self.__controlParams = cpp_bindings.ControlParams()
+        self.__controlParams = cpp_control.ControlParams()
         self.__stateTransParams = cpp_bindings.StateTransParams()
         self.__model = cpp_bindings.ClohessyWiltshire2D(0.01, mean_motion)
         if self.mean_motion is not None:
             self.__model.mean_motion = self.mean_motion
+        if kwargs("control_model") is not None:
+            self.__model.setControlModel(kwargs("control_model"))
 
     @property
     def allow_cpp(self):
@@ -1135,7 +1159,7 @@ class ClohessyWiltshireOrbit2d(LinearDynamicsBase):
                 warn(
                     "Supplied control model does not support c++ backend but model is supposed to allow c++ backend. Not generating parameters"
                 )
-                self.__controlParams = cpp_bindings.ControlParams()
+                self.__controlParams = cpp_control.ControlParams()
 
         # hack since state params is empty but things are set in the model
         self.__model.dt = state_args[0]
@@ -1148,6 +1172,10 @@ class ClohessyWiltshireOrbit2d(LinearDynamicsBase):
     @property
     def state_names(self):
         return self.__model.state_names()
+
+    @property
+    def control_model(self):
+        return self.__model.controlModel()
 
     def propagate_state(self, timestep, state, u=None, state_args=None, ctrl_args=None):
         if state_args is None:
@@ -1231,11 +1259,13 @@ class ClohessyWiltshireOrbit(ClohessyWiltshireOrbit2d):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.__controlParams = cpp_bindings.ControlParams()
+        self.__controlParams = cpp_control.ControlParams()
         self.__stateTransParams = cpp_bindings.StateTransParams()
         self.__model = cpp_bindings.ClohessyWiltshire(0.1, 0.01)
         if self.mean_motion is not None:
             self.__model.mean_motion = self.mean_motion
+        if kwargs("control_model") is not None:
+            self.__model.setControlModel(kwargs("control_model"))
 
     @property
     def allow_cpp(self):
@@ -1257,7 +1287,7 @@ class ClohessyWiltshireOrbit(ClohessyWiltshireOrbit2d):
                 warn(
                     "Supplied control model does not support c++ backend but model is supposed to allow c++ backend. Not generating parameters"
                 )
-                self.__controlParams = cpp_bindings.ControlParams()
+                self.__controlParams = cpp_control.ControlParams()
 
         # hack since state params is empty but things are set in the model
         self.__model.dt = state_args[0]
@@ -1270,6 +1300,10 @@ class ClohessyWiltshireOrbit(ClohessyWiltshireOrbit2d):
     @property
     def state_names(self):
         return self.__model.state_names()
+
+    @property
+    def control_model(self):
+        return self.__model.controlModel()
 
     def propagate_state(self, timestep, state, u=None, state_args=None, ctrl_args=None):
         if state_args is None:
