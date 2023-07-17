@@ -40,11 +40,6 @@ class DynamicsBase(ABC):
     that of the state vector.
     """
 
-    # def __init__(self, state_constraint=None):
-    #     super().__init__()
-    #     # self.control_model = control_model
-    #     self.state_constraint = state_constraint
-
     def __init__(self, control_model=None, state_constraint=None):
         super().__init__()
         self.control_model = control_model
@@ -147,7 +142,7 @@ class LinearDynamicsBase(DynamicsBase):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def get_input_mat(self, timestep, state, *ctrl_args):
+    def get_input_mat(self, timestep, *ctrl_args):
         """Calculates the input matrix from the control model.
 
         This calculates the jacobian of the control model. If no control model
@@ -169,7 +164,7 @@ class LinearDynamicsBase(DynamicsBase):
         """
         if self.control_model is None:
             raise RuntimeWarning("Control model is not set.")
-        return self.control_model.getInputMat(timestep, state, *ctrl_args)
+        return self.control_model.getInputMat(timestep, *ctrl_args)
 
     def get_dis_process_noise_mat(self, dt, *f_args):
         """Class method for getting the process noise.
@@ -234,8 +229,7 @@ class LinearDynamicsBase(DynamicsBase):
 
         if self.control_model is not None:
             
-            input_mat = self.control_model.get_input_mat(state, *ctrl_args)
-            # input_mat = self.control_model.get_input_mat(timestep, state, *ctrl_args)
+            input_mat = self.control_model.get_input_mat(timestep, state, *ctrl_args)
             ctrl = input_mat @ u
             next_state += ctrl
         if self.state_constraint is not None:
@@ -530,34 +524,16 @@ class DoubleIntegrator(LinearDynamicsBase):
     def state_names(self):
         return self.__model.state_names()
 
-    # @property
-    # def control_model(self):
-    #     if self.__model is None:
-    #         return self.control_model
-    #     else:
-    #         return self.__model.controlModel()
-
-    # @control_model.setter
-    # def control_model(self, control_model):
-    #     if self.__model is None:
-    #         self.control_model = control_model
-    #     else:
-    #         self.__model.setControlModel(control_model)
-
     def propagate_state(self, timestep, state, u=None, state_args=None, ctrl_args=None):
         if state_args is None:
             raise RuntimeError("state_args must be (dt,) not None")
-        # if cont_args is None:
-        if ctrl_args is not None:
-            self.args_to_params(state_args, ctrl_args)
         if self.control_model is None:
             self.__model.dt = state_args[0]
             return self.__model.propagate_state(timestep, state).reshape((-1, 1))
         else:
-            return self.__model.propagate_state(timestep, state, u, ctrl_args=ctrl_args)
-            # return super().propagate_state(
-            #     timestep, state, u=u, state_args=state_args, ctrl_args=ctrl_args
-            # )
+            return super().propagate_state(
+                timestep, state, u=u, state_args=state_args, ctrl_args=ctrl_args
+            )
 
     def get_dis_process_noise_mat(self, dt, proc_cov):
         """Discrete process noise matrix.
@@ -1142,8 +1118,8 @@ class ClohessyWiltshireOrbit2d(LinearDynamicsBase):
         self.__model = cpp_bindings.ClohessyWiltshire2D(0.01, mean_motion)
         if self.mean_motion is not None:
             self.__model.mean_motion = self.mean_motion
-        if kwargs("control_model") is not None:
-            self.__model.setControlModel(kwargs("control_model"))
+        # if kwargs("control_model") is not None:
+        #     self.__model.setControlModel(kwargs("control_model"))
 
     @property
     def allow_cpp(self):
@@ -1178,10 +1154,6 @@ class ClohessyWiltshireOrbit2d(LinearDynamicsBase):
     @property
     def state_names(self):
         return self.__model.state_names()
-
-    @property
-    def control_model(self):
-        return self.__model.controlModel()
 
     def propagate_state(self, timestep, state, u=None, state_args=None, ctrl_args=None):
         if state_args is None:
@@ -1270,8 +1242,8 @@ class ClohessyWiltshireOrbit(ClohessyWiltshireOrbit2d):
         self.__model = cpp_bindings.ClohessyWiltshire(0.1, 0.01)
         if self.mean_motion is not None:
             self.__model.mean_motion = self.mean_motion
-        if kwargs("control_model") is not None:
-            self.__model.setControlModel(kwargs("control_model"))
+        # if kwargs("control_model") is not None:
+        #     self.__model.setControlModel(kwargs("control_model"))
 
     @property
     def allow_cpp(self):
@@ -1306,10 +1278,6 @@ class ClohessyWiltshireOrbit(ClohessyWiltshireOrbit2d):
     @property
     def state_names(self):
         return self.__model.state_names()
-
-    @property
-    def control_model(self):
-        return self.__model.controlModel()
 
     def propagate_state(self, timestep, state, u=None, state_args=None, ctrl_args=None):
         if state_args is None:
