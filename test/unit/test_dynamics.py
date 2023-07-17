@@ -62,8 +62,8 @@ def test_double_integrator_control():
     # dynObj.control_model = lambda _t, *_args: np.array(
     #     [[0, 0], [0, 0], [1 * dt, 0], [0, 0.5 * dt]]
     # )
-    # dynOb.control_model =
-    dynObj.control_model(gcont.StateControl())
+    dynObj.control_model = gcont.StateControl()
+    # dynObj.control_model(gcont.StateControl())
     cont_args = (2, 3)
 
     # simulate for some time
