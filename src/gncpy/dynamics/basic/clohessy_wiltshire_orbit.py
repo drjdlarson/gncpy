@@ -25,9 +25,9 @@ class ClohessyWiltshireOrbit(ClohessyWiltshireOrbit2d):
         self.__stateTransParams = cpp_bindings.StateTransParams()
         self.__model = cpp_bindings.ClohessyWiltshire(0.1, 0.01)
         if self.mean_motion is not None:
-            self.__model = cpp_bindings.ClohessyWiltshire2D(0.01, mean_motion)
+            self.__model = cpp_bindings.ClohessyWiltshire(0.01, self.mean_motion)
         else:
-            self.__model = cpp_bindings.ClohessyWiltshire2D(0.01, 0.0)
+            self.__model = cpp_bindings.ClohessyWiltshire(0.01, 0.0)
         if "control_model" in kwargs and kwargs["control_model"] is not None:
             self.__model.set_control_model(kwargs("control_model"))
 
