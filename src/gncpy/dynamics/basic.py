@@ -164,7 +164,7 @@ class LinearDynamicsBase(DynamicsBase):
         """
         if self.control_model is None:
             raise RuntimeWarning("Control model is not set.")
-        return self.control_model.getInputMat(timestep, *ctrl_args)
+        return self.control_model(timestep, *ctrl_args)
 
     def get_dis_process_noise_mat(self, dt, *f_args):
         """Class method for getting the process noise.
@@ -229,7 +229,7 @@ class LinearDynamicsBase(DynamicsBase):
 
         if self.control_model is not None:
             
-            input_mat = self.control_model.get_input_mat(timestep, state, *ctrl_args)
+            input_mat = self.control_model(timestep, state, *ctrl_args)
             ctrl = input_mat @ u
             next_state += ctrl
         if self.state_constraint is not None:
