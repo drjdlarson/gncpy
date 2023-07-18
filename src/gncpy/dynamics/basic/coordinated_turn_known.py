@@ -27,7 +27,15 @@ class CoordinatedTurnKnown(LinearDynamicsBase):
     def __init__(self, turn_rate=5 * np.pi / 180, **kwargs):
         super().__init__(**kwargs)
         self.turn_rate = turn_rate
-        self.control_model = None
+        self._control_model = None
+
+    @property
+    def control_model(self):
+        return self._control_model
+
+    @control_model.setter
+    def control_model(self, model):
+        self._control_model = model
 
     def get_state_mat(self, timestep, dt):
         """Returns the discrete time state matrix.

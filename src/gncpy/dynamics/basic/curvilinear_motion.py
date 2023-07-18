@@ -48,7 +48,7 @@ class CurvilinearMotion(NonlinearDynamicsBase):
             Additional key word arguments for the parent.
         """
         super().__init__(**kwargs)
-        self.control_model = [None] * len(self.state_names)
+        self._control_model = [None] * len(self.state_names)
         self.control_constraint = None
 
     @property
@@ -56,6 +56,14 @@ class CurvilinearMotion(NonlinearDynamicsBase):
         """Continuous time ODEs, not used."""
         warn("Not used by this class")
         return []
+
+    @property
+    def control_model(self):
+        return self._control_model
+
+    @control_model.setter
+    def control_model(self, model):
+        self._control_model = model
 
     def get_state_mat(
         self, timestep, state, *args, u=None, ctrl_args=None, use_continuous=False

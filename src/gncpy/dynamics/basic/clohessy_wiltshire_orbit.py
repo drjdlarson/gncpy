@@ -33,6 +33,14 @@ class ClohessyWiltshireOrbit(ClohessyWiltshireOrbit2d):
     def allow_cpp(self):
         return True
 
+    @property
+    def control_model(self):
+        return self._control_model
+
+    @control_model.setter()
+    def control_model(self, model):
+        self._control_model = model
+
     # must be provided if allow_cpp is true
     def args_to_params(self, state_args, control_args):
         if len(state_args) != 1:
@@ -40,11 +48,11 @@ class ClohessyWiltshireOrbit(ClohessyWiltshireOrbit2d):
                 "state args must be only (dt,) not {}".format(repr(state_args))
             )
 
-        if len(control_args) != 0 and self.control_model is None:
+        if len(control_args) != 0 and self._control_model is None:
             warn("Control agruments supplied but no control model specified")
-        elif self.control_model is not None:
+        elif self._control_model is not None:
             try:
-                self.__controlParams = self.control_model.args_to_params(control_args)
+                self.__controlParams = self._control_model.args_to_params(control_args)
             except Exception:
                 warn(
                     "Supplied control model does not support c++ backend but model is supposed to allow c++ backend. Not generating parameters"
@@ -66,7 +74,7 @@ class ClohessyWiltshireOrbit(ClohessyWiltshireOrbit2d):
     def propagate_state(self, timestep, state, u=None, state_args=None, ctrl_args=None):
         if state_args is None:
             raise RuntimeError("state_args must be (dt,) not None")
-        if self.control_model is None:
+        if self._control_model is None:
             self.__model.dt = state_args[0]
             return self.__model.propagate_state(timestep, state).reshape((-1, 1))
         else:

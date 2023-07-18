@@ -89,8 +89,8 @@ class NonlinearDynamicsBase(DynamicsBase):
         out = np.zeros((len(self.state_names), 1))
         for ii, f in enumerate(self.cont_fnc_lst):
             out[ii] = f(t, x, *state_args)
-        if self.control_model is not None:
-            for ii, g in enumerate(self.control_model):
+        if self._control_model is not None:
+            for ii, g in enumerate(self._control_model):
                 out[ii] += g(t, x, u, *ctrl_args)
         return out
 
@@ -116,7 +116,7 @@ class NonlinearDynamicsBase(DynamicsBase):
         if ctrl_args is None:
             ctrl_args = ()
         if use_continuous:
-            if self.control_model is not None and u is not None:
+            if self._control_model is not None and u is not None:
 
                 def factory(ii):
                     return lambda _t, _x, _u, *_args: self._cont_dyn(
@@ -167,7 +167,7 @@ class NonlinearDynamicsBase(DynamicsBase):
         N x Nu numpy array
             Control input matrix.
         """
-        if self.control_model is None:
+        if self._control_model is None:
             warn("Control model is None")
             return np.zeros((state.size, u.size))
         if state_args is None:

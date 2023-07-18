@@ -41,7 +41,15 @@ class IRobotCreate(NonlinearDynamicsBase):
         def g2(t, x, u, *args):
             return (u[1] - u[0]) / self.wheel_separation
 
-        self.control_model = [g0, g1, g2]
+        self._control_model = [g0, g1, g2]
+
+    @property
+    def control_model(self):
+        return self._control_model
+
+    @control_model.setter
+    def control_model(self, model):
+        self._control_model = model
 
     @property
     def wheel_separation(self):

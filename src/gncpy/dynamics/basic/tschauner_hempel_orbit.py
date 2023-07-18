@@ -46,6 +46,14 @@ class TschaunerHempelOrbit(NonlinearDynamicsBase):
         super().__init__(**kwargs)
 
     @property
+    def control_model(self):
+        return self._control_model
+
+    @control_model.setter
+    def control_model(self, model):
+        self._control_model = model
+
+    @property
     def cont_fnc_lst(self):
         """Continuous time dynamics.
 

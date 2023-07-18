@@ -28,12 +28,20 @@ class DynamicsBase(ABC):
 
     def __init__(self, control_model=None, state_constraint=None):
         super().__init__()
-        self.control_model = control_model
+        self._control_model = control_model
         self.state_constraint = state_constraint
 
     @property
     def allow_cpp(self):
         return False
+
+    @property
+    def control_model(self):
+        return self._control_model
+
+    @control_model.setter
+    def control_model(self, model):
+        self._control_model = model
 
     @abstractmethod
     def propagate_state(self, timestep, state, u=None, state_args=None, ctrl_args=None):
