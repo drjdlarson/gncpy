@@ -20,7 +20,7 @@ class DoubleIntegrator(LinearDynamicsBase):
         self.__stateTransParams = cpp_bindings.StateTransParams()
         self.__model = cpp_bindings.DoubleIntegrator(0.1)
         if "control_model" in kwargs and kwargs["control_model"] is not None:
-            self.__model.setControlModel(kwargs("control_model"))
+            self.__model.set_control_model(kwargs("control_model"))
 
     @property
     def allow_cpp(self):

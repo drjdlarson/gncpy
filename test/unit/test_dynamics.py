@@ -338,14 +338,12 @@ def test_clohessy_wiltshire_prop():
 
     # Create dynamics object
     dynObj = gdyn.ClohessyWiltshireOrbit(mean_motion=mean_motion)
-    dynObj.control_model = gcont.StateControl(len(dynObj.state_names), 2)
-    ctrl_args = [(3, 4), (0, 1), (dt, 0.5 * dt)]
     state = np.zeros((time.size, len(dynObj.state_names)))
     state[0] = np.array([0, 0, 0, 1, 0, 1])
 
     for kk, tt in enumerate(time[:-1]):
         state[kk + 1] = dynObj.propagate_state(
-            tt, state[kk].reshape((-1, 1)), state_args=(dt,), ctrl_args=ctrl_args
+            tt, state[kk].reshape((-1, 1)), state_args=(dt,)
         ).flatten()
 
     x_end = state[0, 2] * t1
@@ -451,17 +449,17 @@ if __name__ == "__main__":
 
         plt.close("all")
 
-    # test_double_integrator_mat()
-    # test_double_integrator_prop()
+    test_double_integrator_mat()
+    test_double_integrator_prop()
     test_double_integrator_control()
 
-    # test_clohessy_wiltshire2d_mat()
-    # test_clohessy_wiltshire2d_prop()
-    # test_clohessy_wiltshire2d_control()
+    test_clohessy_wiltshire2d_mat()
+    test_clohessy_wiltshire2d_prop()
+    test_clohessy_wiltshire2d_control()
 
-    # test_clohessy_wiltshire_mat()
-    # test_clohessy_wiltshire_prop()
-    # test_clohessy_wiltshire_control()
+    test_clohessy_wiltshire_mat()
+    test_clohessy_wiltshire_prop()
+    test_clohessy_wiltshire_control()
 
     if DEBUG:
         plt.show()
