@@ -19,7 +19,7 @@ void initStateControl(py::module& m) {
 
     GNCPY_PY_CHILD_CLASS(gncpy::control::StateControlParams, gncpy::control::ControlParams) (m, "StateControlParams")
         .def(py::init<const std::vector<uint8_t>&, const std::vector<uint8_t>&>())
-        .ddef(py::init<const std::vector<uint8_t>&, const std::vector<uint8_t>&, const std::vector<double>&>())
+        .def(py::init<const std::vector<uint8_t>&, const std::vector<uint8_t>&, const std::vector<double>&>())
         .def_readonly("cont_inds", &gncpy::control::StateControlParams::contInds, "Indices of the state vector to control (read-only)")
         GNCPY_PICKLE(gncpy::control::StateControlParams);
 
