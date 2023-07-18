@@ -20,7 +20,9 @@ void initStateControl(py::module& m) {
     GNCPY_PY_CHILD_CLASS(gncpy::control::StateControlParams, gncpy::control::ControlParams) (m, "StateControlParams")
         .def(py::init<const std::vector<uint8_t>&, const std::vector<uint8_t>&>())
         .def(py::init<const std::vector<uint8_t>&, const std::vector<uint8_t>&, const std::vector<double>&>())
-        .def_readonly("cont_inds", &gncpy::control::StateControlParams::contInds, "Indices of the state vector to control (read-only)")
+        .def_readonly("cont_rows", &gncpy::control::StateControlParams::contRows, "Row indices of the state vector to control (read-only)")
+        .def_readonly("cont_columns", &gncpy::control::StateControlParams::contColumns, "Column indices of the state vector to control (read-only)")
+        .def_readonly("vals", &gncpy::controls::StateControlParams::vals, "Values to be placed in the input matrix.")
         GNCPY_PICKLE(gncpy::control::StateControlParams);
 
     GNCPY_PY_CHILD_CLASS(gncpy::control::StateControl, gncpy::control::ILinearControlModel)(m, "StateControl")
