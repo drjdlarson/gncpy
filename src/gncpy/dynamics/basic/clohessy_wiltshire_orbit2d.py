@@ -48,7 +48,7 @@ class ClohessyWiltshireOrbit2d(LinearDynamicsBase):
     @control_model.setter
     def control_model(self, model):
         if isinstance(model, cpp_control.ILinearControlModel):
-            self.__model.setControlModel(model)
+            self.__model.set_control_model(model)
         else:
             raise TypeError("must be ILinearControlModel type")
 

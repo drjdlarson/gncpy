@@ -30,7 +30,7 @@ void initStateControl(py::module& m) {
         GNCPY_CONTROL_ILINEARCONTROLMODEL_INTERFACE(gncpy::control::StateControl)
         .def("args_to_params", []([[maybe_unused]] gncpy::control::StateControl& self, py::tuple args) {
             if(args.size() != 3 && args.size() != 2){
-                throw gncpy::exceptions::BadParams("Must only pass indices to state control model");
+                throw gncpy::exceptions::BadParams("Must only pass row/column indices and values to state control model");
             }
             std::vector<uint8_t> rows;
             std::vector<uint8_t> cols;

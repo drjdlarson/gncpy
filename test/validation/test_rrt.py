@@ -22,7 +22,7 @@ def test_lin_lqrrrtstar():
     # define dynamics
     dynObj = gdyn.DoubleIntegrator()
     pos_inds = [0, 1]
-    dynObj.control_model = lambda _t, *_args: np.array([[0, 0], [0, 0], [1, 0], [0, 1]])
+    dynObj.control_model = gctrl.StateControl(len(dynObj.state_names), 2)
     u_nom = np.zeros((2, 1))
     state_args = (dt,)
 
@@ -78,6 +78,7 @@ def test_lin_lqrrrtstar():
         end_state,
         use_convergence=True,
         state_args=state_args,
+        ctrl_args=((2, 3), (0, 1)),
         disp=True,
         plt_inds=[0, 1],
         show_animation=DEBUG_PLOTS,

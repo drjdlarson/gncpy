@@ -29,15 +29,11 @@ def test_double_integrator_prop():
     dt = 0.01
     t1 = 10
     time = np.arange(0, t1 + dt, dt)
-    cur_state = np.array([0.5, 1, 0, 0]).reshape((-1, 1))
-    end_state = np.array([2, 4, 0, 0]).reshape((-1, 1))
-    time_horizon = float("inf")
 
     # Create dynamics object
     dynObj = gdyn.DoubleIntegrator()
-    # dynObj.control_model = lambda _t, *_args: np.array([[0, 0], [0, 0], [1, 0], [0, 0.5]])
     state = np.zeros((time.size, len(dynObj.state_names)))
-    state[0] = np.array([0, 0, 1, 0])
+    state[0] = np.array([0, 0, 1, 0.5])
 
     for kk, tt in enumerate(time[:-1]):
         state[kk + 1] = dynObj.propagate_state(
@@ -45,10 +41,12 @@ def test_double_integrator_prop():
         ).flatten()
 
     x_end = state[0, 2] * t1
-    test.assert_allclose(state[-1], np.array([x_end, 0, 1, 0], dtype=float))
+    y_end = state[0, 3] * t1
+    test.assert_allclose(
+        state[-1], np.array([x_end, y_end, state[0, 2], state[0, 3]], dtype=float)
+    )
 
 
-# TODO: change this to accommodate new control
 def test_double_integrator_control():
     dt = 0.01
     t1 = 10
@@ -58,14 +56,13 @@ def test_double_integrator_control():
     dynObj = gdyn.DoubleIntegrator()
 
     # Setup control model: 1 m/s^2 accel control in x, 0.5 m/s^2 control in y
-    dynObj.control_model = gcont.StateControl(len(dynObj.state_names), (len(dynObj.state_names))/2)
-
+    dynObj.control_model = gcont.StateControl(len(dynObj.state_names), 2)
 
     # simulate for some time
     state = np.zeros((time.size, len(dynObj.state_names)))
     state[0] = np.array([0, 0, 1, 0])
 
-    ctrl_args = [(2, 3), (0, 1)]
+    ctrl_args = [(2, 3), (0, 1), (dt, 0.5 * dt)]
 
     for kk, tt in enumerate(time[:-1]):
         state[kk + 1] = dynObj.propagate_state(
@@ -73,7 +70,7 @@ def test_double_integrator_control():
             state[kk].reshape((-1, 1)),
             state_args=(dt,),
             u=np.ones((2, 1)),
-            ctrl_args=ctrl_args
+            ctrl_args=ctrl_args,
         ).flatten()
 
     # debug plots
@@ -109,18 +106,10 @@ def test_double_integrator_control():
         fig.suptitle("Double Integrator Vel w/ Control")
 
     # calculate expected state
-    x_end = (
-        0.5 * dynObj.control_model(0)[2, 0] / dt * t1**2
-        + state[0, 2] * t1
-        + state[0, 0]
-    )
-    y_end = (
-        0.5 * dynObj.control_model(0)[3, 1] / dt * t1**2
-        + state[0, 3] * t1
-        + state[0, 1]
-    )
-    xvel_end = dynObj.control_model(0)[2, 0] / dt * t1 + state[0, 2]
-    yvel_end = dynObj.control_model(0)[3, 1] / dt * t1 + state[0, 3]
+    x_end = 0.5 * ctrl_args[2][0] / dt * t1**2 + state[0, 2] * t1 + state[0, 0]
+    y_end = 0.5 * ctrl_args[2][1] / dt * t1**2 + state[0, 3] * t1 + state[0, 1]
+    xvel_end = ctrl_args[2][0] / dt * t1 + state[0, 2]
+    yvel_end = ctrl_args[2][1] / dt * t1 + state[0, 3]
     exp_state = np.array([x_end, y_end, xvel_end, yvel_end])
 
     # test expected against code
@@ -218,9 +207,9 @@ def test_clohessy_wiltshire2d_control():
     dynObj = gdyn.ClohessyWiltshireOrbit2d(mean_motion=mean_motion)
 
     # Setup control model: 1 m/s^2 accel control in x, 0.5 m/s^2 control in y
-    dynObj.control_model = gcont.StateControl(len(dynObj.state_names), (len(dynObj.state_names))/2)
+    dynObj.control_model = gcont.StateControl(len(dynObj.state_names), 2)
 
-    ctrl_args = [(2, 3), (0, 1), (dt, 0.5*dt)]
+    ctrl_args = [(2, 3), (0, 1), (dt, 0.5 * dt)]
 
     # simulate for some time
     state = np.zeros((time.size, len(dynObj.state_names)))
@@ -228,7 +217,11 @@ def test_clohessy_wiltshire2d_control():
 
     for kk, tt in enumerate(time[:-1]):
         state[kk + 1] = dynObj.propagate_state(
-            tt, state[kk].reshape((-1, 1)), state_args=(dt,), u=np.ones((2, 1)), ctrl_args=ctrl_args
+            tt,
+            state[kk].reshape((-1, 1)),
+            state_args=(dt,),
+            u=np.ones((2, 1)),
+            ctrl_args=ctrl_args,
         ).flatten()
 
     # debug plots
@@ -345,13 +338,14 @@ def test_clohessy_wiltshire_prop():
 
     # Create dynamics object
     dynObj = gdyn.ClohessyWiltshireOrbit(mean_motion=mean_motion)
-    # dynObj.control_model = lambda _t, *_args: np.array([[0, 0], [0, 0], [1, 0], [0, 0.5]])
+    dynObj.control_model = gcont.StateControl(len(dynObj.state_names), 2)
+    ctrl_args = [(3, 4), (0, 1), (dt, 0.5 * dt)]
     state = np.zeros((time.size, len(dynObj.state_names)))
     state[0] = np.array([0, 0, 0, 1, 0, 1])
 
     for kk, tt in enumerate(time[:-1]):
         state[kk + 1] = dynObj.propagate_state(
-            tt, state[kk].reshape((-1, 1)), state_args=(dt,)
+            tt, state[kk].reshape((-1, 1)), state_args=(dt,), ctrl_args=ctrl_args
         ).flatten()
 
     x_end = state[0, 2] * t1
@@ -365,7 +359,6 @@ def test_clohessy_wiltshire_prop():
     )
 
 
-# TODO: change this to accommodate new control
 def test_clohessy_wiltshire_control():
     dt = 0.01
     t1 = 10
@@ -380,24 +373,9 @@ def test_clohessy_wiltshire_control():
     # Create dynamics object
     dynObj = gdyn.ClohessyWiltshireOrbit(mean_motion=mean_motion)
 
-    # Setup control model: 1 m/s^2 accel control in x, 0.5 m/s^2 control in y
-    # dynObj.control_model = lambda _t, *_args: np.array(
-    #     [
-    #         [0, 0, 0],
-    #         [0, 0, 0],
-    #         [0, 0, 0],
-    #         [1 * dt, 0, 0],
-    #         [0, 0.5 * dt, 0],
-    #         [0, 0, 1 * dt],
-    #     ]
-    # )
-
-    dynObj.control_model = gcont.StateControl(len(dynObj.state_names), (len(dynObj.state_names))/2)
-    # dynObj.control_model = lambda _t, *_args: np.array(
-    #     [[0, 0], [0, 0], [1 * dt, 0], [0, 0.5 * dt]]
-    # )
-
-    ctrl_args = [(3, 4, 5), (0, 1, 2), (dt, 0.5*dt, dt)]
+    # Setup control model: 1 m/s^2 accel control in x, 0.5 m/s^2 control in y, 1 m/s^2 in z
+    dynObj.control_model = gcont.StateControl(len(dynObj.state_names), 3)
+    ctrl_args = [(3, 4, 5), (0, 1, 2), (dt, 0.5 * dt, dt)]
 
     # simulate for some time
     state = np.zeros((time.size, len(dynObj.state_names)))
@@ -405,7 +383,11 @@ def test_clohessy_wiltshire_control():
 
     for kk, tt in enumerate(time[:-1]):
         state[kk + 1] = dynObj.propagate_state(
-            tt, state[kk].reshape((-1, 1)), state_args=(dt,), u=np.ones((3, 1))
+            tt,
+            state[kk].reshape((-1, 1)),
+            state_args=(dt,),
+            u=np.ones((3, 1)),
+            ctrl_args=ctrl_args,
         ).flatten()
 
     # debug plots
@@ -464,21 +446,22 @@ if __name__ == "__main__":
     if DEBUG:
         import matplotlib.pyplot as plt
         import matplotlib
+
         matplotlib.use("WebAgg")
 
         plt.close("all")
 
-    test_double_integrator_mat()
-    test_double_integrator_prop()
+    # test_double_integrator_mat()
+    # test_double_integrator_prop()
     test_double_integrator_control()
 
-    test_clohessy_wiltshire2d_mat()
-    test_clohessy_wiltshire2d_prop()
-    test_clohessy_wiltshire2d_control()
+    # test_clohessy_wiltshire2d_mat()
+    # test_clohessy_wiltshire2d_prop()
+    # test_clohessy_wiltshire2d_control()
 
-    test_clohessy_wiltshire_mat()
-    test_clohessy_wiltshire_prop()
-    test_clohessy_wiltshire_control()
+    # test_clohessy_wiltshire_mat()
+    # test_clohessy_wiltshire_prop()
+    # test_clohessy_wiltshire_control()
 
     if DEBUG:
         plt.show()

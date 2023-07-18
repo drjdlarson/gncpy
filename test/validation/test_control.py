@@ -15,7 +15,8 @@ def test_lqr_lin_inf_hor():
 
     # Create dynamics object
     dynObj = gdyn.DoubleIntegrator()
-    dynObj.control_model = lambda _t, *_args: np.array([[0, 0], [0, 0], [1, 0], [0, 1]])
+    dynObj.control_model = gctrl.StateControl(len(dynObj.state_names), 2)
+    ctrl_args = ((2, 3), (0, 1))
     state_args = (dt,)
 
     # Setup LQR Object
@@ -33,6 +34,7 @@ def test_lqr_lin_inf_hor():
         end_state=end_state,
         end_state_tol=0.1,
         check_inds=[0, 1],
+        ctrl_args=ctrl_args,
         state_args=state_args,
         provide_details=True,
     )
@@ -49,7 +51,8 @@ def test_lqr_lin_finite_hor():
 
     # Create dynamics object
     dynObj = gdyn.DoubleIntegrator()
-    dynObj.control_model = lambda _t, *_args: np.array([[0, 0], [0, 0], [1, 0], [0, 1]])
+    dynObj.control_model = gctrl.StateControl(len(dynObj.state_names), 2)
+    ctrl_args = ((2, 3), (0, 1))
     state_args = (dt,)
     inv_state_args = (-dt,)
 
@@ -67,6 +70,7 @@ def test_lqr_lin_finite_hor():
         cur_state,
         end_state=end_state,
         state_args=state_args,
+        ctrl_args=ctrl_args,
         inv_state_args=inv_state_args,
         provide_details=True,
     )

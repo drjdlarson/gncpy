@@ -241,7 +241,7 @@ class ExtendedKalmanFilter(KalmanFilter):
             (
                 self.__predParams.stateTransParams,
                 self.__predParams.controlParams,
-            ) = self._dyn_obj.args_to_params(dyn_fun_params, control_fun_params)
+            ) = self._dyn_obj.args_to_params(dyn_fun_params, control_fun_params)[:2]
             return self.__model.predict(
                 timestep, cur_state, cur_input, self.__predParams
             ).reshape((-1, 1))

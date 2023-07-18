@@ -421,7 +421,7 @@ class KalmanFilter(BayesFilter):
             (
                 self.__predParams.stateTransParams,
                 self.__predParams.controlParams,
-            ) = self._dyn_obj.args_to_params(state_mat_args, input_mat_args)
+            ) = self._dyn_obj.args_to_params(state_mat_args, input_mat_args)[:2]
             return self.__model.predict(
                 timestep, cur_state, cur_input, self.__predParams
             ).reshape((-1, 1))

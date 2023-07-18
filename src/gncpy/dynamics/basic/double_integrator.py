@@ -34,7 +34,8 @@ class DoubleIntegrator(LinearDynamicsBase):
     @control_model.setter
     def control_model(self, model):
         if isinstance(model, cpp_control.ILinearControlModel):
-            self.__model.setControlModel(model)
+            self._control_model = model
+            self.__model.set_control_model(self._control_model)
         else:
             raise TypeError("must be ILinearControlModel type")
 
@@ -48,14 +49,10 @@ class DoubleIntegrator(LinearDynamicsBase):
         if len(control_args) != 0 and self._control_model is None:
             warn("Control agruments supplied but no control model specified")
         elif self._control_model is not None:
-            try:
-                self.__controlParams = self._control_model.args_to_params(control_args)
-            except Exception:
-                warn(
-                    "Supplied control model does not support c++ backend but model is supposed to allow c++ backend. Not generating parameters"
-                )
-                self.__controlParams = cpp_control.ControlParams()
-        
+            self.__controlParams = self._control_model.args_to_params(
+                tuple(control_args)
+            )
+
         self.__constraintParams = cpp_bindings.ConstraintParams()
 
         # hack since state params is empty but things are set in the model
@@ -74,12 +71,16 @@ class DoubleIntegrator(LinearDynamicsBase):
     def propagate_state(self, timestep, state, u=None, state_args=None, ctrl_args=None):
         if state_args is None:
             raise RuntimeError("state_args must be (dt,) not None")
+        self.__model.dt = state_args[0]
         if self._control_model is None:
-            self.__model.dt = state_args[0]
-            return self.__model.propagate_state(timestep, state).reshape((-1, 1))
+            next_state = self.__model.propagate_state(timestep, state).reshape((-1, 1))
         else:
-            return self.__model.propagate_state(timestep, state, u, *self.args_to_params(state_args, ctrl_args))
-
+            next_state = self.__model.propagate_state(
+                timestep, state, u, *self.args_to_params(state_args, ctrl_args)
+            )
+        if self.state_constraint is not None:
+            next_state = self.state_constraint(timestep, next_state)
+        return next_state
 
     def get_dis_process_noise_mat(self, dt, proc_cov):
         """Discrete process noise matrix.
@@ -118,4 +119,3 @@ class DoubleIntegrator(LinearDynamicsBase):
         """
         self.__model.dt = dt
         return self.__model.get_state_mat(timestep, self.__stateTransParams)
-
