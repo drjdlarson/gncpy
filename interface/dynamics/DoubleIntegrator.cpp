@@ -21,7 +21,6 @@ void initDoubleIntegrator(py::module& m) {
 
     GNCPY_PY_CHILD_CLASS(gncpy::dynamics::DoubleIntegrator, gncpy::dynamics::ILinearDynamics)(m, "DoubleIntegrator")
         .def(py::init<double>())
-        .def("set_control_model", &gncpy::dynamics::ILinearDynamics::setControlModel)
         GNCPY_DYNAMICS_ILINEARDYNAMICS_INTERFACE(gncpy::dynamics::DoubleIntegrator)
         .def_property("dt", &gncpy::dynamics::DoubleIntegrator::dt, &gncpy::dynamics::DoubleIntegrator::setDt) // Essentially setter and getter
         GNCPY_PICKLE(gncpy::dynamics::DoubleIntegrator);

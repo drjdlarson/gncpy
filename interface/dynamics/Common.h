@@ -30,5 +30,6 @@ extern void initClohessyWiltshire(pybind11::module&);
 #define GNCPY_DYNAMICS_ILINEARDYNAMICS_INTERFACE(cName) \
     GNCPY_DYNAMICS_IDYNAMICS_INTERFACE(cName) \
     .def("get_state_mat", &cName::getStateMat, \
-         pybind11::arg("timestep"), pybind11::arg_v("stateTransParams", static_cast<lager::gncpy::dynamics::StateTransParams *>(nullptr), "lager::gncpy::dynamics::StateTransParams*=nullptr"))
+         pybind11::arg("timestep"), pybind11::arg_v("stateTransParams", static_cast<lager::gncpy::dynamics::StateTransParams *>(nullptr), "lager::gncpy::dynamics::StateTransParams*=nullptr")) \
+    .def("set_control_model", &cName::setControlModel)
          
