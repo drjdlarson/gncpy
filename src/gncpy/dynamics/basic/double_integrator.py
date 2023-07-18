@@ -39,6 +39,31 @@ class DoubleIntegrator(LinearDynamicsBase):
         else:
             raise TypeError("must be ILinearControlModel type")
 
+    def get_input_mat(self, timestep, *ctrl_args):
+        """Calculates the input matrix from the control model.
+
+        This calculates the jacobian of the control model. If no control model
+        is specified than it returns a zero matrix.
+
+        Parameters
+        ----------
+        timestep : float
+            current timestep.
+        state : N x 1 numpy array
+            current state.
+        *ctrl_args : tuple
+            Additional arguments to pass to the control model.
+
+        Returns
+        -------
+        N x Nu numpy array
+            Control input matrix.
+        """
+        if self._control_model is None:
+            raise RuntimeWarning("Control model is not set.")
+        self.args_to_params((0.1,), ctrl_args)
+        return self._control_model.get_input_mat(timestep, self.__controlParams)
+
     # must be provided if allow_cpp is true
     def args_to_params(self, state_args, control_args):
         if len(state_args) != 1:

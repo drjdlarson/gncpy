@@ -37,7 +37,7 @@ class LinearDynamicsBase(DynamicsBase):
         """
         if self._control_model is None:
             raise RuntimeWarning("Control model is not set.")
-        return self._control_model.get_input_mat(timestep, *ctrl_args)
+        return self._control_model(timestep, *ctrl_args)
 
     def get_dis_process_noise_mat(self, dt, *f_args):
         """Class method for getting the process noise.
