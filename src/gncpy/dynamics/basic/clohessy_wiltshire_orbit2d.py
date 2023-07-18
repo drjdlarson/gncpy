@@ -40,13 +40,17 @@ class ClohessyWiltshireOrbit2d(LinearDynamicsBase):
     def allow_cpp(self):
         return True
 
-    property
+    @property
     def control_model(self):
-        return self._control_model
+        warn("viewing the control model is not supported for this class")
+        return None
 
-    @control_model.setter()
+    @control_model.setter
     def control_model(self, model):
-        self._control_model = model
+        if isinstance(model, cpp_control.ILinearControlModel):
+            self.__model.setControlModel(model)
+        else:
+            raise TypeError("must be ILinearControlModel type")
 
     # must be provided if allow_cpp is true
     def args_to_params(self, state_args, control_args):

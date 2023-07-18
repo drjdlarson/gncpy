@@ -65,12 +65,15 @@ def test_double_integrator_control():
     state = np.zeros((time.size, len(dynObj.state_names)))
     state[0] = np.array([0, 0, 1, 0])
 
+    ctrl_args = [(2, 3), (0, 1)]
+
     for kk, tt in enumerate(time[:-1]):
         state[kk + 1] = dynObj.propagate_state(
             tt,
             state[kk].reshape((-1, 1)),
             state_args=(dt,),
             u=np.ones((2, 1)),
+            ctrl_args=ctrl_args
         ).flatten()
 
     # debug plots
@@ -215,9 +218,9 @@ def test_clohessy_wiltshire2d_control():
     dynObj = gdyn.ClohessyWiltshireOrbit2d(mean_motion=mean_motion)
 
     # Setup control model: 1 m/s^2 accel control in x, 0.5 m/s^2 control in y
-    dynObj.control_model = lambda _t, *_args: np.array(
-        [[0, 0], [0, 0], [1 * dt, 0], [0, 0.5 * dt]]
-    )
+    dynObj.control_model = gcont.StateControl(len(dynObj.state_names))
+
+    ctrl_args = [(2, 3), (0, 1), (dt, 0.5*dt)]
 
     # simulate for some time
     state = np.zeros((time.size, len(dynObj.state_names)))
@@ -225,7 +228,7 @@ def test_clohessy_wiltshire2d_control():
 
     for kk, tt in enumerate(time[:-1]):
         state[kk + 1] = dynObj.propagate_state(
-            tt, state[kk].reshape((-1, 1)), state_args=(dt,), u=np.ones((2, 1))
+            tt, state[kk].reshape((-1, 1)), state_args=(dt,), u=np.ones((2, 1)), ctrl_args=ctrl_args
         ).flatten()
 
     # debug plots
@@ -378,16 +381,23 @@ def test_clohessy_wiltshire_control():
     dynObj = gdyn.ClohessyWiltshireOrbit(mean_motion=mean_motion)
 
     # Setup control model: 1 m/s^2 accel control in x, 0.5 m/s^2 control in y
-    dynObj.control_model = lambda _t, *_args: np.array(
-        [
-            [0, 0, 0],
-            [0, 0, 0],
-            [0, 0, 0],
-            [1 * dt, 0, 0],
-            [0, 0.5 * dt, 0],
-            [0, 0, 1 * dt],
-        ]
-    )
+    # dynObj.control_model = lambda _t, *_args: np.array(
+    #     [
+    #         [0, 0, 0],
+    #         [0, 0, 0],
+    #         [0, 0, 0],
+    #         [1 * dt, 0, 0],
+    #         [0, 0.5 * dt, 0],
+    #         [0, 0, 1 * dt],
+    #     ]
+    # )
+
+    dynObj.control_model = gcont.StateControl(len(dynObj.state_names))
+    # dynObj.control_model = lambda _t, *_args: np.array(
+    #     [[0, 0], [0, 0], [1 * dt, 0], [0, 0.5 * dt]]
+    # )
+
+    ctrl_args = [(3, 4, 5), (0, 1, 2), (dt, 0.5*dt, dt)]
 
     # simulate for some time
     state = np.zeros((time.size, len(dynObj.state_names)))
