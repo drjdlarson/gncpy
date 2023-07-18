@@ -24,7 +24,7 @@ void initStateControl(py::module& m) {
         GNCPY_PICKLE(gncpy::control::StateControlParams);
 
     GNCPY_PY_CHILD_CLASS(gncpy::control::StateControl, gncpy::control::ILinearControlModel)(m, "StateControl")
-        .def(py::init<size_t>())
+        .def(py::init<size_t, size_t>())
         GNCPY_CONTROL_ILINEARCONTROLMODEL_INTERFACE(gncpy::control::StateControl)
         .def("args_to_params", []([[maybe_unused]] gncpy::control::StateControl& self, py::tuple args) {
             if(args.size() != 3 && args.size() != 2){
