@@ -31,6 +31,13 @@ class DoubleIntegrator(LinearDynamicsBase):
         warn("viewing the control model is not supported for this class")
         return None
 
+    @control_model.setter
+    def control_model(self, model):
+        if isinstance(model, cpp_control.ILinearControlModel):
+            self.__model.setControlModel(model)
+        else:
+            raise TypeError("must be ILinearControlModel type")
+
     # must be provided if allow_cpp is true
     def args_to_params(self, state_args, control_args):
         if len(state_args) != 1:

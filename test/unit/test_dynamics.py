@@ -3,7 +3,7 @@ import numpy.testing as test
 
 import gncpy.dynamics.basic as gdyn
 
-import gncpy.control._control as gcont
+import gncpy.control as gcont
 
 DEBUG = False
 
@@ -58,9 +58,8 @@ def test_double_integrator_control():
     dynObj = gdyn.DoubleIntegrator()
 
     # Setup control model: 1 m/s^2 accel control in x, 0.5 m/s^2 control in y
-    dynObj.control_model = lambda _t, *_args: np.array(
-        [[0, 0], [0, 0], [1 * dt, 0], [0, 0.5 * dt]]
-    )
+    dynObj.control_model = gcont.StateControl(len(dynObj.state_names))
+
 
     # simulate for some time
     state = np.zeros((time.size, len(dynObj.state_names)))
