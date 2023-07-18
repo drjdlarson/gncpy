@@ -412,23 +412,32 @@ def test_clohessy_wiltshire_control():
 
         fig.axes[1].plot(time, state[:, 1])
         fig.axes[1].set_ylabel("y-pos (m)")
-        fig.axes[1].set_xlabel("time (s)")
         fig.axes[1].grid(True)
+
+        fig.axes[2].plot(time, state[:, 2])
+        fig.axes[2].set_ylabel("z-pos (m)")
+        fig.axes[2].set_xlabel("time (s)")
+        fig.axes[2].grid(True)
 
         fig.suptitle("Clohessy Wiltshire Pos w/ Control")
 
         fig = plt.figure()
-        fig.add_subplot(2, 1, 1)
-        fig.add_subplot(2, 1, 2)
+        fig.add_subplot(3, 1, 1)
+        fig.add_subplot(3, 1, 2)
+        fig.add_subplot(3, 1, 3)
 
-        fig.axes[0].plot(time, state[:, 2])
+        fig.axes[0].plot(time, state[:, 3])
         fig.axes[0].set_ylabel("x-vel (m/s)")
         fig.axes[0].grid(True)
 
-        fig.axes[1].plot(time, state[:, 3])
+        fig.axes[1].plot(time, state[:, 4])
         fig.axes[1].set_ylabel("y-vel (m/s)")
-        fig.axes[1].set_xlabel("time (s)")
         fig.axes[1].grid(True)
+
+        fig.axes[2].plot(time, state[:, 5])
+        fig.axes[2].set_ylabel("z-vel (m/s)")
+        fig.axes[2].set_xlabel("time (s)")
+        fig.axes[2].grid(True)
 
         fig.suptitle("Clohessy Wiltshire Vel w/ Control")
 
@@ -445,6 +454,8 @@ if __name__ == "__main__":
     DEBUG = True
     if DEBUG:
         import matplotlib.pyplot as plt
+        import matplotlib
+        matplotlib.use("WebAgg")
 
         plt.close("all")
 
