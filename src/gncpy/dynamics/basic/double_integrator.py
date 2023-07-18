@@ -19,7 +19,7 @@ class DoubleIntegrator(LinearDynamicsBase):
         self.__controlParams = cpp_control.ControlParams()
         self.__stateTransParams = cpp_bindings.StateTransParams()
         self.__model = cpp_bindings.DoubleIntegrator(0.1)
-        if kwargs("control_model") is not None:
+        if kwargs["control_model"] is not None:
             self.__model.setControlModel(kwargs("control_model"))
 
     @property

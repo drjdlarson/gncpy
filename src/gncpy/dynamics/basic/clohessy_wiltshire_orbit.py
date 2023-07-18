@@ -26,8 +26,8 @@ class ClohessyWiltshireOrbit(ClohessyWiltshireOrbit2d):
         self.__model = cpp_bindings.ClohessyWiltshire(0.1, 0.01)
         if self.mean_motion is not None:
             self.__model.mean_motion = self.mean_motion
-        # if kwargs("control_model") is not None:
-        #     self.__model.setControlModel(kwargs("control_model"))
+        if kwargs["control_model"] is not None:
+            self.__model.setControlModel(kwargs("control_model"))
 
     @property
     def allow_cpp(self):
