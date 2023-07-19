@@ -1,0 +1,32 @@
+coordinated\_turn\_known
+========================
+
+.. automodule:: gncpy.dynamics.basic.coordinated_turn_known
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: coordinated_turn_known
+      :nosignatures:
+      :template: class.rst_t
+   
+      CoordinatedTurnKnown
+   
+   
+
+   
+   
+   
+
+
+

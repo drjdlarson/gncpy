@@ -1,0 +1,32 @@
+tschauner\_hempel\_orbit
+========================
+
+.. automodule:: gncpy.dynamics.basic.tschauner_hempel_orbit
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: tschauner_hempel_orbit
+      :nosignatures:
+      :template: class.rst_t
+   
+      TschaunerHempelOrbit
+   
+   
+
+   
+   
+   
+
+
+

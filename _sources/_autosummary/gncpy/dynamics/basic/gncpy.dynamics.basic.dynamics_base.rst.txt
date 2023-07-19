@@ -1,0 +1,32 @@
+dynamics\_base
+==============
+
+.. automodule:: gncpy.dynamics.basic.dynamics_base
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: dynamics_base
+      :nosignatures:
+      :template: class.rst_t
+   
+      DynamicsBase
+   
+   
+
+   
+   
+   
+
+
+

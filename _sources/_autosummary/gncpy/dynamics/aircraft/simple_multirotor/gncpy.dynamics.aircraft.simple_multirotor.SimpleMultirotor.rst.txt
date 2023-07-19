@@ -33,6 +33,7 @@ SimpleMultirotor
    .. autosummary::
    
       ~SimpleMultirotor.allow_cpp
+      ~SimpleMultirotor.control_model
       ~SimpleMultirotor.state_names
       ~SimpleMultirotor.state_units
    

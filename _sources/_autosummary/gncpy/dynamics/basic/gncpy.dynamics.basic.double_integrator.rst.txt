@@ -1,0 +1,32 @@
+double\_integrator
+==================
+
+.. automodule:: gncpy.dynamics.basic.double_integrator
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: double_integrator
+      :nosignatures:
+      :template: class.rst_t
+   
+      DoubleIntegrator
+   
+   
+
+   
+   
+   
+
+
+

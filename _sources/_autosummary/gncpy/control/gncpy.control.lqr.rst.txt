@@ -1,0 +1,32 @@
+lqr
+===
+
+.. automodule:: gncpy.control.lqr
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: lqr
+      :nosignatures:
+      :template: class.rst_t
+   
+      LQR
+   
+   
+
+   
+   
+   
+
+
+

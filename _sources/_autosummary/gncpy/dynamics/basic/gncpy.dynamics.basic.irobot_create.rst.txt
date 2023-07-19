@@ -1,0 +1,32 @@
+irobot\_create
+==============
+
+.. automodule:: gncpy.dynamics.basic.irobot_create
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: irobot_create
+      :nosignatures:
+      :template: class.rst_t
+   
+      IRobotCreate
+   
+   
+
+   
+   
+   
+
+
+

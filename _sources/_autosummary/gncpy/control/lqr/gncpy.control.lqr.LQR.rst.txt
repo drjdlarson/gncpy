@@ -1,0 +1,44 @@
+LQR
+===
+
+.. currentmodule:: gncpy.control.lqr
+
+.. autoclass:: LQR
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~LQR.__init__
+      ~LQR.backward_pass
+      ~LQR.backward_pass_step
+      ~LQR.calculate_control
+      ~LQR.cost_function
+      ~LQR.get_state_space
+      ~LQR.prop_state
+      ~LQR.prop_state_backward
+      ~LQR.set_cost_model
+      ~LQR.set_state_model
+      ~LQR.solve_dare
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~LQR.Q
+      ~LQR.R
+      ~LQR.dt
+   
+   

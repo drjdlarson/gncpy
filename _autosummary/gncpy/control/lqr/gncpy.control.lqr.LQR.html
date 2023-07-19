@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LQR &mdash; GNCPy 2.0.1.dev0 documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
+    <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_autosummary/gncpy/control/lqr/gncpy.control.lqr.LQR.html" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../../_static/clipboard.min.js"></script>
+        <script src="../../../../_static/copybutton.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="coordinate_transforms" href="../../gncpy.coordinate_transforms.html" />
+    <link rel="prev" title="lqr" href="../gncpy.control.lqr.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #9E1B32" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            GNCPy
+              <img src="../../../../_static/logo.svg" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                2.0.1.dev0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../../../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../../gncpy.html">gncpy</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../../gncpy.control.html">control</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../gncpy.control.elqr.html">elqr</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../gncpy.control.lqr.html">lqr</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.coordinate_transforms.html">coordinate_transforms</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../coordinate_transforms/gncpy.coordinate_transforms.ecef_to_LLA.html">gncpy.coordinate_transforms.ecef_to_LLA</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../coordinate_transforms/gncpy.coordinate_transforms.ecef_to_NED.html">gncpy.coordinate_transforms.ecef_to_NED</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../coordinate_transforms/gncpy.coordinate_transforms.lla_to_ECEF.html">gncpy.coordinate_transforms.lla_to_ECEF</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../coordinate_transforms/gncpy.coordinate_transforms.lla_to_NED.html">gncpy.coordinate_transforms.lla_to_NED</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../coordinate_transforms/gncpy.coordinate_transforms.ned_to_LLA.html">gncpy.coordinate_transforms.ned_to_LLA</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.data_fusion.html">data_fusion</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../data_fusion/gncpy.data_fusion.GeneralizedCovarianceIntersection.html">gncpy.data_fusion.GeneralizedCovarianceIntersection</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.distributions.html">distributions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../distributions/gncpy.distributions.Particle.html">Particle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../distributions/gncpy.distributions.ParticleDistribution.html">ParticleDistribution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../distributions/gncpy.distributions.QuadraturePoints.html">QuadraturePoints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../distributions/gncpy.distributions.SigmaPoints.html">SigmaPoints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../distributions/gncpy.distributions.SimpleParticleDistribution.html">SimpleParticleDistribution</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.dynamics.html">dynamics</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../dynamics/gncpy.dynamics.aircraft.html">aircraft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../dynamics/gncpy.dynamics.basic.html">basic</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.errors.html">errors</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../errors/gncpy.errors.ExtremeMeasurementNoiseError.html">gncpy.errors.ExtremeMeasurementNoiseError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../errors/gncpy.errors.ParticleDepletionError.html">gncpy.errors.ParticleDepletionError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../errors/gncpy.errors.ParticleEstimationDomainError.html">gncpy.errors.ParticleEstimationDomainError</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.filters.html">filters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.bayes_filter.html">bayes_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.bootstrap_filter.html">bootstrap_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.ekf_gaussian_scale_mixture_filter.html">ekf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.extended_kalman_filter.html">extended_kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.gci_filter.html">gci_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.gsm_filter_base.html">gsm_filter_base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.imm_gci_filter.html">imm_gci_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.interacting_multiple_model.html">interacting_multiple_model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.kalman_filter.html">kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.kf_gaussian_scale_mixture_filter.html">kf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.max_corr_ent_ukf.html">max_corr_ent_ukf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.max_corr_ent_upf.html">max_corr_ent_upf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.mcmc_particle_filter_base.html">mcmc_particle_filter_base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.particle_filter.html">particle_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.qkf_gaussian_scale_mixture_filter.html">qkf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.quadrature_kalman_filter.html">quadrature_kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.sqkf_gaussian_scale_mixture_filter.html">sqkf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.square_root_qkf.html">square_root_qkf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.students_t_filter.html">students_t_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.ukf_gaussian_scale_mixture_filter.html">ukf_gaussian_scale_mixture_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.unscented_kalman_filter.html">unscented_kalman_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../filters/gncpy.filters.unscented_particle_filter.html">unscented_particle_filter</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.game_engine.html">game_engine</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../game_engine/gncpy.game_engine.base_game.html">base_game</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../game_engine/gncpy.game_engine.components.html">components</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../game_engine/gncpy.game_engine.entities.html">entities</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../game_engine/gncpy.game_engine.physics2d.html">physics2d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../game_engine/gncpy.game_engine.rendering2d.html">rendering2d</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.games.html">games</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../games/gncpy.games.SimpleUAV2d.html">SimpleUAV2d</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.math.html">math</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.epanechnikov_kernel.html">gncpy.math.epanechnikov_kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.gamma_fnc.html">gncpy.math.gamma_fnc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.gaussian_kernel.html">gncpy.math.gaussian_kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.get_elem_sym_fnc.html">gncpy.math.get_elem_sym_fnc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.get_hessian.html">gncpy.math.get_hessian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.get_input_jacobian.html">gncpy.math.get_input_jacobian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.get_jacobian.html">gncpy.math.get_jacobian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.get_state_jacobian.html">gncpy.math.get_state_jacobian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.log_sum_exp.html">gncpy.math.log_sum_exp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.rk4.html">gncpy.math.rk4</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.rk4_backward.html">gncpy.math.rk4_backward</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.weighted_sum_mat.html">gncpy.math.weighted_sum_mat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../math/gncpy.math.weighted_sum_vec.html">gncpy.math.weighted_sum_vec</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.measurements.html">measurements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.orbital_mechanics.html">orbital_mechanics</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../orbital_mechanics/gncpy.orbital_mechanics.correct_lon_ascend.html">gncpy.orbital_mechanics.correct_lon_ascend</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../orbital_mechanics/gncpy.orbital_mechanics.ecc_anom_from_mean.html">gncpy.orbital_mechanics.ecc_anom_from_mean</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../orbital_mechanics/gncpy.orbital_mechanics.ecef_from_orbit.html">gncpy.orbital_mechanics.ecef_from_orbit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../orbital_mechanics/gncpy.orbital_mechanics.true_anom_from_ecc.html">gncpy.orbital_mechanics.true_anom_from_ecc</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.planning.html">planning</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../planning/gncpy.planning.a_star.html">a_star</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../planning/gncpy.planning.reinforcement_learning.html">reinforcement_learning</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../planning/gncpy.planning.rrt_star.html">rrt_star</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.plotting.html">plotting</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../plotting/gncpy.plotting.calc_error_ellipse.html">gncpy.plotting.calc_error_ellipse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotting/gncpy.plotting.get_cmap.html">gncpy.plotting.get_cmap</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotting/gncpy.plotting.init_plotting_opts.html">gncpy.plotting.init_plotting_opts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../plotting/gncpy.plotting.set_title_label.html">gncpy.plotting.set_title_label</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.sampling.html">sampling</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../sampling/gncpy.sampling.MetropolisHastings.html">MetropolisHastings</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.utilities.html">utilities</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../utilities/gncpy.utilities.classproperty.html">gncpy.utilities.classproperty</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../utilities/gncpy.utilities.ClassPropertyDescriptor.html">ClassPropertyDescriptor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../utilities/gncpy.utilities.ClassPropertyMetaClass.html">ClassPropertyMetaClass</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gncpy.wgs84.html">wgs84</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../wgs84/gncpy.wgs84.calc_earth_rate.html">gncpy.wgs84.calc_earth_rate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../wgs84/gncpy.wgs84.calc_ew_rad.html">gncpy.wgs84.calc_ew_rad</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../wgs84/gncpy.wgs84.calc_gravity.html">gncpy.wgs84.calc_gravity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../wgs84/gncpy.wgs84.calc_ns_rad.html">gncpy.wgs84.calc_ns_rad</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../wgs84/gncpy.wgs84.calc_transport_rate.html">gncpy.wgs84.calc_transport_rate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../wgs84/gncpy.wgs84.convert_msl_to_wgs.html">gncpy.wgs84.convert_msl_to_wgs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../wgs84/gncpy.wgs84.convert_wgs_to_msl.html">gncpy.wgs84.convert_wgs_to_msl</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../wgs84/gncpy.wgs84.init_egm_lookup_table.html">gncpy.wgs84.init_egm_lookup_table</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../usage.html">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/control.html">Control Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/control.html#lqr-infinite-horizon-linear-dyanmics">LQR Infinite Horizon Linear Dyanmics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/control.html#lqr-finite-horzon-linear-dynamics">LQR Finite Horzon Linear Dynamics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/control.html#lqr-finite-horzon-non-linear-dynamics">LQR Finite Horzon Non-linear Dynamics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/control.html#elqr">ELQR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/control.html#elqr-modified-quadratization">ELQR Modified Quadratization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/control.html#elqr-linear-dynamics">ELQR Linear Dynamics</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/filters.html">Filter Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/filters.html#kalman-filter">Kalman Filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/filters.html#extended-kalman-filter">Extended Kalman Filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/filters.html#interacting-multiple-model-filter">Interacting Multiple Model Filter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/planning.html">Planning Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/a_star.html">A* Examples</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../usage/a_star.html#normal-a">Normal A*</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../usage/a_star.html#beam-search">Beam Search</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../usage/a_star.html#weighted-a">Weighted A*</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/rrtstar.html">RRT* Examples</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../usage/rrtstar.html#lqr-rrt-with-linear-dynamics">LQR-RRT* with Linear Dynamics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../usage/rrtstar.html#lqr-rrt-with-non-linear-dynamics">LQR-RRT* with Non-Linear Dynamics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../usage/rrtstar.html#elqr-rrt-with-non-linear-dynamics">ELQR-RRT* with Non-Linear Dynamics</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../toolchain.html">Toolchain</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../toolchain.html#development-environment-setup">Development Environment Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../toolchain.html#example-workflow">Example Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../toolchain.html#notes-on-tox">Notes on tox</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../cicd.html">CI/CD Pipeline</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../cicd.html#github-actions-quick-guide">Github Actions Quick Guide</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="./reports/coverage/index.html#http://">Test Coverage Report</a></li>
+<li class="toctree-l1"><a class="reference external" href="./reports/junit/junit.html#http://">Test Results Report</a></li>
+<li class="toctree-l1"><a class="reference external" href="http://lager.ua.edu/">LAGER Homepage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../References.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #9E1B32" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">GNCPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../api.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="../../../gncpy.html">gncpy</a></li>
+          <li class="breadcrumb-item"><a href="../../gncpy.control.html">control</a></li>
+          <li class="breadcrumb-item"><a href="../gncpy.control.lqr.html">lqr</a></li>
+      <li class="breadcrumb-item active">LQR</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="lqr">
+<h1>LQR<a class="headerlink" href="#lqr" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="gncpy.control.lqr.LQR">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LQR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_horizon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">inf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hard_constraints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/control/lqr.html#LQR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.control.lqr.LQR" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Implements a Linear Quadratic Regulator (LQR) controller.</p>
+<p class="rubric">Notes</p>
+<p>It can be either an infinite horizon where a single controller gain <span class="math notranslate nohighlight">\(K\)</span>
+is found or a finite horizon where value iteration is preformed during the
+backward pass to calculate a controller gain matrix at every step of the
+time horizon. The finite horizon case is consistent with a Receding Horizon
+formulation of the controller. If non-linear dyanmics are supplied then they
+are linearized at every step of the finite horizon, or once about the initial
+state for infinite horizon. This can also track references by supplying an
+end state. If infinite horizon the the control input is given by</p>
+<div class="math notranslate nohighlight">
+\[u = K (r - x) + k\]</div>
+<p>if the problem is finite horizon the control input (with or without reference
+tracking) is given by</p>
+<div class="math notranslate nohighlight">
+\[u = K x + k\]</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gncpy.control.lqr.LQR.dynObj">
+<span class="sig-name descname"><span class="pre">dynObj</span></span><a class="headerlink" href="#gncpy.control.lqr.LQR.dynObj" title="Permalink to this definition"></a></dt>
+<dd><p>Dynamics model to generate control parameters for.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">gncpy.dynamics.basic.DynamicsBase</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gncpy.control.lqr.LQR.time_horizon">
+<span class="sig-name descname"><span class="pre">time_horizon</span></span><a class="headerlink" href="#gncpy.control.lqr.LQR.time_horizon" title="Permalink to this definition"></a></dt>
+<dd><p>Length of the time horizon for the controller.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gncpy.control.lqr.LQR.u_nom">
+<span class="sig-name descname"><span class="pre">u_nom</span></span><a class="headerlink" href="#gncpy.control.lqr.LQR.u_nom" title="Permalink to this definition"></a></dt>
+<dd><p>Nominal control input</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Nu x 1 numpy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gncpy.control.lqr.LQR.ct_go_mats">
+<span class="sig-name descname"><span class="pre">ct_go_mats</span></span><a class="headerlink" href="#gncpy.control.lqr.LQR.ct_go_mats" title="Permalink to this definition"></a></dt>
+<dd><p>Cost-to-go matrices, 1 per step in the time horizon.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Nh+1 x N x N numpy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gncpy.control.lqr.LQR.ct_go_vecs">
+<span class="sig-name descname"><span class="pre">ct_go_vecs</span></span><a class="headerlink" href="#gncpy.control.lqr.LQR.ct_go_vecs" title="Permalink to this definition"></a></dt>
+<dd><p>Cost-to-go vectors, 1 per step in the time horizon.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Nh+1 x N x 1 numpy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gncpy.control.lqr.LQR.feedback_gain">
+<span class="sig-name descname"><span class="pre">feedback_gain</span></span><a class="headerlink" href="#gncpy.control.lqr.LQR.feedback_gain" title="Permalink to this definition"></a></dt>
+<dd><p>Feedback gain matrix. If finite horizon there is 1 per timestep.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(Nh) x Nu x N numpy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gncpy.control.lqr.LQR.feedthrough_gain">
+<span class="sig-name descname"><span class="pre">feedthrough_gain</span></span><a class="headerlink" href="#gncpy.control.lqr.LQR.feedthrough_gain" title="Permalink to this definition"></a></dt>
+<dd><p>Feedthrough gain vector. If finite horizon there is 1 per timestep.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(Nh) x Nu x 1</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gncpy.control.lqr.LQR.end_state">
+<span class="sig-name descname"><span class="pre">end_state</span></span><a class="headerlink" href="#gncpy.control.lqr.LQR.end_state" title="Permalink to this definition"></a></dt>
+<dd><p>Ending state. This generally does not need to be set directly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>N x 1</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gncpy.control.lqr.LQR.hard_constraints">
+<span class="sig-name descname"><span class="pre">hard_constraints</span></span><a class="headerlink" href="#gncpy.control.lqr.LQR.hard_constraints" title="Permalink to this definition"></a></dt>
+<dd><p>Flag indicating that state constraints should be enforced during value propagation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.control.lqr.LQR.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_horizon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">inf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hard_constraints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/control/lqr.html#LQR.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.control.lqr.LQR.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize an object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>time_horizon</strong> (<em>float</em><em>, </em><em>optional</em>) – Time horizon for the controller. The default is float(“inf”).</p></li>
+<li><p><strong>hard_constraints</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag indicating that state constraints should be enforced during value propagation.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.control.lqr.LQR.__init__" title="gncpy.control.lqr.LQR.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a></p></td>
+<td><p>Initialize an object.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.control.lqr.LQR.backward_pass" title="gncpy.control.lqr.LQR.backward_pass"><code class="xref py py-obj docutils literal notranslate"><span class="pre">backward_pass</span></code></a></p></td>
+<td><p>Backward pass for the finite horizon case.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">backward_pass_step</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.control.lqr.LQR.calculate_control" title="gncpy.control.lqr.LQR.calculate_control"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_control</span></code></a></p></td>
+<td><p>Calculate the control parameters and state trajectory.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.control.lqr.LQR.cost_function" title="gncpy.control.lqr.LQR.cost_function"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cost_function</span></code></a></p></td>
+<td><p>Calculates the cost for the state and control input.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.control.lqr.LQR.get_state_space" title="gncpy.control.lqr.LQR.get_state_space"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_state_space</span></code></a></p></td>
+<td><p>Return the <span class="math notranslate nohighlight">\(A, B\)</span> matrices.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.control.lqr.LQR.prop_state" title="gncpy.control.lqr.LQR.prop_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prop_state</span></code></a></p></td>
+<td><p>Propagate the state in time.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.control.lqr.LQR.prop_state_backward" title="gncpy.control.lqr.LQR.prop_state_backward"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prop_state_backward</span></code></a></p></td>
+<td><p>Propagate the state backward and get the forward state space.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.control.lqr.LQR.set_cost_model" title="gncpy.control.lqr.LQR.set_cost_model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_cost_model</span></code></a></p></td>
+<td><p>Sets the cost model used.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.control.lqr.LQR.set_state_model" title="gncpy.control.lqr.LQR.set_state_model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_state_model</span></code></a></p></td>
+<td><p>Set the state/dynamics model.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.control.lqr.LQR.solve_dare" title="gncpy.control.lqr.LQR.solve_dare"><code class="xref py py-obj docutils literal notranslate"><span class="pre">solve_dare</span></code></a></p></td>
+<td><p>Solve the discrete algebraic ricatti equation.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.control.lqr.LQR.Q" title="gncpy.control.lqr.LQR.Q"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Q</span></code></a></p></td>
+<td><p>Read only state penalty matrix.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.control.lqr.LQR.R" title="gncpy.control.lqr.LQR.R"><code class="xref py py-obj docutils literal notranslate"><span class="pre">R</span></code></a></p></td>
+<td><p>Read only control penalty matrix.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.control.lqr.LQR.dt" title="gncpy.control.lqr.LQR.dt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dt</span></code></a></p></td>
+<td><p>Timestep.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.control.lqr.LQR.backward_pass">
+<span class="sig-name descname"><span class="pre">backward_pass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">itr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_timesteps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">traj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctrl_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cost_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_state_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_ctrl_args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/control/lqr.html#LQR.backward_pass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.control.lqr.LQR.backward_pass" title="Permalink to this definition"></a></dt>
+<dd><p>Backward pass for the finite horizon case.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>itr</strong> (<em>int</em>) – iteration number.</p></li>
+<li><p><strong>num_timesteps</strong> (<em>int</em>) – Total number of timesteps.</p></li>
+<li><p><strong>traj</strong> (<em>Nh+1 x N numpy array</em>) – State trajectory.</p></li>
+<li><p><strong>state_args</strong> (<em>tuple</em>) – Extra arguments for the state matrix calculation.</p></li>
+<li><p><strong>ctrl_args</strong> (<em>tuple</em>) – Extra arguments for the control matrix calculation.</p></li>
+<li><p><strong>cost_args</strong> (<em>tuple</em>) – Extra arguments for the cost function. Not used for LQR.</p></li>
+<li><p><strong>time_vec</strong> (<em>Nh+1 numpy array</em>) – Time vector for control horizon.</p></li>
+<li><p><strong>inv_state_args</strong> (<em>tuple</em>) – Extra arguments for the inverse state matrix calculation.</p></li>
+<li><p><strong>inv_ctrl_args</strong> (<em>tuple</em>) – Extra arguments for the inverse control matrix calculation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>traj</strong> – State trajectory.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Nh+1 x N numpy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.control.lqr.LQR.calculate_control">
+<span class="sig-name descname"><span class="pre">calculate_control</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cur_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cur_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_state_tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_inf_iters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_inds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctrl_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_state_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_ctrl_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">provide_details</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/control/lqr.html#LQR.calculate_control"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.control.lqr.LQR.calculate_control" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the control parameters and state trajectory.</p>
+<p>This can track a reference or regulate to zero. It can also be inifinte
+or finite horizon.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cur_time</strong> (<em>float</em>) – Current time when starting the control calculation.</p></li>
+<li><p><strong>cur_state</strong> (<em>N x 1 numpy array</em>) – Current state.</p></li>
+<li><p><strong>end_state</strong> (<em>N x 1 numpy array</em><em>, </em><em>optional</em>) – Desired/reference ending state. The default is None.</p></li>
+<li><p><strong>end_state_tol</strong> (<em>float</em><em>, </em><em>optional</em>) – Tolerance on the reference state when calculating the state trajectory
+for the inifinte horizon case. The default is 1e-2.</p></li>
+<li><p><strong>max_inf_iters</strong> (<em>int</em>) – Maximum number of steps to use in the trajectory when finding
+the state trajectory for the infinite horizon case to avoid infinite
+loops.</p></li>
+<li><p><strong>check_inds</strong> (<em>list</em><em>, </em><em>optional</em>) – List of indices of the state vector to check when determining
+the end condition for the state trajectory calculation for the
+infinite horizon case. The default is None which checks the full
+state vector.</p></li>
+<li><p><strong>state_args</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Extra arguments for calculating the state matrix. The default is None.</p></li>
+<li><p><strong>ctrl_args</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Extra arguments for calculating the input matrix. The default is None.</p></li>
+<li><p><strong>inv_state_args</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Extra arguments for calculating the inverse state matrix. The
+default is None.</p></li>
+<li><p><strong>inv_ctrl_args</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Extra arguments for calculating the inverse input matrix. The
+default is None.</p></li>
+<li><p><strong>provide_details</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag indicating if additional outputs should be provided. The
+default is False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>u</strong> (<em>Nu x 1 numpy array</em>) – Control input for current timestep.</p></li>
+<li><p><strong>cost</strong> (<em>float, optional</em>) – Cost of the trajectory</p></li>
+<li><p><strong>state_traj</strong> (<em>Nh+1 x N numpy array, optional</em>) – State trajectory over the horizon, or until the reference is reached.</p></li>
+<li><p><strong>ctrl_signal</strong> (<em>Nh x Nu numy array, optional</em>) – Control inputs over the horizon, or until the reference is reached.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.control.lqr.LQR.cost_function">
+<span class="sig-name descname"><span class="pre">cost_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctrl_input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_initial</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_final</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/control/lqr.html#LQR.cost_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.control.lqr.LQR.cost_function" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates the cost for the state and control input.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tt</strong> (<em>float</em>) – Current timestep.</p></li>
+<li><p><strong>state</strong> (<em>N x 1 numpy array</em>) – Current state.</p></li>
+<li><p><strong>ctrl_input</strong> (<em>Nu x 1 numpy array</em>) – Current control input.</p></li>
+<li><p><strong>is_initial</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag indicating if it’s the initial time. The default is False.</p></li>
+<li><p><strong>is_final</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag indicating if it’s the final time. The default is False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Cost.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.control.lqr.LQR.get_state_space">
+<span class="sig-name descname"><span class="pre">get_state_space</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_hat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_hat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctrl_args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/control/lqr.html#LQR.get_state_space"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.control.lqr.LQR.get_state_space" title="Permalink to this definition"></a></dt>
+<dd><p>Return the <span class="math notranslate nohighlight">\(A, B\)</span> matrices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tt</strong> (<em>float</em>) – Current timestep.</p></li>
+<li><p><strong>x_hat</strong> (<em>N x 1 numpy array</em>) – Current state.</p></li>
+<li><p><strong>u_hat</strong> (<em>Nu x 1 numpy array</em>) – Current control input.</p></li>
+<li><p><strong>state_args</strong> (<em>tuple</em>) – Extra arguments for the state calculation.</p></li>
+<li><p><strong>ctrl_args</strong> (<em>tuple</em>) – Extra arguments for the control calculation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>NotImplementedError</strong> – If unsupported dynamics are used.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>A</strong> (<em>N x N numpy array</em>) – State matrix.</p></li>
+<li><p><strong>B</strong> (<em>N x Nu numpy array</em>) – Input matrix.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.control.lqr.LQR.prop_state">
+<span class="sig-name descname"><span class="pre">prop_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_hat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_hat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctrl_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forward</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_state_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_ctrl_args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/control/lqr.html#LQR.prop_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.control.lqr.LQR.prop_state" title="Permalink to this definition"></a></dt>
+<dd><p>Propagate the state in time.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.control.lqr.LQR.prop_state_backward">
+<span class="sig-name descname"><span class="pre">prop_state_backward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_hat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_hat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctrl_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_state_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_ctrl_args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/control/lqr.html#LQR.prop_state_backward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.control.lqr.LQR.prop_state_backward" title="Permalink to this definition"></a></dt>
+<dd><p>Propagate the state backward and get the forward state space.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tt</strong> (<em>float</em>) – Future timestep.</p></li>
+<li><p><strong>x_hat</strong> (<em>N x 1 numpy array</em>) – Future state.</p></li>
+<li><p><strong>u_hat</strong> (<em>Nu x 1 numpy array</em>) – Future control input.</p></li>
+<li><p><strong>state_args</strong> (<em>tuple</em>) – Extra arguments for the state matrix calculation.</p></li>
+<li><p><strong>ctrl_args</strong> (<em>tuple</em>) – Extra arguments for the control matrix calculation.</p></li>
+<li><p><strong>inv_state_args</strong> (<em>tuple</em>) – Extra arguments for the inverse state matrix calculation.</p></li>
+<li><p><strong>inv_ctrl_args</strong> (<em>tuple</em>) – Extra arguments for the inverse control matrix calculation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>x_hat_p</strong> (<em>N x 1 numpy array</em>) – Previous state.</p></li>
+<li><p><strong>A</strong> (<em>N x N numpy array</em>) – Forward state transition matrix.</p></li>
+<li><p><strong>B</strong> (<em>N x Nu</em>) – Forward input matrix.</p></li>
+<li><p><strong>c</strong> (<em>N x 1 numpy array</em>) – Forward c vector.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.control.lqr.LQR.set_cost_model">
+<span class="sig-name descname"><span class="pre">set_cost_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/control/lqr.html#LQR.set_cost_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.control.lqr.LQR.set_cost_model" title="Permalink to this definition"></a></dt>
+<dd><p>Sets the cost model used.</p>
+<p class="rubric">Notes</p>
+<p>This implements an LQR controller for the cost function</p>
+<div class="math notranslate nohighlight">
+\[J = \int^{t_f}_0 x^T Q x + u^T R u + u^T P x d\tau\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Q</strong> (<em>N x N numpy array</em>) – State cost matrix.</p></li>
+<li><p><strong>R</strong> (<em>Nu x Nu numpy array</em>) – Control input cost matrix.</p></li>
+<li><p><strong>P</strong> (<em>Nu x N</em><em>, </em><em>optional</em>) – State and control correlation cost matrix. The default is None which
+gives a zero matrix.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.control.lqr.LQR.set_state_model">
+<span class="sig-name descname"><span class="pre">set_state_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u_nom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control_constraints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dynObj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/control/lqr.html#LQR.set_state_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.control.lqr.LQR.set_state_model" title="Permalink to this definition"></a></dt>
+<dd><p>Set the state/dynamics model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>u_nom</strong> (<em>Nu x 1 numpy array</em>) – Nominal control input.</p></li>
+<li><p><strong>control_constraints</strong> (<em>callable</em>) – Function that takes in timestep and control signal and returns the constrained control signal as a Nu x 1
+numpy array</p></li>
+<li><p><strong>dynObj</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">gncpy.dynamics.basic.DynamicsBase</span></code>, optional) – System dynamics to control. The default is None.</p></li>
+<li><p><strong>dt</strong> (<em>float</em><em>, </em><em>optional</em>) – Timestep to use. Will update the dynamic object if applicable.
+The default is None.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gncpy.control.lqr.LQR.solve_dare">
+<span class="sig-name descname"><span class="pre">solve_dare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cur_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cur_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctrl_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/control/lqr.html#LQR.solve_dare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.control.lqr.LQR.solve_dare" title="Permalink to this definition"></a></dt>
+<dd><p>Solve the discrete algebraic ricatti equation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cur_time</strong> (<em>float</em>) – Current time.</p></li>
+<li><p><strong>cur_state</strong> (<em>N x 1 numpy array</em>) – Current state.</p></li>
+<li><p><strong>state_args</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Additional arguments for calculating the state. The default is None.</p></li>
+<li><p><strong>ctrl_args</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Additional agruments for calculating the input matrix. The default
+is None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>S</strong> (<em>N x N numpy array</em>) – DARE solution.</p></li>
+<li><p><strong>F</strong> (<em>N x N numpy array</em>) – Discrete state transition matrix</p></li>
+<li><p><strong>G</strong> (<em>N x Nu numpy array</em>) – Discrete input matrix.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gncpy.control.lqr.LQR.Q">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Q</span></span><a class="headerlink" href="#gncpy.control.lqr.LQR.Q" title="Permalink to this definition"></a></dt>
+<dd><p>Read only state penalty matrix.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gncpy.control.lqr.LQR.R">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">R</span></span><a class="headerlink" href="#gncpy.control.lqr.LQR.R" title="Permalink to this definition"></a></dt>
+<dd><p>Read only control penalty matrix.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="gncpy.control.lqr.LQR.dt">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dt</span></span><a class="headerlink" href="#gncpy.control.lqr.LQR.dt" title="Permalink to this definition"></a></dt>
+<dd><p>Timestep.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../gncpy.control.lqr.html" class="btn btn-neutral float-left" title="lqr" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../gncpy.coordinate_transforms.html" class="btn btn-neutral float-right" title="coordinate_transforms" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Laboratory for Autonomy, GNC, and Estimation Research (LAGER).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

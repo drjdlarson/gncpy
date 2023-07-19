@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gncpy.filters.kalman_filter &mdash; GNCPy 1.0.2.dev0 documentation</title>
+  <title>gncpy.filters.kalman_filter &mdash; GNCPy 2.0.1.dev0 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
@@ -37,7 +37,7 @@
               <img src="../../../_static/logo.svg" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                1.0.2.dev0
+                2.0.1.dev0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -52,8 +52,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Reference</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../_autosummary/gncpy.html">gncpy</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.control.html">control</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/control/gncpy.control.ELQR.html">ELQR</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/control/gncpy.control.LQR.html">LQR</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/control/gncpy.control.elqr.html">elqr</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/gncpy/control/gncpy.control.lqr.html">lqr</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/gncpy/gncpy.coordinate_transforms.html">coordinate_transforms</a><ul>
@@ -630,12 +630,12 @@
         <span class="k">return</span> <span class="n">next_state</span><span class="p">,</span> <span class="n">state_mat</span>
 
     <span class="k">def</span> <span class="nf">_init_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">cpp_needs_init</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cpp_needs_init</span> <span class="o">=</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__model</span> <span class="ow">is</span> <span class="kc">None</span>
             <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dyn_obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dyn_obj</span><span class="o">.</span><span class="n">allow_cpp</span><span class="p">)</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_measObj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="p">)</span>
-        <span class="k">if</span> <span class="n">cpp_needs_init</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cpp_needs_init</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__model</span> <span class="o">=</span> <span class="n">cpp_bindings</span><span class="o">.</span><span class="n">Kalman</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__predParams</span> <span class="o">=</span> <span class="n">cpp_bindings</span><span class="o">.</span><span class="n">BayesPredictParams</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__corrParams</span> <span class="o">=</span> <span class="n">cpp_bindings</span><span class="o">.</span><span class="n">BayesCorrectParams</span><span class="p">()</span>
@@ -684,7 +684,7 @@
             <span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__predParams</span><span class="o">.</span><span class="n">stateTransParams</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__predParams</span><span class="o">.</span><span class="n">controlParams</span><span class="p">,</span>
-            <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dyn_obj</span><span class="o">.</span><span class="n">args_to_params</span><span class="p">(</span><span class="n">state_mat_args</span><span class="p">,</span> <span class="n">input_mat_args</span><span class="p">)</span>
+            <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dyn_obj</span><span class="o">.</span><span class="n">args_to_params</span><span class="p">(</span><span class="n">state_mat_args</span><span class="p">,</span> <span class="n">input_mat_args</span><span class="p">)[:</span><span class="mi">2</span><span class="p">]</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span>
                 <span class="n">timestep</span><span class="p">,</span> <span class="n">cur_state</span><span class="p">,</span> <span class="n">cur_input</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__predParams</span>
             <span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>

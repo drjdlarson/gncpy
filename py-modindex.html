@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Python Module Index &mdash; GNCPy 1.0.2.dev0 documentation</title>
+  <title>Python Module Index &mdash; GNCPy 2.0.1.dev0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
@@ -40,7 +40,7 @@
               <img src="_static/logo.svg" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                1.0.2.dev0
+                2.0.1.dev0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -55,8 +55,8 @@
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="_autosummary/gncpy.html">gncpy</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/gncpy/gncpy.control.html">control</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="_autosummary/gncpy/control/gncpy.control.ELQR.html">ELQR</a></li>
-<li class="toctree-l4"><a class="reference internal" href="_autosummary/gncpy/control/gncpy.control.LQR.html">LQR</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/gncpy/control/gncpy.control.elqr.html">elqr</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/gncpy/control/gncpy.control.lqr.html">lqr</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/gncpy/gncpy.coordinate_transforms.html">coordinate_transforms</a><ul>
@@ -284,9 +284,20 @@
      <tr class="cap" id="cap-c"><td></td><td>
        <strong>c</strong></td><td></td></tr>
      <tr>
-       <td></td>
+       <td><img src="_static/minus.png" class="toggler"
+              id="toggle-1" style="display: none" alt="-" /></td>
        <td>
        <a href="_autosummary/gncpy/gncpy.control.html#module-gncpy.control"><code class="xref">gncpy.control</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="_autosummary/gncpy/control/gncpy.control.elqr.html#module-gncpy.control.elqr"><code class="xref">gncpy.control.elqr</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="_autosummary/gncpy/control/gncpy.control.lqr.html#module-gncpy.control.lqr"><code class="xref">gncpy.control.lqr</code></a></td><td>
        <em></em></td></tr>
      <tr>
        <td></td>
@@ -308,24 +319,84 @@
        <em></em></td></tr>
      <tr>
        <td><img src="_static/minus.png" class="toggler"
-              id="toggle-1" style="display: none" alt="-" /></td>
+              id="toggle-2" style="display: none" alt="-" /></td>
        <td>
        <a href="_autosummary/gncpy/gncpy.dynamics.html#module-gncpy.dynamics"><code class="xref">gncpy.dynamics</code></a></td><td>
        <em></em></td></tr>
-     <tr class="cg-1">
+     <tr class="cg-2">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="_autosummary/gncpy/dynamics/gncpy.dynamics.aircraft.html#module-gncpy.dynamics.aircraft"><code class="xref">gncpy.dynamics.aircraft</code></a></td><td>
        <em></em></td></tr>
-     <tr class="cg-1">
+     <tr class="cg-2">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="_autosummary/gncpy/dynamics/aircraft/gncpy.dynamics.aircraft.simple_multirotor.html#module-gncpy.dynamics.aircraft.simple_multirotor"><code class="xref">gncpy.dynamics.aircraft.simple_multirotor</code></a></td><td>
        <em></em></td></tr>
-     <tr class="cg-1">
+     <tr class="cg-2">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="_autosummary/gncpy/dynamics/gncpy.dynamics.basic.html#module-gncpy.dynamics.basic"><code class="xref">gncpy.dynamics.basic</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-2">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="_autosummary/gncpy/dynamics/basic/gncpy.dynamics.basic.clohessy_wiltshire_orbit.html#module-gncpy.dynamics.basic.clohessy_wiltshire_orbit"><code class="xref">gncpy.dynamics.basic.clohessy_wiltshire_orbit</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-2">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="_autosummary/gncpy/dynamics/basic/gncpy.dynamics.basic.clohessy_wiltshire_orbit2d.html#module-gncpy.dynamics.basic.clohessy_wiltshire_orbit2d"><code class="xref">gncpy.dynamics.basic.clohessy_wiltshire_orbit2d</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-2">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="_autosummary/gncpy/dynamics/basic/gncpy.dynamics.basic.coordinated_turn_known.html#module-gncpy.dynamics.basic.coordinated_turn_known"><code class="xref">gncpy.dynamics.basic.coordinated_turn_known</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-2">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="_autosummary/gncpy/dynamics/basic/gncpy.dynamics.basic.coordinated_turn_unknown.html#module-gncpy.dynamics.basic.coordinated_turn_unknown"><code class="xref">gncpy.dynamics.basic.coordinated_turn_unknown</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-2">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="_autosummary/gncpy/dynamics/basic/gncpy.dynamics.basic.curvilinear_motion.html#module-gncpy.dynamics.basic.curvilinear_motion"><code class="xref">gncpy.dynamics.basic.curvilinear_motion</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-2">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="_autosummary/gncpy/dynamics/basic/gncpy.dynamics.basic.double_integrator.html#module-gncpy.dynamics.basic.double_integrator"><code class="xref">gncpy.dynamics.basic.double_integrator</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-2">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="_autosummary/gncpy/dynamics/basic/gncpy.dynamics.basic.dynamics_base.html#module-gncpy.dynamics.basic.dynamics_base"><code class="xref">gncpy.dynamics.basic.dynamics_base</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-2">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="_autosummary/gncpy/dynamics/basic/gncpy.dynamics.basic.irobot_create.html#module-gncpy.dynamics.basic.irobot_create"><code class="xref">gncpy.dynamics.basic.irobot_create</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-2">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="_autosummary/gncpy/dynamics/basic/gncpy.dynamics.basic.karlgaard_orbit.html#module-gncpy.dynamics.basic.karlgaard_orbit"><code class="xref">gncpy.dynamics.basic.karlgaard_orbit</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-2">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="_autosummary/gncpy/dynamics/basic/gncpy.dynamics.basic.linear_dynamics_base.html#module-gncpy.dynamics.basic.linear_dynamics_base"><code class="xref">gncpy.dynamics.basic.linear_dynamics_base</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-2">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="_autosummary/gncpy/dynamics/basic/gncpy.dynamics.basic.nonlinear_dynamics_base.html#module-gncpy.dynamics.basic.nonlinear_dynamics_base"><code class="xref">gncpy.dynamics.basic.nonlinear_dynamics_base</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-2">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="_autosummary/gncpy/dynamics/basic/gncpy.dynamics.basic.tschauner_hempel_orbit.html#module-gncpy.dynamics.basic.tschauner_hempel_orbit"><code class="xref">gncpy.dynamics.basic.tschauner_hempel_orbit</code></a></td><td>
        <em></em></td></tr>
      <tr class="pcap"><td></td><td>&#160;</td><td></td></tr>
      <tr class="cap" id="cap-e"><td></td><td>
@@ -340,116 +411,116 @@
        <strong>f</strong></td><td></td></tr>
      <tr>
        <td><img src="_static/minus.png" class="toggler"
-              id="toggle-2" style="display: none" alt="-" /></td>
+              id="toggle-3" style="display: none" alt="-" /></td>
        <td>
        <a href="_autosummary/gncpy/gncpy.filters.html#module-gncpy.filters"><code class="xref">gncpy.filters</code></a></td><td>
        <em></em></td></tr>
-     <tr class="cg-2">
+     <tr class="cg-3">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="_autosummary/gncpy/filters/gncpy.filters.bayes_filter.html#module-gncpy.filters.bayes_filter"><code class="xref">gncpy.filters.bayes_filter</code></a></td><td>
        <em></em></td></tr>
-     <tr class="cg-2">
+     <tr class="cg-3">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="_autosummary/gncpy/filters/gncpy.filters.bootstrap_filter.html#module-gncpy.filters.bootstrap_filter"><code class="xref">gncpy.filters.bootstrap_filter</code></a></td><td>
        <em></em></td></tr>
-     <tr class="cg-2">
+     <tr class="cg-3">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="_autosummary/gncpy/filters/gncpy.filters.ekf_gaussian_scale_mixture_filter.html#module-gncpy.filters.ekf_gaussian_scale_mixture_filter"><code class="xref">gncpy.filters.ekf_gaussian_scale_mixture_filter</code></a></td><td>
        <em></em></td></tr>
-     <tr class="cg-2">
+     <tr class="cg-3">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="_autosummary/gncpy/filters/gncpy.filters.extended_kalman_filter.html#module-gncpy.filters.extended_kalman_filter"><code class="xref">gncpy.filters.extended_kalman_filter</code></a></td><td>
        <em></em></td></tr>
-     <tr class="cg-2">
+     <tr class="cg-3">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="_autosummary/gncpy/filters/gncpy.filters.gci_filter.html#module-gncpy.filters.gci_filter"><code class="xref">gncpy.filters.gci_filter</code></a></td><td>
        <em></em></td></tr>
-     <tr class="cg-2">
+     <tr class="cg-3">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="_autosummary/gncpy/filters/gncpy.filters.gsm_filter_base.html#module-gncpy.filters.gsm_filter_base"><code class="xref">gncpy.filters.gsm_filter_base</code></a></td><td>
        <em></em></td></tr>
-     <tr class="cg-2">
+     <tr class="cg-3">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="_autosummary/gncpy/filters/gncpy.filters.imm_gci_filter.html#module-gncpy.filters.imm_gci_filter"><code class="xref">gncpy.filters.imm_gci_filter</code></a></td><td>
        <em></em></td></tr>
-     <tr class="cg-2">
+     <tr class="cg-3">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="_autosummary/gncpy/filters/gncpy.filters.interacting_multiple_model.html#module-gncpy.filters.interacting_multiple_model"><code class="xref">gncpy.filters.interacting_multiple_model</code></a></td><td>
        <em></em></td></tr>
-     <tr class="cg-2">
+     <tr class="cg-3">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="_autosummary/gncpy/filters/gncpy.filters.kalman_filter.html#module-gncpy.filters.kalman_filter"><code class="xref">gncpy.filters.kalman_filter</code></a></td><td>
        <em></em></td></tr>
-     <tr class="cg-2">
+     <tr class="cg-3">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="_autosummary/gncpy/filters/gncpy.filters.kf_gaussian_scale_mixture_filter.html#module-gncpy.filters.kf_gaussian_scale_mixture_filter"><code class="xref">gncpy.filters.kf_gaussian_scale_mixture_filter</code></a></td><td>
        <em></em></td></tr>
-     <tr class="cg-2">
+     <tr class="cg-3">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="_autosummary/gncpy/filters/gncpy.filters.max_corr_ent_ukf.html#module-gncpy.filters.max_corr_ent_ukf"><code class="xref">gncpy.filters.max_corr_ent_ukf</code></a></td><td>
        <em></em></td></tr>
-     <tr class="cg-2">
+     <tr class="cg-3">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="_autosummary/gncpy/filters/gncpy.filters.max_corr_ent_upf.html#module-gncpy.filters.max_corr_ent_upf"><code class="xref">gncpy.filters.max_corr_ent_upf</code></a></td><td>
        <em></em></td></tr>
-     <tr class="cg-2">
+     <tr class="cg-3">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="_autosummary/gncpy/filters/gncpy.filters.mcmc_particle_filter_base.html#module-gncpy.filters.mcmc_particle_filter_base"><code class="xref">gncpy.filters.mcmc_particle_filter_base</code></a></td><td>
        <em></em></td></tr>
-     <tr class="cg-2">
+     <tr class="cg-3">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="_autosummary/gncpy/filters/gncpy.filters.particle_filter.html#module-gncpy.filters.particle_filter"><code class="xref">gncpy.filters.particle_filter</code></a></td><td>
        <em></em></td></tr>
-     <tr class="cg-2">
+     <tr class="cg-3">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="_autosummary/gncpy/filters/gncpy.filters.qkf_gaussian_scale_mixture_filter.html#module-gncpy.filters.qkf_gaussian_scale_mixture_filter"><code class="xref">gncpy.filters.qkf_gaussian_scale_mixture_filter</code></a></td><td>
        <em></em></td></tr>
-     <tr class="cg-2">
+     <tr class="cg-3">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="_autosummary/gncpy/filters/gncpy.filters.quadrature_kalman_filter.html#module-gncpy.filters.quadrature_kalman_filter"><code class="xref">gncpy.filters.quadrature_kalman_filter</code></a></td><td>
        <em></em></td></tr>
-     <tr class="cg-2">
+     <tr class="cg-3">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="_autosummary/gncpy/filters/gncpy.filters.sqkf_gaussian_scale_mixture_filter.html#module-gncpy.filters.sqkf_gaussian_scale_mixture_filter"><code class="xref">gncpy.filters.sqkf_gaussian_scale_mixture_filter</code></a></td><td>
        <em></em></td></tr>
-     <tr class="cg-2">
+     <tr class="cg-3">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="_autosummary/gncpy/filters/gncpy.filters.square_root_qkf.html#module-gncpy.filters.square_root_qkf"><code class="xref">gncpy.filters.square_root_qkf</code></a></td><td>
        <em></em></td></tr>
-     <tr class="cg-2">
+     <tr class="cg-3">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="_autosummary/gncpy/filters/gncpy.filters.students_t_filter.html#module-gncpy.filters.students_t_filter"><code class="xref">gncpy.filters.students_t_filter</code></a></td><td>
        <em></em></td></tr>
-     <tr class="cg-2">
+     <tr class="cg-3">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="_autosummary/gncpy/filters/gncpy.filters.ukf_gaussian_scale_mixture_filter.html#module-gncpy.filters.ukf_gaussian_scale_mixture_filter"><code class="xref">gncpy.filters.ukf_gaussian_scale_mixture_filter</code></a></td><td>
        <em></em></td></tr>
-     <tr class="cg-2">
+     <tr class="cg-3">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="_autosummary/gncpy/filters/gncpy.filters.unscented_kalman_filter.html#module-gncpy.filters.unscented_kalman_filter"><code class="xref">gncpy.filters.unscented_kalman_filter</code></a></td><td>
        <em></em></td></tr>
-     <tr class="cg-2">
+     <tr class="cg-3">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="_autosummary/gncpy/filters/gncpy.filters.unscented_particle_filter.html#module-gncpy.filters.unscented_particle_filter"><code class="xref">gncpy.filters.unscented_particle_filter</code></a></td><td>
@@ -464,42 +535,42 @@
        <em></em></td></tr>
      <tr>
        <td><img src="_static/minus.png" class="toggler"
-              id="toggle-3" style="display: none" alt="-" /></td>
+              id="toggle-4" style="display: none" alt="-" /></td>
        <td>
        <a href="_autosummary/gncpy/gncpy.game_engine.html#module-gncpy.game_engine"><code class="xref">gncpy.game_engine</code></a></td><td>
        <em></em></td></tr>
-     <tr class="cg-3">
+     <tr class="cg-4">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="_autosummary/gncpy/game_engine/gncpy.game_engine.base_game.html#module-gncpy.game_engine.base_game"><code class="xref">gncpy.game_engine.base_game</code></a></td><td>
        <em></em></td></tr>
-     <tr class="cg-3">
+     <tr class="cg-4">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="_autosummary/gncpy/game_engine/gncpy.game_engine.components.html#module-gncpy.game_engine.components"><code class="xref">gncpy.game_engine.components</code></a></td><td>
        <em></em></td></tr>
-     <tr class="cg-3">
+     <tr class="cg-4">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="_autosummary/gncpy/game_engine/gncpy.game_engine.entities.html#module-gncpy.game_engine.entities"><code class="xref">gncpy.game_engine.entities</code></a></td><td>
        <em></em></td></tr>
-     <tr class="cg-3">
+     <tr class="cg-4">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="_autosummary/gncpy/game_engine/gncpy.game_engine.physics2d.html#module-gncpy.game_engine.physics2d"><code class="xref">gncpy.game_engine.physics2d</code></a></td><td>
        <em></em></td></tr>
-     <tr class="cg-3">
+     <tr class="cg-4">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="_autosummary/gncpy/game_engine/gncpy.game_engine.rendering2d.html#module-gncpy.game_engine.rendering2d"><code class="xref">gncpy.game_engine.rendering2d</code></a></td><td>
        <em></em></td></tr>
      <tr>
        <td><img src="_static/minus.png" class="toggler"
-              id="toggle-4" style="display: none" alt="-" /></td>
+              id="toggle-5" style="display: none" alt="-" /></td>
        <td>
        <a href="_autosummary/gncpy/gncpy.games.html#module-gncpy.games"><code class="xref">gncpy.games</code></a></td><td>
        <em></em></td></tr>
-     <tr class="cg-4">
+     <tr class="cg-5">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="_autosummary/gncpy/games/gncpy.games.SimpleUAV2d.html#module-gncpy.games.SimpleUAV2d"><code class="xref">gncpy.games.SimpleUAV2d</code></a></td><td>
@@ -530,41 +601,41 @@
        <strong>p</strong></td><td></td></tr>
      <tr>
        <td><img src="_static/minus.png" class="toggler"
-              id="toggle-5" style="display: none" alt="-" /></td>
+              id="toggle-6" style="display: none" alt="-" /></td>
        <td>
        <a href="_autosummary/gncpy/gncpy.planning.html#module-gncpy.planning"><code class="xref">gncpy.planning</code></a></td><td>
        <em></em></td></tr>
-     <tr class="cg-5">
+     <tr class="cg-6">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="_autosummary/gncpy/planning/gncpy.planning.a_star.html#module-gncpy.planning.a_star"><code class="xref">gncpy.planning.a_star</code></a></td><td>
        <em></em></td></tr>
-     <tr class="cg-5">
+     <tr class="cg-6">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="_autosummary/gncpy/planning/gncpy.planning.reinforcement_learning.html#module-gncpy.planning.reinforcement_learning"><code class="xref">gncpy.planning.reinforcement_learning</code></a></td><td>
        <em></em></td></tr>
-     <tr class="cg-5">
+     <tr class="cg-6">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="_autosummary/gncpy/planning/reinforcement_learning/gncpy.planning.reinforcement_learning.envs.html#module-gncpy.planning.reinforcement_learning.envs"><code class="xref">gncpy.planning.reinforcement_learning.envs</code></a></td><td>
        <em></em></td></tr>
-     <tr class="cg-5">
+     <tr class="cg-6">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="_autosummary/gncpy/planning/reinforcement_learning/envs/gncpy.planning.reinforcement_learning.envs.simple2d.html#module-gncpy.planning.reinforcement_learning.envs.simple2d"><code class="xref">gncpy.planning.reinforcement_learning.envs.simple2d</code></a></td><td>
        <em></em></td></tr>
-     <tr class="cg-5">
+     <tr class="cg-6">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="_autosummary/gncpy/planning/reinforcement_learning/envs/simple2d/gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.html#module-gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d"><code class="xref">gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d</code></a></td><td>
        <em></em></td></tr>
-     <tr class="cg-5">
+     <tr class="cg-6">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="_autosummary/gncpy/planning/reinforcement_learning/gncpy.planning.reinforcement_learning.wrappers.html#module-gncpy.planning.reinforcement_learning.wrappers"><code class="xref">gncpy.planning.reinforcement_learning.wrappers</code></a></td><td>
        <em></em></td></tr>
-     <tr class="cg-5">
+     <tr class="cg-6">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="_autosummary/gncpy/planning/gncpy.planning.rrt_star.html#module-gncpy.planning.rrt_star"><code class="xref">gncpy.planning.rrt_star</code></a></td><td>

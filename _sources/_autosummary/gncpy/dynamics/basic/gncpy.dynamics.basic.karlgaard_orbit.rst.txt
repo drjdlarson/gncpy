@@ -1,0 +1,32 @@
+karlgaard\_orbit
+================
+
+.. automodule:: gncpy.dynamics.basic.karlgaard_orbit
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: karlgaard_orbit
+      :nosignatures:
+      :template: class.rst_t
+   
+      KarlgaardOrbit
+   
+   
+
+   
+   
+   
+
+
+

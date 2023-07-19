@@ -1,0 +1,32 @@
+elqr
+====
+
+.. automodule:: gncpy.control.elqr
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: elqr
+      :nosignatures:
+      :template: class.rst_t
+   
+      ELQR
+   
+   
+
+   
+   
+   
+
+
+

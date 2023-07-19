@@ -1,0 +1,38 @@
+NonlinearDynamicsBase
+=====================
+
+.. currentmodule:: gncpy.dynamics.basic.nonlinear_dynamics_base
+
+.. autoclass:: NonlinearDynamicsBase
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~NonlinearDynamicsBase.__init__
+      ~NonlinearDynamicsBase.get_input_mat
+      ~NonlinearDynamicsBase.get_state_mat
+      ~NonlinearDynamicsBase.propagate_state
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~NonlinearDynamicsBase.allow_cpp
+      ~NonlinearDynamicsBase.cont_fnc_lst
+      ~NonlinearDynamicsBase.control_model
+      ~NonlinearDynamicsBase.state_names
+   
+   

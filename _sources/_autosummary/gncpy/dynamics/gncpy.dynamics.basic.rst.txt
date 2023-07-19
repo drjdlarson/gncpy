@@ -13,26 +13,6 @@ basic
 
    
    
-   .. rubric:: Classes
-
-   .. autosummary::
-      :toctree: basic
-      :nosignatures:
-      :template: class.rst_t
-   
-      ClohessyWiltshireOrbit
-      ClohessyWiltshireOrbit2d
-      CoordinatedTurnKnown
-      CoordinatedTurnUnknown
-      CurvilinearMotion
-      DoubleIntegrator
-      DynamicsBase
-      IRobotCreate
-      KarlgaardOrbit
-      LinearDynamicsBase
-      NonlinearDynamicsBase
-      TschaunerHempelOrbit
-   
    
 
    
@@ -40,4 +20,24 @@ basic
    
 
 
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree: basic
+   :template: module.rst_t
+   :recursive:
+
+   ~gncpy.dynamics.basic.clohessy_wiltshire_orbit
+   ~gncpy.dynamics.basic.clohessy_wiltshire_orbit2d
+   ~gncpy.dynamics.basic.coordinated_turn_known
+   ~gncpy.dynamics.basic.coordinated_turn_unknown
+   ~gncpy.dynamics.basic.curvilinear_motion
+   ~gncpy.dynamics.basic.double_integrator
+   ~gncpy.dynamics.basic.dynamics_base
+   ~gncpy.dynamics.basic.irobot_create
+   ~gncpy.dynamics.basic.karlgaard_orbit
+   ~gncpy.dynamics.basic.linear_dynamics_base
+   ~gncpy.dynamics.basic.nonlinear_dynamics_base
+   ~gncpy.dynamics.basic.tschauner_hempel_orbit
 

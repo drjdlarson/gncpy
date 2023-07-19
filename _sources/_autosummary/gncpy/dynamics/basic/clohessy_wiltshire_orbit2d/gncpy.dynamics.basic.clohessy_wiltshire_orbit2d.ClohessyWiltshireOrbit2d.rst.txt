@@ -1,0 +1,40 @@
+ClohessyWiltshireOrbit2d
+========================
+
+.. currentmodule:: gncpy.dynamics.basic.clohessy_wiltshire_orbit2d
+
+.. autoclass:: ClohessyWiltshireOrbit2d
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~ClohessyWiltshireOrbit2d.__init__
+      ~ClohessyWiltshireOrbit2d.args_to_params
+      ~ClohessyWiltshireOrbit2d.get_dis_process_noise_mat
+      ~ClohessyWiltshireOrbit2d.get_input_mat
+      ~ClohessyWiltshireOrbit2d.get_state_mat
+      ~ClohessyWiltshireOrbit2d.propagate_state
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~ClohessyWiltshireOrbit2d.allow_cpp
+      ~ClohessyWiltshireOrbit2d.control_model
+      ~ClohessyWiltshireOrbit2d.model
+      ~ClohessyWiltshireOrbit2d.state_names
+   
+   

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SimpleMultirotor &mdash; GNCPy 1.0.2.dev0 documentation</title>
+  <title>SimpleMultirotor &mdash; GNCPy 2.0.1.dev0 documentation</title>
       <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../../../_static/copybutton.css" type="text/css" />
@@ -40,7 +40,7 @@
               <img src="../../../../../_static/logo.svg" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                1.0.2.dev0
+                2.0.1.dev0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
@@ -55,8 +55,8 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../../../../../api.html">API Reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="../../../../gncpy.html">gncpy</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="../../../gncpy.control.html">control</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../control/gncpy.control.ELQR.html">ELQR</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../control/gncpy.control.LQR.html">LQR</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../control/gncpy.control.elqr.html">elqr</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../control/gncpy.control.lqr.html">lqr</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../../gncpy.coordinate_transforms.html">coordinate_transforms</a><ul>
@@ -272,7 +272,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SimpleMultirotor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">env</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">effector</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">egm_bin_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">library_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gncpy/dynamics/aircraft/simple_multirotor.html#SimpleMultirotor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="../../basic/gncpy.dynamics.basic.DynamicsBase.html#gncpy.dynamics.basic.DynamicsBase" title="gncpy.dynamics.basic.DynamicsBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DynamicsBase</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="../../basic/dynamics_base/gncpy.dynamics.basic.dynamics_base.DynamicsBase.html#gncpy.dynamics.basic.dynamics_base.DynamicsBase" title="gncpy.dynamics.basic.dynamics_base.DynamicsBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DynamicsBase</span></code></a></p>
 <p>Implements functions for a generic multi-rotor.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor.effector">
@@ -357,10 +357,13 @@ None is good for most other cases.</p></li>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">allow_cpp</span></code></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor.state_names" title="gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor.state_names"><code class="xref py py-obj docutils literal notranslate"><span class="pre">state_names</span></code></a></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">control_model</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor.state_names" title="gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor.state_names"><code class="xref py py-obj docutils literal notranslate"><span class="pre">state_names</span></code></a></p></td>
 <td><p>List of vehicle state names.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor.state_units" title="gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor.state_units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">state_units</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor.state_units" title="gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor.state_units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">state_units</span></code></a></p></td>
 <td><p>List of vehicle state units.</p></td>
 </tr>
 </tbody>

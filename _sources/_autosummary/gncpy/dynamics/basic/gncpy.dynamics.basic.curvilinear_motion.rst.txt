@@ -1,0 +1,32 @@
+curvilinear\_motion
+===================
+
+.. automodule:: gncpy.dynamics.basic.curvilinear_motion
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: curvilinear_motion
+      :nosignatures:
+      :template: class.rst_t
+   
+      CurvilinearMotion
+   
+   
+
+   
+   
+   
+
+
+

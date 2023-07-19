@@ -1,0 +1,32 @@
+clohessy\_wiltshire\_orbit2d
+============================
+
+.. automodule:: gncpy.dynamics.basic.clohessy_wiltshire_orbit2d
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree: clohessy_wiltshire_orbit2d
+      :nosignatures:
+      :template: class.rst_t
+   
+      ClohessyWiltshireOrbit2d
+   
+   
+
+   
+   
+   
+
+
+

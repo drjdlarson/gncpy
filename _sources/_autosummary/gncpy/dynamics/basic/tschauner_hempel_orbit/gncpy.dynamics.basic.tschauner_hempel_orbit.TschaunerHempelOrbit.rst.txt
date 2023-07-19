@@ -1,0 +1,38 @@
+TschaunerHempelOrbit
+====================
+
+.. currentmodule:: gncpy.dynamics.basic.tschauner_hempel_orbit
+
+.. autoclass:: TschaunerHempelOrbit
+   :members:
+   :show-inheritance:
+   :inherited-members:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+   
+      ~TschaunerHempelOrbit.__init__
+      ~TschaunerHempelOrbit.get_input_mat
+      ~TschaunerHempelOrbit.get_state_mat
+      ~TschaunerHempelOrbit.propagate_state
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~TschaunerHempelOrbit.allow_cpp
+      ~TschaunerHempelOrbit.cont_fnc_lst
+      ~TschaunerHempelOrbit.control_model
+      ~TschaunerHempelOrbit.state_names
+   
+   

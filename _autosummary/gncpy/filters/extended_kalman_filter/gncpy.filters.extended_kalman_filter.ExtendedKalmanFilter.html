@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ExtendedKalmanFilter &mdash; GNCPy 1.0.2.dev0 documentation</title>
+  <title>ExtendedKalmanFilter &mdash; GNCPy 2.0.1.dev0 documentation</title>
       <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
@@ -41,7 +41,7 @@
               <img src="../../../../_static/logo.svg" class="logo" alt="Logo"/>
           </a>
               <div class="version">
-                1.0.2.dev0
+                2.0.1.dev0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -56,8 +56,8 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../../../../api.html">API Reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="../../../gncpy.html">gncpy</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="../../gncpy.control.html">control</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../control/gncpy.control.ELQR.html">ELQR</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../control/gncpy.control.LQR.html">LQR</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../control/gncpy.control.elqr.html">elqr</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../control/gncpy.control.lqr.html">lqr</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../gncpy.coordinate_transforms.html">coordinate_transforms</a><ul>
@@ -355,7 +355,7 @@ if a dynamic object is not specified.</p>
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.extended_kalman_filter.ExtendedKalmanFilter.correct">
-<span class="sig-name descname"><span class="pre">correct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cur_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas_fun_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.filters.extended_kalman_filter.ExtendedKalmanFilter.correct" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">correct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cur_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas_fun_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/extended_kalman_filter.html#ExtendedKalmanFilter.correct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.extended_kalman_filter.ExtendedKalmanFilter.correct" title="Permalink to this definition"></a></dt>
 <dd><p>Implements a discrete time correction step for a Kalman Filter.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -400,7 +400,7 @@ covariance assuming Gaussian noise.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.extended_kalman_filter.ExtendedKalmanFilter.predict">
-<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cur_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dyn_fun_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/extended_kalman_filter.html#ExtendedKalmanFilter.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.extended_kalman_filter.ExtendedKalmanFilter.predict" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cur_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cur_input</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dyn_fun_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control_fun_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/extended_kalman_filter.html#ExtendedKalmanFilter.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.extended_kalman_filter.ExtendedKalmanFilter.predict" title="Permalink to this definition"></a></dt>
 <dd><p>Prediction step of the EKF.</p>
 <p>This assumes continuous time dynamics and integrates the ode’s to get
 the next state.</p>
@@ -414,6 +414,7 @@ the next state.</p>
 <li><p><strong>cur_state</strong> (<em>N x 1 numpy array</em>) – Current state.</p></li>
 <li><p><strong>dyn_fun_params</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Extra arguments to be passed to the dynamics function. The default
 is None.</p></li>
+<li><p><strong>control_fun_params</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Extra arguments to be passed to the control input function. The default is None.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
@@ -436,7 +437,7 @@ is None.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.extended_kalman_filter.ExtendedKalmanFilter.set_measurement_model">
-<span class="sig-name descname"><span class="pre">set_measurement_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meas_mat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas_fun_lst</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/extended_kalman_filter.html#ExtendedKalmanFilter.set_measurement_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.extended_kalman_filter.ExtendedKalmanFilter.set_measurement_model" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_measurement_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meas_mat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas_fun_lst</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measObj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/extended_kalman_filter.html#ExtendedKalmanFilter.set_measurement_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.extended_kalman_filter.ExtendedKalmanFilter.set_measurement_model" title="Permalink to this definition"></a></dt>
 <dd><p>Sets the measurement model for the filter.</p>
 <p>This can either set the constant measurement matrix, or a set of
 non-linear functions (potentially time varying) to map states to

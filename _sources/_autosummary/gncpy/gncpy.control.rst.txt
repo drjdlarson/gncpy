@@ -13,16 +13,6 @@ control
 
    
    
-   .. rubric:: Classes
-
-   .. autosummary::
-      :toctree: control
-      :nosignatures:
-      :template: class.rst_t
-   
-      ELQR
-      LQR
-   
    
 
    
@@ -30,4 +20,14 @@ control
    
 
 
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree: control
+   :template: module.rst_t
+   :recursive:
+
+   ~gncpy.control.elqr
+   ~gncpy.control.lqr
 
