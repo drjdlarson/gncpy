@@ -1,6 +1,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // needed because some backend gncpy functions retrun stl types
 #include <gncpy/dynamics/Parameters.h>
+#include <gncpy/control/Parameters.h>
 #include <gncpy/filters/Parameters.h>
 
 #include "Common.h"

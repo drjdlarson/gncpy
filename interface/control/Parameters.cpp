@@ -1,6 +1,5 @@
 #include <pybind11/pybind11.h>
-#include <pybind11/stl.h> // needed because some backend gncpy functions retrun stl types
-#include <gncpy/dynamics/Parameters.h>
+#include <gncpy/control/Parameters.h>
 #include "Common.h"
 #include "../Macros.h"
 
@@ -12,11 +11,8 @@ void initParameters(py::module& m) {
 
     using namespace lager;
 
-    GNCPY_PY_BASE_CLASS(gncpy::dynamics::StateTransParams)(m, "StateTransParams")
+    GNCPY_PY_BASE_CLASS(gncpy::control::ControlParams)(m, "ControlParams")
         .def(py::init())
-        GNCPY_PICKLE(gncpy::dynamics::StateTransParams);
-
-    GNCPY_PY_BASE_CLASS(gncpy::dynamics::ConstraintParams)(m, "ConstraintParams")
-        .def(py::init())
-        GNCPY_PICKLE(gncpy::dynamics::ConstraintParams);
+        GNCPY_PICKLE(gncpy::control::ControlParams);
+        
 }
