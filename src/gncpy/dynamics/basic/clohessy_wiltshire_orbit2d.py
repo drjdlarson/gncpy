@@ -120,7 +120,7 @@ class ClohessyWiltshireOrbit2d(LinearDynamicsBase):
             )
         if self.state_constraint is not None:
             next_state = self.state_constraint(timestep, next_state)
-        return next_state
+        return next_state.reshape((-1, 1))
 
     def get_dis_process_noise_mat(self, dt, proc_cov):
         """Discrete process noise matrix.

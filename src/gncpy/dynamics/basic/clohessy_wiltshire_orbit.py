@@ -112,7 +112,7 @@ class ClohessyWiltshireOrbit(ClohessyWiltshireOrbit2d):
             )
         if self.state_constraint is not None:
             next_state = self.state_constraint(timestep, next_state)
-        return next_state
+        return next_state.reshape((-1, 1))
 
     def get_dis_process_noise_mat(self, dt):
         """Calculates the process noise.
