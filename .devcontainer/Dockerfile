@@ -36,6 +36,9 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
+# Set PYTHONPATH environment variable to include the root directory of your project (this allows interconnected importing of files between files in this repo)
+ENV PYTHONPATH=/app/gncpy
+
 # install some python dependencies
-RUN pip install tox genbadge[tests,coverage] numpy matplotlib pytest tornado "setuptools_scm[toml]>=6.2"
+RUN pip install tox genbadge[tests,coverage] numpy matplotlib pytest tornado scipy pyatmos "setuptools_scm[toml]>=6.2"
 

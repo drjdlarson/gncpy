@@ -2,7 +2,8 @@
 // README at: https://github.com/devcontainers/templates/tree/main/src/cpp
 {
 	"name": "gncpy-dev",
-	"image": "ghcr.io/drjdlarson/gncpy-dev:latest",
+	//"image": "ghcr.io/drjdlarson/gncpy-dev:latest",
+	"build": { "dockerfile": "Dockerfile" }, // this rebuilds the docker image according to the docker file if uncommented (comment out image line above)
 	"customizations": {
 		"vscode": {
 			"extensions": [
