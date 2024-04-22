@@ -6,6 +6,7 @@ from abc import abstractmethod
 from warnings import warn
 from .dynamics_base import DynamicsBase
 
+
 class NonlinearDynamicsBase(DynamicsBase):
     """Base class for non-linear dynamics models.
 
@@ -230,7 +231,7 @@ class NonlinearDynamicsBase(DynamicsBase):
         self._integrator.set_initial_value(state, timestep)
 
         if np.isnan(self.dt) or np.isinf(self.dt):
-            raise RuntimeError("Invalid value for dt ({}).".format(self.dt))
+            raise RuntimeError("Invalid value for dt (must be set in class initialization) ({}).".format(self.dt))
         next_time = timestep + self.dt
         next_state = self._integrator.integrate(next_time)
         next_state = next_state.reshape((next_state.size, 1))

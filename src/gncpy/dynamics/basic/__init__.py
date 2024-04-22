@@ -17,3 +17,4 @@ from .karlgaard_orbit import KarlgaardOrbit
 from .linear_dynamics_base import LinearDynamicsBase
 from .nonlinear_dynamics_base import NonlinearDynamicsBase
 from .tschauner_hempel_orbit import TschaunerHempelOrbit
+from .reentry_vehicle import ReentryVehicle
