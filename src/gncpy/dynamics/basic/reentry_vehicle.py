@@ -2,7 +2,7 @@ import numpy as np
 from .nonlinear_dynamics_base import NonlinearDynamicsBase
 import pyatmos as atm
 import gncpy.wgs84 as wgs84
-
+import copy
 
 class ReentryVehicle(NonlinearDynamicsBase):
     """general model for a ballistic reentry vehicle
@@ -38,6 +38,7 @@ class ReentryVehicle(NonlinearDynamicsBase):
         ballistic_coefficient=5000,
         origin_lat=-77.0563,
         origin_long=38.8719,
+        CD0 = 0.25,
         **kwargs,
     ):
         """Initialize an object.
@@ -54,6 +55,9 @@ class ReentryVehicle(NonlinearDynamicsBase):
         origin_long: float, optional
             Longitude of coordinate frame origin, used for calculating noninertial accelerations due to Earth rotation
             Defaults to the Pentagon
+        CD0: float, optional
+            zero-lift drag coefficient; only needed for determining induced drag for manuevering RV's. 
+            If control input is None, this parameter affects nothing and is inconsequential. 
         **kwargs : dict
             Additional arguments for the parent class.
         """
@@ -61,7 +65,15 @@ class ReentryVehicle(NonlinearDynamicsBase):
         self.drag_parameter = 1 / ballistic_coefficient
         self.origin_lat = origin_lat
         self.origin_long = origin_long
+        self.CD0 = CD0
 
+        '''
+        control model is accelerations (in m/s) in the velocity-turn-climb frame:
+        u = np.array([a_thrust, # in direction of vehicle velocity
+                      a_turn,   # in direction (left turn positive) perpendicular to velocity in the horizontal ENU plane
+                      a_climb   # in direction (up positive) perpendicular to velocity and turn
+                    ])
+        '''
         def g0(t, x, u, *args):
             return 0
 
@@ -71,21 +83,51 @@ class ReentryVehicle(NonlinearDynamicsBase):
         def g2(t, x, u, *args):
             return 0
 
+        def ENU_control_acceleration(t, x, u, *args):
+            # assumes u is np.array([a_v, a_t, a_c])
+            v = np.linalg.norm(x[3:])
+            vg = np.linalg.norm(x[3:5])
+            T_ENU_VTC = np.array([[x[3]/v, -x[4]/vg, -x[3]*x[5]/(v*vg)],
+                                  [x[4]/v, x[3]/vg, -x[4]*x[5]/(v*vg)],
+                                  [x[5]/v, 0, vg**2/(v*vg)]])
+            # calculate additional induced drag
+            total_lift_acceleration = np.linalg.norm(u[1:])
+            rho_NED = np.array([x[1], x[0], -(x[2] + wgs84.EQ_RAD)]) # spherical approximation
+            veh_alt = np.linalg.norm(rho_NED) - wgs84.EQ_RAD
+            coesa76_geom = atm.coesa76([veh_alt / 1000])  # geometric altitudes in km
+            density = coesa76_geom.rho  # [kg/m^3]
+            q = 1/2*density*v**2
+            # following equation derived from aero force equations and the CDL=CL**2/4 result from slender body potential flow theory (cite Cronvich)
+            induced_drag_acceleration = total_lift_acceleration**2*self.ballistic_coefficient*self.CD0/(4*q)
+            u_modified = copy.deepcopy(u)
+            u_modified[0] = u_modified[0] - induced_drag_acceleration # subtract induced drag from thrust
+            
+            # convert VTC accelerations to ENU
+            a_control_ENU = T_ENU_VTC @ u_modified
+
+            return a_control_ENU
+
         # FIXME change these to calculate induced drag from maneuvering
         def g3(t, x, u, *args):
             if u is None:
                 return 0
-            return (u[0]).item()
+            else:
+                control_accel = ENU_control_acceleration(t, x, u, *args)
+                return control_accel[0]
 
         def g4(t, x, u, *args):
             if u is None:
                 return 0
-            return (u[1]).item()
+            else:
+                control_accel = ENU_control_acceleration(t, x, u, *args)
+                return control_accel[1]
 
         def g5(t, x, u, *args):
             if u is None:
                 return 0
-            return (u[2]).item()
+            else:
+                control_accel = ENU_control_acceleration(t, x, u, *args)
+                return control_accel[2]
 
         self._control_model = [g0, g1, g2, g3, g4, g5]
 
@@ -128,19 +170,19 @@ class ReentryVehicle(NonlinearDynamicsBase):
         def ENU_acceleration(t, x, *args):
             # All calculations done in NED frame then converted to ENU immediately before returning 
 
-            # approximate vehicle gravity using mixed ellipsoidal and spherical models
-            # use poor latitude approximation, flat earth altitude approximation, and flat earth gravity unit vector
-            dlat = x[1] / wgs84.EQ_RAD * 180 / np.pi
+            # approximate vehicle gravity using WGS84 gravity model and spherical approximation
+            dlat = x[1] / wgs84.EQ_RAD * 180 / np.pi # use (very) poor latitude approximation
             veh_lat = self.origin_lat + dlat
-            veh_alt = x[2]
-            rho = np.array([x[0], x[1], x[2] + wgs84.EQ_RAD]) # FIXME this is a terrible. approximation
-            a_gravity = wgs84.calc_gravity(veh_lat, veh_alt).T.flatten()  # assume directly down in ENU frame (flat earth) (also bad FIXME)
+            rho_NED = np.array([x[1], x[0], -(x[2] + wgs84.EQ_RAD)]) # spherical approximation
+            veh_alt = np.linalg.norm(rho_NED) - wgs84.EQ_RAD
+            a_gravity_magnitude = wgs84.calc_gravity(veh_lat, veh_alt).T.flatten()
+            a_gravity = -a_gravity_magnitude[2]*rho_NED/np.linalg.norm(rho_NED) # direct gravity towards earth center for spherical earth
 
-            # all these calculations done in NED frame, then converted to ENU
+            # all these calculations done in NED frame
             NED_velocity = np.array([x[4], x[3], -x[5]])
             omega_earth = wgs84.calc_earth_rate(veh_lat)
             omega_earth = omega_earth.T.flatten() # convert to row array for np.cross usage
-            a_centrifugal = np.cross(omega_earth, np.cross(omega_earth, rho)) # FIXME rho is ENU 
+            a_centrifugal = np.cross(omega_earth, np.cross(omega_earth, rho_NED))
             a_coriolis = 2 * np.cross(omega_earth, NED_velocity)
 
             a_earth_induced = a_gravity - a_centrifugal - a_coriolis
