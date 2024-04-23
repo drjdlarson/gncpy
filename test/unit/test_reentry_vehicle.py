@@ -9,13 +9,20 @@ DEBUG = False
 
 def test_rv_prop():
     dt = 0.1
-    t1 = 10
+    t1 = 100
     time = np.arange(0, t1 + dt, dt)
 
     # Create dynamics object
     dynObj = gdyn.ReentryVehicle(dt=dt)
     state = np.zeros((time.size, len(dynObj.state_names)))
-    state[0] = np.array([10000, 10000, 10000, -1000, -1000, -100])
+    reentry_speed = 7500 # 24300 ft/s
+    reentry_angle = np.deg2rad(10)
+    reentry_heading = np.deg2rad(45+180) # assume 45 degree heading angle towards origin
+    reentry_velocity = np.array([reentry_speed*np.cos(reentry_heading)*np.cos(reentry_angle), 
+                                 reentry_speed*np.sin(reentry_heading)*np.cos(reentry_angle),
+                                 -reentry_speed*np.sin(reentry_angle)
+                                 ])
+    state[0] = np.concatenate(([100000, 100000, 100000], reentry_velocity))
 
     for kk, tt in enumerate(time[:-1]):
         state[kk + 1, :] = dynObj.propagate_state(tt, state[kk].reshape((-1, 1))).flatten()
@@ -85,18 +92,25 @@ def test_rv_prop():
 
 def test_rv_control():
     dt = 0.1
-    t1 = 10
+    t1 = 100
     time = np.arange(0, t1 + dt, dt)
 
     # Create dynamics object
     dynObj = gdyn.ReentryVehicle(dt=dt)
 
     # Control model already set up for RV: input constant 50 m/s2 right hand turn
-    u = np.array([0,-100,0]) # FIXME integration fails for high values; works for 10
+    u = np.array([0,-100,0]) 
 
     # simulate for some time
     state = np.zeros((time.size, len(dynObj.state_names)))
-    state[0] = np.array([10000, 10000, 10000, -1000, -1000, -100])
+    reentry_speed = 7500 # 24300 ft/s
+    reentry_angle = np.deg2rad(10)
+    reentry_heading = np.deg2rad(45+180) # assume 45 degree heading angle towards origin
+    reentry_velocity = np.array([reentry_speed*np.cos(reentry_heading)*np.cos(reentry_angle), 
+                                 reentry_speed*np.sin(reentry_heading)*np.cos(reentry_angle),
+                                 -reentry_speed*np.sin(reentry_angle)
+                                 ])
+    state[0] = np.concatenate(([100000, 100000, 100000], reentry_velocity))
 
     for kk, tt in enumerate(time[:-1]):
         state[kk + 1, :] = dynObj.propagate_state(
@@ -143,7 +157,7 @@ def test_rv_control():
         fig.axes[1].grid(True)
 
         fig.axes[2].plot(time, state[:, 5])
-        fig.axes[2].set_ylabel("N-vel (m/s)")
+        fig.axes[2].set_ylabel("U-vel (m/s)")
         fig.axes[2].set_xlabel("time (s)")
         fig.axes[2].grid(True)
 
@@ -179,8 +193,8 @@ if __name__ == "__main__":
 
         plt.close("all")
 
-    #test_rv_prop()
-    test_rv_control()
+    test_rv_prop()
+    #test_rv_control()
 
     if DEBUG:
         plt.show()

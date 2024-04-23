@@ -85,25 +85,37 @@ class ReentryVehicle(NonlinearDynamicsBase):
 
         def ENU_control_acceleration(t, x, u, *args):
             # assumes u is np.array([a_v, a_t, a_c])
+
+            # define VTC -> ENU rotation matrix
             v = np.linalg.norm(x[3:])
             vg = np.linalg.norm(x[3:5])
             T_ENU_VTC = np.array([[x[3]/v, -x[4]/vg, -x[3]*x[5]/(v*vg)],
                                   [x[4]/v, x[3]/vg, -x[4]*x[5]/(v*vg)],
                                   [x[5]/v, 0, vg**2/(v*vg)]])
-            # calculate additional induced drag
-            total_lift_acceleration = np.linalg.norm(u[1:])
+            
+            # calculate dynamic pressure 
             rho_NED = np.array([x[1], x[0], -(x[2] + wgs84.EQ_RAD)]) # spherical approximation
             veh_alt = np.linalg.norm(rho_NED) - wgs84.EQ_RAD
             coesa76_geom = atm.coesa76([veh_alt / 1000])  # geometric altitudes in km
             density = coesa76_geom.rho  # [kg/m^3]
             q = 1/2*density*v**2
-            # following equation derived from aero force equations and the CDL=CL**2/4 result from slender body potential flow theory (cite Cronvich)
-            induced_drag_acceleration = total_lift_acceleration**2*self.ballistic_coefficient*self.CD0/(4*q)
-            u_modified = copy.deepcopy(u)
-            u_modified[0] = u_modified[0] - induced_drag_acceleration # subtract induced drag from thrust
+
+            # limit maximum lift, assume CLMax = 3 
+            # (set high to poorly account for fact that thrust can be unaligned with velocity to help turn)
+            u_limited = copy.deepcopy(u).astype(float)
+            total_lift_acceleration = np.linalg.norm(u[1:])
+            lift_accel_max = 3*q*self.drag_parameter/self.CD0
+            if total_lift_acceleration > lift_accel_max:
+                u_limited[1:] = u_limited[1:]*lift_accel_max/total_lift_acceleration
+                total_lift_acceleration = np.linalg.norm(u_limited[1:])
+
+            # calculate additional induced drag
+            # following equation derived from CDL=CL**2/4 result from slender body potential flow theory (cite Cronvich Missile Aerodynamics)
+            induced_drag_acceleration = total_lift_acceleration**2/self.drag_parameter*self.CD0/(4*q)
+            u_limited[0] = u_limited[0] - induced_drag_acceleration # subtract induced drag from thrust
             
             # convert VTC accelerations to ENU
-            a_control_ENU = T_ENU_VTC @ u_modified
+            a_control_ENU = T_ENU_VTC @ u_limited
 
             return a_control_ENU
 
