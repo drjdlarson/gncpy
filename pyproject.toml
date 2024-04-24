@@ -33,6 +33,7 @@ dependencies = [
     "numpy",
     "scipy",
     "matplotlib",
+    "pyatmos",
     "ruamel.yaml>=0.17.21",
 ]
 

@@ -84,6 +84,11 @@ class ReentryVehicle(NonlinearDynamicsBase):
             return 0
 
         def ENU_control_acceleration(t, x, u, *args):
+            # FIXME
+            # this function assumes all turning is done by aerodynamic forces 
+            # (the thrust vector is aligned with velocity and does not contribute to turning).
+            # This assumption means no exoatmospheric turning is possible, which doesn't really work for an interceptor.
+
             # assumes u is np.array([a_v, a_t, a_c])
 
             # define VTC -> ENU rotation matrix
@@ -92,15 +97,15 @@ class ReentryVehicle(NonlinearDynamicsBase):
             T_ENU_VTC = np.array([[x[3]/v, -x[4]/vg, -x[3]*x[5]/(v*vg)],
                                   [x[4]/v, x[3]/vg, -x[4]*x[5]/(v*vg)],
                                   [x[5]/v, 0, vg**2/(v*vg)]])
-            
-            # calculate dynamic pressure 
+
+            # calculate dynamic pressure
             rho_NED = np.array([x[1], x[0], -(x[2] + wgs84.EQ_RAD)]) # spherical approximation
             veh_alt = np.linalg.norm(rho_NED) - wgs84.EQ_RAD
             coesa76_geom = atm.coesa76([veh_alt / 1000])  # geometric altitudes in km
             density = coesa76_geom.rho  # [kg/m^3]
             q = 1/2*density*v**2
 
-            # limit maximum lift, assume CLMax = 3 
+            # limit maximum lift, assume CLMax = 3
             # (set high to poorly account for fact that thrust can be unaligned with velocity to help turn)
             u_limited = copy.deepcopy(u).astype(float)
             total_lift_acceleration = np.linalg.norm(u[1:])
@@ -113,7 +118,7 @@ class ReentryVehicle(NonlinearDynamicsBase):
             # following equation derived from CDL=CL**2/4 result from slender body potential flow theory (cite Cronvich Missile Aerodynamics)
             induced_drag_acceleration = total_lift_acceleration**2/self.drag_parameter*self.CD0/(4*q)
             u_limited[0] = u_limited[0] - induced_drag_acceleration # subtract induced drag from thrust
-            
+
             # convert VTC accelerations to ENU
             a_control_ENU = T_ENU_VTC @ u_limited
 
@@ -180,7 +185,7 @@ class ReentryVehicle(NonlinearDynamicsBase):
 
         # try to write a generic acceleration function that the following functions can break up; will this work?
         def ENU_acceleration(t, x, *args):
-            # All calculations done in NED frame then converted to ENU immediately before returning 
+            # All calculations done in NED frame then converted to ENU immediately before returning
 
             # approximate vehicle gravity using WGS84 gravity model and spherical approximation
             dlat = x[1] / wgs84.EQ_RAD * 180 / np.pi # use (very) poor latitude approximation
