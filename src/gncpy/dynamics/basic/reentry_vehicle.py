@@ -39,6 +39,7 @@ class ReentryVehicle(NonlinearDynamicsBase):
         origin_lat=-77.0563,
         origin_long=38.8719,
         CD0 = 0.25,
+        has_thrusters = True,
         **kwargs,
     ):
         """Initialize an object.
@@ -58,6 +59,10 @@ class ReentryVehicle(NonlinearDynamicsBase):
         CD0: float, optional
             zero-lift drag coefficient; only needed for determining induced drag for manuevering RV's. 
             If control input is None, this parameter affects nothing and is inconsequential. 
+        has_thrusters: bool, optional
+            Determines if the vehicle will respond to commanded turn/climb accelerations beyond what it can do with aero
+            forces alone (typically applies in upper/exo-atmosphere). If false, control commands will be limited to 
+            accelerations possible from aero forces alone. 
         **kwargs : dict
             Additional arguments for the parent class.
         """
@@ -66,9 +71,10 @@ class ReentryVehicle(NonlinearDynamicsBase):
         self.origin_lat = origin_lat
         self.origin_long = origin_long
         self.CD0 = CD0
+        self.has_thrusters = has_thrusters
 
         '''
-        control model is accelerations (in m/s) in the velocity-turn-climb frame:
+        control model is specific forces (in m/s2) in the velocity-turn-climb frame:
         u = np.array([a_thrust, # in direction of vehicle velocity
                       a_turn,   # in direction (left turn positive) perpendicular to velocity in the horizontal ENU plane
                       a_climb   # in direction (up positive) perpendicular to velocity and turn
@@ -107,12 +113,18 @@ class ReentryVehicle(NonlinearDynamicsBase):
 
             # limit maximum lift, assume CLMax = 3
             # (set high to poorly account for fact that thrust can be unaligned with velocity to help turn)
+            # If aero lift not enough to satisfy control, assume remaining maneuvering 
+            # accelerations provided by thrusters
             u_limited = copy.deepcopy(u).astype(float)
             total_lift_acceleration = np.linalg.norm(u[1:])
             lift_accel_max = 3*q*self.drag_parameter/self.CD0
+            
             if total_lift_acceleration > lift_accel_max:
-                u_limited[1:] = u_limited[1:]*lift_accel_max/total_lift_acceleration
-                total_lift_acceleration = np.linalg.norm(u_limited[1:])
+                if self.has_thrusters:
+                    total_lift_acceleration = lift_accel_max
+                else:
+                    u_limited[1:] = u_limited[1:]*lift_accel_max/total_lift_acceleration
+                    total_lift_acceleration = np.linalg.norm(u_limited[1:])
 
             # calculate additional induced drag
             # following equation derived from CDL=CL**2/4 result from slender body potential flow theory (cite Cronvich Missile Aerodynamics)
@@ -124,7 +136,6 @@ class ReentryVehicle(NonlinearDynamicsBase):
 
             return a_control_ENU
 
-        # FIXME change these to calculate induced drag from maneuvering
         def g3(t, x, u, *args):
             if u is None:
                 return 0
