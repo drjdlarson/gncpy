@@ -5,10 +5,27 @@ import gncpy.math as math
 import gncpy.dynamics.basic as gdyn
 import gncpy.control as gcont
 
+# dependencies to create a time it decorator
+import time
+from functools import wraps
+
+
 # FIXME want to put some asserts in here to actually function as a test, not just a debug/plotting function
 
 DEBUG = False
 
+
+def timeit(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        end_time = time.time()
+        print(f"Execution time of {func.__name__}: {end_time - start_time} seconds")
+        return result
+    return wrapper
+
+@timeit
 def test_rv_prop():
     dt = 0.1
     t1 = 100
@@ -91,7 +108,7 @@ def test_rv_prop():
 
         fig.suptitle("Reentry vehicle simulation without control input")
 
-
+@timeit
 def test_rv_control():
     dt = 0.1
     t1 = 100
@@ -185,7 +202,7 @@ def test_rv_control():
         fig.suptitle("Reentry vehicle simulation with RH 10m/s2 turn")
 
 # function to test that the Reentry vehicle class works for simulating a launched missile to intercept as well
-
+@timeit
 def test_interceptor_control():
     dt = 0.1
     t1 = 50
@@ -290,6 +307,7 @@ if __name__ == "__main__":
 
         plt.close("all")
 
+    
     test_rv_prop()
     test_rv_control()
     test_interceptor_control()

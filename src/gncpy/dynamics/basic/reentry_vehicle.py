@@ -40,6 +40,7 @@ class ReentryVehicle(NonlinearDynamicsBase):
         origin_long=38.8719,
         CD0 = 0.25,
         has_thrusters = True,
+        atm_model = atm.expo,
         **kwargs,
     ):
         """Initialize an object.
@@ -63,6 +64,11 @@ class ReentryVehicle(NonlinearDynamicsBase):
             Determines if the vehicle will respond to commanded turn/climb accelerations beyond what it can do with aero
             forces alone (typically applies in upper/exo-atmosphere). If false, control commands will be limited to 
             accelerations possible from aero forces alone. 
+        atm_model: pyatmos class, optional
+            determines how density will be calculated for different vehicle altitudes. Either atm.expo or atm.coesa76 
+            can be chosen. Expo runs ~10x faster thatn coesa76. If coesa76 chosen, it currently takes up 50% of runtime for
+            a model with control input. Thus, choosing expo will ~halve overall runtime. Exponential model underestimates 
+            atmospheric density by up to 25%. 
         **kwargs : dict
             Additional arguments for the parent class.
         """
@@ -72,6 +78,7 @@ class ReentryVehicle(NonlinearDynamicsBase):
         self.origin_long = origin_long
         self.CD0 = CD0
         self.has_thrusters = has_thrusters
+        self.atm_model = atm_model
 
         '''
         control model is specific forces (in m/s2) in the velocity-turn-climb frame:
@@ -90,10 +97,10 @@ class ReentryVehicle(NonlinearDynamicsBase):
             return 0
 
         def ENU_control_acceleration(t, x, u, *args):
-            # FIXME
-            # this function assumes all turning is done by aerodynamic forces 
-            # (the thrust vector is aligned with velocity and does not contribute to turning).
-            # This assumption means no exoatmospheric turning is possible, which doesn't really work for an interceptor.
+            # FIXME this function assumes turning is done by aero forces only up to CL=3, then assumes any further 
+            # commanded turning/climbing is done via thrusters. It also assumes a CL of 3 is achievable to account
+            # for the thrust vector helping turn at some alpha. It's all very sus as an approximation
+
 
             # assumes u is np.array([a_v, a_t, a_c])
 
@@ -107,8 +114,9 @@ class ReentryVehicle(NonlinearDynamicsBase):
             # calculate dynamic pressure
             rho_NED = np.array([x[1], x[0], -(x[2] + wgs84.EQ_RAD)]) # spherical approximation
             veh_alt = np.linalg.norm(rho_NED) - wgs84.EQ_RAD
-            coesa76_geom = atm.coesa76([veh_alt / 1000])  # geometric altitudes in km
-            density = coesa76_geom.rho  # [kg/m^3]
+            #coesa76_geom = atm.expo([veh_alt / 1000])  # geometric altitudes in km
+            #density = coesa76_geom.rho  # [kg/m^3]
+            density = self.density # the dynamics model MUST be called before the control model for this to be defined
             q = 1/2*density*v**2
 
             # limit maximum lift, assume CLMax = 3
@@ -172,6 +180,47 @@ class ReentryVehicle(NonlinearDynamicsBase):
         """Read only ballistic coefficient."""
         return 1 / self.drag_parameter
 
+    # 3D vector acceleration function that the following functions break into components
+    def ENU_acceleration(self, t, x, *args):
+        # All calculations done in NED frame then converted to ENU immediately before returning
+
+        # approximate vehicle gravity using WGS84 gravity model and spherical approximation
+        dlat = x[1] / wgs84.EQ_RAD * 180 / np.pi # use (very) poor latitude approximation
+        veh_lat = self.origin_lat + dlat
+        rho_NED = np.array([x[1], x[0], -(x[2] + wgs84.EQ_RAD)]) # spherical approximation
+        veh_alt = np.linalg.norm(rho_NED) - wgs84.EQ_RAD
+        a_gravity_magnitude = wgs84.calc_gravity(veh_lat, veh_alt).T.flatten()
+        a_gravity = -a_gravity_magnitude[2]*rho_NED/np.linalg.norm(rho_NED) # direct gravity towards earth center for spherical earth
+
+        # all these calculations done in NED frame
+        NED_velocity = np.array([x[4], x[3], -x[5]])
+        omega_earth = wgs84.calc_earth_rate(veh_lat)
+        omega_earth = omega_earth.T.flatten() # convert to row array for np.cross usage
+        a_centrifugal = np.cross(omega_earth, np.cross(omega_earth, rho_NED))
+        a_coriolis = 2 * np.cross(omega_earth, NED_velocity)
+
+        a_earth_induced = a_gravity - a_centrifugal - a_coriolis
+
+        atmosphere = self.atm_model([veh_alt / 1000])  # geometric altitudes in km by default
+        density = atmosphere.rho  # [kg/m^3]
+        self.density = density # store density at current altitude so we don't need to recalc for control
+        velocity_norm = np.linalg.norm(NED_velocity)
+        a_drag = (
+            -1
+            / 2
+            * density
+            * (velocity_norm) ** 2
+            * self.drag_parameter
+            * NED_velocity
+            / velocity_norm
+        )
+
+        a_total_NED = a_drag + a_earth_induced
+        a_total_ENU = np.copy(a_total_NED)
+        a_total_ENU[0], a_total_ENU[1], a_total_ENU[2] = a_total_NED[1], a_total_NED[0], -a_total_ENU[2]
+
+        return a_total_ENU
+
     @property
     def cont_fnc_lst(self):
         """Continuous time dynamics.
@@ -194,61 +243,59 @@ class ReentryVehicle(NonlinearDynamicsBase):
         def f2(t, x, *args):
             return x[5]
 
-        # try to write a generic acceleration function that the following functions can break up; will this work?
-        def ENU_acceleration(t, x, *args):
-            # All calculations done in NED frame then converted to ENU immediately before returning
-
-            # approximate vehicle gravity using WGS84 gravity model and spherical approximation
-            dlat = x[1] / wgs84.EQ_RAD * 180 / np.pi # use (very) poor latitude approximation
-            veh_lat = self.origin_lat + dlat
-            rho_NED = np.array([x[1], x[0], -(x[2] + wgs84.EQ_RAD)]) # spherical approximation
-            veh_alt = np.linalg.norm(rho_NED) - wgs84.EQ_RAD
-            a_gravity_magnitude = wgs84.calc_gravity(veh_lat, veh_alt).T.flatten()
-            a_gravity = -a_gravity_magnitude[2]*rho_NED/np.linalg.norm(rho_NED) # direct gravity towards earth center for spherical earth
-
-            # all these calculations done in NED frame
-            NED_velocity = np.array([x[4], x[3], -x[5]])
-            omega_earth = wgs84.calc_earth_rate(veh_lat)
-            omega_earth = omega_earth.T.flatten() # convert to row array for np.cross usage
-            a_centrifugal = np.cross(omega_earth, np.cross(omega_earth, rho_NED))
-            a_coriolis = 2 * np.cross(omega_earth, NED_velocity)
-
-            a_earth_induced = a_gravity - a_centrifugal - a_coriolis
-
-            coesa76_geom = atm.coesa76(
-                [veh_alt / 1000]
-            )  # geometric altitudes in km by default
-            density = coesa76_geom.rho  # [kg/m^3]
-            velocity_norm = np.linalg.norm(NED_velocity)
-            a_drag = (
-                -1
-                / 2
-                * density
-                * (velocity_norm) ** 2
-                * self.drag_parameter
-                * NED_velocity
-                / velocity_norm
-            )
-
-            a_total_NED = a_drag + a_earth_induced
-            a_total_ENU = np.copy(a_total_NED)
-            a_total_ENU[0], a_total_ENU[1], a_total_ENU[2] = a_total_NED[1], a_total_NED[0], -a_total_ENU[2]
-
-            return a_total_ENU
-
         # returns E acceleration
         def f3(t, x, *args):
-            a_total = ENU_acceleration(t, x, *args)
+            a_total = self.ENU_acceleration(t, x, *args)
             return a_total[0]
 
         # returns N acceleration
         def f4(t, x, *args):
-            a_total = ENU_acceleration(t, x, *args)
+            a_total = self.ENU_acceleration(t, x, *args)
             return a_total[1]
 
         # returns U acceleration
         def f5(t, x, *args):
-            a_total = ENU_acceleration(t, x, *args)
+            a_total = self.ENU_acceleration(t, x, *args)
             return a_total[2]
 
         return [f0, f1, f2, f3, f4, f5]
+    
+    # overwrite continuous dynamics function to only call ENU_acceleration once
+    def _cont_dyn(self, t, x, u, state_args, ctrl_args):
+        r"""Implements the continuous time dynamics.
+
+        This automatically sets up the combined differential equation based on
+        the supplied continuous function list.
+
+        This implements the equation :math:`\dot{x} = f(t, x) + g(t, x, u)` and
+        returns the state derivatives as a vector. Note the control input is
+        only used if an appropriate control model is set by the user.
+
+        Parameters
+        ----------
+        t : float
+            timestep.
+        x : N x 1 numpy array
+            current state.
+        u : Nu x 1 numpy array
+            Control effort, not used if no control model.
+        state_args : tuple
+            Additional arguements for the state functions.
+        ctrl_args : tuple
+            Additional arguments for the control functions. Not used if no
+            control model
+
+        Returns
+        -------
+        x_dot : N x 1 numpy array
+            state derivative
+        """
+        out = np.zeros((len(self.state_names), 1))
+        out[:3] = np.array([x[3], x[4], x[5]]).reshape(-1, 1)
+        acceleration = self.ENU_acceleration(t, x)
+        out[3:] = acceleration.reshape(-1, 1)
+    
+        if self._control_model is not None:
+            for ii, g in enumerate(self._control_model):
+                out[ii] += g(t, x, u, *ctrl_args)
+        return out
