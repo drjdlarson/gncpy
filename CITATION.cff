@@ -16,7 +16,7 @@ title: "GNCPy: A Python Package for Guidance, Navigation, and Control Algorithms
 version: 2.0.1
 doi: 10.5281/zenodo.11429010
 date-released: 2024-06-02
-url: "https://github.com/drjdlarson/gncpp"
+url: "https://github.com/drjdlarson/gncpy"
 preferred-citation:
   type: software
   authors:
