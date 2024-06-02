@@ -8,6 +8,10 @@ authors:
   given-names: "Ryan W."
 - family-names: "Weirens"
   given-names: "Vaughn A."
+- family-names: "Doerr"
+  given-names: "Bryce"
+- family-names: "Luong"
+  given-names: "Tuan D."
 title: "GNCPy: A Python Package for Guidance, Navigation, and Control Algorithms"
 version: 2.0.1
 doi: 10.5281/zenodo.11429010
@@ -23,6 +27,10 @@ preferred-citation:
     given-names: "Ryan W."
   - family-names: "Weirens"
     given-names: "Vaughn A."
+  - family-names: "Doerr"
+    given-names: "Bryce"
+  - family-names: "Luong"
+    given-names: "Tuan D."
   doi: "10.5281/zenodo.11429010"
   title: "GNCPy: A Python Package for Guidance, Navigation, and Control Algorithms"
   year: 2024
