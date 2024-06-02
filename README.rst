@@ -83,23 +83,3 @@ Note, all tox commands must be run from the root of the repository because this 
 
 ..
     END TOOLCHAIN INCLUDE
-
-.. 
-    BEGIN CITE INCLUDE
-
-Cite
-====
-Please cite the framework as follows
-
-.. code-block:: bibtex
-
-    @Misc{gncpy,
-        author       = {Jordan D. Larson and Ryan W. Thomas and Vincent W. Hill and Vaughn Weirens},
-        howpublished = {Web page},
-        title        = {{GNCPy}: A {P}ython library for {G}uidance, {N}avigation, and {C}ontrol algorithms},
-        year         = {2019},
-        url          = {https://github.com/drjdlarson/gncpy},
-    }
-
-..
-    END CITE INCLUDE
