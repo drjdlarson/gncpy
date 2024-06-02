@@ -1,25 +1,27 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GCIFilter &mdash; GNCPy 2.0.1.dev0 documentation</title>
-      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
+
+  
     <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_autosummary/gncpy/filters/gci_filter/gncpy.filters.gci_filter.GCIFilter.html" />
   <!--[if lt IE 9]>
     <script src="../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../../../_static/jquery.js"></script>
-        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-        <script src="../../../../_static/doctools.js"></script>
-        <script src="../../../../_static/sphinx_highlight.js"></script>
-        <script src="../../../../_static/clipboard.min.js"></script>
-        <script src="../../../../_static/copybutton.js"></script>
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=ba91f118"></script>
+        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../../_static/copybutton.js?v=cbcfbdad"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
@@ -267,14 +269,14 @@
            <div itemprop="articleBody">
              
   <section id="gcifilter">
-<h1>GCIFilter<a class="headerlink" href="#gcifilter" title="Permalink to this heading"></a></h1>
+<h1>GCIFilter<a class="headerlink" href="#gcifilter" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="gncpy.filters.gci_filter.GCIFilter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GCIFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas_model_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas_noise_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/gci_filter.html#GCIFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.gci_filter.GCIFilter" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GCIFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas_model_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas_noise_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/gci_filter.html#GCIFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.gci_filter.GCIFilter" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="../bayes_filter/gncpy.filters.bayes_filter.BayesFilter.html#gncpy.filters.bayes_filter.BayesFilter" title="gncpy.filters.bayes_filter.BayesFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">BayesFilter</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.gci_filter.GCIFilter.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas_model_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas_noise_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/gci_filter.html#GCIFilter.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.gci_filter.GCIFilter.__init__" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas_model_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas_noise_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/gci_filter.html#GCIFilter.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.gci_filter.GCIFilter.__init__" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>
@@ -316,7 +318,7 @@
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.gci_filter.GCIFilter.correct">
-<span class="sig-name descname"><span class="pre">correct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cur_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas_fun_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/gci_filter.html#GCIFilter.correct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.gci_filter.GCIFilter.correct" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">correct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cur_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas_fun_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/gci_filter.html#GCIFilter.correct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.gci_filter.GCIFilter.correct" title="Link to this definition"></a></dt>
 <dd><p>Generic method for the filters correction step.</p>
 <p>This must be overridden in the inherited class. It is recommended to
 keep the same structure/order for the arguments to allow for
@@ -325,7 +327,7 @@ standardized implementation of wrapper code.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.gci_filter.GCIFilter.load_filter_state">
-<span class="sig-name descname"><span class="pre">load_filter_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filt_state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/gci_filter.html#GCIFilter.load_filter_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.gci_filter.GCIFilter.load_filter_state" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">load_filter_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filt_state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/gci_filter.html#GCIFilter.load_filter_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.gci_filter.GCIFilter.load_filter_state" title="Link to this definition"></a></dt>
 <dd><p>Generic method for saving key filter variables.</p>
 <p>This must be overridden in the inherited class. It is recommended to keep
 the signature the same to allow for standardized implemenation of
@@ -336,7 +338,7 @@ output as the original instance that called the save function.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.gci_filter.GCIFilter.predict">
-<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cur_state</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/gci_filter.html#GCIFilter.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.gci_filter.GCIFilter.predict" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cur_state</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/gci_filter.html#GCIFilter.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.gci_filter.GCIFilter.predict" title="Link to this definition"></a></dt>
 <dd><p>Generic method for the filters prediction step.</p>
 <p>This must be overridden in the inherited class. It is recommended to
 keep the same structure/order for the arguments to allow for
@@ -345,7 +347,7 @@ standardized implementation of wrapper code.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.gci_filter.GCIFilter.save_filter_state">
-<span class="sig-name descname"><span class="pre">save_filter_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/gci_filter.html#GCIFilter.save_filter_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.gci_filter.GCIFilter.save_filter_state" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">save_filter_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/gci_filter.html#GCIFilter.save_filter_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.gci_filter.GCIFilter.save_filter_state" title="Link to this definition"></a></dt>
 <dd><p>Generic method for saving key filter variables.</p>
 <p>This must be overridden in the inherited class. It is recommended to keep
 the signature the same to allow for standardized implemenation of
@@ -356,7 +358,7 @@ as the current instance when this function was called.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.gci_filter.GCIFilter.set_measurement_model">
-<span class="sig-name descname"><span class="pre">set_measurement_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meas_model_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/gci_filter.html#GCIFilter.set_measurement_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.gci_filter.GCIFilter.set_measurement_model" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_measurement_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meas_model_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/gci_filter.html#GCIFilter.set_measurement_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.gci_filter.GCIFilter.set_measurement_model" title="Link to this definition"></a></dt>
 <dd><p>Generic method for setting the measurement model.</p>
 <p>This must be overridden in the inherited class. The signature for this
 is arbitrary.</p>
@@ -364,7 +366,7 @@ is arbitrary.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.gci_filter.GCIFilter.set_state_model">
-<span class="sig-name descname"><span class="pre">set_state_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dyn_obj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/gci_filter.html#GCIFilter.set_state_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.gci_filter.GCIFilter.set_state_model" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_state_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dyn_obj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/gci_filter.html#GCIFilter.set_state_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.gci_filter.GCIFilter.set_state_model" title="Link to this definition"></a></dt>
 <dd><p>Generic method for tsetting the state model.</p>
 <p>This must be overridden in the inherited class. The signature for this
 is arbitrary.</p>

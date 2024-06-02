@@ -1,25 +1,27 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GSMFilterBase &mdash; GNCPy 2.0.1.dev0 documentation</title>
-      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
+
+  
     <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_autosummary/gncpy/filters/gsm_filter_base/gncpy.filters.gsm_filter_base.GSMFilterBase.html" />
   <!--[if lt IE 9]>
     <script src="../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../../../_static/jquery.js"></script>
-        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-        <script src="../../../../_static/doctools.js"></script>
-        <script src="../../../../_static/sphinx_highlight.js"></script>
-        <script src="../../../../_static/clipboard.min.js"></script>
-        <script src="../../../../_static/copybutton.js"></script>
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=ba91f118"></script>
+        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../../_static/copybutton.js?v=cbcfbdad"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
@@ -267,10 +269,10 @@
            <div itemprop="articleBody">
              
   <section id="gsmfilterbase">
-<h1>GSMFilterBase<a class="headerlink" href="#gsmfilterbase" title="Permalink to this heading"></a></h1>
+<h1>GSMFilterBase<a class="headerlink" href="#gsmfilterbase" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="gncpy.filters.gsm_filter_base.GSMFilterBase">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GSMFilterBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enable_proc_noise_estimation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/gsm_filter_base.html#GSMFilterBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.gsm_filter_base.GSMFilterBase" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GSMFilterBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enable_proc_noise_estimation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/gsm_filter_base.html#GSMFilterBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.gsm_filter_base.GSMFilterBase" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="../bayes_filter/gncpy.filters.bayes_filter.BayesFilter.html#gncpy.filters.bayes_filter.BayesFilter" title="gncpy.filters.bayes_filter.BayesFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">BayesFilter</span></code></a></p>
 <p>Base implementation of a Gaussian Scale Mixture (GSM) filter.</p>
 <p>This should be inherited from to include specific implementations of the
@@ -283,7 +285,7 @@ This class does not implement a specific core filter, that is up to the
 child classes.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.filters.gsm_filter_base.GSMFilterBase.enable_proc_noise_estimation">
-<span class="sig-name descname"><span class="pre">enable_proc_noise_estimation</span></span><a class="headerlink" href="#gncpy.filters.gsm_filter_base.GSMFilterBase.enable_proc_noise_estimation" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">enable_proc_noise_estimation</span></span><a class="headerlink" href="#gncpy.filters.gsm_filter_base.GSMFilterBase.enable_proc_noise_estimation" title="Link to this definition"></a></dt>
 <dd><p>Flag indicating if the process noise should be estimated.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -294,7 +296,7 @@ child classes.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.gsm_filter_base.GSMFilterBase.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enable_proc_noise_estimation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/gsm_filter_base.html#GSMFilterBase.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.gsm_filter_base.GSMFilterBase.__init__" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enable_proc_noise_estimation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/gsm_filter_base.html#GSMFilterBase.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.gsm_filter_base.GSMFilterBase.__init__" title="Link to this definition"></a></dt>
 <dd><p>Initializes the class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -358,7 +360,7 @@ default is False.</p></li>
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.gsm_filter_base.GSMFilterBase.correct">
-<span class="sig-name descname"><span class="pre">correct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cur_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">core_filt_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/gsm_filter_base.html#GSMFilterBase.correct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.gsm_filter_base.GSMFilterBase.correct" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">correct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cur_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">core_filt_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/gsm_filter_base.html#GSMFilterBase.correct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.gsm_filter_base.GSMFilterBase.correct" title="Link to this definition"></a></dt>
 <dd><p>Correction step of the GSM filter.</p>
 <p>This optionally estimates the measurement noise then calls the core
 filters correction function.</p>
@@ -366,11 +368,11 @@ filters correction function.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.gsm_filter_base.GSMFilterBase.load_filter_state">
-<span class="sig-name descname"><span class="pre">load_filter_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filt_state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/gsm_filter_base.html#GSMFilterBase.load_filter_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.gsm_filter_base.GSMFilterBase.load_filter_state" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">load_filter_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filt_state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/gsm_filter_base.html#GSMFilterBase.load_filter_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.gsm_filter_base.GSMFilterBase.load_filter_state" title="Link to this definition"></a></dt>
 <dd><p>Initializes filter using saved filter state.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.filters.gsm_filter_base.GSMFilterBase.filt_state">
-<span class="sig-name descname"><span class="pre">filt_state</span></span><a class="headerlink" href="#gncpy.filters.gsm_filter_base.GSMFilterBase.filt_state" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">filt_state</span></span><a class="headerlink" href="#gncpy.filters.gsm_filter_base.GSMFilterBase.filt_state" title="Link to this definition"></a></dt>
 <dd><p>Dictionary generated by <a class="reference internal" href="#gncpy.filters.gsm_filter_base.GSMFilterBase.save_filter_state" title="gncpy.filters.gsm_filter_base.GSMFilterBase.save_filter_state"><code class="xref py py-meth docutils literal notranslate"><span class="pre">save_filter_state()</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -383,7 +385,7 @@ filters correction function.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.gsm_filter_base.GSMFilterBase.plot_particles">
-<span class="sig-name descname"><span class="pre">plot_particles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filt_inds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_inds</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/gsm_filter_base.html#GSMFilterBase.plot_particles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.gsm_filter_base.GSMFilterBase.plot_particles" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">plot_particles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filt_inds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_inds</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/gsm_filter_base.html#GSMFilterBase.plot_particles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.gsm_filter_base.GSMFilterBase.plot_particles" title="Link to this definition"></a></dt>
 <dd><p>Plots the particle distribution for every given measurement index.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -407,7 +409,7 @@ for.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.gsm_filter_base.GSMFilterBase.predict">
-<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cur_state</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/gsm_filter_base.html#GSMFilterBase.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.gsm_filter_base.GSMFilterBase.predict" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cur_state</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/gsm_filter_base.html#GSMFilterBase.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.gsm_filter_base.GSMFilterBase.predict" title="Link to this definition"></a></dt>
 <dd><p>Prediction step of the GSM filter.</p>
 <p>This optionally estimates the process noise then calls the core filters
 prediction function.</p>
@@ -415,7 +417,7 @@ prediction function.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.gsm_filter_base.GSMFilterBase.save_filter_state">
-<span class="sig-name descname"><span class="pre">save_filter_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/gsm_filter_base.html#GSMFilterBase.save_filter_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.gsm_filter_base.GSMFilterBase.save_filter_state" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">save_filter_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/gsm_filter_base.html#GSMFilterBase.save_filter_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.gsm_filter_base.GSMFilterBase.save_filter_state" title="Link to this definition"></a></dt>
 <dd><p>Saves filter variables so they can be restored later.</p>
 <p>Note that to pickle the resulting dictionary the <code class="code docutils literal notranslate"><span class="pre">dill</span></code> package
 may need to be used due to potential pickling of functions.</p>
@@ -423,7 +425,7 @@ may need to be used due to potential pickling of functions.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.gsm_filter_base.GSMFilterBase.set_meas_noise_model">
-<span class="sig-name descname"><span class="pre">set_meas_noise_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bootstrap_lst</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">importance_weight_factory_lst</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gsm_lst</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_parts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/gsm_filter_base.html#GSMFilterBase.set_meas_noise_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.gsm_filter_base.GSMFilterBase.set_meas_noise_model" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_meas_noise_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bootstrap_lst</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">importance_weight_factory_lst</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gsm_lst</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_parts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/gsm_filter_base.html#GSMFilterBase.set_meas_noise_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.gsm_filter_base.GSMFilterBase.set_meas_noise_model" title="Link to this definition"></a></dt>
 <dd><p>Initializes the measurement noise estimators.</p>
 <p>The filters and importance
 weight factories can be provided or a list of
@@ -472,13 +474,13 @@ with no supplied seed. Only used if a <cite>gsm_lst</cite> is supplied.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.gsm_filter_base.GSMFilterBase.set_measurement_model">
-<span class="sig-name descname"><span class="pre">set_measurement_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/gsm_filter_base.html#GSMFilterBase.set_measurement_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.gsm_filter_base.GSMFilterBase.set_measurement_model" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_measurement_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/gsm_filter_base.html#GSMFilterBase.set_measurement_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.gsm_filter_base.GSMFilterBase.set_measurement_model" title="Link to this definition"></a></dt>
 <dd><p>Wrapper for the core filters set measurement model function.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.gsm_filter_base.GSMFilterBase.set_process_noise_model">
-<span class="sig-name descname"><span class="pre">set_process_noise_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_est</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startup_delay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/gsm_filter_base.html#GSMFilterBase.set_process_noise_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.gsm_filter_base.GSMFilterBase.set_process_noise_model" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_process_noise_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_est</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startup_delay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/gsm_filter_base.html#GSMFilterBase.set_process_noise_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.gsm_filter_base.GSMFilterBase.set_process_noise_model" title="Link to this definition"></a></dt>
 <dd><p>Sets the filter parameters for estimating process noise.</p>
 <p>This assumes the same process noise model as in
 <span id="id4">[<a class="reference internal" href="../../../../References.html#id27" title="Jordi Vila-Valls, Carles Fernández-Prades, Pau Closas, and Juan A Fernandez-Rubio. Bayesian filtering for nonlinear state-space models in symmetric α-stable measurement noise. In 2011 19th European Signal Processing Conference, 674–678. IEEE, 2011.">28</a>]</span>.</p>
@@ -504,25 +506,25 @@ either the previous value is maintained or a value of 1 is used.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.gsm_filter_base.GSMFilterBase.set_state_model">
-<span class="sig-name descname"><span class="pre">set_state_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/gsm_filter_base.html#GSMFilterBase.set_state_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.gsm_filter_base.GSMFilterBase.set_state_model" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_state_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/gsm_filter_base.html#GSMFilterBase.set_state_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.gsm_filter_base.GSMFilterBase.set_state_model" title="Link to this definition"></a></dt>
 <dd><p>Wrapper for the core filters set state model function.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gncpy.filters.gsm_filter_base.GSMFilterBase.cov">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cov</span></span><a class="headerlink" href="#gncpy.filters.gsm_filter_base.GSMFilterBase.cov" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cov</span></span><a class="headerlink" href="#gncpy.filters.gsm_filter_base.GSMFilterBase.cov" title="Link to this definition"></a></dt>
 <dd><p>Covariance of the filter.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gncpy.filters.gsm_filter_base.GSMFilterBase.meas_noise">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">meas_noise</span></span><a class="headerlink" href="#gncpy.filters.gsm_filter_base.GSMFilterBase.meas_noise" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">meas_noise</span></span><a class="headerlink" href="#gncpy.filters.gsm_filter_base.GSMFilterBase.meas_noise" title="Link to this definition"></a></dt>
 <dd><p>Measurement noise of the core filter, estimated online and does not need to be set.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gncpy.filters.gsm_filter_base.GSMFilterBase.proc_noise">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">proc_noise</span></span><a class="headerlink" href="#gncpy.filters.gsm_filter_base.GSMFilterBase.proc_noise" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">proc_noise</span></span><a class="headerlink" href="#gncpy.filters.gsm_filter_base.GSMFilterBase.proc_noise" title="Link to this definition"></a></dt>
 <dd><p>Wrapper for the process noise covariance of the core filter.</p>
 </dd></dl>
 

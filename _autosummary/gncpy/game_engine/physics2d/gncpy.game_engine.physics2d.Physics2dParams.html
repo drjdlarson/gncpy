@@ -1,25 +1,27 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Physics2dParams &mdash; GNCPy 2.0.1.dev0 documentation</title>
-      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
+
+  
     <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_autosummary/gncpy/game_engine/physics2d/gncpy.game_engine.physics2d.Physics2dParams.html" />
   <!--[if lt IE 9]>
     <script src="../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../../../_static/jquery.js"></script>
-        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-        <script src="../../../../_static/doctools.js"></script>
-        <script src="../../../../_static/sphinx_highlight.js"></script>
-        <script src="../../../../_static/clipboard.min.js"></script>
-        <script src="../../../../_static/copybutton.js"></script>
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=ba91f118"></script>
+        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../../_static/copybutton.js?v=cbcfbdad"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
@@ -267,16 +269,16 @@
            <div itemprop="articleBody">
              
   <section id="physics2dparams">
-<h1>Physics2dParams<a class="headerlink" href="#physics2dparams" title="Permalink to this heading"></a></h1>
+<h1>Physics2dParams<a class="headerlink" href="#physics2dparams" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="gncpy.game_engine.physics2d.Physics2dParams">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Physics2dParams</span></span><a class="reference internal" href="../../../../_modules/gncpy/game_engine/physics2d.html#Physics2dParams"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.game_engine.physics2d.Physics2dParams" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Physics2dParams</span></span><a class="reference internal" href="../../../../_modules/gncpy/game_engine/physics2d.html#Physics2dParams"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.game_engine.physics2d.Physics2dParams" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Parameters for the 2d physics system to be parsed by the config parser.</p>
 <p>The types defined in this class determine what type the parser uses.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.game_engine.physics2d.Physics2dParams.dt">
-<span class="sig-name descname"><span class="pre">dt</span></span><a class="headerlink" href="#gncpy.game_engine.physics2d.Physics2dParams.dt" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">dt</span></span><a class="headerlink" href="#gncpy.game_engine.physics2d.Physics2dParams.dt" title="Link to this definition"></a></dt>
 <dd><p>Main dt of the game, this is the rendering dt and may be the same as
 the update dt.</p>
 <dl class="field-list simple">
@@ -288,7 +290,7 @@ the update dt.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.game_engine.physics2d.Physics2dParams.step_factor">
-<span class="sig-name descname"><span class="pre">step_factor</span></span><a class="headerlink" href="#gncpy.game_engine.physics2d.Physics2dParams.step_factor" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">step_factor</span></span><a class="headerlink" href="#gncpy.game_engine.physics2d.Physics2dParams.step_factor" title="Link to this definition"></a></dt>
 <dd><p>Factor to divide the base dt by to get the update dt. Must be positive.
 Allows multiple incremental physics steps inbetween the main rendering
 calls. Helps ensure objects don’t pass through each other from moving too
@@ -302,7 +304,7 @@ far in a given frame.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.game_engine.physics2d.Physics2dParams.min_pos">
-<span class="sig-name descname"><span class="pre">min_pos</span></span><a class="headerlink" href="#gncpy.game_engine.physics2d.Physics2dParams.min_pos" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">min_pos</span></span><a class="headerlink" href="#gncpy.game_engine.physics2d.Physics2dParams.min_pos" title="Link to this definition"></a></dt>
 <dd><p>Minimium position in real units in the order x, y.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -313,7 +315,7 @@ far in a given frame.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.game_engine.physics2d.Physics2dParams.dist_width">
-<span class="sig-name descname"><span class="pre">dist_width</span></span><a class="headerlink" href="#gncpy.game_engine.physics2d.Physics2dParams.dist_width" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">dist_width</span></span><a class="headerlink" href="#gncpy.game_engine.physics2d.Physics2dParams.dist_width" title="Link to this definition"></a></dt>
 <dd><p>Distance in real units for the width of the game world.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -324,7 +326,7 @@ far in a given frame.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.game_engine.physics2d.Physics2dParams.dist_height">
-<span class="sig-name descname"><span class="pre">dist_height</span></span><a class="headerlink" href="#gncpy.game_engine.physics2d.Physics2dParams.dist_height" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">dist_height</span></span><a class="headerlink" href="#gncpy.game_engine.physics2d.Physics2dParams.dist_height" title="Link to this definition"></a></dt>
 <dd><p>Distance in real units for the height of the game world.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -335,7 +337,7 @@ far in a given frame.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.game_engine.physics2d.Physics2dParams.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/game_engine/physics2d.html#Physics2dParams.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.game_engine.physics2d.Physics2dParams.__init__" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/game_engine/physics2d.html#Physics2dParams.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.game_engine.physics2d.Physics2dParams.__init__" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>
@@ -356,7 +358,7 @@ far in a given frame.</p>
 </table>
 <dl class="py property">
 <dt class="sig sig-object py" id="gncpy.game_engine.physics2d.Physics2dParams.update_dt">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">update_dt</span></span><a class="headerlink" href="#gncpy.game_engine.physics2d.Physics2dParams.update_dt" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">update_dt</span></span><a class="headerlink" href="#gncpy.game_engine.physics2d.Physics2dParams.update_dt" title="Link to this definition"></a></dt>
 <dd><p>Timestep for physics updates.</p>
 </dd></dl>
 

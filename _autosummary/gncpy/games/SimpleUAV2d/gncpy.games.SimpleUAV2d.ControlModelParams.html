@@ -1,25 +1,27 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ControlModelParams &mdash; GNCPy 2.0.1.dev0 documentation</title>
-      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
+
+  
     <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.ControlModelParams.html" />
   <!--[if lt IE 9]>
     <script src="../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../../../_static/jquery.js"></script>
-        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-        <script src="../../../../_static/doctools.js"></script>
-        <script src="../../../../_static/sphinx_highlight.js"></script>
-        <script src="../../../../_static/clipboard.min.js"></script>
-        <script src="../../../../_static/copybutton.js"></script>
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=ba91f118"></script>
+        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../../_static/copybutton.js?v=cbcfbdad"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
@@ -267,16 +269,16 @@
            <div itemprop="articleBody">
              
   <section id="controlmodelparams">
-<h1>ControlModelParams<a class="headerlink" href="#controlmodelparams" title="Permalink to this heading"></a></h1>
+<h1>ControlModelParams<a class="headerlink" href="#controlmodelparams" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.ControlModelParams">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ControlModelParams</span></span><a class="reference internal" href="../../../../_modules/gncpy/games/SimpleUAV2d.html#ControlModelParams"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.games.SimpleUAV2d.ControlModelParams" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ControlModelParams</span></span><a class="reference internal" href="../../../../_modules/gncpy/games/SimpleUAV2d.html#ControlModelParams"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.games.SimpleUAV2d.ControlModelParams" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Parameters for the birth model to be parsed by the yaml parser.</p>
 <p>The types defined in this class determine what type the parser uses.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.ControlModelParams.type">
-<span class="sig-name descname"><span class="pre">type</span></span><a class="headerlink" href="#gncpy.games.SimpleUAV2d.ControlModelParams.type" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">type</span></span><a class="headerlink" href="#gncpy.games.SimpleUAV2d.ControlModelParams.type" title="Link to this definition"></a></dt>
 <dd><p>type of control model to use. Options are dependent on the dynamics type.
 For <code class="code docutils literal notranslate"><span class="pre">'DoubleIntegrator'</span></code> dynamics, options are <code class="code docutils literal notranslate"><span class="pre">'velocity'</span></code>.
 For <code class="code docutils literal notranslate"><span class="pre">'CoordinatedTurn'</span></code> dynamics, options are <code class="code docutils literal notranslate"><span class="pre">'velocity_turn'</span></code>.</p>
@@ -289,7 +291,7 @@ For <code class="code docutils literal notranslate"><span class="pre">'Coordinat
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.ControlModelParams.max_vel">
-<span class="sig-name descname"><span class="pre">max_vel</span></span><a class="headerlink" href="#gncpy.games.SimpleUAV2d.ControlModelParams.max_vel" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">max_vel</span></span><a class="headerlink" href="#gncpy.games.SimpleUAV2d.ControlModelParams.max_vel" title="Link to this definition"></a></dt>
 <dd><p>Maximum velocity for x/y components. Must be set for coordinated turn
 <code class="code docutils literal notranslate"><span class="pre">'velocity_turn'</span></code> type. Only used by double integrator
 <code class="code docutils literal notranslate"><span class="pre">'velocity'</span></code> type if max_vel_x and max_vel_y not set.</p>
@@ -302,7 +304,7 @@ For <code class="code docutils literal notranslate"><span class="pre">'Coordinat
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.ControlModelParams.max_vel_x">
-<span class="sig-name descname"><span class="pre">max_vel_x</span></span><a class="headerlink" href="#gncpy.games.SimpleUAV2d.ControlModelParams.max_vel_x" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">max_vel_x</span></span><a class="headerlink" href="#gncpy.games.SimpleUAV2d.ControlModelParams.max_vel_x" title="Link to this definition"></a></dt>
 <dd><p>Maximum velocity in the x direction. Used by double integrator
 <code class="code docutils literal notranslate"><span class="pre">'velocity'</span></code>.</p>
 <dl class="field-list simple">
@@ -314,7 +316,7 @@ For <code class="code docutils literal notranslate"><span class="pre">'Coordinat
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.ControlModelParams.max_vel_y">
-<span class="sig-name descname"><span class="pre">max_vel_y</span></span><a class="headerlink" href="#gncpy.games.SimpleUAV2d.ControlModelParams.max_vel_y" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">max_vel_y</span></span><a class="headerlink" href="#gncpy.games.SimpleUAV2d.ControlModelParams.max_vel_y" title="Link to this definition"></a></dt>
 <dd><p>Maximum velocity in the y direction. Used by double integrator
 <code class="code docutils literal notranslate"><span class="pre">'velocity'</span></code>.</p>
 <dl class="field-list simple">
@@ -326,7 +328,7 @@ For <code class="code docutils literal notranslate"><span class="pre">'Coordinat
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.ControlModelParams.max_turn_rate">
-<span class="sig-name descname"><span class="pre">max_turn_rate</span></span><a class="headerlink" href="#gncpy.games.SimpleUAV2d.ControlModelParams.max_turn_rate" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">max_turn_rate</span></span><a class="headerlink" href="#gncpy.games.SimpleUAV2d.ControlModelParams.max_turn_rate" title="Link to this definition"></a></dt>
 <dd><p>Maximum turn rate. Used by coordinated turn <code class="code docutils literal notranslate"><span class="pre">'velocity_turn'</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -337,7 +339,7 @@ For <code class="code docutils literal notranslate"><span class="pre">'Coordinat
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.games.SimpleUAV2d.ControlModelParams.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/games/SimpleUAV2d.html#ControlModelParams.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.games.SimpleUAV2d.ControlModelParams.__init__" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/games/SimpleUAV2d.html#ControlModelParams.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.games.SimpleUAV2d.ControlModelParams.__init__" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>

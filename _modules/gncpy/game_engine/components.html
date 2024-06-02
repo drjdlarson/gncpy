@@ -1,24 +1,26 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>gncpy.game_engine.components &mdash; GNCPy 2.0.1.dev0 documentation</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+
+  
     <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_modules/gncpy/game_engine/components.html" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
-        <script src="../../../_static/clipboard.min.js"></script>
-        <script src="../../../_static/copybutton.js"></script>
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=ba91f118"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../_static/copybutton.js?v=cbcfbdad"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -277,7 +279,9 @@
 <span class="sd">&quot;&quot;&quot;Directory containing common game assets.&quot;&quot;&quot;</span>
 
 
-<div class="viewcode-block" id="CShape"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CShape.html#gncpy.game_engine.components.CShape">[docs]</a><span class="k">class</span> <span class="nc">CShape</span><span class="p">:</span>
+<div class="viewcode-block" id="CShape">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CShape.html#gncpy.game_engine.components.CShape">[docs]</a>
+<span class="k">class</span> <span class="nc">CShape</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Contains properties related to the drawn shape.</span>
 
 <span class="sd">    Attributes</span>
@@ -294,7 +298,9 @@
 
     <span class="vm">__slots__</span> <span class="o">=</span> <span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="s2">&quot;shape&quot;</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">,</span> <span class="s2">&quot;zorder&quot;</span>
 
-<div class="viewcode-block" id="CShape.__init__"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CShape.html#gncpy.game_engine.components.CShape.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<div class="viewcode-block" id="CShape.__init__">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CShape.html#gncpy.game_engine.components.CShape.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">s_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fpath</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize an object.</span>
@@ -350,10 +356,14 @@
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Shape type </span><span class="si">{}</span><span class="s2"> not implemented&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">s_type</span><span class="p">))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">color</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">zorder</span> <span class="o">=</span> <span class="n">zorder</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zorder</span> <span class="o">=</span> <span class="n">zorder</span></div>
+</div>
 
 
-<div class="viewcode-block" id="CTransform"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CTransform.html#gncpy.game_engine.components.CTransform">[docs]</a><span class="k">class</span> <span class="nc">CTransform</span><span class="p">:</span>
+
+<div class="viewcode-block" id="CTransform">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CTransform.html#gncpy.game_engine.components.CTransform">[docs]</a>
+<span class="k">class</span> <span class="nc">CTransform</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Contains properties relating to the spatial components.</span>
 
 <span class="sd">    Attributes</span>
@@ -368,13 +378,19 @@
 
     <span class="vm">__slots__</span> <span class="o">=</span> <span class="s2">&quot;pos&quot;</span><span class="p">,</span> <span class="s2">&quot;last_pos&quot;</span><span class="p">,</span> <span class="s2">&quot;vel&quot;</span>
 
-<div class="viewcode-block" id="CTransform.__init__"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CTransform.html#gncpy.game_engine.components.CTransform.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="CTransform.__init__">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CTransform.html#gncpy.game_engine.components.CTransform.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">last_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">vel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span></div>
+</div>
 
 
-<div class="viewcode-block" id="CCollision"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CCollision.html#gncpy.game_engine.components.CCollision">[docs]</a><span class="k">class</span> <span class="nc">CCollision</span><span class="p">:</span>
+
+<div class="viewcode-block" id="CCollision">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CCollision.html#gncpy.game_engine.components.CCollision">[docs]</a>
+<span class="k">class</span> <span class="nc">CCollision</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Handles the bounding box used for collisions.</span>
 
 <span class="sd">    Attributes</span>
@@ -385,14 +401,20 @@
 
     <span class="vm">__slots__</span> <span class="o">=</span> <span class="s2">&quot;aabb&quot;</span>
 
-<div class="viewcode-block" id="CCollision.__init__"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CCollision.html#gncpy.game_engine.components.CCollision.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="CCollision.__init__">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CCollision.html#gncpy.game_engine.components.CCollision.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">w</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">h</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">aabb</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">Rect</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">aabb</span> <span class="o">=</span> <span class="kc">None</span></div></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">aabb</span> <span class="o">=</span> <span class="kc">None</span></div>
+</div>
 
 
-<div class="viewcode-block" id="CBirth"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CBirth.html#gncpy.game_engine.components.CBirth">[docs]</a><span class="k">class</span> <span class="nc">CBirth</span><span class="p">:</span>
+
+<div class="viewcode-block" id="CBirth">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CBirth.html#gncpy.game_engine.components.CBirth">[docs]</a>
+<span class="k">class</span> <span class="nc">CBirth</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Handles the birth model properties.</span>
 
 <span class="sd">    Also handles the generation of the birth location through the use of</span>
@@ -408,7 +430,9 @@
 
     <span class="vm">__slots__</span> <span class="o">=</span> <span class="s2">&quot;_model&quot;</span><span class="p">,</span> <span class="s2">&quot;loc&quot;</span><span class="p">,</span> <span class="s2">&quot;_rng&quot;</span><span class="p">,</span> <span class="s2">&quot;randomize&quot;</span>
 
-<div class="viewcode-block" id="CBirth.__init__"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CBirth.html#gncpy.game_engine.components.CBirth.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<div class="viewcode-block" id="CBirth.__init__">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CBirth.html#gncpy.game_engine.components.CBirth.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">b_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">randomize</span><span class="o">=</span><span class="kc">True</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes an object.</span>
@@ -436,7 +460,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span> <span class="o">=</span> <span class="n">rng</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">randomize</span> <span class="o">=</span> <span class="n">randomize</span></div>
 
-<div class="viewcode-block" id="CBirth.sample"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CBirth.html#gncpy.game_engine.components.CBirth.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CBirth.sample">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CBirth.html#gncpy.game_engine.components.CBirth.sample">[docs]</a>
+    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Draw a sample from the distribution.</span>
 
 <span class="sd">        Will provide the location parameter if not randomizing.</span>
@@ -448,10 +475,14 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">randomize</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">rng</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">location</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span></div></div>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">location</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span></div>
+</div>
 
 
-<div class="viewcode-block" id="CEvents"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CEvents.html#gncpy.game_engine.components.CEvents">[docs]</a><span class="k">class</span> <span class="nc">CEvents</span><span class="p">:</span>
+
+<div class="viewcode-block" id="CEvents">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CEvents.html#gncpy.game_engine.components.CEvents">[docs]</a>
+<span class="k">class</span> <span class="nc">CEvents</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Holds the events properties.</span>
 
 <span class="sd">    Attributes</span>
@@ -463,11 +494,17 @@
 
     <span class="vm">__slots__</span> <span class="o">=</span> <span class="s2">&quot;events&quot;</span>
 
-<div class="viewcode-block" id="CEvents.__init__"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CEvents.html#gncpy.game_engine.components.CEvents.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">events</span> <span class="o">=</span> <span class="p">[]</span></div></div>
+<div class="viewcode-block" id="CEvents.__init__">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CEvents.html#gncpy.game_engine.components.CEvents.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">events</span> <span class="o">=</span> <span class="p">[]</span></div>
+</div>
 
 
-<div class="viewcode-block" id="CHazard"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CHazard.html#gncpy.game_engine.components.CHazard">[docs]</a><span class="k">class</span> <span class="nc">CHazard</span><span class="p">:</span>
+
+<div class="viewcode-block" id="CHazard">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CHazard.html#gncpy.game_engine.components.CHazard">[docs]</a>
+<span class="k">class</span> <span class="nc">CHazard</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Hold the properties for hazard info.</span>
 
 <span class="sd">    Attributes</span>
@@ -481,7 +518,9 @@
 
     <span class="vm">__slots__</span> <span class="o">=</span> <span class="s2">&quot;prob_of_death&quot;</span><span class="p">,</span> <span class="s2">&quot;entrance_times&quot;</span>
 
-<div class="viewcode-block" id="CHazard.__init__"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CHazard.html#gncpy.game_engine.components.CHazard.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prob_of_death</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="CHazard.__init__">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CHazard.html#gncpy.game_engine.components.CHazard.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prob_of_death</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize an object.</span>
 
 <span class="sd">        Parameters</span>
@@ -490,10 +529,14 @@
 <span class="sd">            Probability of death at each timestep.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prob_of_death</span> <span class="o">=</span> <span class="n">prob_of_death</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">entrance_times</span> <span class="o">=</span> <span class="p">{}</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">entrance_times</span> <span class="o">=</span> <span class="p">{}</span></div>
+</div>
 
 
-<div class="viewcode-block" id="CCapabilities"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CCapabilities.html#gncpy.game_engine.components.CCapabilities">[docs]</a><span class="k">class</span> <span class="nc">CCapabilities</span><span class="p">:</span>
+
+<div class="viewcode-block" id="CCapabilities">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CCapabilities.html#gncpy.game_engine.components.CCapabilities">[docs]</a>
+<span class="k">class</span> <span class="nc">CCapabilities</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Hold properties about player/target capabilities.</span>
 
 <span class="sd">    Attributes</span>
@@ -505,7 +548,9 @@
 
     <span class="vm">__slots__</span> <span class="o">=</span> <span class="s2">&quot;capabilities&quot;</span>
 
-<div class="viewcode-block" id="CCapabilities.__init__"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CCapabilities.html#gncpy.game_engine.components.CCapabilities.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">capabilities</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="CCapabilities.__init__">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CCapabilities.html#gncpy.game_engine.components.CCapabilities.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">capabilities</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize an object.</span>
 
 <span class="sd">        Parameters</span>
@@ -515,10 +560,14 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">capabilities</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">capabilities</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">capabilities</span> <span class="o">=</span> <span class="n">capabilities</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">capabilities</span> <span class="o">=</span> <span class="n">capabilities</span></div>
+</div>
 
 
-<div class="viewcode-block" id="CPriority"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CPriority.html#gncpy.game_engine.components.CPriority">[docs]</a><span class="k">class</span> <span class="nc">CPriority</span><span class="p">:</span>
+
+<div class="viewcode-block" id="CPriority">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CPriority.html#gncpy.game_engine.components.CPriority">[docs]</a>
+<span class="k">class</span> <span class="nc">CPriority</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Hold properties about the priority.</span>
 
 <span class="sd">    Attributes</span>
@@ -529,7 +578,9 @@
 
     <span class="vm">__slots__</span> <span class="o">=</span> <span class="s2">&quot;priority&quot;</span>
 
-<div class="viewcode-block" id="CPriority.__init__"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CPriority.html#gncpy.game_engine.components.CPriority.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="CPriority.__init__">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CPriority.html#gncpy.game_engine.components.CPriority.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize an object.</span>
 
 <span class="sd">        Parameters</span>
@@ -537,10 +588,14 @@
 <span class="sd">        priority : float</span>
 <span class="sd">            priority of the object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">priority</span> <span class="o">=</span> <span class="n">priority</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">priority</span> <span class="o">=</span> <span class="n">priority</span></div>
+</div>
 
 
-<div class="viewcode-block" id="CDynamics"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CDynamics.html#gncpy.game_engine.components.CDynamics">[docs]</a><span class="k">class</span> <span class="nc">CDynamics</span><span class="p">:</span>
+
+<div class="viewcode-block" id="CDynamics">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CDynamics.html#gncpy.game_engine.components.CDynamics">[docs]</a>
+<span class="k">class</span> <span class="nc">CDynamics</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Handles all the properties relaing to the dynamics.</span>
 
 <span class="sd">    Also implements the logic for propagating the state via a dynamics</span>
@@ -578,7 +633,9 @@
         <span class="s2">&quot;state_high&quot;</span><span class="p">,</span>
     <span class="p">)</span>
 
-<div class="viewcode-block" id="CDynamics.__init__"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CDynamics.html#gncpy.game_engine.components.CDynamics.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<div class="viewcode-block" id="CDynamics.__init__">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/components/gncpy.game_engine.components.CDynamics.html#gncpy.game_engine.components.CDynamics.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">dynObj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">pos_inds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -622,7 +679,9 @@
             <span class="n">ctrl_args</span> <span class="o">=</span> <span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ctrl_args</span> <span class="o">=</span> <span class="n">ctrl_args</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">state_low</span> <span class="o">=</span> <span class="n">state_low</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">state_high</span> <span class="o">=</span> <span class="n">state_high</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state_high</span> <span class="o">=</span> <span class="n">state_high</span></div>
+</div>
+
 </pre></div>
 
            </div>

@@ -1,25 +1,27 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LQRRRTStar &mdash; GNCPy 2.0.1.dev0 documentation</title>
-      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
+
+  
     <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_autosummary/gncpy/planning/rrt_star/gncpy.planning.rrt_star.LQRRRTStar.html" />
   <!--[if lt IE 9]>
     <script src="../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../../../_static/jquery.js"></script>
-        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-        <script src="../../../../_static/doctools.js"></script>
-        <script src="../../../../_static/sphinx_highlight.js"></script>
-        <script src="../../../../_static/clipboard.min.js"></script>
-        <script src="../../../../_static/copybutton.js"></script>
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=ba91f118"></script>
+        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../../_static/copybutton.js?v=cbcfbdad"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
@@ -267,15 +269,15 @@
            <div itemprop="articleBody">
              
   <section id="lqrrrtstar">
-<h1>LQRRRTStar<a class="headerlink" href="#lqrrrtstar" title="Permalink to this heading"></a></h1>
+<h1>LQRRRTStar<a class="headerlink" href="#lqrrrtstar" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="gncpy.planning.rrt_star.LQRRRTStar">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LQRRRTStar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">planner</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goal_sample_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connect_circle_dist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expand_dis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_fun</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/planning/rrt_star.html#LQRRRTStar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LQRRRTStar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">planner</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goal_sample_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connect_circle_dist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expand_dis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_fun</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/planning/rrt_star.html#LQRRRTStar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Implements the LQR-RRT* algorithm.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.planning.rrt_star.LQRRRTStar.rng">
-<span class="sig-name descname"><span class="pre">rng</span></span><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.rng" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">rng</span></span><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.rng" title="Link to this definition"></a></dt>
 <dd><p>Instance of a random number generator to use.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -286,7 +288,7 @@
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.planning.rrt_star.LQRRRTStar.start">
-<span class="sig-name descname"><span class="pre">start</span></span><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.start" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">start</span></span><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.start" title="Link to this definition"></a></dt>
 <dd><p>Starting state</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -297,7 +299,7 @@
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.planning.rrt_star.LQRRRTStar.end">
-<span class="sig-name descname"><span class="pre">end</span></span><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.end" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">end</span></span><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.end" title="Link to this definition"></a></dt>
 <dd><p>Ending state</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -308,7 +310,7 @@
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.planning.rrt_star.LQRRRTStar.node_list">
-<span class="sig-name descname"><span class="pre">node_list</span></span><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.node_list" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">node_list</span></span><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.node_list" title="Link to this definition"></a></dt>
 <dd><p>List of nodes in the tree.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -319,7 +321,7 @@
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.planning.rrt_star.LQRRRTStar.min_rand">
-<span class="sig-name descname"><span class="pre">min_rand</span></span><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.min_rand" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">min_rand</span></span><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.min_rand" title="Link to this definition"></a></dt>
 <dd><p>Minimum position values when generating random nodes</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -330,7 +332,7 @@
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.planning.rrt_star.LQRRRTStar.max_rand">
-<span class="sig-name descname"><span class="pre">max_rand</span></span><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.max_rand" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">max_rand</span></span><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.max_rand" title="Link to this definition"></a></dt>
 <dd><p>Maximum position values when generating radnom nodes</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -341,7 +343,7 @@
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.planning.rrt_star.LQRRRTStar.pos_inds">
-<span class="sig-name descname"><span class="pre">pos_inds</span></span><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.pos_inds" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">pos_inds</span></span><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.pos_inds" title="Link to this definition"></a></dt>
 <dd><p>List of position indices in the state vector</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -352,7 +354,7 @@
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.planning.rrt_star.LQRRRTStar.sampling_fun">
-<span class="sig-name descname"><span class="pre">sampling_fun</span></span><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.sampling_fun" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">sampling_fun</span></span><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.sampling_fun" title="Link to this definition"></a></dt>
 <dd><p>Function that returns a random sample from the state space. Must
 take rng, pos_inds, min_rand, max_rand as inputs and return a numpy array
 of the same size as the state vector.</p>
@@ -365,7 +367,7 @@ of the same size as the state vector.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.planning.rrt_star.LQRRRTStar.goal_sample_rate">
-<span class="sig-name descname"><span class="pre">goal_sample_rate</span></span><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.goal_sample_rate" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">goal_sample_rate</span></span><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.goal_sample_rate" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>float</p>
@@ -375,7 +377,7 @@ of the same size as the state vector.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.planning.rrt_star.LQRRRTStar.max_iter">
-<span class="sig-name descname"><span class="pre">max_iter</span></span><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.max_iter" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">max_iter</span></span><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.max_iter" title="Link to this definition"></a></dt>
 <dd><p>Maximum iterations to search for.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -386,7 +388,7 @@ of the same size as the state vector.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.planning.rrt_star.LQRRRTStar.connect_circle_dist">
-<span class="sig-name descname"><span class="pre">connect_circle_dist</span></span><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.connect_circle_dist" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">connect_circle_dist</span></span><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.connect_circle_dist" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>float</p>
@@ -396,7 +398,7 @@ of the same size as the state vector.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.planning.rrt_star.LQRRRTStar.step_size">
-<span class="sig-name descname"><span class="pre">step_size</span></span><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.step_size" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">step_size</span></span><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.step_size" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>float</p>
@@ -406,7 +408,7 @@ of the same size as the state vector.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.planning.rrt_star.LQRRRTStar.expand_dis">
-<span class="sig-name descname"><span class="pre">expand_dis</span></span><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.expand_dis" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">expand_dis</span></span><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.expand_dis" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>float</p>
@@ -416,7 +418,7 @@ of the same size as the state vector.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.planning.rrt_star.LQRRRTStar.ell_con">
-<span class="sig-name descname"><span class="pre">ell_con</span></span><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.ell_con" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ell_con</span></span><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.ell_con" title="Link to this definition"></a></dt>
 <dd><p>Ellipsoidal constraint value</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -427,7 +429,7 @@ of the same size as the state vector.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.planning.rrt_star.LQRRRTStar.Nobs">
-<span class="sig-name descname"><span class="pre">Nobs</span></span><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.Nobs" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">Nobs</span></span><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.Nobs" title="Link to this definition"></a></dt>
 <dd><p>Number of obstacles.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -438,7 +440,7 @@ of the same size as the state vector.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.planning.rrt_star.LQRRRTStar.obstacle_list">
-<span class="sig-name descname"><span class="pre">obstacle_list</span></span><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.obstacle_list" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">obstacle_list</span></span><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.obstacle_list" title="Link to this definition"></a></dt>
 <dd><p>Each row describes an obstacle; x pos, y pos, (z pos), radius.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -449,7 +451,7 @@ of the same size as the state vector.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.planning.rrt_star.LQRRRTStar.P">
-<span class="sig-name descname"><span class="pre">P</span></span><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.P" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">P</span></span><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.P" title="Link to this definition"></a></dt>
 <dd><p>States of each obstacle for collision checking.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -460,7 +462,7 @@ of the same size as the state vector.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.planning.rrt_star.LQRRRTStar.planner">
-<span class="sig-name descname"><span class="pre">planner</span></span><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.planner" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">planner</span></span><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.planner" title="Link to this definition"></a></dt>
 <dd><p>Planner class instance for predicting paths.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -471,7 +473,7 @@ of the same size as the state vector.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.planning.rrt_star.LQRRRTStar.S">
-<span class="sig-name descname"><span class="pre">S</span></span><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.S" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">S</span></span><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.S" title="Link to this definition"></a></dt>
 <dd><p>Solution to the discrete time algebraic riccatti equation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -482,7 +484,7 @@ of the same size as the state vector.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.planning.rrt_star.LQRRRTStar.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">planner</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goal_sample_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connect_circle_dist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expand_dis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_fun</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/planning/rrt_star.html#LQRRRTStar.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.__init__" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">planner</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goal_sample_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connect_circle_dist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expand_dis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_fun</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/planning/rrt_star.html#LQRRRTStar.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.planning.rrt_star.LQRRRTStar.__init__" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>

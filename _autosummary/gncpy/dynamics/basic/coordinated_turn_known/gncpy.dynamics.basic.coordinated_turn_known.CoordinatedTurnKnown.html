@@ -1,25 +1,27 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CoordinatedTurnKnown &mdash; GNCPy 2.0.1.dev0 documentation</title>
-      <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/copybutton.css?v=76b2166b" />
+
+  
     <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_autosummary/gncpy/dynamics/basic/coordinated_turn_known/gncpy.dynamics.basic.coordinated_turn_known.CoordinatedTurnKnown.html" />
   <!--[if lt IE 9]>
     <script src="../../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../../../../_static/jquery.js"></script>
-        <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
-        <script src="../../../../../_static/doctools.js"></script>
-        <script src="../../../../../_static/sphinx_highlight.js"></script>
-        <script src="../../../../../_static/clipboard.min.js"></script>
-        <script src="../../../../../_static/copybutton.js"></script>
+        <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../../_static/documentation_options.js?v=ba91f118"></script>
+        <script src="../../../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../../../_static/copybutton.js?v=cbcfbdad"></script>
     <script src="../../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" />
@@ -268,10 +270,10 @@
            <div itemprop="articleBody">
              
   <section id="coordinatedturnknown">
-<h1>CoordinatedTurnKnown<a class="headerlink" href="#coordinatedturnknown" title="Permalink to this heading"></a></h1>
+<h1>CoordinatedTurnKnown<a class="headerlink" href="#coordinatedturnknown" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="gncpy.dynamics.basic.coordinated_turn_known.CoordinatedTurnKnown">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CoordinatedTurnKnown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">turn_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.08726646259971647</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gncpy/dynamics/basic/coordinated_turn_known.html#CoordinatedTurnKnown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.dynamics.basic.coordinated_turn_known.CoordinatedTurnKnown" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CoordinatedTurnKnown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">turn_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.08726646259971647</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gncpy/dynamics/basic/coordinated_turn_known.html#CoordinatedTurnKnown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.dynamics.basic.coordinated_turn_known.CoordinatedTurnKnown" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="../linear_dynamics_base/gncpy.dynamics.basic.linear_dynamics_base.LinearDynamicsBase.html#gncpy.dynamics.basic.linear_dynamics_base.LinearDynamicsBase" title="gncpy.dynamics.basic.linear_dynamics_base.LinearDynamicsBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinearDynamicsBase</span></code></a></p>
 <p>Implements the linear coordinated turn with known turn rate model.</p>
 <p>This is a slight variation from normal <a class="reference internal" href="../linear_dynamics_base/gncpy.dynamics.basic.linear_dynamics_base.LinearDynamicsBase.html#gncpy.dynamics.basic.linear_dynamics_base.LinearDynamicsBase" title="gncpy.dynamics.basic.linear_dynamics_base.LinearDynamicsBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinearDynamicsBase</span></code></a> classes
@@ -284,7 +286,7 @@ dynamics.</p>
 <span id="id2">[<a class="reference internal" href="../../../../../References.html#id30" title="Samuel Blackman and Robert Popoli. Design and analysis of modern tracking systems. Artech House, 1999. ISBN 1580530060.">3</a>]</span> for details.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.dynamics.basic.coordinated_turn_known.CoordinatedTurnKnown.turn_rate">
-<span class="sig-name descname"><span class="pre">turn_rate</span></span><a class="headerlink" href="#gncpy.dynamics.basic.coordinated_turn_known.CoordinatedTurnKnown.turn_rate" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">turn_rate</span></span><a class="headerlink" href="#gncpy.dynamics.basic.coordinated_turn_known.CoordinatedTurnKnown.turn_rate" title="Link to this definition"></a></dt>
 <dd><p>Turn rate in rad/s</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -295,7 +297,7 @@ dynamics.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.dynamics.basic.coordinated_turn_known.CoordinatedTurnKnown.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">turn_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.08726646259971647</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gncpy/dynamics/basic/coordinated_turn_known.html#CoordinatedTurnKnown.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.dynamics.basic.coordinated_turn_known.CoordinatedTurnKnown.__init__" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">turn_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.08726646259971647</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gncpy/dynamics/basic/coordinated_turn_known.html#CoordinatedTurnKnown.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.dynamics.basic.coordinated_turn_known.CoordinatedTurnKnown.__init__" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>
@@ -334,7 +336,7 @@ dynamics.</p>
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.dynamics.basic.coordinated_turn_known.CoordinatedTurnKnown.get_dis_process_noise_mat">
-<span class="sig-name descname"><span class="pre">get_dis_process_noise_mat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">f_args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.dynamics.basic.coordinated_turn_known.CoordinatedTurnKnown.get_dis_process_noise_mat" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_dis_process_noise_mat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">f_args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.dynamics.basic.coordinated_turn_known.CoordinatedTurnKnown.get_dis_process_noise_mat" title="Link to this definition"></a></dt>
 <dd><p>Class method for getting the process noise.</p>
 <p>Should be overridden in child classes. Should maintain the same
 signature to allow for standardized wrappers.</p>
@@ -356,7 +358,7 @@ signature to allow for standardized wrappers.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.dynamics.basic.coordinated_turn_known.CoordinatedTurnKnown.get_input_mat">
-<span class="sig-name descname"><span class="pre">get_input_mat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gncpy/dynamics/basic/coordinated_turn_known.html#CoordinatedTurnKnown.get_input_mat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.dynamics.basic.coordinated_turn_known.CoordinatedTurnKnown.get_input_mat" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_input_mat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gncpy/dynamics/basic/coordinated_turn_known.html#CoordinatedTurnKnown.get_input_mat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.dynamics.basic.coordinated_turn_known.CoordinatedTurnKnown.get_input_mat" title="Link to this definition"></a></dt>
 <dd><p>Gets the input matrix.</p>
 <p>This enforces the no control model requirement of these dynamics by
 forcing the input matrix to be zeros.</p>
@@ -378,7 +380,7 @@ forcing the input matrix to be zeros.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.dynamics.basic.coordinated_turn_known.CoordinatedTurnKnown.get_state_mat">
-<span class="sig-name descname"><span class="pre">get_state_mat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gncpy/dynamics/basic/coordinated_turn_known.html#CoordinatedTurnKnown.get_state_mat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.dynamics.basic.coordinated_turn_known.CoordinatedTurnKnown.get_state_mat" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_state_mat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gncpy/dynamics/basic/coordinated_turn_known.html#CoordinatedTurnKnown.get_state_mat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.dynamics.basic.coordinated_turn_known.CoordinatedTurnKnown.get_state_mat" title="Link to this definition"></a></dt>
 <dd><p>Returns the discrete time state matrix.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -398,7 +400,7 @@ forcing the input matrix to be zeros.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.dynamics.basic.coordinated_turn_known.CoordinatedTurnKnown.propagate_state">
-<span class="sig-name descname"><span class="pre">propagate_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctrl_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gncpy/dynamics/basic/coordinated_turn_known.html#CoordinatedTurnKnown.propagate_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.dynamics.basic.coordinated_turn_known.CoordinatedTurnKnown.propagate_state" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">propagate_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctrl_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gncpy/dynamics/basic/coordinated_turn_known.html#CoordinatedTurnKnown.propagate_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.dynamics.basic.coordinated_turn_known.CoordinatedTurnKnown.propagate_state" title="Link to this definition"></a></dt>
 <dd><p>Propagates the state forward in time.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -427,7 +429,7 @@ The default is None.</p></li>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.dynamics.basic.coordinated_turn_known.CoordinatedTurnKnown.state_names">
-<span class="sig-name descname"><span class="pre">state_names</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('x</span> <span class="pre">pos',</span> <span class="pre">'y</span> <span class="pre">pos',</span> <span class="pre">'x</span> <span class="pre">vel',</span> <span class="pre">'y</span> <span class="pre">vel',</span> <span class="pre">'turn</span> <span class="pre">angle')</span></em><a class="headerlink" href="#gncpy.dynamics.basic.coordinated_turn_known.CoordinatedTurnKnown.state_names" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">state_names</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('x</span> <span class="pre">pos',</span> <span class="pre">'y</span> <span class="pre">pos',</span> <span class="pre">'x</span> <span class="pre">vel',</span> <span class="pre">'y</span> <span class="pre">vel',</span> <span class="pre">'turn</span> <span class="pre">angle')</span></em><a class="headerlink" href="#gncpy.dynamics.basic.coordinated_turn_known.CoordinatedTurnKnown.state_names" title="Link to this definition"></a></dt>
 <dd><p>Tuple of strings for the name of each state. The order should match
 that of the state vector.</p>
 </dd></dl>

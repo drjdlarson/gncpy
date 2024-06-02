@@ -1,24 +1,26 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>gncpy.filters.unscented_particle_filter &mdash; GNCPy 2.0.1.dev0 documentation</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+
+  
     <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_modules/gncpy/filters/unscented_particle_filter.html" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
-        <script src="../../../_static/clipboard.min.js"></script>
-        <script src="../../../_static/copybutton.js"></script>
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=ba91f118"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../_static/copybutton.js?v=cbcfbdad"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -270,7 +272,9 @@
 <span class="kn">from</span> <span class="nn">gncpy.filters.mcmc_particle_filter_base</span> <span class="kn">import</span> <span class="n">MCMCParticleFilterBase</span>
 <span class="kn">from</span> <span class="nn">gncpy.filters.unscented_kalman_filter</span> <span class="kn">import</span> <span class="n">UnscentedKalmanFilter</span>
 
-<div class="viewcode-block" id="UnscentedParticleFilter"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/unscented_particle_filter/gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.html#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter">[docs]</a><span class="k">class</span> <span class="nc">UnscentedParticleFilter</span><span class="p">(</span><span class="n">MCMCParticleFilterBase</span><span class="p">):</span>
+<div class="viewcode-block" id="UnscentedParticleFilter">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/filters/unscented_particle_filter/gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.html#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter">[docs]</a>
+<span class="k">class</span> <span class="nc">UnscentedParticleFilter</span><span class="p">(</span><span class="n">MCMCParticleFilterBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Implements an unscented particle filter.</span>
 
 <span class="sd">    Notes</span>
@@ -282,14 +286,19 @@
 
     <span class="n">require_copy_prop_parts</span> <span class="o">=</span> <span class="kc">False</span>
 
-<div class="viewcode-block" id="UnscentedParticleFilter.__init__"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/unscented_particle_filter/gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.html#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="UnscentedParticleFilter.__init__">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/filters/unscented_particle_filter/gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.html#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">candDist</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_filt</span> <span class="o">=</span> <span class="n">UnscentedKalmanFilter</span><span class="p">()</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="UnscentedParticleFilter.save_filter_state"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/unscented_particle_filter/gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.html#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.save_filter_state">[docs]</a>    <span class="k">def</span> <span class="nf">save_filter_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="UnscentedParticleFilter.save_filter_state">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/filters/unscented_particle_filter/gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.html#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.save_filter_state">[docs]</a>
+    <span class="k">def</span> <span class="nf">save_filter_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Saves filter variables so they can be restored later.&quot;&quot;&quot;</span>
         <span class="n">filt_state</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">save_filter_state</span><span class="p">()</span>
 
@@ -298,7 +307,10 @@
 
         <span class="k">return</span> <span class="n">filt_state</span></div>
 
-<div class="viewcode-block" id="UnscentedParticleFilter.load_filter_state"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/unscented_particle_filter/gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.html#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.load_filter_state">[docs]</a>    <span class="k">def</span> <span class="nf">load_filter_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filt_state</span><span class="p">):</span>
+
+<div class="viewcode-block" id="UnscentedParticleFilter.load_filter_state">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/filters/unscented_particle_filter/gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.html#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.load_filter_state">[docs]</a>
+    <span class="k">def</span> <span class="nf">load_filter_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filt_state</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes filter using saved filter state.</span>
 
 <span class="sd">        Attributes</span>
@@ -310,6 +322,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">candDist</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;candDist&quot;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_filt</span><span class="o">.</span><span class="n">load_filter_state</span><span class="p">(</span><span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_filt&quot;</span><span class="p">])</span></div>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">meas_likelihood_fnc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -484,7 +497,9 @@
     <span class="k">def</span> <span class="nf">proc_noise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proc_noise</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_filt</span><span class="o">.</span><span class="n">proc_noise</span> <span class="o">=</span> <span class="n">proc_noise</span>
 
-<div class="viewcode-block" id="UnscentedParticleFilter.set_state_model"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/unscented_particle_filter/gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.html#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.set_state_model">[docs]</a>    <span class="k">def</span> <span class="nf">set_state_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="UnscentedParticleFilter.set_state_model">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/filters/unscented_particle_filter/gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.html#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.set_state_model">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_state_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets the state model for the filter.</span>
 
 <span class="sd">        This calls the UKF&#39;s set state function</span>
@@ -492,7 +507,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_filt</span><span class="o">.</span><span class="n">set_state_model</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="UnscentedParticleFilter.set_measurement_model"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/unscented_particle_filter/gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.html#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.set_measurement_model">[docs]</a>    <span class="k">def</span> <span class="nf">set_measurement_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+<div class="viewcode-block" id="UnscentedParticleFilter.set_measurement_model">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/filters/unscented_particle_filter/gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.html#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.set_measurement_model">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_measurement_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Sets the measurement model for the filter.</span>
 
 <span class="sd">        This is a wrapper for the inner UKF&#39;s set_measurement model function.</span>
@@ -501,6 +519,7 @@
 <span class="sd">        for details.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_filt</span><span class="o">.</span><span class="n">set_measurement_model</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
 
     <span class="k">def</span> <span class="nf">_predict_loop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">ukf_kwargs</span><span class="p">,</span> <span class="n">dist</span><span class="p">):</span>
         <span class="n">newDist</span> <span class="o">=</span> <span class="n">gdistrib</span><span class="o">.</span><span class="n">ParticleDistribution</span><span class="p">()</span>
@@ -519,7 +538,9 @@
         <span class="n">newDist</span><span class="o">.</span><span class="n">add_particle</span><span class="p">(</span><span class="n">new_parts</span><span class="p">,</span> <span class="n">new_weights</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">newDist</span>
 
-<div class="viewcode-block" id="UnscentedParticleFilter.predict"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/unscented_particle_filter/gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.html#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">ukf_kwargs</span><span class="o">=</span><span class="p">{}):</span>
+<div class="viewcode-block" id="UnscentedParticleFilter.predict">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/filters/unscented_particle_filter/gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.html#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.predict">[docs]</a>
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">ukf_kwargs</span><span class="o">=</span><span class="p">{}):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Prediction step of the UPF.</span>
 
 <span class="sd">        This calls the UKF prediction function on every particle.</span>
@@ -546,6 +567,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">candDist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predict_loop</span><span class="p">(</span><span class="n">timestep</span><span class="p">,</span> <span class="n">ukf_kwargs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">candDist</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_state</span><span class="p">()</span></div>
+
 
     <span class="k">def</span> <span class="nf">_inner_correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">meas</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">filt_kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Wrapper so child class can override.&quot;&quot;&quot;</span>
@@ -598,7 +620,9 @@
 
         <span class="k">return</span> <span class="n">newDist</span><span class="p">,</span> <span class="n">rel_likeli</span><span class="p">,</span> <span class="n">unnorm_weights</span>
 
-<div class="viewcode-block" id="UnscentedParticleFilter.correct"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/unscented_particle_filter/gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.html#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">meas</span><span class="p">,</span> <span class="n">ukf_kwargs</span><span class="o">=</span><span class="p">{},</span> <span class="n">move_kwargs</span><span class="o">=</span><span class="p">{}):</span>
+<div class="viewcode-block" id="UnscentedParticleFilter.correct">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/filters/unscented_particle_filter/gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.html#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.correct">[docs]</a>
+    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">meas</span><span class="p">,</span> <span class="n">ukf_kwargs</span><span class="o">=</span><span class="p">{},</span> <span class="n">move_kwargs</span><span class="o">=</span><span class="p">{}):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Correction step of the UPF.</span>
 
 <span class="sd">        This optionally can perform a MCMC move step as well.</span>
@@ -656,7 +680,10 @@
             <span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_calc_state</span><span class="p">(),</span> <span class="n">rel_likeli</span><span class="p">,</span> <span class="n">inds_removed</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="UnscentedParticleFilter.move_particles"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/unscented_particle_filter/gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.html#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.move_particles">[docs]</a>    <span class="k">def</span> <span class="nf">move_particles</span><span class="p">(</span>
+
+<div class="viewcode-block" id="UnscentedParticleFilter.move_particles">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/filters/unscented_particle_filter/gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.html#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.move_particles">[docs]</a>
+    <span class="k">def</span> <span class="nf">move_particles</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">meas</span><span class="p">,</span> <span class="n">old_weights</span><span class="p">,</span> <span class="n">old_likeli</span><span class="p">,</span> <span class="n">can_weight</span><span class="p">,</span> <span class="n">can_likeli</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Movement function for the MCMC move step.</span>
@@ -707,7 +734,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span><span class="o">.</span><span class="n">clear_particles</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span><span class="o">.</span><span class="n">add_particle</span><span class="p">(</span><span class="n">new_parts</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span> <span class="o">/</span> <span class="n">num_parts</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_parts</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">new_likeli</span></div></div>
+        <span class="k">return</span> <span class="n">new_likeli</span></div>
+</div>
+
 </pre></div>
 
            </div>

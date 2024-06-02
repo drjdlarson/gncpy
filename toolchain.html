@@ -1,25 +1,27 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Toolchain &mdash; GNCPy 2.0.1.dev0 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+
+  
     <link rel="canonical" href="https://drjdlarson.github.io/gncpy/toolchain.html" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="_static/jquery.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
-        <script src="_static/clipboard.min.js"></script>
-        <script src="_static/copybutton.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=ba91f118"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="_static/copybutton.js?v=cbcfbdad"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -263,20 +265,20 @@
            <div itemprop="articleBody">
              
   <section id="toolchain">
-<h1>Toolchain<a class="headerlink" href="#toolchain" title="Permalink to this heading"></a></h1>
+<h1>Toolchain<a class="headerlink" href="#toolchain" title="Link to this heading"></a></h1>
 <div class="toctree-wrapper compound">
 </div>
 <p>This provides information on initial setup of the toolchain when developing for gncpy, information on how to use tox for running unit and validation tests, and for using tox to build documentation.</p>
 <p>This project uses the pytest for developing and running the tests (with extensions for generating summary and coverage reports), tox automates setting up and running the test environment (as well as the documentation), Sphinx is used for documenting the code, and the Black formatter is used to auto format the python code. This project also follows <a class="reference external" href="https://semver.org/">semantic versioning</a> where any api breaking changes will increment the major version number. Additionally, a prebuilt docker container image is provided to get started with developing for this library. It contains all of the needed tools to compile the code, run the tests, and build the documentation. The docker container can be used within VS Code through their dev container extension to allow editing local files but compiling using the toolchain provided within the container.</p>
 <section id="development-environment-setup">
-<h2>Development Environment Setup<a class="headerlink" href="#development-environment-setup" title="Permalink to this heading"></a></h2>
+<h2>Development Environment Setup<a class="headerlink" href="#development-environment-setup" title="Link to this heading"></a></h2>
 <p>It is recommended to use VS Code with the dev containers extension for developing. Development containers allow the full toolchain to be automatically setup on most any machine capable of running Docker. For information on dev-containers see <a class="reference external" href="https://code.visualstudio.com/docs/devcontainers/containers">here</a> for an overview, <a class="reference external" href="https://stackoverflow.com/questions/71402603/vs-code-in-docker-container-is-there-a-way-to-automatically-install-extensions">here</a> for auto installing extensions in the container
 and <a class="reference external" href="https://pspdfkit.com/blog/2020/visual-studio-code-cpp-docker/">here</a> for an example setup. The provided dev container also has useful extensions installed to ease development.</p>
 <p>To being, make sure VS Code and git are installed. Additionally, make sure docker is installed for your system (<a class="reference external" href="https://docs.docker.com/desktop/install/windows-install/">Windows</a>, <a class="reference external" href="https://docs.docker.com/desktop/install/mac-install/">Mac</a>, <a class="reference external" href="https://docs.docker.com/engine/install/">Linux</a>). Next, install the dev containers extension within VS Code. Clone the repository locally on your computer, for windows it is recommended to clone it within your linux subsystem directory (e.g. a sub-directory of your linux home folder) to improve performance within the container (the linux directories on Windows can be accessed through the file browser by typing <code class="code docutils literal notranslate"><span class="pre">\wsl$</span></code> in the address bar and clicking on your distro). Now open the repo folder within VS Code (for windows you may need to connect to the linux subsystem first). Then you should be prompted to open the folder in the container, click yes. If you are not prompted, you can go to the command palette and start typing “Open folder in container”. Now your terminal within VS Code will be running commands within the container but the files your are editing/creating will be accessible from your local machine’s file browser.</p>
 <p>Note if you click the open in container button on the repo’s page it will automatically open VS Code, open the container, and clone the repo for you. However, it will do this within a docker volume so the files are only accessible within the container (ie you can’t view them through your local file browser).</p>
 </section>
 <section id="example-workflow">
-<h2>Example Workflow<a class="headerlink" href="#example-workflow" title="Permalink to this heading"></a></h2>
+<h2>Example Workflow<a class="headerlink" href="#example-workflow" title="Link to this heading"></a></h2>
 <p>Once the repository is open in the container, you can edit files, run tests, and make commits just like normal. For example, after editing some files and adding some validation tests to run these tests you would simply call the following from the root of the repository.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tox</span>
 </pre></div>
@@ -290,7 +292,7 @@ and <a class="reference external" href="https://pspdfkit.com/blog/2020/visual-st
 <p>to remove any existing documenation builds and generate the html version. The output is placed in <strong>docs/build/html</strong> and can be viewed by opening the <strong>docs/build/html/index.html</strong> file in your web browser.</p>
 </section>
 <section id="notes-on-tox">
-<h2>Notes on tox<a class="headerlink" href="#notes-on-tox" title="Permalink to this heading"></a></h2>
+<h2>Notes on tox<a class="headerlink" href="#notes-on-tox" title="Link to this heading"></a></h2>
 <p>Tox will automatically create virtual environements, install dependencies, install the package, and run some commands in the virtual environment. These are defined in the <strong>tox.ini</strong> file in the repository. If tox is called without specifying an envrionment, it will run all of the default environments. The available environments can be listed with</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tox</span> <span class="o">-</span><span class="n">av</span>
 </pre></div>

@@ -1,24 +1,26 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>gncpy.wgs84 &mdash; GNCPy 2.0.1.dev0 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+
+  
     <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_modules/gncpy/wgs84.html" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
-        <script src="../../_static/clipboard.min.js"></script>
-        <script src="../../_static/copybutton.js"></script>
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=ba91f118"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../_static/copybutton.js?v=cbcfbdad"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -280,7 +282,9 @@
 <span class="n">_egm_lut</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
 
 
-<div class="viewcode-block" id="calc_earth_rate"><a class="viewcode-back" href="../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_earth_rate.html#gncpy.wgs84.calc_earth_rate">[docs]</a><span class="k">def</span> <span class="nf">calc_earth_rate</span><span class="p">(</span><span class="n">lat</span><span class="p">):</span>
+<div class="viewcode-block" id="calc_earth_rate">
+<a class="viewcode-back" href="../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_earth_rate.html#gncpy.wgs84.calc_earth_rate">[docs]</a>
+<span class="k">def</span> <span class="nf">calc_earth_rate</span><span class="p">(</span><span class="n">lat</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Calculate the earth rate</span>
 
 <span class="sd">    Args:</span>
@@ -291,7 +295,10 @@
     <span class="k">return</span> <span class="n">EARTH_ROT_RATE</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat</span><span class="p">)],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat</span><span class="p">)]])</span></div>
 
 
-<div class="viewcode-block" id="calc_transport_rate"><a class="viewcode-back" href="../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_transport_rate.html#gncpy.wgs84.calc_transport_rate">[docs]</a><span class="k">def</span> <span class="nf">calc_transport_rate</span><span class="p">(</span><span class="n">v_N</span><span class="p">,</span> <span class="n">alt</span><span class="p">,</span> <span class="n">lat</span><span class="p">):</span>
+
+<div class="viewcode-block" id="calc_transport_rate">
+<a class="viewcode-back" href="../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_transport_rate.html#gncpy.wgs84.calc_transport_rate">[docs]</a>
+<span class="k">def</span> <span class="nf">calc_transport_rate</span><span class="p">(</span><span class="n">v_N</span><span class="p">,</span> <span class="n">alt</span><span class="p">,</span> <span class="n">lat</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Calculates the transport rate</span>
 
 <span class="sd">    Args:</span>
@@ -308,7 +315,10 @@
                      <span class="o">-</span><span class="n">v_N</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">re</span> <span class="o">+</span> <span class="n">alt</span><span class="p">)])</span></div>
 
 
-<div class="viewcode-block" id="calc_ns_rad"><a class="viewcode-back" href="../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_ns_rad.html#gncpy.wgs84.calc_ns_rad">[docs]</a><span class="k">def</span> <span class="nf">calc_ns_rad</span><span class="p">(</span><span class="n">lat</span><span class="p">):</span>
+
+<div class="viewcode-block" id="calc_ns_rad">
+<a class="viewcode-back" href="../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_ns_rad.html#gncpy.wgs84.calc_ns_rad">[docs]</a>
+<span class="k">def</span> <span class="nf">calc_ns_rad</span><span class="p">(</span><span class="n">lat</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Calculates the North/South radius</span>
 
 <span class="sd">    Args:</span>
@@ -320,7 +330,10 @@
                                              <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mf">1.5</span></div>
 
 
-<div class="viewcode-block" id="calc_ew_rad"><a class="viewcode-back" href="../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_ew_rad.html#gncpy.wgs84.calc_ew_rad">[docs]</a><span class="k">def</span> <span class="nf">calc_ew_rad</span><span class="p">(</span><span class="n">lat</span><span class="p">):</span>
+
+<div class="viewcode-block" id="calc_ew_rad">
+<a class="viewcode-back" href="../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_ew_rad.html#gncpy.wgs84.calc_ew_rad">[docs]</a>
+<span class="k">def</span> <span class="nf">calc_ew_rad</span><span class="p">(</span><span class="n">lat</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Calculates the East/West radius</span>
 
 <span class="sd">    Args:</span>
@@ -331,7 +344,10 @@
     <span class="k">return</span> <span class="n">EQ_RAD</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">ECCENTRICITY</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="calc_gravity"><a class="viewcode-back" href="../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_gravity.html#gncpy.wgs84.calc_gravity">[docs]</a><span class="k">def</span> <span class="nf">calc_gravity</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">alt</span><span class="p">):</span>
+
+<div class="viewcode-block" id="calc_gravity">
+<a class="viewcode-back" href="../../_autosummary/gncpy/wgs84/gncpy.wgs84.calc_gravity.html#gncpy.wgs84.calc_gravity">[docs]</a>
+<span class="k">def</span> <span class="nf">calc_gravity</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">alt</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Calculates gravity vector in NED coordinates</span>
 
 <span class="sd">    Args:</span>
@@ -352,30 +368,40 @@
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="n">g</span><span class="p">]])</span></div>
 
 
-<div class="viewcode-block" id="init_egm_lookup_table"><a class="viewcode-back" href="../../_autosummary/gncpy/wgs84/gncpy.wgs84.init_egm_lookup_table.html#gncpy.wgs84.init_egm_lookup_table">[docs]</a><span class="k">def</span> <span class="nf">init_egm_lookup_table</span><span class="p">(</span><span class="n">bin_file</span><span class="p">):</span>
+
+<div class="viewcode-block" id="init_egm_lookup_table">
+<a class="viewcode-back" href="../../_autosummary/gncpy/wgs84/gncpy.wgs84.init_egm_lookup_table.html#gncpy.wgs84.init_egm_lookup_table">[docs]</a>
+<span class="k">def</span> <span class="nf">init_egm_lookup_table</span><span class="p">(</span><span class="n">bin_file</span><span class="p">):</span>
     <span class="k">global</span> <span class="n">_egm_lut</span>
     <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Lookup table has not been implemented yet&#39;</span><span class="p">)</span>
     <span class="n">_egm_lut</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span></div>
 
 
-<div class="viewcode-block" id="convert_wgs_to_msl"><a class="viewcode-back" href="../../_autosummary/gncpy/wgs84/gncpy.wgs84.convert_wgs_to_msl.html#gncpy.wgs84.convert_wgs_to_msl">[docs]</a><span class="k">def</span> <span class="nf">convert_wgs_to_msl</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">):</span>
+
+<div class="viewcode-block" id="convert_wgs_to_msl">
+<a class="viewcode-back" href="../../_autosummary/gncpy/wgs84/gncpy.wgs84.convert_wgs_to_msl.html#gncpy.wgs84.convert_wgs_to_msl">[docs]</a>
+<span class="k">def</span> <span class="nf">convert_wgs_to_msl</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">):</span>
     <span class="k">global</span> <span class="n">_egm_lut</span>
     <span class="k">if</span> <span class="n">_egm_lut</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;EGM table was not loaded. Can not convert to height above geoid&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">alt</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="bp">NotImplemented</span></div>
+
         <span class="c1"># row, col = (None, None)</span>
         <span class="c1"># return alt - _egm_lut[row, col]</span>
 
 
-<div class="viewcode-block" id="convert_msl_to_wgs"><a class="viewcode-back" href="../../_autosummary/gncpy/wgs84/gncpy.wgs84.convert_msl_to_wgs.html#gncpy.wgs84.convert_msl_to_wgs">[docs]</a><span class="k">def</span> <span class="nf">convert_msl_to_wgs</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">):</span>
+<div class="viewcode-block" id="convert_msl_to_wgs">
+<a class="viewcode-back" href="../../_autosummary/gncpy/wgs84/gncpy.wgs84.convert_msl_to_wgs.html#gncpy.wgs84.convert_msl_to_wgs">[docs]</a>
+<span class="k">def</span> <span class="nf">convert_msl_to_wgs</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">):</span>
     <span class="k">global</span> <span class="n">_egm_lut</span>
     <span class="k">if</span> <span class="n">_egm_lut</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;EGM table was not loaded. Can not convert to wgs84 altitude&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">alt</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="bp">NotImplemented</span></div>
+
         <span class="c1"># row, col = (None, None)</span>
         <span class="c1"># return alt + _egm_lut[row, col]</span>
 </pre></div>

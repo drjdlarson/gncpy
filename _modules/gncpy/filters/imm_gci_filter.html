@@ -1,24 +1,26 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>gncpy.filters.imm_gci_filter &mdash; GNCPy 2.0.1.dev0 documentation</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+
+  
     <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_modules/gncpy/filters/imm_gci_filter.html" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
-        <script src="../../../_static/clipboard.min.js"></script>
-        <script src="../../../_static/copybutton.js"></script>
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=ba91f118"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../_static/copybutton.js?v=cbcfbdad"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -269,8 +271,12 @@
 <span class="kn">import</span> <span class="nn">gncpy.data_fusion</span> <span class="k">as</span> <span class="nn">gdf</span>
 
 
-<div class="viewcode-block" id="IMMGCIFilter"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/imm_gci_filter/gncpy.filters.imm_gci_filter.IMMGCIFilter.html#gncpy.filters.imm_gci_filter.IMMGCIFilter">[docs]</a><span class="k">class</span> <span class="nc">IMMGCIFilter</span><span class="p">(</span><span class="n">InteractingMultipleModel</span><span class="p">,</span> <span class="n">GCIFilter</span><span class="p">):</span>
-<div class="viewcode-block" id="IMMGCIFilter.__init__"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/imm_gci_filter/gncpy.filters.imm_gci_filter.IMMGCIFilter.html#gncpy.filters.imm_gci_filter.IMMGCIFilter.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<div class="viewcode-block" id="IMMGCIFilter">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/filters/imm_gci_filter/gncpy.filters.imm_gci_filter.IMMGCIFilter.html#gncpy.filters.imm_gci_filter.IMMGCIFilter">[docs]</a>
+<span class="k">class</span> <span class="nc">IMMGCIFilter</span><span class="p">(</span><span class="n">InteractingMultipleModel</span><span class="p">,</span> <span class="n">GCIFilter</span><span class="p">):</span>
+<div class="viewcode-block" id="IMMGCIFilter.__init__">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/filters/imm_gci_filter/gncpy.filters.imm_gci_filter.IMMGCIFilter.html#gncpy.filters.imm_gci_filter.IMMGCIFilter.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">meas_model_list</span><span class="o">=</span><span class="p">[],</span>
         <span class="n">meas_noise_list</span><span class="o">=</span><span class="p">[],</span>
@@ -289,7 +295,10 @@
                 <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meas_model_list</span><span class="p">))</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">meas_model_list</span><span class="p">))</span>
             <span class="p">]</span></div>
 
-<div class="viewcode-block" id="IMMGCIFilter.save_filter_state"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/imm_gci_filter/gncpy.filters.imm_gci_filter.IMMGCIFilter.html#gncpy.filters.imm_gci_filter.IMMGCIFilter.save_filter_state">[docs]</a>    <span class="k">def</span> <span class="nf">save_filter_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="IMMGCIFilter.save_filter_state">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/filters/imm_gci_filter/gncpy.filters.imm_gci_filter.IMMGCIFilter.html#gncpy.filters.imm_gci_filter.IMMGCIFilter.save_filter_state">[docs]</a>
+    <span class="k">def</span> <span class="nf">save_filter_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">filt_state</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">filt_tup_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">filt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_filt_list</span><span class="p">:</span>
@@ -310,7 +319,10 @@
 
         <span class="k">return</span> <span class="n">filt_state</span></div>
 
-<div class="viewcode-block" id="IMMGCIFilter.load_filter_state"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/imm_gci_filter/gncpy.filters.imm_gci_filter.IMMGCIFilter.html#gncpy.filters.imm_gci_filter.IMMGCIFilter.load_filter_state">[docs]</a>    <span class="k">def</span> <span class="nf">load_filter_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filt_state</span><span class="p">):</span>
+
+<div class="viewcode-block" id="IMMGCIFilter.load_filter_state">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/filters/imm_gci_filter/gncpy.filters.imm_gci_filter.IMMGCIFilter.html#gncpy.filters.imm_gci_filter.IMMGCIFilter.load_filter_state">[docs]</a>
+    <span class="k">def</span> <span class="nf">load_filter_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filt_state</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">in_filt_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">filt_tup_list</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;in_filt_list&quot;</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">tup</span> <span class="ow">in</span> <span class="n">filt_tup_list</span><span class="p">:</span>
@@ -332,7 +344,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">meas_model_list</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;meas_model_list&quot;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">meas_noise_list</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;meas_noise_list&quot;</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="IMMGCIFilter.set_measurement_model"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/imm_gci_filter/gncpy.filters.imm_gci_filter.IMMGCIFilter.html#gncpy.filters.imm_gci_filter.IMMGCIFilter.set_measurement_model">[docs]</a>    <span class="k">def</span> <span class="nf">set_measurement_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meas_model_list</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="IMMGCIFilter.set_measurement_model">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/filters/imm_gci_filter/gncpy.filters.imm_gci_filter.IMMGCIFilter.html#gncpy.filters.imm_gci_filter.IMMGCIFilter.set_measurement_model">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_measurement_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meas_model_list</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">warn</span><span class="p">(</span>
             <span class="s2">&quot;Measurement models defined in the constructor,&quot;</span>
             <span class="s2">&quot; this function will overwrite initialized measurement model list.&quot;</span>
@@ -340,10 +355,16 @@
         <span class="k">if</span> <span class="n">meas_model_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">meas_model_list</span> <span class="o">=</span> <span class="n">meas_model_list</span></div>
 
-<div class="viewcode-block" id="IMMGCIFilter.predict"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/imm_gci_filter/gncpy.filters.imm_gci_filter.IMMGCIFilter.html#gncpy.filters.imm_gci_filter.IMMGCIFilter.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+<div class="viewcode-block" id="IMMGCIFilter.predict">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/filters/imm_gci_filter/gncpy.filters.imm_gci_filter.IMMGCIFilter.html#gncpy.filters.imm_gci_filter.IMMGCIFilter.predict">[docs]</a>
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">timestep</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="IMMGCIFilter.correct"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/imm_gci_filter/gncpy.filters.imm_gci_filter.IMMGCIFilter.html#gncpy.filters.imm_gci_filter.IMMGCIFilter.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">meas_list</span><span class="p">,</span> <span class="n">meas_fun_args</span><span class="o">=</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+<div class="viewcode-block" id="IMMGCIFilter.correct">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/filters/imm_gci_filter/gncpy.filters.imm_gci_filter.IMMGCIFilter.html#gncpy.filters.imm_gci_filter.IMMGCIFilter.correct">[docs]</a>
+    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">meas_list</span><span class="p">,</span> <span class="n">meas_fun_args</span><span class="o">=</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="c1"># initialize lists</span>
         <span class="n">est_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">cov_list</span> <span class="o">=</span> <span class="p">[]</span>
@@ -421,7 +442,9 @@
         <span class="n">out_state</span> <span class="o">=</span> <span class="n">out_state</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">out_state</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cur_out_state</span> <span class="o">=</span> <span class="n">out_state</span>
 
-        <span class="k">return</span> <span class="p">(</span><span class="n">out_state</span><span class="p">,</span> <span class="n">out_meas_fit_prob</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="p">(</span><span class="n">out_state</span><span class="p">,</span> <span class="n">out_meas_fit_prob</span><span class="p">)</span></div>
+</div>
+
 </pre></div>
 
            </div>

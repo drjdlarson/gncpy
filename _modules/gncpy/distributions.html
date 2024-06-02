@@ -1,24 +1,26 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>gncpy.distributions &mdash; GNCPy 2.0.1.dev0 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+
+  
     <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_modules/gncpy/distributions.html" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
-        <script src="../../_static/clipboard.min.js"></script>
-        <script src="../../_static/copybutton.js"></script>
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=ba91f118"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../_static/copybutton.js?v=cbcfbdad"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -289,7 +291,9 @@
         <span class="k">return</span> <span class="n">result</span>
 
 
-<div class="viewcode-block" id="QuadraturePoints"><a class="viewcode-back" href="../../_autosummary/gncpy/distributions/gncpy.distributions.QuadraturePoints.html#gncpy.distributions.QuadraturePoints">[docs]</a><span class="k">class</span> <span class="nc">QuadraturePoints</span><span class="p">:</span>
+<div class="viewcode-block" id="QuadraturePoints">
+<a class="viewcode-back" href="../../_autosummary/gncpy/distributions/gncpy.distributions.QuadraturePoints.html#gncpy.distributions.QuadraturePoints">[docs]</a>
+<span class="k">class</span> <span class="nc">QuadraturePoints</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Helper class that defines quadrature points.</span>
 
 <span class="sd">    Notes</span>
@@ -319,11 +323,14 @@
 <span class="sd">        is the total number of points.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="QuadraturePoints.__init__"><a class="viewcode-back" href="../../_autosummary/gncpy/distributions/gncpy.distributions.QuadraturePoints.html#gncpy.distributions.QuadraturePoints.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points_per_axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_axes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="QuadraturePoints.__init__">
+<a class="viewcode-back" href="../../_autosummary/gncpy/distributions/gncpy.distributions.QuadraturePoints.html#gncpy.distributions.QuadraturePoints.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points_per_axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_axes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">points_per_axis</span> <span class="o">=</span> <span class="n">points_per_axis</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_axes</span> <span class="o">=</span> <span class="n">num_axes</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[]])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span></div>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">num_points</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -351,7 +358,9 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">la</span><span class="o">.</span><span class="n">cholesky</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span>
 
-<div class="viewcode-block" id="QuadraturePoints.update_points"><a class="viewcode-back" href="../../_autosummary/gncpy/distributions/gncpy.distributions.QuadraturePoints.html#gncpy.distributions.QuadraturePoints.update_points">[docs]</a>    <span class="k">def</span> <span class="nf">update_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">have_sqrt</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="QuadraturePoints.update_points">
+<a class="viewcode-back" href="../../_autosummary/gncpy/distributions/gncpy.distributions.QuadraturePoints.html#gncpy.distributions.QuadraturePoints.update_points">[docs]</a>
+    <span class="k">def</span> <span class="nf">update_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">have_sqrt</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates the quadrature points given some initial point and scale.</span>
 
 <span class="sd">        Parameters</span>
@@ -393,6 +402,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">)</span></div>
 
+
         <span class="c1"># note: Sum[w * p @ p.T] should equal the identity matrix here</span>
 
     <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -407,7 +417,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">_QuadPointIter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
-<div class="viewcode-block" id="QuadraturePoints.plot_points"><a class="viewcode-back" href="../../_autosummary/gncpy/distributions/gncpy.distributions.QuadraturePoints.html#gncpy.distributions.QuadraturePoints.plot_points">[docs]</a>    <span class="k">def</span> <span class="nf">plot_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inds</span><span class="p">,</span> <span class="n">x_lbl</span><span class="o">=</span><span class="s1">&#39;X Position&#39;</span><span class="p">,</span> <span class="n">y_lbl</span><span class="o">=</span><span class="s1">&#39;Y Position&#39;</span><span class="p">,</span>
+<div class="viewcode-block" id="QuadraturePoints.plot_points">
+<a class="viewcode-back" href="../../_autosummary/gncpy/distributions/gncpy.distributions.QuadraturePoints.html#gncpy.distributions.QuadraturePoints.plot_points">[docs]</a>
+    <span class="k">def</span> <span class="nf">plot_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inds</span><span class="p">,</span> <span class="n">x_lbl</span><span class="o">=</span><span class="s1">&#39;X Position&#39;</span><span class="p">,</span> <span class="n">y_lbl</span><span class="o">=</span><span class="s1">&#39;Y Position&#39;</span><span class="p">,</span>
                     <span class="n">ttl</span><span class="o">=</span><span class="s1">&#39;Weighted Positions&#39;</span><span class="p">,</span> <span class="n">size_factor</span><span class="o">=</span><span class="mi">100</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plots the weighted points.</span>
 
@@ -466,10 +478,14 @@
 
         <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="n">fig</span></div></div>
+        <span class="k">return</span> <span class="n">fig</span></div>
+</div>
 
 
-<div class="viewcode-block" id="SigmaPoints"><a class="viewcode-back" href="../../_autosummary/gncpy/distributions/gncpy.distributions.SigmaPoints.html#gncpy.distributions.SigmaPoints">[docs]</a><span class="k">class</span> <span class="nc">SigmaPoints</span><span class="p">(</span><span class="n">QuadraturePoints</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SigmaPoints">
+<a class="viewcode-back" href="../../_autosummary/gncpy/distributions/gncpy.distributions.SigmaPoints.html#gncpy.distributions.SigmaPoints">[docs]</a>
+<span class="k">class</span> <span class="nc">SigmaPoints</span><span class="p">(</span><span class="n">QuadraturePoints</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Helper class that defines sigma points.</span>
 
 <span class="sd">    Notes</span>
@@ -491,12 +507,15 @@
 <span class="sd">        to 2 which is ideal for Gaussians.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="SigmaPoints.__init__"><a class="viewcode-back" href="../../_autosummary/gncpy/distributions/gncpy.distributions.SigmaPoints.html#gncpy.distributions.SigmaPoints.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">kappa</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="SigmaPoints.__init__">
+<a class="viewcode-back" href="../../_autosummary/gncpy/distributions/gncpy.distributions.SigmaPoints.html#gncpy.distributions.SigmaPoints.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">kappa</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kappa</span> <span class="o">=</span> <span class="n">kappa</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">=</span> <span class="n">beta</span></div>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">lam</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -545,7 +564,9 @@
                                       <span class="n">diff</span> <span class="o">@</span> <span class="n">diff</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
                                                           <span class="mi">1</span><span class="p">,</span> <span class="n">x_bar</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
 
-<div class="viewcode-block" id="SigmaPoints.init_weights"><a class="viewcode-back" href="../../_autosummary/gncpy/distributions/gncpy.distributions.SigmaPoints.html#gncpy.distributions.SigmaPoints.init_weights">[docs]</a>    <span class="k">def</span> <span class="nf">init_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="SigmaPoints.init_weights">
+<a class="viewcode-back" href="../../_autosummary/gncpy/distributions/gncpy.distributions.SigmaPoints.html#gncpy.distributions.SigmaPoints.init_weights">[docs]</a>
+    <span class="k">def</span> <span class="nf">init_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes the weights based on other parameters.</span>
 
 <span class="sd">        This should be called to setup the weight vectors after setting</span>
@@ -562,7 +583,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">weights_mean</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">w</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">weights_cov</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">w</span></div>
 
-<div class="viewcode-block" id="SigmaPoints.update_points"><a class="viewcode-back" href="../../_autosummary/gncpy/distributions/gncpy.distributions.SigmaPoints.html#gncpy.distributions.SigmaPoints.update_points">[docs]</a>    <span class="k">def</span> <span class="nf">update_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">have_sqrt</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SigmaPoints.update_points">
+<a class="viewcode-back" href="../../_autosummary/gncpy/distributions/gncpy.distributions.SigmaPoints.html#gncpy.distributions.SigmaPoints.update_points">[docs]</a>
+    <span class="k">def</span> <span class="nf">update_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">have_sqrt</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates the sigma points given some initial point and covariance.</span>
 
 <span class="sd">        Parameters</span>
@@ -589,10 +613,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_axes</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_axes</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">num_axes</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span> <span class="o">+</span> <span class="n">S</span><span class="o">.</span><span class="n">T</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">num_axes</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span> <span class="o">-</span> <span class="n">S</span><span class="o">.</span><span class="n">T</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">num_axes</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span> <span class="o">-</span> <span class="n">S</span><span class="o">.</span><span class="n">T</span></div>
+</div>
 
 
-<div class="viewcode-block" id="Particle"><a class="viewcode-back" href="../../_autosummary/gncpy/distributions/gncpy.distributions.Particle.html#gncpy.distributions.Particle">[docs]</a><span class="k">class</span> <span class="nc">Particle</span><span class="p">:</span>
+
+<div class="viewcode-block" id="Particle">
+<a class="viewcode-back" href="../../_autosummary/gncpy/distributions/gncpy.distributions.Particle.html#gncpy.distributions.Particle">[docs]</a>
+<span class="k">class</span> <span class="nc">Particle</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Helper class for defining single particles in a particle distribution.</span>
 
 <span class="sd">    Attributes</span>
@@ -607,12 +635,15 @@
 <span class="sd">        check with the filter to determine if this is necessary.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="Particle.__init__"><a class="viewcode-back" href="../../_autosummary/gncpy/distributions/gncpy.distributions.Particle.html#gncpy.distributions.Particle.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[]]),</span> <span class="n">uncertainty</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[]]),</span>
+<div class="viewcode-block" id="Particle.__init__">
+<a class="viewcode-back" href="../../_autosummary/gncpy/distributions/gncpy.distributions.Particle.html#gncpy.distributions.Particle.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[]]),</span> <span class="n">uncertainty</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[]]),</span>
                  <span class="n">sigmaPoints</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">point</span> <span class="o">=</span> <span class="n">point</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">uncertainty</span> <span class="o">=</span> <span class="n">uncertainty</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">sigmaPoints</span> <span class="o">=</span> <span class="n">sigmaPoints</span></div>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -637,6 +668,7 @@
         <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Particle mean is read only&#39;</span><span class="p">)</span></div>
 
 
+
 <span class="k">class</span> <span class="nc">_ParticleDistIter</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">partDist</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_partDist</span> <span class="o">=</span> <span class="n">partDist</span>
@@ -652,17 +684,24 @@
         <span class="k">return</span> <span class="n">result</span>
 
 
-<div class="viewcode-block" id="SimpleParticleDistribution"><a class="viewcode-back" href="../../_autosummary/gncpy/distributions/gncpy.distributions.SimpleParticleDistribution.html#gncpy.distributions.SimpleParticleDistribution">[docs]</a><span class="k">class</span> <span class="nc">SimpleParticleDistribution</span><span class="p">:</span>
-<div class="viewcode-block" id="SimpleParticleDistribution.__init__"><a class="viewcode-back" href="../../_autosummary/gncpy/distributions/gncpy.distributions.SimpleParticleDistribution.html#gncpy.distributions.SimpleParticleDistribution.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="SimpleParticleDistribution">
+<a class="viewcode-back" href="../../_autosummary/gncpy/distributions/gncpy.distributions.SimpleParticleDistribution.html#gncpy.distributions.SimpleParticleDistribution">[docs]</a>
+<span class="k">class</span> <span class="nc">SimpleParticleDistribution</span><span class="p">:</span>
+<div class="viewcode-block" id="SimpleParticleDistribution.__init__">
+<a class="viewcode-back" href="../../_autosummary/gncpy/distributions/gncpy.distributions.SimpleParticleDistribution.html#gncpy.distributions.SimpleParticleDistribution.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_parts_per_ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">particles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[]])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span></div>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">num_particles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_parts_per_ind</span><span class="p">))</span>
 
-<div class="viewcode-block" id="SimpleParticleDistribution.plot_particles"><a class="viewcode-back" href="../../_autosummary/gncpy/distributions/gncpy.distributions.SimpleParticleDistribution.html#gncpy.distributions.SimpleParticleDistribution.plot_particles">[docs]</a>    <span class="k">def</span> <span class="nf">plot_particles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ind</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Approximate PDF from Particle Distribution&#39;</span><span class="p">,</span>
+<div class="viewcode-block" id="SimpleParticleDistribution.plot_particles">
+<a class="viewcode-back" href="../../_autosummary/gncpy/distributions/gncpy.distributions.SimpleParticleDistribution.html#gncpy.distributions.SimpleParticleDistribution.plot_particles">[docs]</a>
+    <span class="k">def</span> <span class="nf">plot_particles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ind</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Approximate PDF from Particle Distribution&#39;</span><span class="p">,</span>
                        <span class="n">x_lbl</span><span class="o">=</span><span class="s1">&#39;State&#39;</span><span class="p">,</span> <span class="n">y_lbl</span><span class="o">=</span><span class="s1">&#39;Probability&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plots the approximate PDF represented by the particle distribution</span>
 
@@ -712,16 +751,22 @@
             <span class="n">fig</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="n">lgnd_loc</span><span class="p">)</span>
         <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="n">fig</span></div></div>
+        <span class="k">return</span> <span class="n">fig</span></div>
+</div>
 
 
-<div class="viewcode-block" id="ParticleDistribution"><a class="viewcode-back" href="../../_autosummary/gncpy/distributions/gncpy.distributions.ParticleDistribution.html#gncpy.distributions.ParticleDistribution">[docs]</a><span class="k">class</span> <span class="nc">ParticleDistribution</span><span class="p">:</span>
+
+<div class="viewcode-block" id="ParticleDistribution">
+<a class="viewcode-back" href="../../_autosummary/gncpy/distributions/gncpy.distributions.ParticleDistribution.html#gncpy.distributions.ParticleDistribution">[docs]</a>
+<span class="k">class</span> <span class="nc">ParticleDistribution</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Particle distribution object.</span>
 
 <span class="sd">    Helper class for managing arbitrary distributions of particles.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="ParticleDistribution.__init__"><a class="viewcode-back" href="../../_autosummary/gncpy/distributions/gncpy.distributions.ParticleDistribution.html#gncpy.distributions.ParticleDistribution.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="ParticleDistribution.__init__">
+<a class="viewcode-back" href="../../_autosummary/gncpy/distributions/gncpy.distributions.ParticleDistribution.html#gncpy.distributions.ParticleDistribution.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_particles</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -731,6 +776,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__uncertianties</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__index</span> <span class="o">=</span> <span class="mi">0</span></div>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">particles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -792,7 +838,9 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[]</span>
 
-<div class="viewcode-block" id="ParticleDistribution.add_particle"><a class="viewcode-back" href="../../_autosummary/gncpy/distributions/gncpy.distributions.ParticleDistribution.html#gncpy.distributions.ParticleDistribution.add_particle">[docs]</a>    <span class="k">def</span> <span class="nf">add_particle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">w</span><span class="p">):</span>
+<div class="viewcode-block" id="ParticleDistribution.add_particle">
+<a class="viewcode-back" href="../../_autosummary/gncpy/distributions/gncpy.distributions.ParticleDistribution.html#gncpy.distributions.ParticleDistribution.add_particle">[docs]</a>
+    <span class="k">def</span> <span class="nf">add_particle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">w</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds a particle and weight to the distribution.</span>
 
 <span class="sd">        Parameters</span>
@@ -818,14 +866,20 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">w</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ParticleDistribution.clear_particles"><a class="viewcode-back" href="../../_autosummary/gncpy/distributions/gncpy.distributions.ParticleDistribution.html#gncpy.distributions.ParticleDistribution.clear_particles">[docs]</a>    <span class="k">def</span> <span class="nf">clear_particles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ParticleDistribution.clear_particles">
+<a class="viewcode-back" href="../../_autosummary/gncpy/distributions/gncpy.distributions.ParticleDistribution.html#gncpy.distributions.ParticleDistribution.clear_particles">[docs]</a>
+    <span class="k">def</span> <span class="nf">clear_particles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Clears the particle and weight lists.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__need_mean_lst_update</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__need_uncert_lst_update</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_particles</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span> <span class="o">=</span> <span class="p">[]</span></div>
 
-<div class="viewcode-block" id="ParticleDistribution.update_weights"><a class="viewcode-back" href="../../_autosummary/gncpy/distributions/gncpy.distributions.ParticleDistribution.html#gncpy.distributions.ParticleDistribution.update_weights">[docs]</a>    <span class="k">def</span> <span class="nf">update_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">w_lst</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ParticleDistribution.update_weights">
+<a class="viewcode-back" href="../../_autosummary/gncpy/distributions/gncpy.distributions.ParticleDistribution.html#gncpy.distributions.ParticleDistribution.update_weights">[docs]</a>
+    <span class="k">def</span> <span class="nf">update_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">w_lst</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates the weights to match the given list.</span>
 
 <span class="sd">        Checks that the length of the weights matches the number of particles.</span>
@@ -837,6 +891,7 @@
             <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Different number of weights than particles&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span> <span class="o">=</span> <span class="n">w_lst</span></div>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -874,6 +929,7 @@
 <span class="sd">            Weight of the current particle.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">_ParticleDistIter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
 </pre></div>
 
            </div>

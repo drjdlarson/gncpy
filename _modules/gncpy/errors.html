@@ -1,24 +1,26 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>gncpy.errors &mdash; GNCPy 2.0.1.dev0 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+
+  
     <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_modules/gncpy/errors.html" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
-        <script src="../../_static/clipboard.min.js"></script>
-        <script src="../../_static/copybutton.js"></script>
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=ba91f118"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../_static/copybutton.js?v=cbcfbdad"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -264,19 +266,27 @@
 <span></span><span class="sd">&quot;&quot;&quot;Defines custom exceptions and errors for algorithm specific problems.&quot;&quot;&quot;</span>
 
 
-<div class="viewcode-block" id="ParticleDepletionError"><a class="viewcode-back" href="../../_autosummary/gncpy/errors/gncpy.errors.ParticleDepletionError.html#gncpy.errors.ParticleDepletionError">[docs]</a><span class="k">class</span> <span class="nc">ParticleDepletionError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<div class="viewcode-block" id="ParticleDepletionError">
+<a class="viewcode-back" href="../../_autosummary/gncpy/errors/gncpy.errors.ParticleDepletionError.html#gncpy.errors.ParticleDepletionError">[docs]</a>
+<span class="k">class</span> <span class="nc">ParticleDepletionError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Thrown when a PF has depleted all its particles.&quot;&quot;&quot;</span>
 
     <span class="k">pass</span></div>
 
 
-<div class="viewcode-block" id="ParticleEstimationDomainError"><a class="viewcode-back" href="../../_autosummary/gncpy/errors/gncpy.errors.ParticleEstimationDomainError.html#gncpy.errors.ParticleEstimationDomainError">[docs]</a><span class="k">class</span> <span class="nc">ParticleEstimationDomainError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ParticleEstimationDomainError">
+<a class="viewcode-back" href="../../_autosummary/gncpy/errors/gncpy.errors.ParticleEstimationDomainError.html#gncpy.errors.ParticleEstimationDomainError">[docs]</a>
+<span class="k">class</span> <span class="nc">ParticleEstimationDomainError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Thrown when a PF has an estimate for a particle outside its valid domain.&quot;&quot;&quot;</span>
 
     <span class="k">pass</span></div>
 
 
-<div class="viewcode-block" id="ExtremeMeasurementNoiseError"><a class="viewcode-back" href="../../_autosummary/gncpy/errors/gncpy.errors.ExtremeMeasurementNoiseError.html#gncpy.errors.ExtremeMeasurementNoiseError">[docs]</a><span class="k">class</span> <span class="nc">ExtremeMeasurementNoiseError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ExtremeMeasurementNoiseError">
+<a class="viewcode-back" href="../../_autosummary/gncpy/errors/gncpy.errors.ExtremeMeasurementNoiseError.html#gncpy.errors.ExtremeMeasurementNoiseError">[docs]</a>
+<span class="k">class</span> <span class="nc">ExtremeMeasurementNoiseError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Thrown when the estimated measurement noise covariance is ill formed.</span>
 
 <span class="sd">    This may happen when bad measurements are used for estimation, as may be</span>
@@ -285,6 +295,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">pass</span></div>
+
 </pre></div>
 
            </div>

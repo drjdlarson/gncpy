@@ -1,24 +1,26 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>gncpy.filters.interacting_multiple_model &mdash; GNCPy 2.0.1.dev0 documentation</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+
+  
     <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_modules/gncpy/filters/interacting_multiple_model.html" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
-        <script src="../../../_static/clipboard.min.js"></script>
-        <script src="../../../_static/copybutton.js"></script>
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=ba91f118"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../_static/copybutton.js?v=cbcfbdad"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -267,7 +269,9 @@
 <span class="kn">from</span> <span class="nn">gncpy.filters.particle_filter</span> <span class="kn">import</span> <span class="n">ParticleFilter</span>
 
 
-<div class="viewcode-block" id="InteractingMultipleModel"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/interacting_multiple_model/gncpy.filters.interacting_multiple_model.InteractingMultipleModel.html#gncpy.filters.interacting_multiple_model.InteractingMultipleModel">[docs]</a><span class="k">class</span> <span class="nc">InteractingMultipleModel</span><span class="p">:</span>
+<div class="viewcode-block" id="InteractingMultipleModel">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/filters/interacting_multiple_model/gncpy.filters.interacting_multiple_model.InteractingMultipleModel.html#gncpy.filters.interacting_multiple_model.InteractingMultipleModel">[docs]</a>
+<span class="k">class</span> <span class="nc">InteractingMultipleModel</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Implementation of an InteractingMultipleModel (IMM) filter.</span>
 
 <span class="sd">    This filter combines several inner filters with different dynamic models</span>
@@ -275,7 +279,9 @@
 <span class="sd">    updates.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="InteractingMultipleModel.__init__"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/interacting_multiple_model/gncpy.filters.interacting_multiple_model.InteractingMultipleModel.html#gncpy.filters.interacting_multiple_model.InteractingMultipleModel.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="InteractingMultipleModel.__init__">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/filters/interacting_multiple_model/gncpy.filters.interacting_multiple_model.InteractingMultipleModel.html#gncpy.filters.interacting_multiple_model.InteractingMultipleModel.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">in_filt_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cur_filt_ind</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model_trans_mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[]])</span>
@@ -284,6 +290,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">filt_weight_history</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[]])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mean_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cov_list</span> <span class="o">=</span> <span class="p">[]</span></div>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">cov</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -307,7 +314,9 @@
     <span class="k">def</span> <span class="nf">cov</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
         <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Covariance is read only. SKIPPING&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="InteractingMultipleModel.save_filter_state"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/interacting_multiple_model/gncpy.filters.interacting_multiple_model.InteractingMultipleModel.html#gncpy.filters.interacting_multiple_model.InteractingMultipleModel.save_filter_state">[docs]</a>    <span class="k">def</span> <span class="nf">save_filter_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="InteractingMultipleModel.save_filter_state">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/filters/interacting_multiple_model/gncpy.filters.interacting_multiple_model.InteractingMultipleModel.html#gncpy.filters.interacting_multiple_model.InteractingMultipleModel.save_filter_state">[docs]</a>
+    <span class="k">def</span> <span class="nf">save_filter_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Saves filter variables so they can be restored later.</span>
 
 <span class="sd">        Note that to pickle the resulting dictionary the :code:`dill` package</span>
@@ -329,7 +338,10 @@
 
         <span class="k">return</span> <span class="n">filt_state</span></div>
 
-<div class="viewcode-block" id="InteractingMultipleModel.load_filter_state"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/interacting_multiple_model/gncpy.filters.interacting_multiple_model.InteractingMultipleModel.html#gncpy.filters.interacting_multiple_model.InteractingMultipleModel.load_filter_state">[docs]</a>    <span class="k">def</span> <span class="nf">load_filter_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filt_state</span><span class="p">):</span>
+
+<div class="viewcode-block" id="InteractingMultipleModel.load_filter_state">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/filters/interacting_multiple_model/gncpy.filters.interacting_multiple_model.InteractingMultipleModel.html#gncpy.filters.interacting_multiple_model.InteractingMultipleModel.load_filter_state">[docs]</a>
+    <span class="k">def</span> <span class="nf">load_filter_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filt_state</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes filter using saved filter state.</span>
 
 <span class="sd">        Attributes</span>
@@ -353,6 +365,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">filt_weight_history</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;filt_weight_history&quot;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mean_list</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;mean_list&quot;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cov_list</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;cov_list&quot;</span><span class="p">]</span></div>
+
 
     <span class="k">def</span> <span class="nf">initialize_states</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init_means</span><span class="p">,</span> <span class="n">init_covs</span><span class="p">,</span> <span class="n">init_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mean_list</span> <span class="o">=</span> <span class="n">init_means</span>
@@ -389,7 +402,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">model_trans_mat</span> <span class="o">=</span> <span class="n">model_trans</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">in_filt_list</span> <span class="o">=</span> <span class="n">filter_lst</span>
 
-<div class="viewcode-block" id="InteractingMultipleModel.set_models"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/interacting_multiple_model/gncpy.filters.interacting_multiple_model.InteractingMultipleModel.html#gncpy.filters.interacting_multiple_model.InteractingMultipleModel.set_models">[docs]</a>    <span class="k">def</span> <span class="nf">set_models</span><span class="p">(</span>
+<div class="viewcode-block" id="InteractingMultipleModel.set_models">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/filters/interacting_multiple_model/gncpy.filters.interacting_multiple_model.InteractingMultipleModel.html#gncpy.filters.interacting_multiple_model.InteractingMultipleModel.set_models">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_models</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">filter_lst</span><span class="p">,</span> <span class="n">model_trans</span><span class="p">,</span> <span class="n">init_means</span><span class="p">,</span> <span class="n">init_covs</span><span class="p">,</span> <span class="n">init_weights</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set different filters and dynamics models for an IMM filter.&quot;&quot;&quot;</span>
@@ -397,11 +412,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">initialize_filters</span><span class="p">(</span><span class="n">filter_lst</span><span class="p">,</span> <span class="n">model_trans</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">initialize_states</span><span class="p">(</span><span class="n">init_means</span><span class="p">,</span> <span class="n">init_covs</span><span class="p">,</span> <span class="n">init_weights</span><span class="o">=</span><span class="n">init_weights</span><span class="p">)</span></div>
 
+
     <span class="k">def</span> <span class="nf">set_measurement_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">filt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_filt_list</span><span class="p">:</span>
             <span class="n">filt</span><span class="o">.</span><span class="n">set_measurement_model</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-<div class="viewcode-block" id="InteractingMultipleModel.predict"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/interacting_multiple_model/gncpy.filters.interacting_multiple_model.InteractingMultipleModel.html#gncpy.filters.interacting_multiple_model.InteractingMultipleModel.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="InteractingMultipleModel.predict">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/filters/interacting_multiple_model/gncpy.filters.interacting_multiple_model.InteractingMultipleModel.html#gncpy.filters.interacting_multiple_model.InteractingMultipleModel.predict">[docs]</a>
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Prediction step for the IMM filter.&quot;&quot;&quot;</span>
         <span class="n">new_weight_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">new_mean_list</span> <span class="o">=</span> <span class="p">[]</span>
@@ -431,7 +449,9 @@
                     <span class="o">*</span> <span class="p">(</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">cov_list</span><span class="p">[</span><span class="n">jj</span><span class="p">]</span>
                         <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean_list</span><span class="p">[</span><span class="n">jj</span><span class="p">]</span> <span class="o">-</span> <span class="n">weighted_state</span><span class="p">)</span>
-<div class="viewcode-block" id="InteractingMultipleModel.correct"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/interacting_multiple_model/gncpy.filters.interacting_multiple_model.InteractingMultipleModel.html#gncpy.filters.interacting_multiple_model.InteractingMultipleModel.correct">[docs]</a>                        <span class="o">@</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean_list</span><span class="p">[</span><span class="n">jj</span><span class="p">]</span> <span class="o">-</span> <span class="n">weighted_state</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+<div class="viewcode-block" id="InteractingMultipleModel.correct">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/filters/interacting_multiple_model/gncpy.filters.interacting_multiple_model.InteractingMultipleModel.html#gncpy.filters.interacting_multiple_model.InteractingMultipleModel.correct">[docs]</a>
+                        <span class="o">@</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean_list</span><span class="p">[</span><span class="n">jj</span><span class="p">]</span> <span class="o">-</span> <span class="n">weighted_state</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
                     <span class="p">)</span>
                 <span class="p">)</span>
             <span class="n">weighted_cov</span> <span class="o">=</span> <span class="n">weighted_cov</span> <span class="o">/</span> <span class="n">new_weight</span>
@@ -462,6 +482,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">cur_out_state</span> <span class="o">=</span> <span class="n">out_state</span>
         <span class="k">return</span> <span class="n">out_state</span></div>
 
+
     <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">meas</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Measurement correction step for the IMM filter.&quot;&quot;&quot;</span>
         <span class="n">new_weight_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filt_weights</span><span class="p">))</span>
@@ -485,7 +506,9 @@
             <span class="n">out_state</span> <span class="o">+=</span> <span class="n">new_weight_list</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean_list</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">cur_out_state</span> <span class="o">=</span> <span class="n">out_state</span>
-        <span class="k">return</span> <span class="p">(</span><span class="n">out_state</span><span class="p">,</span> <span class="n">out_meas_fit_prob</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="p">(</span><span class="n">out_state</span><span class="p">,</span> <span class="n">out_meas_fit_prob</span><span class="p">)</span></div>
+</div>
+
 </pre></div>
 
            </div>

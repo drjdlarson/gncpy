@@ -1,25 +1,27 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>IRobotCreate &mdash; GNCPy 2.0.1.dev0 documentation</title>
-      <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/copybutton.css?v=76b2166b" />
+
+  
     <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_autosummary/gncpy/dynamics/basic/irobot_create/gncpy.dynamics.basic.irobot_create.IRobotCreate.html" />
   <!--[if lt IE 9]>
     <script src="../../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../../../../_static/jquery.js"></script>
-        <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
-        <script src="../../../../../_static/doctools.js"></script>
-        <script src="../../../../../_static/sphinx_highlight.js"></script>
-        <script src="../../../../../_static/clipboard.min.js"></script>
-        <script src="../../../../../_static/copybutton.js"></script>
+        <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../../_static/documentation_options.js?v=ba91f118"></script>
+        <script src="../../../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../../../_static/copybutton.js?v=cbcfbdad"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../../genindex.html" />
@@ -269,10 +271,10 @@
            <div itemprop="articleBody">
              
   <section id="irobotcreate">
-<h1>IRobotCreate<a class="headerlink" href="#irobotcreate" title="Permalink to this heading"></a></h1>
+<h1>IRobotCreate<a class="headerlink" href="#irobotcreate" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="gncpy.dynamics.basic.irobot_create.IRobotCreate">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IRobotCreate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wheel_separation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.258</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1675</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gncpy/dynamics/basic/irobot_create.html#IRobotCreate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.dynamics.basic.irobot_create.IRobotCreate" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IRobotCreate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wheel_separation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.258</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1675</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gncpy/dynamics/basic/irobot_create.html#IRobotCreate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.dynamics.basic.irobot_create.IRobotCreate" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="../nonlinear_dynamics_base/gncpy.dynamics.basic.nonlinear_dynamics_base.NonlinearDynamicsBase.html#gncpy.dynamics.basic.nonlinear_dynamics_base.NonlinearDynamicsBase" title="gncpy.dynamics.basic.nonlinear_dynamics_base.NonlinearDynamicsBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">NonlinearDynamicsBase</span></code></a></p>
 <p>A differential drive robot based on the iRobot Create.</p>
 <p>This has a control model predefined because the dynamics themselves do not
@@ -282,7 +284,7 @@ change the state.</p>
 It represents a 2 wheel robot with some distance between its wheels.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.dynamics.basic.irobot_create.IRobotCreate.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wheel_separation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.258</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1675</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gncpy/dynamics/basic/irobot_create.html#IRobotCreate.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.dynamics.basic.irobot_create.IRobotCreate.__init__" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wheel_separation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.258</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1675</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/gncpy/dynamics/basic/irobot_create.html#IRobotCreate.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.dynamics.basic.irobot_create.IRobotCreate.__init__" title="Link to this definition"></a></dt>
 <dd><p>Initialize an object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -334,7 +336,7 @@ It represents a 2 wheel robot with some distance between its wheels.</p>
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.dynamics.basic.irobot_create.IRobotCreate.get_input_mat">
-<span class="sig-name descname"><span class="pre">get_input_mat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctrl_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.dynamics.basic.irobot_create.IRobotCreate.get_input_mat" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_input_mat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctrl_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.dynamics.basic.irobot_create.IRobotCreate.get_input_mat" title="Link to this definition"></a></dt>
 <dd><p>Calculates the input matrix from the control model.</p>
 <p>This calculates the jacobian of the control model. If no control model
 is specified than it returns a zero matrix.</p>
@@ -358,7 +360,7 @@ is specified than it returns a zero matrix.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.dynamics.basic.irobot_create.IRobotCreate.get_state_mat">
-<span class="sig-name descname"><span class="pre">get_state_mat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">f_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctrl_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_continuous</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.dynamics.basic.irobot_create.IRobotCreate.get_state_mat" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_state_mat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">f_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctrl_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_continuous</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.dynamics.basic.irobot_create.IRobotCreate.get_state_mat" title="Link to this definition"></a></dt>
 <dd><p>Calculates the state matrix from the ode list.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -379,7 +381,7 @@ is specified than it returns a zero matrix.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.dynamics.basic.irobot_create.IRobotCreate.propagate_state">
-<span class="sig-name descname"><span class="pre">propagate_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctrl_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.dynamics.basic.irobot_create.IRobotCreate.propagate_state" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">propagate_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctrl_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.dynamics.basic.irobot_create.IRobotCreate.propagate_state" title="Link to this definition"></a></dt>
 <dd><p>Propagates the continuous time dynamics.</p>
 <p>Automatically integrates the defined ode list and adds control inputs
 (held constant over the integration period).</p>
@@ -409,20 +411,20 @@ is ().</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gncpy.dynamics.basic.irobot_create.IRobotCreate.cont_fnc_lst">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cont_fnc_lst</span></span><a class="headerlink" href="#gncpy.dynamics.basic.irobot_create.IRobotCreate.cont_fnc_lst" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cont_fnc_lst</span></span><a class="headerlink" href="#gncpy.dynamics.basic.irobot_create.IRobotCreate.cont_fnc_lst" title="Link to this definition"></a></dt>
 <dd><p>Implements the contiuous time dynamics.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.dynamics.basic.irobot_create.IRobotCreate.state_names">
-<span class="sig-name descname"><span class="pre">state_names</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('pos_x',</span> <span class="pre">'pos_v',</span> <span class="pre">'turn_angle')</span></em><a class="headerlink" href="#gncpy.dynamics.basic.irobot_create.IRobotCreate.state_names" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">state_names</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('pos_x',</span> <span class="pre">'pos_v',</span> <span class="pre">'turn_angle')</span></em><a class="headerlink" href="#gncpy.dynamics.basic.irobot_create.IRobotCreate.state_names" title="Link to this definition"></a></dt>
 <dd><p>Tuple of strings for the name of each state. The order should match
 that of the state vector.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gncpy.dynamics.basic.irobot_create.IRobotCreate.wheel_separation">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">wheel_separation</span></span><a class="headerlink" href="#gncpy.dynamics.basic.irobot_create.IRobotCreate.wheel_separation" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">wheel_separation</span></span><a class="headerlink" href="#gncpy.dynamics.basic.irobot_create.IRobotCreate.wheel_separation" title="Link to this definition"></a></dt>
 <dd><p>Read only wheel separation distance.</p>
 </dd></dl>
 

@@ -1,25 +1,27 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CI/CD Pipeline &mdash; GNCPy 2.0.1.dev0 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+
+  
     <link rel="canonical" href="https://drjdlarson.github.io/gncpy/cicd.html" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="_static/jquery.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
-        <script src="_static/clipboard.min.js"></script>
-        <script src="_static/copybutton.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=ba91f118"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="_static/copybutton.js?v=cbcfbdad"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -263,12 +265,12 @@
            <div itemprop="articleBody">
              
   <section id="ci-cd-pipeline">
-<h1>CI/CD Pipeline<a class="headerlink" href="#ci-cd-pipeline" title="Permalink to this heading"></a></h1>
+<h1>CI/CD Pipeline<a class="headerlink" href="#ci-cd-pipeline" title="Link to this heading"></a></h1>
 <p>The goal of Continuous Integration and Continuous Development (CI/CD) is to be constantly running tests and checks upon every push to the repo. This project makes use of Github actions to achieve this, but other technologies can be used such as Travis CI or Jenkins. Two main workflows are setup, once that runs on every push and another that is designed to automate releases.</p>
 <p>The first that runs on every push is designed to run the tests on multiple versions of python on multiple operating systems. If the tests fail, you can look at the workflow log to see the output from the failing test cases.</p>
 <p>The second workflow is designed to run when pushing a new version tag to automate creating a new release. It will build the container images and publish them to the Github Container Registry, build and run the unit tests, build the documentation, push the documentation to the gh-pages branch to update the website, and automatically package the release and add a commit message to the release that summarizes all the commits since the last release.</p>
 <section id="github-actions-quick-guide">
-<h2>Github Actions Quick Guide<a class="headerlink" href="#github-actions-quick-guide" title="Permalink to this heading"></a></h2>
+<h2>Github Actions Quick Guide<a class="headerlink" href="#github-actions-quick-guide" title="Link to this heading"></a></h2>
 <p>The following is a quick reference to Github actions. Each action, or workflow, is defined within a <code class="code docutils literal notranslate"><span class="pre">.github/workflow/*.yml</span></code> file. These files follow the YAML syntax and can define multiple jobs which can run in parallel or in sequence. The file defines triggers that control when each workflow gets executed. All of these workflows execute based on events that happen on the remote (i.e. if a workflow is triggered on a version tag, making a version tag on your local system with <code class="code docutils literal notranslate"><span class="pre">git</span> <span class="pre">tag</span></code> won’t trigger the action, but pushing that to github with a <code class="code docutils literal notranslate"><span class="pre">git</span> <span class="pre">push</span></code> will cause it to be triggered since github will now see the tag). Additionally, the workflows run on Github’s servers NOT your local machine.</p>
 <p>Each job within a workflow starts with a fresh system (i.e. a clean diretory) and can be defined to run on a different operating system (as defined by the runner). A given job is made up of multiple steps, a step can either run commands in the runner’s terminal or use a predefined action which may have additional options. A typicaly job will need a step to checkout the repo at the current state that triggered the action. The steps within a job run sequentially, whereas the jobs themselves normally run in parallel. The jobs can be made to run in sequence by defining the <code class="code docutils literal notranslate"><span class="pre">needs</span></code> tag within the job and giving the id of a prior job.</p>
 </section>

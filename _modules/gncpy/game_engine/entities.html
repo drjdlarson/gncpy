@@ -1,24 +1,26 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>gncpy.game_engine.entities &mdash; GNCPy 2.0.1.dev0 documentation</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+
+  
     <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_modules/gncpy/game_engine/entities.html" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
-        <script src="../../../_static/clipboard.min.js"></script>
-        <script src="../../../_static/copybutton.js"></script>
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=ba91f118"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../_static/copybutton.js?v=cbcfbdad"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -264,7 +266,9 @@
 <span></span><span class="sd">&quot;&quot;&quot;Defines game entities and a manager class.&quot;&quot;&quot;</span>
 
 
-<div class="viewcode-block" id="Entity"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/entities/gncpy.game_engine.entities.Entity.html#gncpy.game_engine.entities.Entity">[docs]</a><span class="k">class</span> <span class="nc">Entity</span><span class="p">:</span>
+<div class="viewcode-block" id="Entity">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/entities/gncpy.game_engine.entities.Entity.html#gncpy.game_engine.entities.Entity">[docs]</a>
+<span class="k">class</span> <span class="nc">Entity</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Elements in a game.</span>
 
 <span class="sd">    These should not be created or deleted directly, the manager class should</span>
@@ -273,7 +277,9 @@
 
     <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;_active&quot;</span><span class="p">,</span> <span class="s2">&quot;_id&quot;</span><span class="p">,</span> <span class="s2">&quot;_tag&quot;</span><span class="p">,</span> <span class="s2">&quot;_components&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Entity.__init__"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/entities/gncpy.game_engine.entities.Entity.html#gncpy.game_engine.entities.Entity.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e_id</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
+<div class="viewcode-block" id="Entity.__init__">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/entities/gncpy.game_engine.entities.Entity.html#gncpy.game_engine.entities.Entity.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e_id</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize an object.</span>
 
 <span class="sd">        This should not be called outside of the :class:`.EntityManager` class.</span>
@@ -291,6 +297,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_components</span> <span class="o">=</span> <span class="p">{}</span></div>
 
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">active</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Flag indicating if the entity is alive.&quot;&quot;&quot;</span>
@@ -306,11 +313,16 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read only unique id of the entity.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span>
 
-<div class="viewcode-block" id="Entity.destroy"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/entities/gncpy.game_engine.entities.Entity.html#gncpy.game_engine.entities.Entity.destroy">[docs]</a>    <span class="k">def</span> <span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Entity.destroy">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/entities/gncpy.game_engine.entities.Entity.html#gncpy.game_engine.entities.Entity.destroy">[docs]</a>
+    <span class="k">def</span> <span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Handles destruction of the entity.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_active</span> <span class="o">=</span> <span class="kc">False</span></div>
 
-<div class="viewcode-block" id="Entity.has_component"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/entities/gncpy.game_engine.entities.Entity.html#gncpy.game_engine.entities.Entity.has_component">[docs]</a>    <span class="k">def</span> <span class="nf">has_component</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">comp</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Entity.has_component">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/entities/gncpy.game_engine.entities.Entity.html#gncpy.game_engine.entities.Entity.has_component">[docs]</a>
+    <span class="k">def</span> <span class="nf">has_component</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">comp</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns true if the entity has the given component.</span>
 
 <span class="sd">        Parameters</span>
@@ -325,7 +337,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">comp</span><span class="o">.</span><span class="vm">__name__</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_components</span></div>
 
-<div class="viewcode-block" id="Entity.get_component"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/entities/gncpy.game_engine.entities.Entity.html#gncpy.game_engine.entities.Entity.get_component">[docs]</a>    <span class="k">def</span> <span class="nf">get_component</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">comp</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Entity.get_component">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/entities/gncpy.game_engine.entities.Entity.html#gncpy.game_engine.entities.Entity.get_component">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_component</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">comp</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns a reference to the given component.</span>
 
 <span class="sd">        This assumes the component exists.</span>
@@ -342,7 +357,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_components</span><span class="p">[</span><span class="n">comp</span><span class="o">.</span><span class="vm">__name__</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="Entity.add_component"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/entities/gncpy.game_engine.entities.Entity.html#gncpy.game_engine.entities.Entity.add_component">[docs]</a>    <span class="k">def</span> <span class="nf">add_component</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">comp</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Entity.add_component">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/entities/gncpy.game_engine.entities.Entity.html#gncpy.game_engine.entities.Entity.add_component">[docs]</a>
+    <span class="k">def</span> <span class="nf">add_component</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">comp</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds a component to the entity.</span>
 
 <span class="sd">        Parameters</span>
@@ -359,19 +377,26 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">component</span> <span class="o">=</span> <span class="n">comp</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_components</span><span class="p">[</span><span class="n">comp</span><span class="o">.</span><span class="vm">__name__</span><span class="p">]</span> <span class="o">=</span> <span class="n">component</span>
-        <span class="k">return</span> <span class="n">component</span></div></div>
+        <span class="k">return</span> <span class="n">component</span></div>
+</div>
 
 
-<div class="viewcode-block" id="EntityManager"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/entities/gncpy.game_engine.entities.EntityManager.html#gncpy.game_engine.entities.EntityManager">[docs]</a><span class="k">class</span> <span class="nc">EntityManager</span><span class="p">:</span>
+
+<div class="viewcode-block" id="EntityManager">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/entities/gncpy.game_engine.entities.EntityManager.html#gncpy.game_engine.entities.EntityManager">[docs]</a>
+<span class="k">class</span> <span class="nc">EntityManager</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Handles creation and deletion of entities.&quot;&quot;&quot;</span>
 
     <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;_entities&quot;</span><span class="p">,</span> <span class="s2">&quot;_entities_to_add&quot;</span><span class="p">,</span> <span class="s2">&quot;_entity_map&quot;</span><span class="p">,</span> <span class="s2">&quot;_total_entities&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="EntityManager.__init__"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/entities/gncpy.game_engine.entities.EntityManager.html#gncpy.game_engine.entities.EntityManager.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="EntityManager.__init__">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/entities/gncpy.game_engine.entities.EntityManager.html#gncpy.game_engine.entities.EntityManager.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_entities</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_entities_to_add</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_entity_map</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_total_entities</span> <span class="o">=</span> <span class="mi">0</span></div>
+
 
     <span class="k">def</span> <span class="nf">_remove_dead_entities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vec</span><span class="p">):</span>
         <span class="n">e_to_rm</span> <span class="o">=</span> <span class="p">[]</span>
@@ -382,7 +407,9 @@
         <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="n">e_to_rm</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
             <span class="k">del</span> <span class="n">vec</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
 
-<div class="viewcode-block" id="EntityManager.update"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/entities/gncpy.game_engine.entities.EntityManager.html#gncpy.game_engine.entities.EntityManager.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="EntityManager.update">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/entities/gncpy.game_engine.entities.EntityManager.html#gncpy.game_engine.entities.EntityManager.update">[docs]</a>
+    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Updates the list of entities.</span>
 
 <span class="sd">        Should be called once per timestep. Adds new entities to the list and</span>
@@ -400,7 +427,10 @@
         <span class="k">for</span> <span class="n">tag</span><span class="p">,</span> <span class="n">ev</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entity_map</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_remove_dead_entities</span><span class="p">(</span><span class="n">ev</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="EntityManager.add_entity"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/entities/gncpy.game_engine.entities.EntityManager.html#gncpy.game_engine.entities.EntityManager.add_entity">[docs]</a>    <span class="k">def</span> <span class="nf">add_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
+
+<div class="viewcode-block" id="EntityManager.add_entity">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/entities/gncpy.game_engine.entities.EntityManager.html#gncpy.game_engine.entities.EntityManager.add_entity">[docs]</a>
+    <span class="k">def</span> <span class="nf">add_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a new entity.</span>
 
 <span class="sd">        The entity is queued to be added. It is not part of the entity list</span>
@@ -422,7 +452,10 @@
 
         <span class="k">return</span> <span class="n">e</span></div>
 
-<div class="viewcode-block" id="EntityManager.get_entities"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/entities/gncpy.game_engine.entities.EntityManager.html#gncpy.game_engine.entities.EntityManager.get_entities">[docs]</a>    <span class="k">def</span> <span class="nf">get_entities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="EntityManager.get_entities">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/entities/gncpy.game_engine.entities.EntityManager.html#gncpy.game_engine.entities.EntityManager.get_entities">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_entities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a list of references to entities.</span>
 
 <span class="sd">        Can also get all entities with a given tag. Note that changing entities</span>
@@ -446,7 +479,10 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="p">[]</span></div>
 
-<div class="viewcode-block" id="EntityManager.get_entity_ids"><a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/entities/gncpy.game_engine.entities.EntityManager.html#gncpy.game_engine.entities.EntityManager.get_entity_ids">[docs]</a>    <span class="k">def</span> <span class="nf">get_entity_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="EntityManager.get_entity_ids">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/entities/gncpy.game_engine.entities.EntityManager.html#gncpy.game_engine.entities.EntityManager.get_entity_ids">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_entity_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a list of the entity ids.</span>
 
 <span class="sd">        Parameters</span>
@@ -460,7 +496,9 @@
 <span class="sd">        list</span>
 <span class="sd">            Each element is an entity id.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">e</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_entities</span><span class="p">(</span><span class="n">tag</span><span class="o">=</span><span class="n">tag</span><span class="p">)]</span></div></div>
+        <span class="k">return</span> <span class="p">[</span><span class="n">e</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_entities</span><span class="p">(</span><span class="n">tag</span><span class="o">=</span><span class="n">tag</span><span class="p">)]</span></div>
+</div>
+
 </pre></div>
 
            </div>

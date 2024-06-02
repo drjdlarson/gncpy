@@ -1,24 +1,26 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>gncpy.control.elqr &mdash; GNCPy 2.0.1.dev0 documentation</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+
+  
     <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_modules/gncpy/control/elqr.html" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
-        <script src="../../../_static/clipboard.min.js"></script>
-        <script src="../../../_static/copybutton.js"></script>
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=ba91f118"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../_static/copybutton.js?v=cbcfbdad"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -274,7 +276,9 @@
 <span class="kn">from</span> <span class="nn">gncpy.control.lqr</span> <span class="kn">import</span> <span class="n">LQR</span>
 
 
-<div class="viewcode-block" id="ELQR"><a class="viewcode-back" href="../../../_autosummary/gncpy/control/elqr/gncpy.control.elqr.ELQR.html#gncpy.control.elqr.ELQR">[docs]</a><span class="k">class</span> <span class="nc">ELQR</span><span class="p">(</span><span class="n">LQR</span><span class="p">):</span>
+<div class="viewcode-block" id="ELQR">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/control/elqr/gncpy.control.elqr.ELQR.html#gncpy.control.elqr.ELQR">[docs]</a>
+<span class="k">class</span> <span class="nc">ELQR</span><span class="p">(</span><span class="n">LQR</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Implements an Extended Linear Quadratic Regulator (ELQR) controller.</span>
 
 <span class="sd">    This is based on</span>
@@ -297,7 +301,9 @@
 <span class="sd">        frame.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="ELQR.__init__"><a class="viewcode-back" href="../../../_autosummary/gncpy/control/elqr/gncpy.control.elqr.ELQR.html#gncpy.control.elqr.ELQR.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_iters</span><span class="o">=</span><span class="mf">1e3</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="ELQR.__init__">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/control/elqr/gncpy.control.elqr.ELQR.html#gncpy.control.elqr.ELQR.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_iters</span><span class="o">=</span><span class="mf">1e3</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize an object.</span>
 
 <span class="sd">        Parameters</span>
@@ -329,7 +335,10 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_ax</span> <span class="o">=</span> <span class="mi">0</span></div>
 
-<div class="viewcode-block" id="ELQR.set_cost_model"><a class="viewcode-back" href="../../../_autosummary/gncpy/control/elqr/gncpy.control.elqr.ELQR.html#gncpy.control.elqr.ELQR.set_cost_model">[docs]</a>    <span class="k">def</span> <span class="nf">set_cost_model</span><span class="p">(</span>
+
+<div class="viewcode-block" id="ELQR.set_cost_model">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/control/elqr/gncpy.control.elqr.ELQR.html#gncpy.control.elqr.ELQR.set_cost_model">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_cost_model</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">Q</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">R</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -406,7 +415,10 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="n">skip_validity_check</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Invalid combination of inputs.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ELQR.cost_function"><a class="viewcode-back" href="../../../_autosummary/gncpy/control/elqr/gncpy.control.elqr.ELQR.html#gncpy.control.elqr.ELQR.cost_function">[docs]</a>    <span class="k">def</span> <span class="nf">cost_function</span><span class="p">(</span>
+
+<div class="viewcode-block" id="ELQR.cost_function">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/control/elqr/gncpy.control.elqr.ELQR.html#gncpy.control.elqr.ELQR.cost_function">[docs]</a>
+    <span class="k">def</span> <span class="nf">cost_function</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">tt</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">ctrl_input</span><span class="p">,</span> <span class="n">cost_args</span><span class="p">,</span> <span class="n">is_initial</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">is_final</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates the cost for the state and control input.</span>
@@ -455,7 +467,10 @@
             <span class="n">tt</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">ctrl_input</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_state</span><span class="p">,</span> <span class="n">is_initial</span><span class="p">,</span> <span class="n">is_final</span><span class="p">,</span> <span class="o">*</span><span class="n">cost_args</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="ELQR.prop_state_forward"><a class="viewcode-back" href="../../../_autosummary/gncpy/control/elqr/gncpy.control.elqr.ELQR.html#gncpy.control.elqr.ELQR.prop_state_forward">[docs]</a>    <span class="k">def</span> <span class="nf">prop_state_forward</span><span class="p">(</span>
+
+<div class="viewcode-block" id="ELQR.prop_state_forward">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/control/elqr/gncpy.control.elqr.ELQR.html#gncpy.control.elqr.ELQR.prop_state_forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">prop_state_forward</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">tt</span><span class="p">,</span> <span class="n">x_hat</span><span class="p">,</span> <span class="n">u_hat</span><span class="p">,</span> <span class="n">state_args</span><span class="p">,</span> <span class="n">ctrl_args</span><span class="p">,</span> <span class="n">inv_state_args</span><span class="p">,</span> <span class="n">inv_ctrl_args</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Propagate the state forward and get the backward state space.</span>
@@ -514,7 +529,10 @@
 
         <span class="k">return</span> <span class="n">x_hat_p</span><span class="p">,</span> <span class="n">ABar</span><span class="p">,</span> <span class="n">BBar</span><span class="p">,</span> <span class="n">cBar</span></div>
 
-<div class="viewcode-block" id="ELQR.quadratize_cost"><a class="viewcode-back" href="../../../_autosummary/gncpy/control/elqr/gncpy.control.elqr.ELQR.html#gncpy.control.elqr.ELQR.quadratize_cost">[docs]</a>    <span class="k">def</span> <span class="nf">quadratize_cost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tt</span><span class="p">,</span> <span class="n">itr</span><span class="p">,</span> <span class="n">x_hat</span><span class="p">,</span> <span class="n">u_hat</span><span class="p">,</span> <span class="n">is_initial</span><span class="p">,</span> <span class="n">is_final</span><span class="p">,</span> <span class="n">cost_args</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ELQR.quadratize_cost">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/control/elqr/gncpy.control.elqr.ELQR.html#gncpy.control.elqr.ELQR.quadratize_cost">[docs]</a>
+    <span class="k">def</span> <span class="nf">quadratize_cost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tt</span><span class="p">,</span> <span class="n">itr</span><span class="p">,</span> <span class="n">x_hat</span><span class="p">,</span> <span class="n">u_hat</span><span class="p">,</span> <span class="n">is_initial</span><span class="p">,</span> <span class="n">is_final</span><span class="p">,</span> <span class="n">cost_args</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Quadratizes the cost function.</span>
 
 <span class="sd">        If the non-quadratic portion of the standard cost function is not</span>
@@ -624,6 +642,7 @@
 
         <span class="k">return</span> <span class="n">P</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">r</span></div>
 
+
     <span class="k">def</span> <span class="nf">quadratize_final_cost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">itr</span><span class="p">,</span> <span class="n">num_timesteps</span><span class="p">,</span> <span class="n">traj</span><span class="p">,</span> <span class="n">time_vec</span><span class="p">,</span> <span class="n">cost_args</span><span class="p">):</span>
         <span class="n">u_hat</span> <span class="o">=</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">feedback_gain</span><span class="p">[</span><span class="n">num_timesteps</span><span class="p">]</span>
@@ -730,7 +749,9 @@
 
         <span class="n">out</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span>
             <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ct_go_mats</span><span class="p">[</span><span class="n">kk</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">ct_come_mats</span><span class="p">[</span><span class="n">kk</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
-<div class="viewcode-block" id="ELQR.forward_pass"><a class="viewcode-back" href="../../../_autosummary/gncpy/control/elqr/gncpy.control.elqr.ELQR.html#gncpy.control.elqr.ELQR.forward_pass">[docs]</a>            <span class="o">@</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ct_go_vecs</span><span class="p">[</span><span class="n">kk</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">ct_come_vecs</span><span class="p">[</span><span class="n">kk</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+<div class="viewcode-block" id="ELQR.forward_pass">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/control/elqr/gncpy.control.elqr.ELQR.html#gncpy.control.elqr.ELQR.forward_pass">[docs]</a>
+            <span class="o">@</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ct_go_vecs</span><span class="p">[</span><span class="n">kk</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">ct_come_vecs</span><span class="p">[</span><span class="n">kk</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">hard_constraints</span>
@@ -794,6 +815,7 @@
             <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">traj</span></div>
+
 
     <span class="k">def</span> <span class="nf">draw_traj</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -869,7 +891,9 @@
 
         <span class="k">return</span> <span class="p">[]</span>
 
-<div class="viewcode-block" id="ELQR.reset"><a class="viewcode-back" href="../../../_autosummary/gncpy/control/elqr/gncpy.control.elqr.ELQR.html#gncpy.control.elqr.ELQR.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tt</span><span class="p">,</span> <span class="n">cur_state</span><span class="p">,</span> <span class="n">end_state</span><span class="p">):</span>
+<div class="viewcode-block" id="ELQR.reset">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/control/elqr/gncpy.control.elqr.ELQR.html#gncpy.control.elqr.ELQR.reset">[docs]</a>
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tt</span><span class="p">,</span> <span class="n">cur_state</span><span class="p">,</span> <span class="n">end_state</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Reset values for calculating the control parameters.</span>
 
 <span class="sd">        This generally does not need to be called outside of the class. It is</span>
@@ -922,7 +946,10 @@
 
         <span class="k">return</span> <span class="n">old_cost</span><span class="p">,</span> <span class="n">num_timesteps</span><span class="p">,</span> <span class="n">traj</span><span class="p">,</span> <span class="n">time_vec</span></div>
 
-<div class="viewcode-block" id="ELQR.calculate_control"><a class="viewcode-back" href="../../../_autosummary/gncpy/control/elqr/gncpy.control.elqr.ELQR.html#gncpy.control.elqr.ELQR.calculate_control">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_control</span><span class="p">(</span>
+
+<div class="viewcode-block" id="ELQR.calculate_control">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/control/elqr/gncpy.control.elqr.ELQR.html#gncpy.control.elqr.ELQR.calculate_control">[docs]</a>
+    <span class="k">def</span> <span class="nf">calculate_control</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">tt</span><span class="p">,</span>
         <span class="n">cur_state</span><span class="p">,</span>
@@ -1254,7 +1281,9 @@
 
         <span class="n">u</span> <span class="o">=</span> <span class="n">ctrl_signal</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
         <span class="n">details</span> <span class="o">=</span> <span class="p">(</span><span class="n">cost</span><span class="p">,</span> <span class="n">state_traj</span><span class="p">,</span> <span class="n">ctrl_signal</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">frame_list</span><span class="p">)</span>
-        <span class="k">return</span> <span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="o">*</span><span class="n">details</span><span class="p">)</span> <span class="k">if</span> <span class="n">provide_details</span> <span class="k">else</span> <span class="n">u</span></div></div>
+        <span class="k">return</span> <span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="o">*</span><span class="n">details</span><span class="p">)</span> <span class="k">if</span> <span class="n">provide_details</span> <span class="k">else</span> <span class="n">u</span></div>
+</div>
+
 </pre></div>
 
            </div>

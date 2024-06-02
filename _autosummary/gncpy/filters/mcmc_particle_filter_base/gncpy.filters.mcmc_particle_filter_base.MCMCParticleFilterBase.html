@@ -1,25 +1,27 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MCMCParticleFilterBase &mdash; GNCPy 2.0.1.dev0 documentation</title>
-      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
+
+  
     <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_autosummary/gncpy/filters/mcmc_particle_filter_base/gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.html" />
   <!--[if lt IE 9]>
     <script src="../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../../../_static/jquery.js"></script>
-        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-        <script src="../../../../_static/doctools.js"></script>
-        <script src="../../../../_static/sphinx_highlight.js"></script>
-        <script src="../../../../_static/clipboard.min.js"></script>
-        <script src="../../../../_static/copybutton.js"></script>
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=ba91f118"></script>
+        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../../_static/copybutton.js?v=cbcfbdad"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
@@ -268,15 +270,15 @@
            <div itemprop="articleBody">
              
   <section id="mcmcparticlefilterbase">
-<h1>MCMCParticleFilterBase<a class="headerlink" href="#mcmcparticlefilterbase" title="Permalink to this heading"></a></h1>
+<h1>MCMCParticleFilterBase<a class="headerlink" href="#mcmcparticlefilterbase" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MCMCParticleFilterBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_MCMC</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/mcmc_particle_filter_base.html#MCMCParticleFilterBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MCMCParticleFilterBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_MCMC</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/mcmc_particle_filter_base.html#MCMCParticleFilterBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="../particle_filter/gncpy.filters.particle_filter.ParticleFilter.html#gncpy.filters.particle_filter.ParticleFilter" title="gncpy.filters.particle_filter.ParticleFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParticleFilter</span></code></a></p>
 <p>Generic base class for Particle filters with an optional Markov Chain Monte Carlo move step.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.use_MCMC">
-<span class="sig-name descname"><span class="pre">use_MCMC</span></span><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.use_MCMC" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">use_MCMC</span></span><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.use_MCMC" title="Link to this definition"></a></dt>
 <dd><p>Flag indicating if the move step is run. The default is False.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -287,7 +289,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_MCMC</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/mcmc_particle_filter_base.html#MCMCParticleFilterBase.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.__init__" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_MCMC</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/mcmc_particle_filter_base.html#MCMCParticleFilterBase.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.__init__" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>
@@ -365,7 +367,7 @@
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.correct">
-<span class="sig-name descname"><span class="pre">correct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas_fun_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas_likely_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proposal_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.correct" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">correct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas_fun_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas_likely_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proposal_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.correct" title="Link to this definition"></a></dt>
 <dd><p>Corrects the state estimate.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -399,7 +401,7 @@ that were removed during the selection process.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.extract_dist">
-<span class="sig-name descname"><span class="pre">extract_dist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">make_copy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.extract_dist" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">extract_dist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">make_copy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.extract_dist" title="Link to this definition"></a></dt>
 <dd><p>Extracts the particle distribution used by the filter.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -417,7 +419,7 @@ performed. The default is True.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.init_from_dist">
-<span class="sig-name descname"><span class="pre">init_from_dist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">make_copy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.init_from_dist" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">init_from_dist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">make_copy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.init_from_dist" title="Link to this definition"></a></dt>
 <dd><p>Initialize the distribution from a distribution object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -435,7 +437,7 @@ performed. The default is True.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.init_particles">
-<span class="sig-name descname"><span class="pre">init_particles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">particle_lst</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.init_particles" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">init_particles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">particle_lst</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.init_particles" title="Link to this definition"></a></dt>
 <dd><p>Initializes the particle distribution with the given list of points.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -446,11 +448,11 @@ performed. The default is True.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.load_filter_state">
-<span class="sig-name descname"><span class="pre">load_filter_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filt_state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.load_filter_state" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">load_filter_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filt_state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.load_filter_state" title="Link to this definition"></a></dt>
 <dd><p>Initializes filter using saved filter state.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.filt_state">
-<span class="sig-name descname"><span class="pre">filt_state</span></span><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.filt_state" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">filt_state</span></span><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.filt_state" title="Link to this definition"></a></dt>
 <dd><p>Dictionary generated by <a class="reference internal" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.save_filter_state" title="gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.save_filter_state"><code class="xref py py-meth docutils literal notranslate"><span class="pre">save_filter_state()</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -463,7 +465,7 @@ performed. The default is True.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.move_particles">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">move_particles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">old_weights</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/mcmc_particle_filter_base.html#MCMCParticleFilterBase.move_particles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.move_particles" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">move_particles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">old_weights</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/mcmc_particle_filter_base.html#MCMCParticleFilterBase.move_particles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.move_particles" title="Link to this definition"></a></dt>
 <dd><p>Generic interface for the movement function.</p>
 <p>This must be overridden in the child class. It is recommended to keep
 the same function signature to allow for standardized wrappers.</p>
@@ -471,7 +473,7 @@ the same function signature to allow for standardized wrappers.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.plot_particles">
-<span class="sig-name descname"><span class="pre">plot_particles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Particle</span> <span class="pre">Distribution'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_lbl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'State'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_lbl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Probability'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.plot_particles" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">plot_particles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Particle</span> <span class="pre">Distribution'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_lbl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'State'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_lbl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Probability'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.plot_particles" title="Link to this definition"></a></dt>
 <dd><p>Plots the particle distribution.</p>
 <p>This will either plot a histogram for a single index, or plot a 2-d
 heatmap/histogram if a list of 2 indices are given. The 1-d case will
@@ -499,7 +501,7 @@ any values relating to title/axis text formatting.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.plot_weighted_particles">
-<span class="sig-name descname"><span class="pre">plot_weighted_particles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_lbl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'State'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_lbl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Weight'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Weighted</span> <span class="pre">Particle</span> <span class="pre">Distribution'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.plot_weighted_particles" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">plot_weighted_particles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_lbl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'State'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_lbl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Weight'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Weighted</span> <span class="pre">Particle</span> <span class="pre">Distribution'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.plot_weighted_particles" title="Link to this definition"></a></dt>
 <dd><p>Plots the weight vs state distribution of the particles.</p>
 <p>This generates a bar chart and only works for single indices.</p>
 <dl class="field-list simple">
@@ -525,7 +527,7 @@ any values relating to title/axis text formatting.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.predict">
-<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dyn_fun_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transition_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.predict" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dyn_fun_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transition_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.predict" title="Link to this definition"></a></dt>
 <dd><p>Predicts the next state.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -551,13 +553,13 @@ The default is ().</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.save_filter_state">
-<span class="sig-name descname"><span class="pre">save_filter_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.save_filter_state" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">save_filter_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.save_filter_state" title="Link to this definition"></a></dt>
 <dd><p>Saves filter variables so they can be restored later.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.set_measurement_model">
-<span class="sig-name descname"><span class="pre">set_measurement_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meas_mat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas_fun</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.set_measurement_model" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_measurement_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meas_mat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas_fun</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.set_measurement_model" title="Link to this definition"></a></dt>
 <dd><p>Sets the measurement model for the filter.</p>
 <p>This can either set the constant measurement matrix, or a set of
 non-linear functions (potentially time varying) to map states to
@@ -590,7 +592,7 @@ The default is None.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.set_state_model">
-<span class="sig-name descname"><span class="pre">set_state_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dyn_obj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dyn_fun</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.set_state_model" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_state_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dyn_obj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dyn_fun</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.set_state_model" title="Link to this definition"></a></dt>
 <dd><p>Sets the state model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -611,7 +613,7 @@ The default is None.</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.cov">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cov</span></span><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.cov" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cov</span></span><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.cov" title="Link to this definition"></a></dt>
 <dd><p>Read only covariance of the particles.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -625,7 +627,7 @@ The default is None.</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.meas_likelihood_fnc">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">meas_likelihood_fnc</span></span><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.meas_likelihood_fnc" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">meas_likelihood_fnc</span></span><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.meas_likelihood_fnc" title="Link to this definition"></a></dt>
 <dd><p>A function that returns the likelihood of the measurement.</p>
 <p>This must have the signature <code class="code docutils literal notranslate"><span class="pre">f(y,</span> <span class="pre">y_hat,</span> <span class="pre">*args)</span></code> where <cite>y</cite> is
 the measurement as an Nm x 1 numpy array, and <cite>y_hat</cite> is the estimated
@@ -647,7 +649,7 @@ weight</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.num_particles">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_particles</span></span><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.num_particles" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_particles</span></span><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.num_particles" title="Link to this definition"></a></dt>
 <dd><p>Read only number of particles used by the filter.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -661,7 +663,7 @@ weight</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.proposal_fnc">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">proposal_fnc</span></span><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.proposal_fnc" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">proposal_fnc</span></span><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.proposal_fnc" title="Link to this definition"></a></dt>
 <dd><p>A function that returns the probability for the proposal distribution.</p>
 <p>This must have the signature <code class="code docutils literal notranslate"><span class="pre">f(x_hat,</span> <span class="pre">x,</span> <span class="pre">y,</span> <span class="pre">*args)</span></code> where
 <cite>x_hat</cite> is a <a class="reference internal" href="../../distributions/gncpy.distributions.Particle.html#gncpy.distributions.Particle" title="gncpy.distributions.Particle"><code class="xref py py-class docutils literal notranslate"><span class="pre">gncpy.distributions.Particle</span></code></a> of the estimated
@@ -684,7 +686,7 @@ weight</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.proposal_sampling_fnc">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">proposal_sampling_fnc</span></span><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.proposal_sampling_fnc" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">proposal_sampling_fnc</span></span><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.proposal_sampling_fnc" title="Link to this definition"></a></dt>
 <dd><p>A function that returns a random sample from the proposal distribtion.</p>
 <p>This should be consistent with the PDF specified in the
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">gncpy.filters.ParticleFilter.proposal_fnc()</span></code>.</p>
@@ -700,7 +702,7 @@ weight</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.transition_prob_fnc">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">transition_prob_fnc</span></span><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.transition_prob_fnc" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">transition_prob_fnc</span></span><a class="headerlink" href="#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.transition_prob_fnc" title="Link to this definition"></a></dt>
 <dd><p>A function that returns the transition probability for the state.</p>
 <p>This must have the signature <code class="code docutils literal notranslate"><span class="pre">f(x_hat,</span> <span class="pre">x,</span> <span class="pre">*args)</span></code> where
 <cite>x_hat</cite> is an N x 1 numpy array representing the propagated state, and

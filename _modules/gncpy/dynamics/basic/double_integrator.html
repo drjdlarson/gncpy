@@ -1,24 +1,26 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>gncpy.dynamics.basic.double_integrator &mdash; GNCPy 2.0.1.dev0 documentation</title>
-      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
+
+  
     <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_modules/gncpy/dynamics/basic/double_integrator.html" />
   <!--[if lt IE 9]>
     <script src="../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../../../_static/jquery.js"></script>
-        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-        <script src="../../../../_static/doctools.js"></script>
-        <script src="../../../../_static/sphinx_highlight.js"></script>
-        <script src="../../../../_static/clipboard.min.js"></script>
-        <script src="../../../../_static/copybutton.js"></script>
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=ba91f118"></script>
+        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../../_static/copybutton.js?v=cbcfbdad"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
@@ -269,7 +271,9 @@
 <span class="kn">from</span> <span class="nn">.linear_dynamics_base</span> <span class="kn">import</span> <span class="n">LinearDynamicsBase</span>
 
 
-<div class="viewcode-block" id="DoubleIntegrator"><a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/basic/double_integrator/gncpy.dynamics.basic.double_integrator.DoubleIntegrator.html#gncpy.dynamics.basic.double_integrator.DoubleIntegrator">[docs]</a><span class="k">class</span> <span class="nc">DoubleIntegrator</span><span class="p">(</span><span class="n">LinearDynamicsBase</span><span class="p">):</span>
+<div class="viewcode-block" id="DoubleIntegrator">
+<a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/basic/double_integrator/gncpy.dynamics.basic.double_integrator.DoubleIntegrator.html#gncpy.dynamics.basic.double_integrator.DoubleIntegrator">[docs]</a>
+<span class="k">class</span> <span class="nc">DoubleIntegrator</span><span class="p">(</span><span class="n">LinearDynamicsBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Implements a double integrator model.</span>
 
 <span class="sd">    Todo</span>
@@ -277,13 +281,16 @@
 <span class="sd">    Implement the control model in c++ for this class</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="DoubleIntegrator.__init__"><a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/basic/double_integrator/gncpy.dynamics.basic.double_integrator.DoubleIntegrator.html#gncpy.dynamics.basic.double_integrator.DoubleIntegrator.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="DoubleIntegrator.__init__">
+<a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/basic/double_integrator/gncpy.dynamics.basic.double_integrator.DoubleIntegrator.html#gncpy.dynamics.basic.double_integrator.DoubleIntegrator.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__controlParams</span> <span class="o">=</span> <span class="n">cpp_control</span><span class="o">.</span><span class="n">ControlParams</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__stateTransParams</span> <span class="o">=</span> <span class="n">cpp_bindings</span><span class="o">.</span><span class="n">StateTransParams</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__model</span> <span class="o">=</span> <span class="n">cpp_bindings</span><span class="o">.</span><span class="n">DoubleIntegrator</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
         <span class="k">if</span> <span class="s2">&quot;control_model&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">and</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;control_model&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__model</span><span class="o">.</span><span class="n">set_control_model</span><span class="p">(</span><span class="n">kwargs</span><span class="p">(</span><span class="s2">&quot;control_model&quot;</span><span class="p">))</span></div>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">allow_cpp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -302,7 +309,9 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;must be ILinearControlModel type&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="DoubleIntegrator.get_input_mat"><a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/basic/double_integrator/gncpy.dynamics.basic.double_integrator.DoubleIntegrator.html#gncpy.dynamics.basic.double_integrator.DoubleIntegrator.get_input_mat">[docs]</a>    <span class="k">def</span> <span class="nf">get_input_mat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="o">*</span><span class="n">ctrl_args</span><span class="p">):</span>
+<div class="viewcode-block" id="DoubleIntegrator.get_input_mat">
+<a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/basic/double_integrator/gncpy.dynamics.basic.double_integrator.DoubleIntegrator.html#gncpy.dynamics.basic.double_integrator.DoubleIntegrator.get_input_mat">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_input_mat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="o">*</span><span class="n">ctrl_args</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates the input matrix from the control model.</span>
 
 <span class="sd">        This calculates the jacobian of the control model. If no control model</span>
@@ -326,6 +335,7 @@
             <span class="k">raise</span> <span class="ne">RuntimeWarning</span><span class="p">(</span><span class="s2">&quot;Control model is not set.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">args_to_params</span><span class="p">((</span><span class="mf">0.1</span><span class="p">,),</span> <span class="n">ctrl_args</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_control_model</span><span class="o">.</span><span class="n">get_input_mat</span><span class="p">(</span><span class="n">timestep</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__controlParams</span><span class="p">)</span></div>
+
 
     <span class="c1"># must be provided if allow_cpp is true</span>
     <span class="k">def</span> <span class="nf">args_to_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_args</span><span class="p">,</span> <span class="n">control_args</span><span class="p">):</span>
@@ -356,7 +366,9 @@
     <span class="k">def</span> <span class="nf">state_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__model</span><span class="o">.</span><span class="n">state_names</span><span class="p">()</span>
 
-<div class="viewcode-block" id="DoubleIntegrator.propagate_state"><a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/basic/double_integrator/gncpy.dynamics.basic.double_integrator.DoubleIntegrator.html#gncpy.dynamics.basic.double_integrator.DoubleIntegrator.propagate_state">[docs]</a>    <span class="k">def</span> <span class="nf">propagate_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">u</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">state_args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ctrl_args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="DoubleIntegrator.propagate_state">
+<a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/basic/double_integrator/gncpy.dynamics.basic.double_integrator.DoubleIntegrator.html#gncpy.dynamics.basic.double_integrator.DoubleIntegrator.propagate_state">[docs]</a>
+    <span class="k">def</span> <span class="nf">propagate_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">u</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">state_args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ctrl_args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">state_args</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;state_args must be (dt,) not None&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__model</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="n">state_args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -370,7 +382,10 @@
             <span class="n">next_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_constraint</span><span class="p">(</span><span class="n">timestep</span><span class="p">,</span> <span class="n">next_state</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">next_state</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="DoubleIntegrator.get_dis_process_noise_mat"><a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/basic/double_integrator/gncpy.dynamics.basic.double_integrator.DoubleIntegrator.html#gncpy.dynamics.basic.double_integrator.DoubleIntegrator.get_dis_process_noise_mat">[docs]</a>    <span class="k">def</span> <span class="nf">get_dis_process_noise_mat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">proc_cov</span><span class="p">):</span>
+
+<div class="viewcode-block" id="DoubleIntegrator.get_dis_process_noise_mat">
+<a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/basic/double_integrator/gncpy.dynamics.basic.double_integrator.DoubleIntegrator.html#gncpy.dynamics.basic.double_integrator.DoubleIntegrator.get_dis_process_noise_mat">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_dis_process_noise_mat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">proc_cov</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Discrete process noise matrix.</span>
 
 <span class="sd">        Parameters</span>
@@ -389,7 +404,10 @@
         <span class="n">gamma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">gamma</span> <span class="o">@</span> <span class="n">proc_cov</span> <span class="o">@</span> <span class="n">gamma</span><span class="o">.</span><span class="n">T</span></div>
 
-<div class="viewcode-block" id="DoubleIntegrator.get_state_mat"><a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/basic/double_integrator/gncpy.dynamics.basic.double_integrator.DoubleIntegrator.html#gncpy.dynamics.basic.double_integrator.DoubleIntegrator.get_state_mat">[docs]</a>    <span class="k">def</span> <span class="nf">get_state_mat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">dt</span><span class="p">):</span>
+
+<div class="viewcode-block" id="DoubleIntegrator.get_state_mat">
+<a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/basic/double_integrator/gncpy.dynamics.basic.double_integrator.DoubleIntegrator.html#gncpy.dynamics.basic.double_integrator.DoubleIntegrator.get_state_mat">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_state_mat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">dt</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Class method for getting the discrete time state matrix.</span>
 
 <span class="sd">        Parameters</span>
@@ -406,7 +424,9 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__model</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="n">dt</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__model</span><span class="o">.</span><span class="n">get_state_mat</span><span class="p">(</span><span class="n">timestep</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__stateTransParams</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__model</span><span class="o">.</span><span class="n">get_state_mat</span><span class="p">(</span><span class="n">timestep</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__stateTransParams</span><span class="p">)</span></div>
+</div>
+
 </pre></div>
 
            </div>

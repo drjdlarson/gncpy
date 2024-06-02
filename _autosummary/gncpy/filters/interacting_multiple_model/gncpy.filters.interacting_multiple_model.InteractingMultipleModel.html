@@ -1,25 +1,27 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>InteractingMultipleModel &mdash; GNCPy 2.0.1.dev0 documentation</title>
-      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
+
+  
     <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_autosummary/gncpy/filters/interacting_multiple_model/gncpy.filters.interacting_multiple_model.InteractingMultipleModel.html" />
   <!--[if lt IE 9]>
     <script src="../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../../../_static/jquery.js"></script>
-        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-        <script src="../../../../_static/doctools.js"></script>
-        <script src="../../../../_static/sphinx_highlight.js"></script>
-        <script src="../../../../_static/clipboard.min.js"></script>
-        <script src="../../../../_static/copybutton.js"></script>
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=ba91f118"></script>
+        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../../_static/copybutton.js?v=cbcfbdad"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
@@ -267,10 +269,10 @@
            <div itemprop="articleBody">
              
   <section id="interactingmultiplemodel">
-<h1>InteractingMultipleModel<a class="headerlink" href="#interactingmultiplemodel" title="Permalink to this heading"></a></h1>
+<h1>InteractingMultipleModel<a class="headerlink" href="#interactingmultiplemodel" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="gncpy.filters.interacting_multiple_model.InteractingMultipleModel">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InteractingMultipleModel</span></span><a class="reference internal" href="../../../../_modules/gncpy/filters/interacting_multiple_model.html#InteractingMultipleModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.interacting_multiple_model.InteractingMultipleModel" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InteractingMultipleModel</span></span><a class="reference internal" href="../../../../_modules/gncpy/filters/interacting_multiple_model.html#InteractingMultipleModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.interacting_multiple_model.InteractingMultipleModel" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Implementation of an InteractingMultipleModel (IMM) filter.</p>
 <p>This filter combines several inner filters with different dynamic models
@@ -278,7 +280,7 @@ and selects the best estimate based on prior predictions and measurement
 updates.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.interacting_multiple_model.InteractingMultipleModel.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/interacting_multiple_model.html#InteractingMultipleModel.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.interacting_multiple_model.InteractingMultipleModel.__init__" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/interacting_multiple_model.html#InteractingMultipleModel.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.interacting_multiple_model.InteractingMultipleModel.__init__" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>
@@ -323,17 +325,17 @@ updates.</p>
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.interacting_multiple_model.InteractingMultipleModel.correct">
-<span class="sig-name descname"><span class="pre">correct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/interacting_multiple_model.html#InteractingMultipleModel.correct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.interacting_multiple_model.InteractingMultipleModel.correct" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">correct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/interacting_multiple_model.html#InteractingMultipleModel.correct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.interacting_multiple_model.InteractingMultipleModel.correct" title="Link to this definition"></a></dt>
 <dd><p>Measurement correction step for the IMM filter.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.interacting_multiple_model.InteractingMultipleModel.load_filter_state">
-<span class="sig-name descname"><span class="pre">load_filter_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filt_state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/interacting_multiple_model.html#InteractingMultipleModel.load_filter_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.interacting_multiple_model.InteractingMultipleModel.load_filter_state" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">load_filter_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filt_state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/interacting_multiple_model.html#InteractingMultipleModel.load_filter_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.interacting_multiple_model.InteractingMultipleModel.load_filter_state" title="Link to this definition"></a></dt>
 <dd><p>Initializes filter using saved filter state.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.filters.interacting_multiple_model.InteractingMultipleModel.filt_state">
-<span class="sig-name descname"><span class="pre">filt_state</span></span><a class="headerlink" href="#gncpy.filters.interacting_multiple_model.InteractingMultipleModel.filt_state" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">filt_state</span></span><a class="headerlink" href="#gncpy.filters.interacting_multiple_model.InteractingMultipleModel.filt_state" title="Link to this definition"></a></dt>
 <dd><p>Dictionary generated by <a class="reference internal" href="#gncpy.filters.interacting_multiple_model.InteractingMultipleModel.save_filter_state" title="gncpy.filters.interacting_multiple_model.InteractingMultipleModel.save_filter_state"><code class="xref py py-meth docutils literal notranslate"><span class="pre">save_filter_state()</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -346,13 +348,13 @@ updates.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.interacting_multiple_model.InteractingMultipleModel.predict">
-<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/interacting_multiple_model.html#InteractingMultipleModel.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.interacting_multiple_model.InteractingMultipleModel.predict" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/interacting_multiple_model.html#InteractingMultipleModel.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.interacting_multiple_model.InteractingMultipleModel.predict" title="Link to this definition"></a></dt>
 <dd><p>Prediction step for the IMM filter.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.interacting_multiple_model.InteractingMultipleModel.save_filter_state">
-<span class="sig-name descname"><span class="pre">save_filter_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/interacting_multiple_model.html#InteractingMultipleModel.save_filter_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.interacting_multiple_model.InteractingMultipleModel.save_filter_state" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">save_filter_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/interacting_multiple_model.html#InteractingMultipleModel.save_filter_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.interacting_multiple_model.InteractingMultipleModel.save_filter_state" title="Link to this definition"></a></dt>
 <dd><p>Saves filter variables so they can be restored later.</p>
 <p>Note that to pickle the resulting dictionary the <code class="code docutils literal notranslate"><span class="pre">dill</span></code> package
 may need to be used due to potential pickling of functions.</p>
@@ -360,13 +362,13 @@ may need to be used due to potential pickling of functions.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.interacting_multiple_model.InteractingMultipleModel.set_models">
-<span class="sig-name descname"><span class="pre">set_models</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_lst</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_trans</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_means</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_covs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/interacting_multiple_model.html#InteractingMultipleModel.set_models"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.interacting_multiple_model.InteractingMultipleModel.set_models" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_models</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_lst</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_trans</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_means</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_covs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/interacting_multiple_model.html#InteractingMultipleModel.set_models"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.interacting_multiple_model.InteractingMultipleModel.set_models" title="Link to this definition"></a></dt>
 <dd><p>Set different filters and dynamics models for an IMM filter.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gncpy.filters.interacting_multiple_model.InteractingMultipleModel.cov">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cov</span></span><a class="headerlink" href="#gncpy.filters.interacting_multiple_model.InteractingMultipleModel.cov" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cov</span></span><a class="headerlink" href="#gncpy.filters.interacting_multiple_model.InteractingMultipleModel.cov" title="Link to this definition"></a></dt>
 <dd><p>Covariance for the IMM Filter.</p>
 </dd></dl>
 

@@ -1,25 +1,27 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../../../../../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SimpleUAVHazards2d &mdash; GNCPy 2.0.1.dev0 documentation</title>
-      <link rel="stylesheet" href="../../../../../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../../../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../../../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../../../../_static/copybutton.css?v=76b2166b" />
+
+  
     <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_autosummary/gncpy/planning/reinforcement_learning/envs/simple2d/simpleUAV2d/gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.html" />
   <!--[if lt IE 9]>
     <script src="../../../../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../../../../../../_static/jquery.js"></script>
-        <script src="../../../../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../../../../../../" id="documentation_options" src="../../../../../../../_static/documentation_options.js"></script>
-        <script src="../../../../../../../_static/doctools.js"></script>
-        <script src="../../../../../../../_static/sphinx_highlight.js"></script>
-        <script src="../../../../../../../_static/clipboard.min.js"></script>
-        <script src="../../../../../../../_static/copybutton.js"></script>
+        <script src="../../../../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../../../../_static/documentation_options.js?v=ba91f118"></script>
+        <script src="../../../../../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../../../../../_static/copybutton.js?v=cbcfbdad"></script>
     <script src="../../../../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../../../search.html" />
@@ -270,17 +272,17 @@
            <div itemprop="articleBody">
              
   <section id="simpleuavhazards2d">
-<h1>SimpleUAVHazards2d<a class="headerlink" href="#simpleuavhazards2d" title="Permalink to this heading"></a></h1>
+<h1>SimpleUAVHazards2d<a class="headerlink" href="#simpleuavhazards2d" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SimpleUAVHazards2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'SimpleUAVHazards2d.yaml'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/gncpy/planning/reinforcement_learning/envs/simple2d/simpleUAV2d.html#SimpleUAVHazards2d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SimpleUAVHazards2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'SimpleUAVHazards2d.yaml'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/gncpy/planning/reinforcement_learning/envs/simple2d/simpleUAV2d.html#SimpleUAVHazards2d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAV2d.html#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAV2d" title="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAV2d"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleUAV2d</span></code></a></p>
 <p>Simple 2d UAV environment with hazards.</p>
 <p>This follows the same underlying game logic as the <a class="reference internal" href="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAV2d.html#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAV2d" title="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAV2d"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleUAV2d</span></code></a>
 environment but has some hazards added to its default configuration.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'SimpleUAVHazards2d.yaml'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/gncpy/planning/reinforcement_learning/envs/simple2d/simpleUAV2d.html#SimpleUAVHazards2d.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.__init__" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'SimpleUAVHazards2d.yaml'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../../../_modules/gncpy/planning/reinforcement_learning/envs/simple2d/simpleUAV2d.html#SimpleUAVHazards2d.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.__init__" title="Link to this definition"></a></dt>
 <dd><p>Initialize an object.</p>
 </dd></dl>
 
@@ -349,7 +351,7 @@ environment but has some hazards added to its default configuration.</p>
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.calc_obs_space">
-<span class="sig-name descname"><span class="pre">calc_obs_space</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.calc_obs_space" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">calc_obs_space</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.calc_obs_space" title="Link to this definition"></a></dt>
 <dd><p>Determines the observation space based on specified options.</p>
 <p>If a dictionary space is used, the keys are <code class="code docutils literal notranslate"><span class="pre">'img'</span></code> for the image
 of the game screen and <code class="code docutils literal notranslate"><span class="pre">'aux'</span></code> for the auxilary state vector. Both
@@ -369,13 +371,13 @@ values are boxes.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.close">
-<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.close" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.close" title="Link to this definition"></a></dt>
 <dd><p>Nicely shuts down the environment.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.gen_act_map">
-<span class="sig-name descname"><span class="pre">gen_act_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.gen_act_map" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">gen_act_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.gen_act_map" title="Link to this definition"></a></dt>
 <dd><p>Maps actions to entity ids for the game.</p>
 <p>This assumes there is only 1 player and if there are more then all
 players get the same action.</p>
@@ -394,7 +396,7 @@ players get the same action.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.reset">
-<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.reset" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.reset" title="Link to this definition"></a></dt>
 <dd><p>Resets the environment to an initial state.</p>
 <p>This method can reset the environment’s random number generator(s)
 if seed is an integer or if the environment has not yet initialized a
@@ -432,7 +434,7 @@ observation. This info should be analogous to the info returned in
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.seed">
-<span class="sig-name descname"><span class="pre">seed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.seed" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">seed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.seed" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Deprecated<span class="colon">:</span></dt>
 <dd class="field-odd"><p>function that sets the seed for the environment’s random number generator(s).</p>
@@ -467,7 +469,7 @@ this won’t be true <cite>if seed=None</cite>, for example.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.step">
-<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.step" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.step" title="Link to this definition"></a></dt>
 <dd><p>Perform one iteration of the game loop.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -488,25 +490,25 @@ this won’t be true <cite>if seed=None</cite>, for example.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.action_space">
-<span class="sig-name descname"><span class="pre">action_space</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Space</span><span class="p"><span class="pre">[</span></span><span class="pre">ActType</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Box(-1.0,</span> <span class="pre">1.0,</span> <span class="pre">(2,),</span> <span class="pre">float32)</span></em><a class="headerlink" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.action_space" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">action_space</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">spaces.Space</span><span class="p"><span class="pre">[</span></span><span class="pre">ActType</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Box(-1.0,</span> <span class="pre">1.0,</span> <span class="pre">(2,),</span> <span class="pre">float32)</span></em><a class="headerlink" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.action_space" title="Link to this definition"></a></dt>
 <dd><p>Space for available actions.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.metadata">
-<span class="sig-name descname"><span class="pre">metadata</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'render_fps':</span> <span class="pre">60,</span> <span class="pre">'render_modes':</span> <span class="pre">['human',</span> <span class="pre">'single_rgb_array']}</span></em><a class="headerlink" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.metadata" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">metadata</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'render_fps':</span> <span class="pre">60,</span> <span class="pre">'render_modes':</span> <span class="pre">['human',</span> <span class="pre">'single_rgb_array']}</span></em><a class="headerlink" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.metadata" title="Link to this definition"></a></dt>
 <dd><p>Additional metadata for the class.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.np_random">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">np_random</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">RandomNumberGenerator</span></em><a class="headerlink" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.np_random" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">np_random</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">RandomNumberGenerator</span></em><a class="headerlink" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.np_random" title="Link to this definition"></a></dt>
 <dd><p>Returns the environment’s internal <code class="xref py py-attr docutils literal notranslate"><span class="pre">_np_random</span></code> that if not set will initialise with a random seed.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.unwrapped">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">unwrapped</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Env</span></em><a class="headerlink" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.unwrapped" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">unwrapped</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Env</span></em><a class="headerlink" href="#gncpy.planning.reinforcement_learning.envs.simple2d.simpleUAV2d.SimpleUAVHazards2d.unwrapped" title="Link to this definition"></a></dt>
 <dd><p>Returns the base non-wrapped environment.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>

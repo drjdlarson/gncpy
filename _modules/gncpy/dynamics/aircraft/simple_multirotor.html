@@ -1,24 +1,26 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>gncpy.dynamics.aircraft.simple_multirotor &mdash; GNCPy 2.0.1.dev0 documentation</title>
-      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
+
+  
     <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_modules/gncpy/dynamics/aircraft/simple_multirotor.html" />
   <!--[if lt IE 9]>
     <script src="../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../../../_static/jquery.js"></script>
-        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-        <script src="../../../../_static/doctools.js"></script>
-        <script src="../../../../_static/sphinx_highlight.js"></script>
-        <script src="../../../../_static/clipboard.min.js"></script>
-        <script src="../../../../_static/copybutton.js"></script>
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=ba91f118"></script>
+        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../../_static/copybutton.js?v=cbcfbdad"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
@@ -279,7 +281,9 @@
 <span class="n">d2r</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">r2d</span>
 
 
-<div class="viewcode-block" id="AeroParams"><a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.AeroParams.html#gncpy.dynamics.aircraft.simple_multirotor.AeroParams">[docs]</a><span class="k">class</span> <span class="nc">AeroParams</span><span class="p">:</span>
+<div class="viewcode-block" id="AeroParams">
+<a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.AeroParams.html#gncpy.dynamics.aircraft.simple_multirotor.AeroParams">[docs]</a>
+<span class="k">class</span> <span class="nc">AeroParams</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Aerodynamic parameters to be parsed by the yaml parser.</span>
 
 <span class="sd">    Attributes</span>
@@ -288,11 +292,17 @@
 <span class="sd">        Drag coefficent.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="AeroParams.__init__"><a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.AeroParams.html#gncpy.dynamics.aircraft.simple_multirotor.AeroParams.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cd</span> <span class="o">=</span> <span class="mi">0</span></div></div>
+<div class="viewcode-block" id="AeroParams.__init__">
+<a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.AeroParams.html#gncpy.dynamics.aircraft.simple_multirotor.AeroParams.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cd</span> <span class="o">=</span> <span class="mi">0</span></div>
+</div>
 
 
-<div class="viewcode-block" id="MassParams"><a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.MassParams.html#gncpy.dynamics.aircraft.simple_multirotor.MassParams">[docs]</a><span class="k">class</span> <span class="nc">MassParams</span><span class="p">:</span>
+
+<div class="viewcode-block" id="MassParams">
+<a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.MassParams.html#gncpy.dynamics.aircraft.simple_multirotor.MassParams">[docs]</a>
+<span class="k">class</span> <span class="nc">MassParams</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Mass parameters to be parsed by the yaml parser.</span>
 
 <span class="sd">    Attributes</span>
@@ -305,13 +315,19 @@
 <span class="sd">        Each element is a list such that it creates the moment of inertia matrix.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="MassParams.__init__"><a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.MassParams.html#gncpy.dynamics.aircraft.simple_multirotor.MassParams.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="MassParams.__init__">
+<a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.MassParams.html#gncpy.dynamics.aircraft.simple_multirotor.MassParams.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cg_m</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mass_kg</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">inertia_kgm2</span> <span class="o">=</span> <span class="p">[]</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inertia_kgm2</span> <span class="o">=</span> <span class="p">[]</span></div>
+</div>
 
 
-<div class="viewcode-block" id="PropParams"><a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.PropParams.html#gncpy.dynamics.aircraft.simple_multirotor.PropParams">[docs]</a><span class="k">class</span> <span class="nc">PropParams</span><span class="p">:</span>
+
+<div class="viewcode-block" id="PropParams">
+<a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.PropParams.html#gncpy.dynamics.aircraft.simple_multirotor.PropParams">[docs]</a>
+<span class="k">class</span> <span class="nc">PropParams</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Propeller parameters to be parsed by the yaml parser.</span>
 
 <span class="sd">    Attributes</span>
@@ -322,12 +338,18 @@
 <span class="sd">        coefficents for the polynomial modeling the torque from the propellers.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="PropParams.__init__"><a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.PropParams.html#gncpy.dynamics.aircraft.simple_multirotor.PropParams.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PropParams.__init__">
+<a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.PropParams.html#gncpy.dynamics.aircraft.simple_multirotor.PropParams.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">poly_thrust</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">poly_torque</span> <span class="o">=</span> <span class="p">[]</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">poly_torque</span> <span class="o">=</span> <span class="p">[]</span></div>
+</div>
 
 
-<div class="viewcode-block" id="MotorParams"><a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.MotorParams.html#gncpy.dynamics.aircraft.simple_multirotor.MotorParams">[docs]</a><span class="k">class</span> <span class="nc">MotorParams</span><span class="p">:</span>
+
+<div class="viewcode-block" id="MotorParams">
+<a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.MotorParams.html#gncpy.dynamics.aircraft.simple_multirotor.MotorParams">[docs]</a>
+<span class="k">class</span> <span class="nc">MotorParams</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Motor parameters to be parsed by the yaml parser.</span>
 
 <span class="sd">    Attributes</span>
@@ -338,9 +360,12 @@
 <span class="sd">        Each element is +/-1 indicating the direction the motor spins.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="MotorParams.__init__"><a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.MotorParams.html#gncpy.dynamics.aircraft.simple_multirotor.MotorParams.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="MotorParams.__init__">
+<a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.MotorParams.html#gncpy.dynamics.aircraft.simple_multirotor.MotorParams.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pos_m</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dir</span> <span class="o">=</span> <span class="p">[]</span></div>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">num_motors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -348,7 +373,10 @@
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dir</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="GeoParams"><a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.GeoParams.html#gncpy.dynamics.aircraft.simple_multirotor.GeoParams">[docs]</a><span class="k">class</span> <span class="nc">GeoParams</span><span class="p">:</span>
+
+<div class="viewcode-block" id="GeoParams">
+<a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.GeoParams.html#gncpy.dynamics.aircraft.simple_multirotor.GeoParams">[docs]</a>
+<span class="k">class</span> <span class="nc">GeoParams</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Geometric parameters to be parsed by the yaml parser.</span>
 
 <span class="sd">    Attributes</span>
@@ -358,11 +386,17 @@
 <span class="sd">        different angles.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="GeoParams.__init__"><a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.GeoParams.html#gncpy.dynamics.aircraft.simple_multirotor.GeoParams.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">front_area_m2</span> <span class="o">=</span> <span class="p">[]</span></div></div>
+<div class="viewcode-block" id="GeoParams.__init__">
+<a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.GeoParams.html#gncpy.dynamics.aircraft.simple_multirotor.GeoParams.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">front_area_m2</span> <span class="o">=</span> <span class="p">[]</span></div>
+</div>
 
 
-<div class="viewcode-block" id="AircraftParams"><a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.AircraftParams.html#gncpy.dynamics.aircraft.simple_multirotor.AircraftParams">[docs]</a><span class="k">class</span> <span class="nc">AircraftParams</span><span class="p">:</span>
+
+<div class="viewcode-block" id="AircraftParams">
+<a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.AircraftParams.html#gncpy.dynamics.aircraft.simple_multirotor.AircraftParams">[docs]</a>
+<span class="k">class</span> <span class="nc">AircraftParams</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Aircraft parameters to be parsed by the yaml parser.</span>
 
 <span class="sd">    Attributes</span>
@@ -379,12 +413,16 @@
 <span class="sd">        Motor parameters</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="AircraftParams.__init__"><a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.AircraftParams.html#gncpy.dynamics.aircraft.simple_multirotor.AircraftParams.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="AircraftParams.__init__">
+<a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.AircraftParams.html#gncpy.dynamics.aircraft.simple_multirotor.AircraftParams.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">aero</span> <span class="o">=</span> <span class="n">AeroParams</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mass</span> <span class="o">=</span> <span class="n">MassParams</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">geo</span> <span class="o">=</span> <span class="n">GeoParams</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prop</span> <span class="o">=</span> <span class="n">PropParams</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">motor</span> <span class="o">=</span> <span class="n">MotorParams</span><span class="p">()</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">motor</span> <span class="o">=</span> <span class="n">MotorParams</span><span class="p">()</span></div>
+</div>
+
 
 
 <span class="n">yaml</span><span class="o">.</span><span class="n">register_class</span><span class="p">(</span><span class="n">AeroParams</span><span class="p">)</span>
@@ -395,10 +433,14 @@
 <span class="n">yaml</span><span class="o">.</span><span class="n">register_class</span><span class="p">(</span><span class="n">AircraftParams</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="Effector"><a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.Effector.html#gncpy.dynamics.aircraft.simple_multirotor.Effector">[docs]</a><span class="k">class</span> <span class="nc">Effector</span><span class="p">:</span>
+<div class="viewcode-block" id="Effector">
+<a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.Effector.html#gncpy.dynamics.aircraft.simple_multirotor.Effector">[docs]</a>
+<span class="k">class</span> <span class="nc">Effector</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Defines an effector.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="Effector.step"><a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.Effector.html#gncpy.dynamics.aircraft.simple_multirotor.Effector.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_cmds</span><span class="p">):</span>
+<div class="viewcode-block" id="Effector.step">
+<a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.Effector.html#gncpy.dynamics.aircraft.simple_multirotor.Effector.step">[docs]</a>
+    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_cmds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Converts input commands to effector commands.</span>
 
 <span class="sd">        Returns</span>
@@ -406,7 +448,9 @@
 <span class="sd">        numpy array</span>
 <span class="sd">            Effector commands</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">input_cmds</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span></div></div>
+        <span class="k">return</span> <span class="n">input_cmds</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span></div>
+</div>
+
 
 
 <span class="k">class</span> <span class="nc">ListEnum</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">):</span>
@@ -552,7 +596,9 @@
     <span class="n">terrain_alt_wgs84</span> <span class="o">=</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="Vehicle"><a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.Vehicle.html#gncpy.dynamics.aircraft.simple_multirotor.Vehicle">[docs]</a><span class="k">class</span> <span class="nc">Vehicle</span><span class="p">:</span>
+<div class="viewcode-block" id="Vehicle">
+<a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.Vehicle.html#gncpy.dynamics.aircraft.simple_multirotor.Vehicle">[docs]</a>
+<span class="k">class</span> <span class="nc">Vehicle</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Implements the base vehicle.</span>
 
 <span class="sd">    Attributes</span>
@@ -571,7 +617,9 @@
 
     <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;state&quot;</span><span class="p">,</span> <span class="s2">&quot;params&quot;</span><span class="p">,</span> <span class="s2">&quot;ref_lat&quot;</span><span class="p">,</span> <span class="s2">&quot;ref_lon&quot;</span><span class="p">,</span> <span class="s2">&quot;takenoff&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Vehicle.__init__"><a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.Vehicle.html#gncpy.dynamics.aircraft.simple_multirotor.Vehicle.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+<div class="viewcode-block" id="Vehicle.__init__">
+<a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.Vehicle.html#gncpy.dynamics.aircraft.simple_multirotor.Vehicle.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize an object.</span>
 
 <span class="sd">        Parameters</span>
@@ -586,10 +634,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">ref_lon</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">takenoff</span> <span class="o">=</span> <span class="kc">False</span></div>
 
+
     <span class="k">def</span> <span class="nf">_get_dcm_earth2body</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">v_smap</span><span class="o">.</span><span class="n">dcm_earth2body</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
 
-<div class="viewcode-block" id="Vehicle.set_dcm_earth2body"><a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.Vehicle.html#gncpy.dynamics.aircraft.simple_multirotor.Vehicle.set_dcm_earth2body">[docs]</a>    <span class="k">def</span> <span class="nf">set_dcm_earth2body</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mat</span><span class="p">):</span>
+<div class="viewcode-block" id="Vehicle.set_dcm_earth2body">
+<a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.Vehicle.html#gncpy.dynamics.aircraft.simple_multirotor.Vehicle.set_dcm_earth2body">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_dcm_earth2body</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mat</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets the dcm in the state vector.</span>
 
 <span class="sd">        Parameters</span>
@@ -598,6 +649,7 @@
 <span class="sd">            Value to assign to the dcm.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">v_smap</span><span class="o">.</span><span class="n">dcm_earth2body</span><span class="p">]</span> <span class="o">=</span> <span class="n">mat</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span></div>
+
 
     <span class="k">def</span> <span class="nf">_calc_aero_force_mom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dyn_pres</span><span class="p">,</span> <span class="n">body_vel</span><span class="p">):</span>
         <span class="n">mom</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
@@ -669,7 +721,9 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">a_f</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">a_m</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Vehicle.eul_to_dcm"><a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.Vehicle.html#gncpy.dynamics.aircraft.simple_multirotor.Vehicle.eul_to_dcm">[docs]</a>    <span class="k">def</span> <span class="nf">eul_to_dcm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">,</span> <span class="n">r3</span><span class="p">):</span>
+<div class="viewcode-block" id="Vehicle.eul_to_dcm">
+<a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.Vehicle.html#gncpy.dynamics.aircraft.simple_multirotor.Vehicle.eul_to_dcm">[docs]</a>
+    <span class="k">def</span> <span class="nf">eul_to_dcm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">,</span> <span class="n">r3</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert euler angles to a DCM.</span>
 
 <span class="sd">        Parameters</span>
@@ -700,6 +754,7 @@
                 <span class="p">[</span><span class="n">cx</span> <span class="o">*</span> <span class="n">sy</span> <span class="o">*</span> <span class="n">cz</span> <span class="o">+</span> <span class="n">sx</span> <span class="o">*</span> <span class="n">sz</span><span class="p">,</span> <span class="n">cx</span> <span class="o">*</span> <span class="n">sy</span> <span class="o">*</span> <span class="n">sz</span> <span class="o">-</span> <span class="n">sx</span> <span class="o">*</span> <span class="n">cz</span><span class="p">,</span> <span class="n">cx</span> <span class="o">*</span> <span class="n">cy</span><span class="p">],</span>
             <span class="p">]</span>
         <span class="p">)</span></div>
+
 
     <span class="k">def</span> <span class="nf">_six_dof_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force</span><span class="p">,</span> <span class="n">mom</span><span class="p">,</span> <span class="n">dt</span><span class="p">):</span>
         <span class="k">def</span> <span class="nf">ode_ang</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
@@ -786,7 +841,9 @@
             <span class="n">ned_accel</span><span class="p">,</span>
         <span class="p">)</span>
 
-<div class="viewcode-block" id="Vehicle.calc_derived_states"><a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.Vehicle.html#gncpy.dynamics.aircraft.simple_multirotor.Vehicle.calc_derived_states">[docs]</a>    <span class="k">def</span> <span class="nf">calc_derived_states</span><span class="p">(</span>
+<div class="viewcode-block" id="Vehicle.calc_derived_states">
+<a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.Vehicle.html#gncpy.dynamics.aircraft.simple_multirotor.Vehicle.calc_derived_states">[docs]</a>
+    <span class="k">def</span> <span class="nf">calc_derived_states</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">terrain_alt_wgs84</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> <span class="n">speed_of_sound</span><span class="p">,</span> <span class="n">ned_vel</span><span class="p">,</span> <span class="n">ned_pos</span><span class="p">,</span> <span class="n">body_vel</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates the parts of the state vector derived from other parts.</span>
@@ -887,7 +944,10 @@
             <span class="n">alt_msl</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="Vehicle.step"><a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.Vehicle.html#gncpy.dynamics.aircraft.simple_multirotor.Vehicle.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">terrain_alt_wgs84</span><span class="p">,</span> <span class="n">gravity</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> <span class="n">speed_of_sound</span><span class="p">,</span> <span class="n">motor_cmds</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Vehicle.step">
+<a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.Vehicle.html#gncpy.dynamics.aircraft.simple_multirotor.Vehicle.step">[docs]</a>
+    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">terrain_alt_wgs84</span><span class="p">,</span> <span class="n">gravity</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> <span class="n">speed_of_sound</span><span class="p">,</span> <span class="n">motor_cmds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Perform one update step for the vehicle.</span>
 
 <span class="sd">        This updates the internal state vector of the vehicle.</span>
@@ -969,10 +1029,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">v_smap</span><span class="o">.</span><span class="n">lon</span><span class="p">]</span> <span class="o">=</span> <span class="n">lon</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">v_smap</span><span class="o">.</span><span class="n">alt_wgs84</span><span class="p">]</span> <span class="o">=</span> <span class="n">alt_wgs84</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">v_smap</span><span class="o">.</span><span class="n">alt_agl</span><span class="p">]</span> <span class="o">=</span> <span class="n">alt_agl</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">v_smap</span><span class="o">.</span><span class="n">alt_msl</span><span class="p">]</span> <span class="o">=</span> <span class="n">alt_msl</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">v_smap</span><span class="o">.</span><span class="n">alt_msl</span><span class="p">]</span> <span class="o">=</span> <span class="n">alt_msl</span></div>
+</div>
 
 
-<div class="viewcode-block" id="Environment"><a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.Environment.html#gncpy.dynamics.aircraft.simple_multirotor.Environment">[docs]</a><span class="k">class</span> <span class="nc">Environment</span><span class="p">:</span>
+
+<div class="viewcode-block" id="Environment">
+<a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.Environment.html#gncpy.dynamics.aircraft.simple_multirotor.Environment">[docs]</a>
+<span class="k">class</span> <span class="nc">Environment</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Environment model.</span>
 
 <span class="sd">    Attributes</span>
@@ -981,9 +1045,12 @@
 <span class="sd">        Environment state vector.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="Environment.__init__"><a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.Environment.html#gncpy.dynamics.aircraft.simple_multirotor.Environment.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Environment.__init__">
+<a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.Environment.html#gncpy.dynamics.aircraft.simple_multirotor.Environment.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize an object.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">e_smap</span><span class="o">.</span><span class="n">get_num_states</span><span class="p">())</span></div>
+
 
     <span class="k">def</span> <span class="nf">_lower_atmo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alt_km</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Model of the lower atmosphere.</span>
@@ -1056,7 +1123,9 @@
                 <span class="s2">&quot;Upper atmosphere model (&gt;86 km) not implemented.&quot;</span>
             <span class="p">)</span>
 
-<div class="viewcode-block" id="Environment.step"><a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.Environment.html#gncpy.dynamics.aircraft.simple_multirotor.Environment.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt_wgs84</span><span class="p">,</span> <span class="n">alt_msl</span><span class="p">):</span>
+<div class="viewcode-block" id="Environment.step">
+<a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.Environment.html#gncpy.dynamics.aircraft.simple_multirotor.Environment.step">[docs]</a>
+    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt_wgs84</span><span class="p">,</span> <span class="n">alt_msl</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Perform one update step for the environment.</span>
 
 <span class="sd">        This updates the internal state vector.</span>
@@ -1080,10 +1149,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">e_smap</span><span class="o">.</span><span class="n">speed_of_sound</span><span class="p">]</span> <span class="o">=</span> <span class="n">spd_snd</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">e_smap</span><span class="o">.</span><span class="n">pressure</span><span class="p">]</span> <span class="o">=</span> <span class="n">pres</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">e_smap</span><span class="o">.</span><span class="n">density</span><span class="p">]</span> <span class="o">=</span> <span class="n">density</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">e_smap</span><span class="o">.</span><span class="n">gravity</span><span class="p">]</span> <span class="o">=</span> <span class="n">gravity</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">e_smap</span><span class="o">.</span><span class="n">gravity</span><span class="p">]</span> <span class="o">=</span> <span class="n">gravity</span></div>
+</div>
 
 
-<div class="viewcode-block" id="SimpleMultirotor"><a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor.html#gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor">[docs]</a><span class="k">class</span> <span class="nc">SimpleMultirotor</span><span class="p">(</span><span class="n">DynamicsBase</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SimpleMultirotor">
+<a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor.html#gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor">[docs]</a>
+<span class="k">class</span> <span class="nc">SimpleMultirotor</span><span class="p">(</span><span class="n">DynamicsBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Implements functions for a generic multi-rotor.</span>
 
 <span class="sd">    Attributes</span>
@@ -1105,7 +1178,9 @@
     <span class="n">state_map</span> <span class="o">=</span> <span class="n">v_smap</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Map of states to indices with units.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="SimpleMultirotor.__init__"><a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor.html#gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<div class="viewcode-block" id="SimpleMultirotor.__init__">
+<a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor.html#gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">params_file</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">effector</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">egm_bin_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">library_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize an object.</span>
@@ -1154,7 +1229,10 @@
         <span class="k">if</span> <span class="n">egm_bin_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">wgs84</span><span class="o">.</span><span class="n">init_egm_lookup_table</span><span class="p">(</span><span class="n">egm_bin_file</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SimpleMultirotor.validate_params_file"><a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor.html#gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor.validate_params_file">[docs]</a>    <span class="k">def</span> <span class="nf">validate_params_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params_file</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SimpleMultirotor.validate_params_file">
+<a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor.html#gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor.validate_params_file">[docs]</a>
+    <span class="k">def</span> <span class="nf">validate_params_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params_file</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate that the parameters file exists.</span>
 
 <span class="sd">        If the path seperator is in the name then it is assumed a full path is</span>
@@ -1189,7 +1267,10 @@
 
         <span class="k">return</span> <span class="n">cf</span></div>
 
-<div class="viewcode-block" id="SimpleMultirotor.propagate_state"><a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor.html#gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor.propagate_state">[docs]</a>    <span class="k">def</span> <span class="nf">propagate_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">desired_motor_cmds</span><span class="p">,</span> <span class="n">dt</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SimpleMultirotor.propagate_state">
+<a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor.html#gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor.propagate_state">[docs]</a>
+    <span class="k">def</span> <span class="nf">propagate_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">desired_motor_cmds</span><span class="p">,</span> <span class="n">dt</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Propagates all internal states forward 1 timestep.</span>
 
 <span class="sd">        Parameters</span>
@@ -1224,7 +1305,10 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vehicle</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="SimpleMultirotor.set_initial_conditions"><a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor.html#gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor.set_initial_conditions">[docs]</a>    <span class="k">def</span> <span class="nf">set_initial_conditions</span><span class="p">(</span>
+
+<div class="viewcode-block" id="SimpleMultirotor.set_initial_conditions">
+<a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor.html#gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor.set_initial_conditions">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_initial_conditions</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">ned_pos</span><span class="p">,</span>
         <span class="n">body_vel</span><span class="p">,</span>
@@ -1359,7 +1443,10 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_env_req_init</span> <span class="o">=</span> <span class="kc">False</span></div>
 
-<div class="viewcode-block" id="SimpleMultirotor.get_state_mat"><a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor.html#gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor.get_state_mat">[docs]</a>    <span class="k">def</span> <span class="nf">get_state_mat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SimpleMultirotor.get_state_mat">
+<a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor.html#gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor.get_state_mat">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_state_mat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets the state matrix, should not be used.</span>
 
 <span class="sd">        Parameters</span>
@@ -1378,7 +1465,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;get_state_mat should not be used by this class!&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SimpleMultirotor.get_input_mat"><a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor.html#gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor.get_input_mat">[docs]</a>    <span class="k">def</span> <span class="nf">get_input_mat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+<div class="viewcode-block" id="SimpleMultirotor.get_input_mat">
+<a class="viewcode-back" href="../../../../_autosummary/gncpy/dynamics/aircraft/simple_multirotor/gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor.html#gncpy.dynamics.aircraft.simple_multirotor.SimpleMultirotor.get_input_mat">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_input_mat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets the input matrix, should not be used.</span>
 
 <span class="sd">        Parameters</span>
@@ -1395,7 +1485,9 @@
 <span class="sd">        RuntimeError</span>
 <span class="sd">            This function should not be used.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;get_input_mat should not be used by this class!&quot;</span><span class="p">)</span></div></div>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;get_input_mat should not be used by this class!&quot;</span><span class="p">)</span></div>
+</div>
+
 </pre></div>
 
            </div>

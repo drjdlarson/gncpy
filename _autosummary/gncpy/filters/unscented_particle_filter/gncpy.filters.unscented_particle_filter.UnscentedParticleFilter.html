@@ -1,25 +1,27 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>UnscentedParticleFilter &mdash; GNCPy 2.0.1.dev0 documentation</title>
-      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
+
+  
     <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_autosummary/gncpy/filters/unscented_particle_filter/gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.html" />
   <!--[if lt IE 9]>
     <script src="../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../../../_static/jquery.js"></script>
-        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-        <script src="../../../../_static/doctools.js"></script>
-        <script src="../../../../_static/sphinx_highlight.js"></script>
-        <script src="../../../../_static/clipboard.min.js"></script>
-        <script src="../../../../_static/copybutton.js"></script>
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=ba91f118"></script>
+        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../../_static/copybutton.js?v=cbcfbdad"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
@@ -268,10 +270,10 @@
            <div itemprop="articleBody">
              
   <section id="unscentedparticlefilter">
-<h1>UnscentedParticleFilter<a class="headerlink" href="#unscentedparticlefilter" title="Permalink to this heading"></a></h1>
+<h1>UnscentedParticleFilter<a class="headerlink" href="#unscentedparticlefilter" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="gncpy.filters.unscented_particle_filter.UnscentedParticleFilter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">UnscentedParticleFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/unscented_particle_filter.html#UnscentedParticleFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">UnscentedParticleFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/unscented_particle_filter.html#UnscentedParticleFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="../mcmc_particle_filter_base/gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase.html#gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase" title="gncpy.filters.mcmc_particle_filter_base.MCMCParticleFilterBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">MCMCParticleFilterBase</span></code></a></p>
 <p>Implements an unscented particle filter.</p>
 <p class="rubric">Notes</p>
@@ -280,7 +282,7 @@
 <span id="id2">[<a class="reference internal" href="../../../../References.html#id18" title="Rudolph Van Der Merwe, Arnaud Doucet, Nando De Freitas, and Eric A Wan. The unscented particle filter. In Advances in neural information processing systems, 584–590. 2001.">26</a>]</span>.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/unscented_particle_filter.html#UnscentedParticleFilter.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.__init__" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/unscented_particle_filter.html#UnscentedParticleFilter.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.__init__" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>
@@ -364,7 +366,7 @@
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.correct">
-<span class="sig-name descname"><span class="pre">correct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ukf_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">move_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/unscented_particle_filter.html#UnscentedParticleFilter.correct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.correct" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">correct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ukf_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">move_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/unscented_particle_filter.html#UnscentedParticleFilter.correct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.correct" title="Link to this definition"></a></dt>
 <dd><p>Correction step of the UPF.</p>
 <p>This optionally can perform a MCMC move step as well.</p>
 <dl class="field-list simple">
@@ -393,7 +395,7 @@ that were removed during the selection process.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.extract_dist">
-<span class="sig-name descname"><span class="pre">extract_dist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">make_copy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.extract_dist" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">extract_dist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">make_copy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.extract_dist" title="Link to this definition"></a></dt>
 <dd><p>Extracts the particle distribution used by the filter.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -411,7 +413,7 @@ performed. The default is True.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.init_from_dist">
-<span class="sig-name descname"><span class="pre">init_from_dist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">make_copy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.init_from_dist" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">init_from_dist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">make_copy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.init_from_dist" title="Link to this definition"></a></dt>
 <dd><p>Initialize the distribution from a distribution object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -429,7 +431,7 @@ performed. The default is True.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.init_particles">
-<span class="sig-name descname"><span class="pre">init_particles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">particle_lst</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.init_particles" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">init_particles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">particle_lst</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.init_particles" title="Link to this definition"></a></dt>
 <dd><p>Initializes the particle distribution with the given list of points.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -440,11 +442,11 @@ performed. The default is True.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.load_filter_state">
-<span class="sig-name descname"><span class="pre">load_filter_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filt_state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/unscented_particle_filter.html#UnscentedParticleFilter.load_filter_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.load_filter_state" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">load_filter_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filt_state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/unscented_particle_filter.html#UnscentedParticleFilter.load_filter_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.load_filter_state" title="Link to this definition"></a></dt>
 <dd><p>Initializes filter using saved filter state.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.filt_state">
-<span class="sig-name descname"><span class="pre">filt_state</span></span><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.filt_state" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">filt_state</span></span><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.filt_state" title="Link to this definition"></a></dt>
 <dd><p>Dictionary generated by <a class="reference internal" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.save_filter_state" title="gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.save_filter_state"><code class="xref py py-meth docutils literal notranslate"><span class="pre">save_filter_state()</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -457,7 +459,7 @@ performed. The default is True.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.move_particles">
-<span class="sig-name descname"><span class="pre">move_particles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">old_weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">old_likeli</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">can_weight</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">can_likeli</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/unscented_particle_filter.html#UnscentedParticleFilter.move_particles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.move_particles" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">move_particles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">old_weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">old_likeli</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">can_weight</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">can_likeli</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/unscented_particle_filter.html#UnscentedParticleFilter.move_particles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.move_particles" title="Link to this definition"></a></dt>
 <dd><p>Movement function for the MCMC move step.</p>
 <p>This modifies the internal particle distribution but does not return a
 value.</p>
@@ -479,7 +481,7 @@ value.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.plot_particles">
-<span class="sig-name descname"><span class="pre">plot_particles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Particle</span> <span class="pre">Distribution'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_lbl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'State'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_lbl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Probability'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.plot_particles" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">plot_particles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Particle</span> <span class="pre">Distribution'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_lbl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'State'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_lbl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Probability'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.plot_particles" title="Link to this definition"></a></dt>
 <dd><p>Plots the particle distribution.</p>
 <p>This will either plot a histogram for a single index, or plot a 2-d
 heatmap/histogram if a list of 2 indices are given. The 1-d case will
@@ -507,7 +509,7 @@ any values relating to title/axis text formatting.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.plot_weighted_particles">
-<span class="sig-name descname"><span class="pre">plot_weighted_particles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_lbl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'State'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_lbl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Weight'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Weighted</span> <span class="pre">Particle</span> <span class="pre">Distribution'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.plot_weighted_particles" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">plot_weighted_particles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_lbl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'State'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_lbl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Weight'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Weighted</span> <span class="pre">Particle</span> <span class="pre">Distribution'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.plot_weighted_particles" title="Link to this definition"></a></dt>
 <dd><p>Plots the weight vs state distribution of the particles.</p>
 <p>This generates a bar chart and only works for single indices.</p>
 <dl class="field-list simple">
@@ -533,7 +535,7 @@ any values relating to title/axis text formatting.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.predict">
-<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ukf_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/unscented_particle_filter.html#UnscentedParticleFilter.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.predict" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ukf_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/unscented_particle_filter.html#UnscentedParticleFilter.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.predict" title="Link to this definition"></a></dt>
 <dd><p>Prediction step of the UPF.</p>
 <p>This calls the UKF prediction function on every particle.</p>
 <dl class="field-list simple">
@@ -555,13 +557,13 @@ default is {}.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.save_filter_state">
-<span class="sig-name descname"><span class="pre">save_filter_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/unscented_particle_filter.html#UnscentedParticleFilter.save_filter_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.save_filter_state" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">save_filter_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/unscented_particle_filter.html#UnscentedParticleFilter.save_filter_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.save_filter_state" title="Link to this definition"></a></dt>
 <dd><p>Saves filter variables so they can be restored later.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.set_measurement_model">
-<span class="sig-name descname"><span class="pre">set_measurement_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/unscented_particle_filter.html#UnscentedParticleFilter.set_measurement_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.set_measurement_model" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_measurement_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/unscented_particle_filter.html#UnscentedParticleFilter.set_measurement_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.set_measurement_model" title="Link to this definition"></a></dt>
 <dd><p>Sets the measurement model for the filter.</p>
 <p>This is a wrapper for the inner UKF’s set_measurement model function.
 It is assumed that the measurement model is the same as that of the UKF.
@@ -571,7 +573,7 @@ for details.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.set_state_model">
-<span class="sig-name descname"><span class="pre">set_state_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/unscented_particle_filter.html#UnscentedParticleFilter.set_state_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.set_state_model" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_state_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/filters/unscented_particle_filter.html#UnscentedParticleFilter.set_state_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.set_state_model" title="Link to this definition"></a></dt>
 <dd><p>Sets the state model for the filter.</p>
 <p>This calls the UKF’s set state function
 (<code class="xref py py-meth docutils literal notranslate"><span class="pre">gncpy.filters.UnscentedKalmanFilter.set_state_model()</span></code>).</p>
@@ -579,7 +581,7 @@ for details.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.cov">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cov</span></span><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.cov" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cov</span></span><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.cov" title="Link to this definition"></a></dt>
 <dd><p>Read only covariance of the particles.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -593,7 +595,7 @@ for details.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.meas_likelihood_fnc">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">meas_likelihood_fnc</span></span><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.meas_likelihood_fnc" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">meas_likelihood_fnc</span></span><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.meas_likelihood_fnc" title="Link to this definition"></a></dt>
 <dd><p>A function that returns the likelihood of the measurement.</p>
 <p>This has the signature <code class="code docutils literal notranslate"><span class="pre">f(y,</span> <span class="pre">y_hat,</span> <span class="pre">*args)</span></code> where <cite>y</cite> is
 the measurement as an Nm x 1 numpy array, and <cite>y_hat</cite> is the estimated
@@ -617,7 +619,7 @@ noise covariance <span class="math notranslate nohighlight">\(R\)</span>.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.meas_noise">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">meas_noise</span></span><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.meas_noise" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">meas_noise</span></span><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.meas_noise" title="Link to this definition"></a></dt>
 <dd><p>Measurement noise matrix.</p>
 <p>This is a wrapper to keep the UPF measurement noise and the internal UKF
 measurement noise synced.</p>
@@ -633,7 +635,7 @@ measurement noise synced.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.num_particles">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_particles</span></span><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.num_particles" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_particles</span></span><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.num_particles" title="Link to this definition"></a></dt>
 <dd><p>Read only number of particles used by the filter.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -647,7 +649,7 @@ measurement noise synced.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.proc_noise">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">proc_noise</span></span><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.proc_noise" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">proc_noise</span></span><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.proc_noise" title="Link to this definition"></a></dt>
 <dd><p>Process noise matrix.</p>
 <p>This is a wrapper to keep the UPF process noise and the internal UKF
 process noise synced.</p>
@@ -663,7 +665,7 @@ process noise synced.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.proposal_fnc">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">proposal_fnc</span></span><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.proposal_fnc" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">proposal_fnc</span></span><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.proposal_fnc" title="Link to this definition"></a></dt>
 <dd><p>A function that returns the probability for the proposal distribution.</p>
 <p>This has the signature <code class="code docutils literal notranslate"><span class="pre">f(x_hat,</span> <span class="pre">x,</span> <span class="pre">y,</span> <span class="pre">*args)</span></code> where
 <cite>x_hat</cite> is a <a class="reference internal" href="../../distributions/gncpy.distributions.Particle.html#gncpy.distributions.Particle" title="gncpy.distributions.Particle"><code class="xref py py-class docutils literal notranslate"><span class="pre">gncpy.distributions.Particle</span></code></a> of the estimated
@@ -687,7 +689,7 @@ weight</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.proposal_sampling_fnc">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">proposal_sampling_fnc</span></span><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.proposal_sampling_fnc" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">proposal_sampling_fnc</span></span><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.proposal_sampling_fnc" title="Link to this definition"></a></dt>
 <dd><p>A function that returns a random sample from the proposal distribtion.</p>
 <p>This should be consistent with the PDF specified in the
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">gncpy.filters.ParticleFilter.proposal_fnc()</span></code>.</p>
@@ -705,7 +707,7 @@ weight</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.transition_prob_fnc">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">transition_prob_fnc</span></span><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.transition_prob_fnc" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">transition_prob_fnc</span></span><a class="headerlink" href="#gncpy.filters.unscented_particle_filter.UnscentedParticleFilter.transition_prob_fnc" title="Link to this definition"></a></dt>
 <dd><p>A function that returns the transition probability for the state.</p>
 <p>This has the signature <code class="code docutils literal notranslate"><span class="pre">f(x_hat,</span> <span class="pre">x,</span> <span class="pre">cov)</span></code> where
 <cite>x_hat</cite> is an N x 1 numpy array representing the propagated state, and

@@ -1,24 +1,26 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>gncpy.filters.gsm_filter_base &mdash; GNCPy 2.0.1.dev0 documentation</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+
+  
     <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_modules/gncpy/filters/gsm_filter_base.html" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
-        <script src="../../../_static/clipboard.min.js"></script>
-        <script src="../../../_static/copybutton.js"></script>
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=ba91f118"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../_static/copybutton.js?v=cbcfbdad"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -345,7 +347,9 @@
         <span class="k">return</span> <span class="n">next_est</span>
 
 
-<div class="viewcode-block" id="GSMFilterBase"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/gsm_filter_base/gncpy.filters.gsm_filter_base.GSMFilterBase.html#gncpy.filters.gsm_filter_base.GSMFilterBase">[docs]</a><span class="k">class</span> <span class="nc">GSMFilterBase</span><span class="p">(</span><span class="n">BayesFilter</span><span class="p">):</span>
+<div class="viewcode-block" id="GSMFilterBase">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/filters/gsm_filter_base/gncpy.filters.gsm_filter_base.GSMFilterBase.html#gncpy.filters.gsm_filter_base.GSMFilterBase">[docs]</a>
+<span class="k">class</span> <span class="nc">GSMFilterBase</span><span class="p">(</span><span class="n">BayesFilter</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base implementation of a Gaussian Scale Mixture (GSM) filter.</span>
 
 <span class="sd">    This should be inherited from to include specific implementations of the</span>
@@ -365,7 +369,9 @@
 <span class="sd">        Flag indicating if the process noise should be estimated.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="GSMFilterBase.__init__"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/gsm_filter_base/gncpy.filters.gsm_filter_base.GSMFilterBase.html#gncpy.filters.gsm_filter_base.GSMFilterBase.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enable_proc_noise_estimation</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="GSMFilterBase.__init__">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/filters/gsm_filter_base/gncpy.filters.gsm_filter_base.GSMFilterBase.html#gncpy.filters.gsm_filter_base.GSMFilterBase.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enable_proc_noise_estimation</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes the class.</span>
 
 <span class="sd">        Parameters</span>
@@ -385,7 +391,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_import_w_factory_lst</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_procNoiseEstimator</span> <span class="o">=</span> <span class="n">_GSMProcNoiseEstimator</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="GSMFilterBase.save_filter_state"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/gsm_filter_base/gncpy.filters.gsm_filter_base.GSMFilterBase.html#gncpy.filters.gsm_filter_base.GSMFilterBase.save_filter_state">[docs]</a>    <span class="k">def</span> <span class="nf">save_filter_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="GSMFilterBase.save_filter_state">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/filters/gsm_filter_base/gncpy.filters.gsm_filter_base.GSMFilterBase.html#gncpy.filters.gsm_filter_base.GSMFilterBase.save_filter_state">[docs]</a>
+    <span class="k">def</span> <span class="nf">save_filter_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Saves filter variables so they can be restored later.</span>
 
 <span class="sd">        Note that to pickle the resulting dictionary the :code:`dill` package</span>
@@ -411,7 +420,10 @@
 
         <span class="k">return</span> <span class="n">filt_state</span></div>
 
-<div class="viewcode-block" id="GSMFilterBase.load_filter_state"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/gsm_filter_base/gncpy.filters.gsm_filter_base.GSMFilterBase.html#gncpy.filters.gsm_filter_base.GSMFilterBase.load_filter_state">[docs]</a>    <span class="k">def</span> <span class="nf">load_filter_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filt_state</span><span class="p">):</span>
+
+<div class="viewcode-block" id="GSMFilterBase.load_filter_state">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/filters/gsm_filter_base/gncpy.filters.gsm_filter_base.GSMFilterBase.html#gncpy.filters.gsm_filter_base.GSMFilterBase.load_filter_state">[docs]</a>
+    <span class="k">def</span> <span class="nf">load_filter_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filt_state</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes filter using saved filter state.</span>
 
 <span class="sd">        Attributes</span>
@@ -438,19 +450,26 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_import_w_factory_lst</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_import_w_factory_lst&quot;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_procNoiseEstimator</span> <span class="o">=</span> <span class="n">filt_state</span><span class="p">[</span><span class="s2">&quot;_procNoiseEstimator&quot;</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="GSMFilterBase.set_state_model"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/gsm_filter_base/gncpy.filters.gsm_filter_base.GSMFilterBase.html#gncpy.filters.gsm_filter_base.GSMFilterBase.set_state_model">[docs]</a>    <span class="k">def</span> <span class="nf">set_state_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+<div class="viewcode-block" id="GSMFilterBase.set_state_model">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/filters/gsm_filter_base/gncpy.filters.gsm_filter_base.GSMFilterBase.html#gncpy.filters.gsm_filter_base.GSMFilterBase.set_state_model">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_state_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Wrapper for the core filters set state model function.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coreFilter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_coreFilter</span><span class="o">.</span><span class="n">set_state_model</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Core filter is not set, use an inherited class.&quot;</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="GSMFilterBase.set_measurement_model"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/gsm_filter_base/gncpy.filters.gsm_filter_base.GSMFilterBase.html#gncpy.filters.gsm_filter_base.GSMFilterBase.set_measurement_model">[docs]</a>    <span class="k">def</span> <span class="nf">set_measurement_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+<div class="viewcode-block" id="GSMFilterBase.set_measurement_model">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/filters/gsm_filter_base/gncpy.filters.gsm_filter_base.GSMFilterBase.html#gncpy.filters.gsm_filter_base.GSMFilterBase.set_measurement_model">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_measurement_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Wrapper for the core filters set measurement model function.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coreFilter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_coreFilter</span><span class="o">.</span><span class="n">set_measurement_model</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Core filter is not set, use an inherited class.&quot;</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">)</span></div>
+
 
     <span class="k">def</span> <span class="nf">_define_student_t_pf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gsm</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">num_parts</span><span class="p">):</span>
         <span class="k">def</span> <span class="nf">import_w_factory</span><span class="p">(</span><span class="n">inov_cov</span><span class="p">):</span>
@@ -580,7 +599,9 @@
 
         <span class="k">return</span> <span class="n">pf</span><span class="p">,</span> <span class="n">import_w_factory</span>
 
-<div class="viewcode-block" id="GSMFilterBase.set_meas_noise_model"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/gsm_filter_base/gncpy.filters.gsm_filter_base.GSMFilterBase.html#gncpy.filters.gsm_filter_base.GSMFilterBase.set_meas_noise_model">[docs]</a>    <span class="k">def</span> <span class="nf">set_meas_noise_model</span><span class="p">(</span>
+<div class="viewcode-block" id="GSMFilterBase.set_meas_noise_model">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/filters/gsm_filter_base/gncpy.filters.gsm_filter_base.GSMFilterBase.html#gncpy.filters.gsm_filter_base.GSMFilterBase.set_meas_noise_model">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_meas_noise_model</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">bootstrap_lst</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">importance_weight_factory_lst</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -695,7 +716,10 @@
             <span class="p">)</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="GSMFilterBase.set_process_noise_model"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/gsm_filter_base/gncpy.filters.gsm_filter_base.GSMFilterBase.html#gncpy.filters.gsm_filter_base.GSMFilterBase.set_process_noise_model">[docs]</a>    <span class="k">def</span> <span class="nf">set_process_noise_model</span><span class="p">(</span>
+
+<div class="viewcode-block" id="GSMFilterBase.set_process_noise_model">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/filters/gsm_filter_base/gncpy.filters.gsm_filter_base.GSMFilterBase.html#gncpy.filters.gsm_filter_base.GSMFilterBase.set_process_noise_model">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_process_noise_model</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">initial_est</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filter_length</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">startup_delay</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets the filter parameters for estimating process noise.</span>
@@ -739,6 +763,7 @@
         <span class="k">if</span> <span class="n">startup_delay</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_procNoiseEstimator</span><span class="o">.</span><span class="n">startup_delay</span> <span class="o">=</span> <span class="n">startup_delay</span></div>
 
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">cov</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Covariance of the filter.&quot;&quot;&quot;</span>
@@ -778,7 +803,9 @@
             <span class="ne">RuntimeWarning</span><span class="p">,</span>
         <span class="p">)</span>
 
-<div class="viewcode-block" id="GSMFilterBase.predict"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/gsm_filter_base/gncpy.filters.gsm_filter_base.GSMFilterBase.html#gncpy.filters.gsm_filter_base.GSMFilterBase.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">cur_state</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="GSMFilterBase.predict">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/filters/gsm_filter_base/gncpy.filters.gsm_filter_base.GSMFilterBase.html#gncpy.filters.gsm_filter_base.GSMFilterBase.predict">[docs]</a>
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">cur_state</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Prediction step of the GSM filter.</span>
 
 <span class="sd">        This optionally estimates the process noise then calls the core filters</span>
@@ -786,7 +813,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coreFilter</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">timestep</span><span class="p">,</span> <span class="n">cur_state</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="GSMFilterBase.correct"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/gsm_filter_base/gncpy.filters.gsm_filter_base.GSMFilterBase.html#gncpy.filters.gsm_filter_base.GSMFilterBase.correct">[docs]</a>    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">meas</span><span class="p">,</span> <span class="n">cur_state</span><span class="p">,</span> <span class="n">core_filt_kwargs</span><span class="o">=</span><span class="p">{}):</span>
+
+<div class="viewcode-block" id="GSMFilterBase.correct">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/filters/gsm_filter_base/gncpy.filters.gsm_filter_base.GSMFilterBase.html#gncpy.filters.gsm_filter_base.GSMFilterBase.correct">[docs]</a>
+    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">meas</span><span class="p">,</span> <span class="n">cur_state</span><span class="p">,</span> <span class="n">core_filt_kwargs</span><span class="o">=</span><span class="p">{}):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Correction step of the GSM filter.</span>
 
 <span class="sd">        This optionally estimates the measurement noise then calls the core</span>
@@ -824,7 +854,10 @@
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">cor_state</span><span class="p">,</span> <span class="n">meas_fit_prob</span></div>
 
-<div class="viewcode-block" id="GSMFilterBase.plot_particles"><a class="viewcode-back" href="../../../_autosummary/gncpy/filters/gsm_filter_base/gncpy.filters.gsm_filter_base.GSMFilterBase.html#gncpy.filters.gsm_filter_base.GSMFilterBase.plot_particles">[docs]</a>    <span class="k">def</span> <span class="nf">plot_particles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filt_inds</span><span class="p">,</span> <span class="n">dist_inds</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+<div class="viewcode-block" id="GSMFilterBase.plot_particles">
+<a class="viewcode-back" href="../../../_autosummary/gncpy/filters/gsm_filter_base/gncpy.filters.gsm_filter_base.GSMFilterBase.html#gncpy.filters.gsm_filter_base.GSMFilterBase.plot_particles">[docs]</a>
+    <span class="k">def</span> <span class="nf">plot_particles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filt_inds</span><span class="p">,</span> <span class="n">dist_inds</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plots the particle distribution for every given measurement index.</span>
 
 <span class="sd">        Parameters</span>
@@ -861,7 +894,9 @@
                     <span class="n">dist_inds</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
                 <span class="p">)</span>
                 <span class="n">keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">figs</span><span class="p">,</span> <span class="n">keys</span></div></div>
+        <span class="k">return</span> <span class="n">figs</span><span class="p">,</span> <span class="n">keys</span></div>
+</div>
+
 </pre></div>
 
            </div>

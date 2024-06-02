@@ -1,25 +1,27 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ELQR &mdash; GNCPy 2.0.1.dev0 documentation</title>
-      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
+
+  
     <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_autosummary/gncpy/control/elqr/gncpy.control.elqr.ELQR.html" />
   <!--[if lt IE 9]>
     <script src="../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../../../_static/jquery.js"></script>
-        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-        <script src="../../../../_static/doctools.js"></script>
-        <script src="../../../../_static/sphinx_highlight.js"></script>
-        <script src="../../../../_static/clipboard.min.js"></script>
-        <script src="../../../../_static/copybutton.js"></script>
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=ba91f118"></script>
+        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../../_static/copybutton.js?v=cbcfbdad"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
@@ -268,17 +270,17 @@
            <div itemprop="articleBody">
              
   <section id="elqr">
-<h1>ELQR<a class="headerlink" href="#elqr" title="Permalink to this heading"></a></h1>
+<h1>ELQR<a class="headerlink" href="#elqr" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="gncpy.control.elqr.ELQR">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ELQR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_iters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/control/elqr.html#ELQR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.control.elqr.ELQR" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ELQR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_iters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/control/elqr.html#ELQR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.control.elqr.ELQR" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="../lqr/gncpy.control.lqr.LQR.html#gncpy.control.lqr.LQR" title="gncpy.control.lqr.LQR"><code class="xref py py-class docutils literal notranslate"><span class="pre">LQR</span></code></a></p>
 <p>Implements an Extended Linear Quadratic Regulator (ELQR) controller.</p>
 <p>This is based on
 <span id="id1">[<a class="reference internal" href="../../../../References.html#id4" title="Jur van den Berg. Extended lqr: locally-optimal feedback control for systems with non-linear dynamics and non-quadratic cost. In Robotics Research, pages 39–56. Springer, 2016.">24</a>]</span>.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.control.elqr.ELQR.max_iters">
-<span class="sig-name descname"><span class="pre">max_iters</span></span><a class="headerlink" href="#gncpy.control.elqr.ELQR.max_iters" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">max_iters</span></span><a class="headerlink" href="#gncpy.control.elqr.ELQR.max_iters" title="Link to this definition"></a></dt>
 <dd><p>Maximum number of iterations to try for convergence.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -289,7 +291,7 @@
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.control.elqr.ELQR.tol">
-<span class="sig-name descname"><span class="pre">tol</span></span><a class="headerlink" href="#gncpy.control.elqr.ELQR.tol" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">tol</span></span><a class="headerlink" href="#gncpy.control.elqr.ELQR.tol" title="Link to this definition"></a></dt>
 <dd><p>Tolerance for convergence.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -300,7 +302,7 @@
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.control.elqr.ELQR.ct_come_mats">
-<span class="sig-name descname"><span class="pre">ct_come_mats</span></span><a class="headerlink" href="#gncpy.control.elqr.ELQR.ct_come_mats" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ct_come_mats</span></span><a class="headerlink" href="#gncpy.control.elqr.ELQR.ct_come_mats" title="Link to this definition"></a></dt>
 <dd><p>Cost-to-come matrices, 1 per step in the time horizon.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -311,7 +313,7 @@
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.control.elqr.ELQR.ct_come_vecs">
-<span class="sig-name descname"><span class="pre">ct_come_vecs</span></span><a class="headerlink" href="#gncpy.control.elqr.ELQR.ct_come_vecs" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ct_come_vecs</span></span><a class="headerlink" href="#gncpy.control.elqr.ELQR.ct_come_vecs" title="Link to this definition"></a></dt>
 <dd><p>Cost-to-come vectors, 1 per step in the time horizon.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -322,7 +324,7 @@
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.control.elqr.ELQR.use_custom_cost">
-<span class="sig-name descname"><span class="pre">use_custom_cost</span></span><a class="headerlink" href="#gncpy.control.elqr.ELQR.use_custom_cost" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">use_custom_cost</span></span><a class="headerlink" href="#gncpy.control.elqr.ELQR.use_custom_cost" title="Link to this definition"></a></dt>
 <dd><p>Flag indicating if a custom cost function should be used.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -333,7 +335,7 @@
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="gncpy.control.elqr.ELQR.gif_frame_skip">
-<span class="sig-name descname"><span class="pre">gif_frame_skip</span></span><a class="headerlink" href="#gncpy.control.elqr.ELQR.gif_frame_skip" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">gif_frame_skip</span></span><a class="headerlink" href="#gncpy.control.elqr.ELQR.gif_frame_skip" title="Link to this definition"></a></dt>
 <dd><p>Number of frames to skip when saving the gif. Set to 1 to take every
 frame.</p>
 <dl class="field-list simple">
@@ -345,7 +347,7 @@ frame.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.control.elqr.ELQR.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_iters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/control/elqr.html#ELQR.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.control.elqr.ELQR.__init__" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_iters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/control/elqr.html#ELQR.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.control.elqr.ELQR.__init__" title="Link to this definition"></a></dt>
 <dd><p>Initialize an object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -434,7 +436,7 @@ frame.</p>
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.control.elqr.ELQR.backward_pass">
-<span class="sig-name descname"><span class="pre">backward_pass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">itr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_timesteps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">traj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctrl_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cost_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_state_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_ctrl_args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.control.elqr.ELQR.backward_pass" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">backward_pass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">itr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_timesteps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">traj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctrl_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cost_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_state_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_ctrl_args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.control.elqr.ELQR.backward_pass" title="Link to this definition"></a></dt>
 <dd><p>Backward pass for the finite horizon case.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -461,7 +463,7 @@ frame.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.control.elqr.ELQR.calculate_control">
-<span class="sig-name descname"><span class="pre">calculate_control</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cur_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctrl_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cost_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_state_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_ctrl_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">provide_details</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_animation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_animation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plt_opts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ttl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plt_inds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax_num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/control/elqr.html#ELQR.calculate_control"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.control.elqr.ELQR.calculate_control" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">calculate_control</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cur_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctrl_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cost_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_state_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_ctrl_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">provide_details</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_animation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_animation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plt_opts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ttl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plt_inds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax_num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/control/elqr.html#ELQR.calculate_control"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.control.elqr.ELQR.calculate_control" title="Link to this definition"></a></dt>
 <dd><p>Calculate the control parameters and state trajectory.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -512,7 +514,7 @@ which assumes [0, 1].</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.control.elqr.ELQR.cost_function">
-<span class="sig-name descname"><span class="pre">cost_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctrl_input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cost_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_initial</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_final</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/control/elqr.html#ELQR.cost_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.control.elqr.ELQR.cost_function" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">cost_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctrl_input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cost_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_initial</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_final</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/control/elqr.html#ELQR.cost_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.control.elqr.ELQR.cost_function" title="Link to this definition"></a></dt>
 <dd><p>Calculates the cost for the state and control input.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -537,7 +539,7 @@ function.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.control.elqr.ELQR.forward_pass">
-<span class="sig-name descname"><span class="pre">forward_pass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">itr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_timesteps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">traj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctrl_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cost_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_state_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_ctrl_args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/control/elqr.html#ELQR.forward_pass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.control.elqr.ELQR.forward_pass" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">forward_pass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">itr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_timesteps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">traj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctrl_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cost_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_state_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_ctrl_args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/control/elqr.html#ELQR.forward_pass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.control.elqr.ELQR.forward_pass" title="Link to this definition"></a></dt>
 <dd><p>Forward pass for the smoothing.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -564,7 +566,7 @@ function.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.control.elqr.ELQR.get_state_space">
-<span class="sig-name descname"><span class="pre">get_state_space</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_hat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_hat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctrl_args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.control.elqr.ELQR.get_state_space" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_state_space</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_hat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_hat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctrl_args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.control.elqr.ELQR.get_state_space" title="Link to this definition"></a></dt>
 <dd><p>Return the <span class="math notranslate nohighlight">\(A, B\)</span> matrices.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -591,13 +593,13 @@ function.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.control.elqr.ELQR.prop_state">
-<span class="sig-name descname"><span class="pre">prop_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_hat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_hat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctrl_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forward</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_state_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_ctrl_args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.control.elqr.ELQR.prop_state" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">prop_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_hat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_hat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctrl_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forward</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_state_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_ctrl_args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.control.elqr.ELQR.prop_state" title="Link to this definition"></a></dt>
 <dd><p>Propagate the state in time.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.control.elqr.ELQR.prop_state_backward">
-<span class="sig-name descname"><span class="pre">prop_state_backward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_hat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_hat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctrl_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_state_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_ctrl_args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.control.elqr.ELQR.prop_state_backward" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">prop_state_backward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_hat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_hat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctrl_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_state_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_ctrl_args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.control.elqr.ELQR.prop_state_backward" title="Link to this definition"></a></dt>
 <dd><p>Propagate the state backward and get the forward state space.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -625,7 +627,7 @@ function.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.control.elqr.ELQR.prop_state_forward">
-<span class="sig-name descname"><span class="pre">prop_state_forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_hat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_hat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctrl_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_state_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_ctrl_args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/control/elqr.html#ELQR.prop_state_forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.control.elqr.ELQR.prop_state_forward" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">prop_state_forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_hat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_hat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctrl_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_state_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv_ctrl_args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/control/elqr.html#ELQR.prop_state_forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.control.elqr.ELQR.prop_state_forward" title="Link to this definition"></a></dt>
 <dd><p>Propagate the state forward and get the backward state space.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -653,7 +655,7 @@ function.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.control.elqr.ELQR.quadratize_cost">
-<span class="sig-name descname"><span class="pre">quadratize_cost</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">itr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_hat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_hat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_initial</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_final</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cost_args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/control/elqr.html#ELQR.quadratize_cost"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.control.elqr.ELQR.quadratize_cost" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">quadratize_cost</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">itr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_hat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_hat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_initial</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_final</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cost_args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/control/elqr.html#ELQR.quadratize_cost"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.control.elqr.ELQR.quadratize_cost" title="Link to this definition"></a></dt>
 <dd><p>Quadratizes the cost function.</p>
 <p>If the non-quadratic portion of the standard cost function is not
 positive semi-definite then it is regularized by setting the negative
@@ -688,7 +690,7 @@ eigen values to zero and reconstructing the matrix.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.control.elqr.ELQR.reset">
-<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cur_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/control/elqr.html#ELQR.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.control.elqr.ELQR.reset" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cur_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_state</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/control/elqr.html#ELQR.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.control.elqr.ELQR.reset" title="Link to this definition"></a></dt>
 <dd><p>Reset values for calculating the control parameters.</p>
 <p>This generally does not need to be called outside of the class. It is
 automatically called when calculating the control parameters.</p>
@@ -714,7 +716,7 @@ automatically called when calculating the control parameters.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.control.elqr.ELQR.set_cost_model">
-<span class="sig-name descname"><span class="pre">set_cost_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">non_quadratic_fun</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quad_modifier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cost_fun</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_validity_check</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/control/elqr.html#ELQR.set_cost_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.control.elqr.ELQR.set_cost_model" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_cost_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">non_quadratic_fun</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quad_modifier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cost_fun</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_validity_check</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gncpy/control/elqr.html#ELQR.set_cost_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gncpy.control.elqr.ELQR.set_cost_model" title="Link to this definition"></a></dt>
 <dd><p>Sets the cost model.</p>
 <p>Either <cite>Q</cite>, and <cite>R</cite> must be supplied (and optionally <cite>quad_modifier</cite>)
 or <cite>cost_fun</cite>. If <cite>Q and `R</cite> are specified a <cite>non_quadratic_fun</cite> is
@@ -757,7 +759,7 @@ combination is given.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.control.elqr.ELQR.set_state_model">
-<span class="sig-name descname"><span class="pre">set_state_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u_nom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control_constraints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dynObj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.control.elqr.ELQR.set_state_model" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_state_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u_nom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control_constraints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dynObj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.control.elqr.ELQR.set_state_model" title="Link to this definition"></a></dt>
 <dd><p>Set the state/dynamics model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -775,7 +777,7 @@ The default is None.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gncpy.control.elqr.ELQR.solve_dare">
-<span class="sig-name descname"><span class="pre">solve_dare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cur_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cur_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctrl_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.control.elqr.ELQR.solve_dare" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">solve_dare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cur_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cur_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctrl_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gncpy.control.elqr.ELQR.solve_dare" title="Link to this definition"></a></dt>
 <dd><p>Solve the discrete algebraic ricatti equation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -800,19 +802,19 @@ is None.</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gncpy.control.elqr.ELQR.Q">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Q</span></span><a class="headerlink" href="#gncpy.control.elqr.ELQR.Q" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Q</span></span><a class="headerlink" href="#gncpy.control.elqr.ELQR.Q" title="Link to this definition"></a></dt>
 <dd><p>Read only state penalty matrix.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gncpy.control.elqr.ELQR.R">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">R</span></span><a class="headerlink" href="#gncpy.control.elqr.ELQR.R" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">R</span></span><a class="headerlink" href="#gncpy.control.elqr.ELQR.R" title="Link to this definition"></a></dt>
 <dd><p>Read only control penalty matrix.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="gncpy.control.elqr.ELQR.dt">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dt</span></span><a class="headerlink" href="#gncpy.control.elqr.ELQR.dt" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dt</span></span><a class="headerlink" href="#gncpy.control.elqr.ELQR.dt" title="Link to this definition"></a></dt>
 <dd><p>Timestep.</p>
 </dd></dl>
 
