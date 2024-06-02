@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Larson"
+  given-names: "Jordan Douglas"
+  orcid: "https://orcid.org/0000-0002-5102-1763"
+- family-names: "Thomas"
+  given-names: "Ryan W."
+- family-names: "Weirens"
+  given-names: "Vaughn A."
+title: "GNCPy: A Python Package for Guidance, Navigation, and Control Algorithms"
+version: 2.0.1
+doi: 10.5281/zenodo.11429010
+date-released: 2024-06-02
+url: "https://github.com/drjdlarson/gncpp"
+preferred-citation:
+  type: software
+  authors:
+  - family-names: "Larson"
+    given-names: "Jordan Douglas"
+    orcid: "https://orcid.org/0000-0002-5102-1763"
+  - family-names: "Thomas"
+    given-names: "Ryan W."
+  - family-names: "Weirens"
+    given-names: "Vaughn A."
+  doi: "10.5281/zenodo.11429010"
+  title: "GNCPy: A Python Package for Guidance, Navigation, and Control Algorithms"
+  year: 2024
