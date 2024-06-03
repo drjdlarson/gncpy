@@ -10,13 +10,13 @@ include(DynamicVersion)
 include(CompileOptions)
 
 # Set ${PROJECT_VERSION} according to git tag or `.git_archival.txt`
-dynamic_version(PROJECT_PREFIX GNCPY_CPP_)
+dynamic_version(PROJECT_PREFIX GNCPP_)
 
 project(${SKBUILD_PROJECT_NAME} VERSION ${PROJECT_VERSION})
 
-option(GNCPY_CPP_VERSION "Version of the c++ backend (without the v prefix) for release builds")
-set(GNCPY_CPP_BRANCH "master" CACHE STRING "Branch of the c++ backend for debug builds")
-set(GNCPY_EIGEN_VERSION "3.4.0" CACHE STRING "Version of Eigen to use when compiling the interface and backend")
+option(GNCPP_VERSION "Version of the c++ backend (without the v prefix) for release builds")
+set(GNCPP_BRANCH "master" CACHE STRING "Branch of the c++ backend for debug builds")
+set(GNCPP_EIGEN_VERSION "3.4.0" CACHE STRING "Version of Eigen to use when compiling the interface and backend")
 
 set(CMAKE_CXX_STANDARD 20)
 set(CXX_STANDARD_REQUIRED ON)
@@ -32,24 +32,24 @@ message(STATUS "Wrapping GNCPy version: ${PROJECT_VERSION}")
 # -----------------------------------------------------------------
 include(FetchContent)
 if(CMAKE_BUILD_TYPE MATCHES "^[Rr]elease")
-    message(STATUS "Fetching gncpy_cpp (version: ${GNCPY_CPP_VERSION})...")
+    message(STATUS "Fetching gncpp (version: ${GNCPP_VERSION})...")
     FetchContent_Declare(
-        gncpy_cpp
-        GIT_REPOSITORY https://github.com/drjdlarson/gncpy_cpp.git
-        GIT_TAG "v${GNCPY_CPP_VERSION}"
+        gncpp
+        GIT_REPOSITORY https://github.com/drjdlarson/gncpp.git
+        GIT_TAG "v${GNCPP_VERSION}"
     )
 else()
-message(STATUS "Fetching gncpy_cpp (branch: ${GNCPY_CPP_BRANCH})...")
+message(STATUS "Fetching gncpp (branch: ${GNCPP_BRANCH})...")
     FetchContent_Declare(
-        gncpy_cpp
-        GIT_REPOSITORY https://github.com/drjdlarson/gncpy_cpp.git
-        GIT_TAG ${GNCPY_CPP_BRANCH}
+        gncpp
+        GIT_REPOSITORY https://github.com/drjdlarson/gncpp.git
+        GIT_TAG ${GNCPP_BRANCH}
     )
 endif()
 set(GNCPY_DOC OFF CACHE INTERNAL "Skip building docs")
 set(GNCPY_TEST OFF CACHE INTERNAL "Skip building tests")
 set(GNCPY_INSTALL ON CACHE INTERNAL "Generate the install target")
-FetchContent_MakeAvailable(gncpy_cpp)
+FetchContent_MakeAvailable(gncpp)
 
 
 
