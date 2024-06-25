@@ -62,11 +62,27 @@ def test_icbm_interception():
         c_state[kk + 1, :] = chaser.propagate_state(tt, c_state[kk].reshape((-1, 1)), u=u_VTC).flatten()
         t_state[kk + 1, :] = chaser.propagate_state(tt, t_state[kk].reshape((-1, 1)), u=np.zeros(3)).flatten()
         
-        if np.linalg.norm(c_state[kk + 1, :3] - t_state[kk+1, :3]) <= hit_distance_threshold:
-            # FIXME this doesn't trip, most likely because the simulation isn't outputting the discretely 
-            # simulated states at the exact time they intercept (the 0.1 second dt is too large a window)
-            # Fix with interpolation?
-            print('interception! Touchdown Alabama')
+        # check for hit:
+        # iff sign change in separations, since only then may vehicle have passed nearest distance point
+        separation_now = c_state[kk + 1, :3] - t_state[kk+1, :3]
+        separation_last = c_state[kk, :3] - t_state[kk, :3]
+        now_signs = np.sign(separation_now)
+        next_signs = np.sign(separation_last)
+        if np.any(now_signs - next_signs):
+            line_vector = separation_now - separation_last
+            origin_vector =  -separation_last
+            
+            # Projection of the origin vector onto the line vector
+            projection_length = np.dot(origin_vector, line_vector) / np.dot(line_vector, line_vector)
+            if projection_length < -1:
+                closest_point = separation_last
+            elif projection_length > 1:
+                closest_point = separation_now
+            else:
+                closest_point = separation_last + projection_length * line_vector
+            nearest_distance = np.linalg.norm(closest_point)
+            if(nearest_distance < hit_distance_threshold):
+                print('interception! Touchdown Alabama. Nearest distance: ', nearest_distance, ' m')
 
 
     # debug plots
