@@ -6,8 +6,6 @@ import gncpy.dynamics.basic as gdyn
 import gncpy.control as gctrl
 import gncpy.measurements as sensors
 
-# FIXME eventually want this to be an actual E2E test that asserts the interceptor hit the icbm
-
 def test_icbm_interception():
     dt = 0.1
     t1 = 70
@@ -40,7 +38,7 @@ def test_icbm_interception():
                                  launch_speed*np.sin(launch_angle)
                                  ])
     c_state[0] = np.concatenate(([0, 0, 0], launch_velocity))
-    chaser_specific_thrust = 200 # m/s (aka about 20g's acceleration at launch)
+    chaser_specific_thrust = 100 # m/s (aka about 10g's acceleration at launch)
 
     R = np.zeros((2,2))
     seeker = sensors.Seeker(R)
@@ -49,14 +47,15 @@ def test_icbm_interception():
 
     # simulate with no icbm evasion control and pronav chaser control
     # this simulation has no sensor noise (perfect knowledge of states)
+    hit_success = False
     for kk, tt in enumerate(time[:-1]):
         # compute control command for interceptor
         relative_state = seeker.calc_relative_state(c_state[kk,:], t_state[kk,:])
         t_go = pronav.estimate_tgo(relative_state[:3], relative_state[3:])
         u_ENU = pronav.PN(relative_state[:3], relative_state[3:], t_go) # 3D pronav control
-        u_ENU[2] = u_ENU[2] + 9.81 # account (roughly/flat earth assumption) for gravity in control vector; akin to setting u nominal
+        u_ENU[2] = u_ENU[2] + 9.81 # account (roughly/flat earth assumption) for gravity in control vector; akin to setting u_nominal
         u_VTC = pronav.enu2vtc(c_state[kk, :], u_ENU) # convert pronav control in ENU frame to VTC frame
-        u_VTC[0] = u_VTC[0] + 100 # add specific thrust to pronav control FIXME this assumes thrust is variable as commanded by pronav
+        u_VTC[0] = u_VTC[0] + chaser_specific_thrust # add specific thrust to pronav control FIXME this assumes thrust is variable as commanded by pronav
         
         # propogate interceptor and target forward
         c_state[kk + 1, :] = chaser.propagate_state(tt, c_state[kk].reshape((-1, 1)), u=u_VTC).flatten()
@@ -82,8 +81,9 @@ def test_icbm_interception():
                 closest_point = separation_last + projection_length * line_vector
             nearest_distance = np.linalg.norm(closest_point)
             if(nearest_distance < hit_distance_threshold):
-                print('interception! Touchdown Alabama. Nearest distance: ', nearest_distance, ' m')
-
+                hit_success = True
+                print('Interception! Touchdown Alabama! Nearest distance: ', nearest_distance, ' m')
+    assert hit_success
 
     # debug plots
     if DEBUG:

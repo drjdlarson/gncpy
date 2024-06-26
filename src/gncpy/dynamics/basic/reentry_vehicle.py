@@ -96,73 +96,25 @@ class ReentryVehicle(NonlinearDynamicsBase):
         def g2(t, x, u, *args):
             return 0
 
-        def ENU_control_acceleration(t, x, u, *args):
-            # FIXME this function assumes turning is done by aero forces only up to CL=3, then assumes any further 
-            # commanded turning/climbing is done via thrusters. It also assumes a CL of 3 is achievable to account
-            # for the thrust vector helping turn at some alpha. It's all very sus as an approximation
-
-
-            # assumes u is np.array([a_v, a_t, a_c])
-
-            # define VTC -> ENU rotation matrix
-            v = np.linalg.norm(x[3:])
-            vg = np.linalg.norm(x[3:5])
-            T_ENU_VTC = np.array([[x[3]/v, -x[4]/vg, -x[3]*x[5]/(v*vg)],
-                                  [x[4]/v, x[3]/vg, -x[4]*x[5]/(v*vg)],
-                                  [x[5]/v, 0, vg**2/(v*vg)]])
-
-            # calculate dynamic pressure
-            rho_NED = np.array([x[1], x[0], -(x[2] + wgs84.EQ_RAD)]) # spherical approximation
-            veh_alt = np.linalg.norm(rho_NED) - wgs84.EQ_RAD
-            #coesa76_geom = atm.expo([veh_alt / 1000])  # geometric altitudes in km
-            #density = coesa76_geom.rho  # [kg/m^3]
-            density = self.density # the dynamics model MUST be called before the control model for this to be defined
-            q = 1/2*density*v**2
-
-            # limit maximum lift, assume CLMax = 3
-            # (set high to poorly account for fact that thrust can be unaligned with velocity to help turn)
-            # If aero lift not enough to satisfy control, assume remaining maneuvering 
-            # accelerations provided by thrusters
-            u_limited = copy.deepcopy(u).astype(float)
-            total_lift_acceleration = np.linalg.norm(u[1:])
-            lift_accel_max = 3*q*self.drag_parameter/self.CD0
-            
-            if total_lift_acceleration > lift_accel_max:
-                if self.has_thrusters:
-                    total_lift_acceleration = lift_accel_max
-                else:
-                    u_limited[1:] = u_limited[1:]*lift_accel_max/total_lift_acceleration
-                    total_lift_acceleration = np.linalg.norm(u_limited[1:])
-
-            # calculate additional induced drag
-            # following equation derived from CDL=CL**2/4 result from slender body potential flow theory (cite Cronvich Missile Aerodynamics)
-            induced_drag_acceleration = total_lift_acceleration**2/self.drag_parameter*self.CD0/(4*q)
-            u_limited[0] = u_limited[0] - induced_drag_acceleration # subtract induced drag from thrust
-
-            # convert VTC accelerations to ENU
-            a_control_ENU = T_ENU_VTC @ u_limited
-
-            return a_control_ENU
-
         def g3(t, x, u, *args):
             if u is None:
                 return 0
             else:
-                control_accel = ENU_control_acceleration(t, x, u, *args)
+                control_accel = self.ENU_control_acceleration(t, x, u, *args)
                 return control_accel[0]
 
         def g4(t, x, u, *args):
             if u is None:
                 return 0
             else:
-                control_accel = ENU_control_acceleration(t, x, u, *args)
+                control_accel = self.ENU_control_acceleration(t, x, u, *args)
                 return control_accel[1]
 
         def g5(t, x, u, *args):
             if u is None:
                 return 0
             else:
-                control_accel = ENU_control_acceleration(t, x, u, *args)
+                control_accel = self.ENU_control_acceleration(t, x, u, *args)
                 return control_accel[2]
 
         self._control_model = [g0, g1, g2, g3, g4, g5]
@@ -180,7 +132,56 @@ class ReentryVehicle(NonlinearDynamicsBase):
         """Read only ballistic coefficient."""
         return 1 / self.drag_parameter
 
-    # 3D vector acceleration function that the following functions break into components
+    # function to calculate ENU control accelerations from a VTC acceleration command
+    # performs coordinate transform and adds aero drag induced from control forces
+    def ENU_control_acceleration(self, t, x, u, *args):
+        # FIXME this function assumes turning is done by aero forces only up to CL=3, then assumes any further 
+        # commanded turning/climbing is done via thrusters. It also assumes a CL of 3 is achievable to account
+        # for the thrust vector helping turn at some alpha. It's all very sus as an approximation
+
+        # assumes u is np.array([a_v, a_t, a_c])
+
+        # define VTC -> ENU rotation matrix
+        v = np.linalg.norm(x[3:])
+        vg = np.linalg.norm(x[3:5])
+        T_ENU_VTC = np.array([[x[3]/v, -x[4]/vg, -x[3]*x[5]/(v*vg)],
+                                [x[4]/v, x[3]/vg, -x[4]*x[5]/(v*vg)],
+                                [x[5]/v, 0, vg**2/(v*vg)]])
+
+        # calculate dynamic pressure
+        rho_NED = np.array([x[1], x[0], -(x[2] + wgs84.EQ_RAD)]) # spherical approximation
+        veh_alt = np.linalg.norm(rho_NED) - wgs84.EQ_RAD
+        #coesa76_geom = atm.expo([veh_alt / 1000])  # geometric altitudes in km
+        #density = coesa76_geom.rho  # [kg/m^3]
+        density = self.density # the dynamics model MUST be called before the control model for this to be defined
+        q = 1/2*density*v**2
+
+        # limit maximum lift, assume CLMax = 3
+        # (set high to poorly account for fact that thrust can be unaligned with velocity to help turn)
+        # If aero lift not enough to satisfy control, assume remaining maneuvering 
+        # accelerations provided by thrusters
+        u_limited = copy.deepcopy(u).astype(float)
+        total_lift_acceleration = np.linalg.norm(u[1:])
+        lift_accel_max = 3*q*self.drag_parameter/self.CD0
+        
+        if total_lift_acceleration > lift_accel_max:
+            if self.has_thrusters:
+                total_lift_acceleration = lift_accel_max
+            else:
+                u_limited[1:] = u_limited[1:]*lift_accel_max/total_lift_acceleration
+                total_lift_acceleration = np.linalg.norm(u_limited[1:])
+
+        # calculate additional induced drag
+        # following equation derived from CDL=CL**2/4 result from slender body potential flow theory (cite Cronvich Missile Aerodynamics)
+        induced_drag_acceleration = total_lift_acceleration**2/self.drag_parameter*self.CD0/(4*q)
+        u_limited[0] = u_limited[0] - induced_drag_acceleration # subtract induced drag from thrust
+
+        # convert VTC accelerations to ENU
+        a_control_ENU = T_ENU_VTC @ u_limited
+
+        return a_control_ENU
+
+    # 3D vector acceleration function induced by reentry vehicle dynamics (drag and gravity)
     def ENU_acceleration(self, t, x, *args):
         # All calculations done in NED frame then converted to ENU immediately before returning
 
@@ -295,7 +296,8 @@ class ReentryVehicle(NonlinearDynamicsBase):
         acceleration = self.ENU_acceleration(t, x)
         out[3:] = acceleration.reshape(-1, 1)
     
-        if self._control_model is not None:
-            for ii, g in enumerate(self._control_model):
-                out[ii] += g(t, x, u, *ctrl_args)
+        if u is not None:
+            control_accel = self.ENU_control_acceleration(t, x, u, *ctrl_args)
+            out[3:] += control_accel.reshape(-1,1)
+
         return out
