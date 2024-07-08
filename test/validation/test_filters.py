@@ -2966,6 +2966,12 @@ def test_GCI_EKF_dynObj():
     def bear_func(t, x):
         return np.arctan2(x[1], x[0])
 
+    def range_func2(t, x):
+        return np.sqrt(x[0] ** 2 + x[1]+5 ** 2)
+
+    def bear_func2(t, x):
+        return np.arctan2(x[1], x[0]+5)
+
     m_noise = 0.002
     p_noise = 0.02
 
@@ -2983,10 +2989,12 @@ def test_GCI_EKF_dynObj():
 
     filt = gfilts.GCIFilter(
         base_filter=in_filt,
-        meas_model_list=[[range_func], [bear_func]],
+        meas_model_list=[[range_func, bear_func], [range_func2, bear_func2]],
         meas_noise_list=[
-            m_noise**2 * np.eye(1),
-            (np.pi / 180 * m_noise) ** 2 * np.eye(1),
+            np.diag([m_noise**2,
+            (np.pi / 180 * m_noise) ** 2]),
+            np.diag([m_noise**2,
+            (np.pi / 180 * m_noise) ** 2])
         ],
     )
     filt.cov = 0.25 * np.eye(4)
@@ -3038,16 +3046,54 @@ def test_GCI_EKF_dynObj():
             ).reshape((-1, 1)),
         )
 
-        meas1 = n_state1 + (m_noise_cov_1 * rng.standard_normal(n_state1.size)).reshape(
-            n_state1.shape
+        n_state3 = range_func2(
+            t,
+            t_states[kk + 1].reshape((-1, 1))
+            + (np.sqrt(np.diag(filt.proc_noise)) * rng.standard_normal(4)).reshape(
+                (-1, 1)
+            ),
         )
-        meas2 = n_state2 + (m_noise_cov_2 * rng.standard_normal(n_state2.size)).reshape(
-            n_state2.shape
+        n_state4 = bear_func2(
+            t,
+            t_states[kk + 1].reshape((-1, 1))
+            + (
+                np.sqrt(np.diag(filt.proc_noise * np.pi / 180)) * rng.standard_normal(4)
+            ).reshape((-1, 1)),
         )
 
+        if (t_states[kk+1][0] > 0 and t_states[kk+1][0] < 15):
+
+            meas1 = n_state1 + (m_noise_cov_1 * rng.standard_normal(n_state1.size)).reshape(
+                n_state1.shape
+            )
+            meas2 = n_state2 + (m_noise_cov_2 * rng.standard_normal(n_state2.size)).reshape(
+                n_state2.shape
+            )
+            sens1 = [meas1, meas2]
+        else:
+            sens1 = []
+        
+        if t_states[kk+1][0] > 5 and t_states[kk+1][0] < 20:
+
+            meas3 = n_state3 + (m_noise_cov_1 * rng.standard_normal(n_state3.size)).reshape(
+                n_state3.shape
+            )
+            meas4 = n_state4 + (m_noise_cov_2 * rng.standard_normal(n_state4.size)).reshape(
+                n_state4.shape
+            )
+
+            sens2 = [meas3, meas4]
+        else:
+            sens2 = []
+
+        # states[kk + 1, :] = filt.correct(
+        #     t, [np.array([meas1, meas2]), np.array([meas3, meas4])], states[kk + 1].reshape((-1, 1))
+        # )[0].flatten()
+
         states[kk + 1, :] = filt.correct(
-            t, [meas1, meas2], states[kk + 1].reshape((-1, 1))
+            t, [np.array(sens1), np.array(sens2)], states[kk + 1].reshape((-1, 1))
         )[0].flatten()
+
         stds[kk + 1, :] = np.sqrt(np.diag(filt.cov))
     errs = states - t_states
     # plot states
@@ -3350,7 +3396,7 @@ if __name__ == "__main__":
     # test_KF_mat()
 
     # test_EKF_dynObj()
-    test_EKF_cpp_dynObj()
+    # test_EKF_cpp_dynObj()
 
     # test_STF_dynObj()
 
@@ -3376,7 +3422,7 @@ if __name__ == "__main__":
     # test_EKF_GSM_gsm()
 
     # test_GCI_KF_dynObj()
-    # test_GCI_EKF_dynObj()
+    test_GCI_EKF_dynObj()
 
     # test_IMM_dynObj()
 

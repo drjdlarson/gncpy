@@ -91,8 +91,13 @@ class GCIFilter(BayesFilter):
         n_est_list = []
         n_prob_list = []
         n_cov_list = []
+        eye_list = []
+        n_w_list = []
+        m_ids = []
         saved_state = self.base_filter.save_filter_state()
         for ii, meas in enumerate(meas_list):
+            if meas.size <= 0:
+                continue
             self.base_filter.load_filter_state(saved_state)
             if isinstance(self.meas_model_list[ii], list):
                 self.base_filter.set_measurement_model(
@@ -109,16 +114,33 @@ class GCIFilter(BayesFilter):
             n_est_list.append(n_est)
             n_cov_list.append(self.base_filter.cov)
             n_prob_list.append(n_prob)
+            eye_list.append(np.eye(len(cur_state)))
+            n_w_list.append(self.weight_list[ii])
+            m_ids.append(ii)
 
-        eye_list = [np.eye(len(cur_state)) for ii in range(len(self.meas_model_list))]
+        # Need to change something ehere that has to do with making sure the appropriate amount of models are added for measurements.
+        s_w_list = np.sum(n_w_list)
+        in_weight_list = [x/s_w_list for x in n_w_list]
+        # eye_list = [np.eye(len(cur_state)) for ii in range(len(self.meas_model_list))]
         new_est, new_cov, new_weight_list = gdf.GeneralizedCovarianceIntersection(
-            n_est_list, n_cov_list, self.weight_list, eye_list, optimizer=self.optimizer
+            n_est_list, n_cov_list, in_weight_list, eye_list, optimizer=self.optimizer
         )
+        o_w_lst = [x * s_w_list for x in new_weight_list]
         meas_fit_prob = 0
         for ii, prob in enumerate(n_prob_list):
-            meas_fit_prob += new_weight_list[ii] * prob
+            # meas_fit_prob += new_weight_list[ii] * prob
+            meas_fit_prob += o_w_lst[ii] * prob
+
+        mid_ind = 0
+        new_w_lst = []
+        for ii in range(len(self.meas_model_list)):
+            if ii in m_ids:
+                new_w_lst.append(o_w_lst[mid_ind])
+                mid_ind += 1
+            else:
+                new_w_lst.append(self.weight_list[ii])
 
         self.base_filter.cov = new_cov
-        self.weight_list = new_weight_list
+        self.weight_list = new_w_lst
 
         return new_est, meas_fit_prob
