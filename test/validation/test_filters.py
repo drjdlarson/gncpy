@@ -3422,7 +3422,7 @@ if __name__ == "__main__":
     # test_EKF_GSM_gsm()
 
     # test_GCI_KF_dynObj()
-    test_GCI_EKF_dynObj()
+    # test_GCI_EKF_dynObj()
 
     # test_IMM_dynObj()
 
