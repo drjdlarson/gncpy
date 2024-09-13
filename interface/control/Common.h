@@ -4,9 +4,9 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/eigen.h>
 
-void initInterface(pybind11::module&);
-void initParameters(pybind11::module&);
-void initStateControl(pybind11::module&);
+extern void initInterface(pybind11::module&);
+extern void initParameters(pybind11::module&);
+extern void initStateControl(pybind11::module&);
 
 #define GNCPY_CONTROL_ILINEARCONTROLMODEL_INTERFACE(cName) \
     .def("get_input_mat", pybind11::overload_cast<double, const lager::gncpy::control::ControlParams*>(&cName::getInputMat, pybind11::const_), \
