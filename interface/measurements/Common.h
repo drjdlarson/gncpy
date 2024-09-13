@@ -4,10 +4,10 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/eigen.h>
 
-void initInterface(pybind11::module&);
-void initParameters(pybind11::module&);
-void initStateObservation(pybind11::module&);
-void initRangeAndBearing(pybind11::module&);
+extern void initInterface(pybind11::module&);
+extern void initParameters(pybind11::module&);
+extern void initStateObservation(pybind11::module&);
+extern void initRangeAndBearing(pybind11::module&);
 
 #define GNCPY_MEASUREMENTS_IMEASMODEL_INTERFACE(cName) \
     .def("get_meas_mat", pybind11::overload_cast<const Eigen::VectorXd&, const lager::gncpy::measurements::MeasParams*>(&cName::getMeasMat, pybind11::const_), \
