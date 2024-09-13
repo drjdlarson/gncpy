@@ -28,7 +28,7 @@ planning
    :template: module.rst_t
    :recursive:
 
-   ~gncpy.planning.a_star
-   ~gncpy.planning.reinforcement_learning
-   ~gncpy.planning.rrt_star
+   ~a_star
+   ~reinforcement_learning
+   ~rrt_star
 

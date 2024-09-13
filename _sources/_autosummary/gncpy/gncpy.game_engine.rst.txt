@@ -28,9 +28,9 @@ game\_engine
    :template: module.rst_t
    :recursive:
 
-   ~gncpy.game_engine.base_game
-   ~gncpy.game_engine.components
-   ~gncpy.game_engine.entities
-   ~gncpy.game_engine.physics2d
-   ~gncpy.game_engine.rendering2d
+   ~base_game
+   ~components
+   ~entities
+   ~physics2d
+   ~rendering2d
 

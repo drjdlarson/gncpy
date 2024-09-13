@@ -28,6 +28,6 @@ dynamics
    :template: module.rst_t
    :recursive:
 
-   ~gncpy.dynamics.aircraft
-   ~gncpy.dynamics.basic
+   ~aircraft
+   ~basic
 

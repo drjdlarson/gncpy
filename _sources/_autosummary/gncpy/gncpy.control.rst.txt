@@ -28,6 +28,6 @@ control
    :template: module.rst_t
    :recursive:
 
-   ~gncpy.control.elqr
-   ~gncpy.control.lqr
+   ~elqr
+   ~lqr
 

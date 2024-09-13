@@ -28,6 +28,6 @@ reinforcement\_learning
    :template: module.rst_t
    :recursive:
 
-   ~gncpy.planning.reinforcement_learning.envs
-   ~gncpy.planning.reinforcement_learning.wrappers
+   ~envs
+   ~wrappers
 

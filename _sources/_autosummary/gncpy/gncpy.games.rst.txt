@@ -28,5 +28,5 @@ games
    :template: module.rst_t
    :recursive:
 
-   ~gncpy.games.SimpleUAV2d
+   ~SimpleUAV2d
 
