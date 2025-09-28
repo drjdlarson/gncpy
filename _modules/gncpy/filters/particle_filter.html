@@ -1,26 +1,24 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gncpy.filters.particle_filter &mdash; GNCPy 2.0.4.dev0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+  <title>gncpy.filters.particle_filter &mdash; GNCPy 2.0.5.dev0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
 
   
     <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_modules/gncpy/filters/particle_filter.html" />
-  <!--[if lt IE 9]>
-    <script src="../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=354a3d29"></script>
-        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
-        <script src="../../../_static/copybutton.js?v=cbcfbdad"></script>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=aa08a9b3"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../../_static/copybutton.js?v=cbcfbdad"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -38,9 +36,6 @@
             GNCPy
               <img src="../../../_static/logo.svg" class="logo" alt="Logo"/>
           </a>
-              <div class="version">
-                2.0.4.dev0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -263,21 +258,21 @@
            <div itemprop="articleBody">
              
   <h1>Source code for gncpy.filters.particle_filter</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">numpy.random</span> <span class="k">as</span> <span class="nn">rnd</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
-<span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy.random</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">rnd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">warn</span>
 
-<span class="kn">import</span> <span class="nn">gncpy.distributions</span> <span class="k">as</span> <span class="nn">gdistrib</span>
-<span class="kn">import</span> <span class="nn">gncpy.errors</span> <span class="k">as</span> <span class="nn">gerr</span>
-<span class="kn">import</span> <span class="nn">gncpy.plotting</span> <span class="k">as</span> <span class="nn">pltUtil</span>
-<span class="kn">from</span> <span class="nn">gncpy.filters.bayes_filter</span> <span class="kn">import</span> <span class="n">BayesFilter</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">gncpy.distributions</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gdistrib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">gncpy.errors</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gerr</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">gncpy.plotting</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pltUtil</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">gncpy.filters.bayes_filter</span><span class="w"> </span><span class="kn">import</span> <span class="n">BayesFilter</span>
 
 
 <div class="viewcode-block" id="ParticleFilter">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/filters/particle_filter/gncpy.filters.particle_filter.ParticleFilter.html#gncpy.filters.particle_filter.ParticleFilter">[docs]</a>
-<span class="k">class</span> <span class="nc">ParticleFilter</span><span class="p">(</span><span class="n">BayesFilter</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ParticleFilter</span><span class="p">(</span><span class="n">BayesFilter</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Implements a basic Particle Filter.</span>
 
 <span class="sd">    Notes</span>
@@ -306,7 +301,7 @@
 
 <div class="viewcode-block" id="ParticleFilter.__init__">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/filters/particle_filter/gncpy.filters.particle_filter.ParticleFilter.html#gncpy.filters.particle_filter.ParticleFilter.__init__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">dyn_obj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">dyn_fun</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -343,7 +338,7 @@
 
 <div class="viewcode-block" id="ParticleFilter.save_filter_state">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/filters/particle_filter/gncpy.filters.particle_filter.ParticleFilter.html#gncpy.filters.particle_filter.ParticleFilter.save_filter_state">[docs]</a>
-    <span class="k">def</span> <span class="nf">save_filter_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_filter_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Saves filter variables so they can be restored later.&quot;&quot;&quot;</span>
         <span class="n">filt_state</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">save_filter_state</span><span class="p">()</span>
 
@@ -368,7 +363,7 @@
 
 <div class="viewcode-block" id="ParticleFilter.load_filter_state">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/filters/particle_filter/gncpy.filters.particle_filter.ParticleFilter.html#gncpy.filters.particle_filter.ParticleFilter.load_filter_state">[docs]</a>
-    <span class="k">def</span> <span class="nf">load_filter_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filt_state</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_filter_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filt_state</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes filter using saved filter state.</span>
 
 <span class="sd">        Attributes</span>
@@ -396,7 +391,7 @@
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">meas_likelihood_fnc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">meas_likelihood_fnc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;A function that returns the likelihood of the measurement.</span>
 
 <span class="sd">        This must have the signature :code:`f(y, y_hat, *args)` where `y` is</span>
@@ -420,11 +415,11 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__meas_likelihood_fnc</span>
 
     <span class="nd">@meas_likelihood_fnc</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">meas_likelihood_fnc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">meas_likelihood_fnc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__meas_likelihood_fnc</span> <span class="o">=</span> <span class="n">val</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">proposal_fnc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">proposal_fnc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;A function that returns the probability for the proposal distribution.</span>
 
 <span class="sd">        This must have the signature :code:`f(x_hat, x, y, *args)` where</span>
@@ -449,11 +444,11 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__proposal_fnc</span>
 
     <span class="nd">@proposal_fnc</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">proposal_fnc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">proposal_fnc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__proposal_fnc</span> <span class="o">=</span> <span class="n">val</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">proposal_sampling_fnc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">proposal_sampling_fnc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;A function that returns a random sample from the proposal distribtion.</span>
 
 <span class="sd">        This should be consistent with the PDF specified in the</span>
@@ -467,11 +462,11 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__proposal_sampling_fnc</span>
 
     <span class="nd">@proposal_sampling_fnc</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">proposal_sampling_fnc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">proposal_sampling_fnc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__proposal_sampling_fnc</span> <span class="o">=</span> <span class="n">val</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">transition_prob_fnc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transition_prob_fnc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;A function that returns the transition probability for the state.</span>
 
 <span class="sd">        This must have the signature :code:`f(x_hat, x, *args)` where</span>
@@ -495,12 +490,12 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__transition_prob_fnc</span>
 
     <span class="nd">@transition_prob_fnc</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">transition_prob_fnc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transition_prob_fnc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__transition_prob_fnc</span> <span class="o">=</span> <span class="n">val</span>
 
 <div class="viewcode-block" id="ParticleFilter.set_state_model">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/filters/particle_filter/gncpy.filters.particle_filter.ParticleFilter.html#gncpy.filters.particle_filter.ParticleFilter.set_state_model">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_state_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dyn_obj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dyn_fun</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_state_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dyn_obj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dyn_fun</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets the state model.</span>
 
 <span class="sd">        Parameters</span>
@@ -531,7 +526,7 @@
 
 <div class="viewcode-block" id="ParticleFilter.set_measurement_model">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/filters/particle_filter/gncpy.filters.particle_filter.ParticleFilter.html#gncpy.filters.particle_filter.ParticleFilter.set_measurement_model">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_measurement_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meas_mat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">meas_fun</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_measurement_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meas_mat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">meas_fun</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Sets the measurement model for the filter.</span>
 
 <span class="sd">        This can either set the constant measurement matrix, or a set of</span>
@@ -578,7 +573,7 @@
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">cov</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cov</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read only covariance of the particles.</span>
 
 <span class="sd">        Returns</span>
@@ -590,11 +585,11 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span><span class="o">.</span><span class="n">covariance</span>
 
     <span class="nd">@cov</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">cov</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cov</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Covariance is read only&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">num_particles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">num_particles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read only number of particles used by the filter.</span>
 
 <span class="sd">        Returns</span>
@@ -606,7 +601,7 @@
 
 <div class="viewcode-block" id="ParticleFilter.init_from_dist">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/filters/particle_filter/gncpy.filters.particle_filter.ParticleFilter.html#gncpy.filters.particle_filter.ParticleFilter.init_from_dist">[docs]</a>
-    <span class="k">def</span> <span class="nf">init_from_dist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dist</span><span class="p">,</span> <span class="n">make_copy</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">init_from_dist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dist</span><span class="p">,</span> <span class="n">make_copy</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the distribution from a distribution object.</span>
 
 <span class="sd">        Parameters</span>
@@ -629,7 +624,7 @@
 
 <div class="viewcode-block" id="ParticleFilter.extract_dist">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/filters/particle_filter/gncpy.filters.particle_filter.ParticleFilter.html#gncpy.filters.particle_filter.ParticleFilter.extract_dist">[docs]</a>
-    <span class="k">def</span> <span class="nf">extract_dist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">make_copy</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">extract_dist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">make_copy</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Extracts the particle distribution used by the filter.</span>
 
 <span class="sd">        Parameters</span>
@@ -651,7 +646,7 @@
 
 <div class="viewcode-block" id="ParticleFilter.init_particles">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/filters/particle_filter/gncpy.filters.particle_filter.ParticleFilter.html#gncpy.filters.particle_filter.ParticleFilter.init_particles">[docs]</a>
-    <span class="k">def</span> <span class="nf">init_particles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">particle_lst</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">init_particles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">particle_lst</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes the particle distribution with the given list of points.</span>
 
 <span class="sd">        Parameters</span>
@@ -667,12 +662,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span><span class="o">.</span><span class="n">add_particle</span><span class="p">(</span><span class="n">particle_lst</span><span class="p">,</span> <span class="p">[</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">num_parts</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_parts</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_calc_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_calc_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_particleDist</span><span class="o">.</span><span class="n">mean</span>
 
 <div class="viewcode-block" id="ParticleFilter.predict">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/filters/particle_filter/gncpy.filters.particle_filter.ParticleFilter.html#gncpy.filters.particle_filter.ParticleFilter.predict">[docs]</a>
-    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">predict</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">dyn_fun_params</span><span class="o">=</span><span class="p">(),</span> <span class="n">sampling_args</span><span class="o">=</span><span class="p">(),</span> <span class="n">transition_args</span><span class="o">=</span><span class="p">()</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Predicts the next state.</span>
@@ -734,7 +729,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_state</span><span class="p">()</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_est_meas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">cur_state</span><span class="p">,</span> <span class="n">n_meas</span><span class="p">,</span> <span class="n">meas_fun_args</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_est_meas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">cur_state</span><span class="p">,</span> <span class="n">n_meas</span><span class="p">,</span> <span class="n">meas_fun_args</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meas_fnc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">est_meas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meas_fnc</span><span class="p">(</span><span class="n">timestep</span><span class="p">,</span> <span class="n">cur_state</span><span class="p">,</span> <span class="o">*</span><span class="n">meas_fun_args</span><span class="p">)</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meas_mat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -743,7 +738,7 @@
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;No measurement model set&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">est_meas</span>
 
-    <span class="k">def</span> <span class="nf">_selection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unnorm_weights</span><span class="p">,</span> <span class="n">rel_likeli_in</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_selection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unnorm_weights</span><span class="p">,</span> <span class="n">rel_likeli_in</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">new_parts</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_particles</span>
         <span class="n">old_weights</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_particles</span>
         <span class="n">rel_likeli_out</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_particles</span>
@@ -782,7 +777,7 @@
 
 <div class="viewcode-block" id="ParticleFilter.correct">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/filters/particle_filter/gncpy.filters.particle_filter.ParticleFilter.html#gncpy.filters.particle_filter.ParticleFilter.correct">[docs]</a>
-    <span class="k">def</span> <span class="nf">correct</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">correct</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">timestep</span><span class="p">,</span>
         <span class="n">meas</span><span class="p">,</span>
@@ -874,7 +869,7 @@
 
 <div class="viewcode-block" id="ParticleFilter.plot_particles">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/filters/particle_filter/gncpy.filters.particle_filter.ParticleFilter.html#gncpy.filters.particle_filter.ParticleFilter.plot_particles">[docs]</a>
-    <span class="k">def</span> <span class="nf">plot_particles</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_particles</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">inds</span><span class="p">,</span>
         <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Particle Distribution&quot;</span><span class="p">,</span>
@@ -937,7 +932,7 @@
 
 <div class="viewcode-block" id="ParticleFilter.plot_weighted_particles">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/filters/particle_filter/gncpy.filters.particle_filter.ParticleFilter.html#gncpy.filters.particle_filter.ParticleFilter.plot_weighted_particles">[docs]</a>
-    <span class="k">def</span> <span class="nf">plot_weighted_particles</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_weighted_particles</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">inds</span><span class="p">,</span>
         <span class="n">x_lbl</span><span class="o">=</span><span class="s2">&quot;State&quot;</span><span class="p">,</span>

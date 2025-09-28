@@ -1,27 +1,25 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Control Examples &mdash; GNCPy 2.0.4.dev0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+  <title>Control Examples &mdash; GNCPy 2.0.5.dev0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
 
   
     <link rel="canonical" href="https://drjdlarson.github.io/gncpy/usage/control.html" />
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=354a3d29"></script>
-        <script src="../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
-        <script src="../_static/copybutton.js?v=cbcfbdad"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=aa08a9b3"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=cbcfbdad"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -41,9 +39,6 @@
             GNCPy
               <img src="../_static/logo.svg" class="logo" alt="Logo"/>
           </a>
-              <div class="version">
-                2.0.4.dev0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -282,11 +277,11 @@
 <h2><a class="toc-backref" href="#id1" role="doc-backlink">LQR Infinite Horizon Linear Dyanmics</a><a class="headerlink" href="#lqr-infinite-horizon-linear-dyanmics" title="Link to this heading"></a></h2>
 <p>The LQR algorithm can be run for the infinite horizon case using linear dynamics
 with the following. Note the state trajectory output can be used as a motion plan.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="k">def</span> <span class="nf">linear_inf_horizon</span><span class="p">():</span>
-<span class="linenos"> 2</span>    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="k">def</span><span class="w"> </span><span class="nf">linear_inf_horizon</span><span class="p">():</span>
+<span class="linenos"> 2</span>    <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="linenos"> 3</span>
-<span class="linenos"> 4</span>    <span class="kn">import</span> <span class="nn">gncpy.dynamics.basic</span> <span class="k">as</span> <span class="nn">gdyn</span>
-<span class="linenos"> 5</span>    <span class="kn">from</span> <span class="nn">gncpy.control</span> <span class="kn">import</span> <span class="n">LQR</span>
+<span class="linenos"> 4</span>    <span class="kn">import</span><span class="w"> </span><span class="nn">gncpy.dynamics.basic</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gdyn</span>
+<span class="linenos"> 5</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">gncpy.control</span><span class="w"> </span><span class="kn">import</span> <span class="n">LQR</span>
 <span class="linenos"> 6</span>
 <span class="linenos"> 7</span>    <span class="n">cur_time</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="linenos"> 8</span>    <span class="n">dt</span> <span class="o">=</span> <span class="mf">0.1</span>
@@ -330,11 +325,11 @@ with the following. Note the state trajectory output can be used as a motion pla
 <h2><a class="toc-backref" href="#id2" role="doc-backlink">LQR Finite Horzon Linear Dynamics</a><a class="headerlink" href="#lqr-finite-horzon-linear-dynamics" title="Link to this heading"></a></h2>
 <p>The LQR algorithm can be run for the finite horizon case using non-linear dynamics
 with the following. Note the state trajectory output can be used as a motion plan.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="k">def</span> <span class="nf">linear_finite_horizon</span><span class="p">():</span>
-<span class="linenos"> 2</span>    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="k">def</span><span class="w"> </span><span class="nf">linear_finite_horizon</span><span class="p">():</span>
+<span class="linenos"> 2</span>    <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="linenos"> 3</span>
-<span class="linenos"> 4</span>    <span class="kn">import</span> <span class="nn">gncpy.dynamics.basic</span> <span class="k">as</span> <span class="nn">gdyn</span>
-<span class="linenos"> 5</span>    <span class="kn">from</span> <span class="nn">gncpy.control</span> <span class="kn">import</span> <span class="n">LQR</span>
+<span class="linenos"> 4</span>    <span class="kn">import</span><span class="w"> </span><span class="nn">gncpy.dynamics.basic</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gdyn</span>
+<span class="linenos"> 5</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">gncpy.control</span><span class="w"> </span><span class="kn">import</span> <span class="n">LQR</span>
 <span class="linenos"> 6</span>
 <span class="linenos"> 7</span>    <span class="n">cur_time</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="linenos"> 8</span>    <span class="n">dt</span> <span class="o">=</span> <span class="mf">0.1</span>
@@ -378,11 +373,11 @@ with the following. Note the state trajectory output can be used as a motion pla
 <h2><a class="toc-backref" href="#id3" role="doc-backlink">LQR Finite Horzon Non-linear Dynamics</a><a class="headerlink" href="#lqr-finite-horzon-non-linear-dynamics" title="Link to this heading"></a></h2>
 <p>The LQR algorithm can be run for the finite horizon case using non-linear dynamics
 with the following. Note the state trajectory output can be used as a motion plan.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="k">def</span> <span class="nf">nonlin_finite_hor</span><span class="p">():</span>
-<span class="linenos"> 2</span>    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="k">def</span><span class="w"> </span><span class="nf">nonlin_finite_hor</span><span class="p">():</span>
+<span class="linenos"> 2</span>    <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="linenos"> 3</span>
-<span class="linenos"> 4</span>    <span class="kn">import</span> <span class="nn">gncpy.dynamics.basic</span> <span class="k">as</span> <span class="nn">gdyn</span>
-<span class="linenos"> 5</span>    <span class="kn">from</span> <span class="nn">gncpy.control</span> <span class="kn">import</span> <span class="n">LQR</span>
+<span class="linenos"> 4</span>    <span class="kn">import</span><span class="w"> </span><span class="nn">gncpy.dynamics.basic</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gdyn</span>
+<span class="linenos"> 5</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">gncpy.control</span><span class="w"> </span><span class="kn">import</span> <span class="n">LQR</span>
 <span class="linenos"> 6</span>
 <span class="linenos"> 7</span>    <span class="n">d2r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span>
 <span class="linenos"> 8</span>
@@ -422,12 +417,12 @@ with the following. Note the state trajectory output can be used as a motion pla
 <p>The ELQR algorithm can be run for a finite horizon with non-linear dynamics and
 a non-quadratic cost with the following. Note the state trajectory output can be
 used as a motion plan. This version does not modify the quadratization process.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="k">def</span> <span class="nf">basic</span><span class="p">():</span>
-<span class="linenos">  2</span>    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="k">def</span><span class="w"> </span><span class="nf">basic</span><span class="p">():</span>
+<span class="linenos">  2</span>    <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="linenos">  3</span>
-<span class="linenos">  4</span>    <span class="kn">import</span> <span class="nn">gncpy.plotting</span> <span class="k">as</span> <span class="nn">gplot</span>
-<span class="linenos">  5</span>    <span class="kn">import</span> <span class="nn">gncpy.control</span> <span class="k">as</span> <span class="nn">gctrl</span>
-<span class="linenos">  6</span>    <span class="kn">from</span> <span class="nn">gncpy.dynamics.basic</span> <span class="kn">import</span> <span class="n">IRobotCreate</span>
+<span class="linenos">  4</span>    <span class="kn">import</span><span class="w"> </span><span class="nn">gncpy.plotting</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gplot</span>
+<span class="linenos">  5</span>    <span class="kn">import</span><span class="w"> </span><span class="nn">gncpy.control</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gctrl</span>
+<span class="linenos">  6</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">gncpy.dynamics.basic</span><span class="w"> </span><span class="kn">import</span> <span class="n">IRobotCreate</span>
 <span class="linenos">  7</span>
 <span class="linenos">  8</span>    <span class="n">tt</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># starting time when calculating control</span>
 <span class="linenos">  9</span>    <span class="n">dt</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">6</span>
@@ -477,7 +472,7 @@ used as a motion plan. This version does not modify the quadratization process.<
 <span class="linenos"> 53</span>    <span class="n">scale_factor</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="linenos"> 54</span>    <span class="n">cost_args</span> <span class="o">=</span> <span class="p">(</span><span class="n">obstacles</span><span class="p">,</span> <span class="n">obs_factor</span><span class="p">,</span> <span class="n">scale_factor</span><span class="p">,</span> <span class="n">bottom_left</span><span class="p">,</span> <span class="n">top_right</span><span class="p">)</span>
 <span class="linenos"> 55</span>
-<span class="linenos"> 56</span>    <span class="k">def</span> <span class="nf">non_quadratic_cost</span><span class="p">(</span>
+<span class="linenos"> 56</span>    <span class="k">def</span><span class="w"> </span><span class="nf">non_quadratic_cost</span><span class="p">(</span>
 <span class="linenos"> 57</span>        <span class="n">tt</span><span class="p">,</span>
 <span class="linenos"> 58</span>        <span class="n">state</span><span class="p">,</span>
 <span class="linenos"> 59</span>        <span class="n">ctrl_input</span><span class="p">,</span>
@@ -557,12 +552,12 @@ used as a motion plan. This version does not modify the quadratization process.<
 <p>The ELQR algorithm can be run for a finite horizon with non-linear dynamics and
 a non-quadratic cost with the following. Note the state trajectory output can be
 used as a motion plan. This version does modifies the quadratization process.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="k">def</span> <span class="nf">modify_quadratize</span><span class="p">():</span>
-<span class="linenos">  2</span>    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="k">def</span><span class="w"> </span><span class="nf">modify_quadratize</span><span class="p">():</span>
+<span class="linenos">  2</span>    <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="linenos">  3</span>
-<span class="linenos">  4</span>    <span class="kn">import</span> <span class="nn">gncpy.plotting</span> <span class="k">as</span> <span class="nn">gplot</span>
-<span class="linenos">  5</span>    <span class="kn">import</span> <span class="nn">gncpy.control</span> <span class="k">as</span> <span class="nn">gctrl</span>
-<span class="linenos">  6</span>    <span class="kn">from</span> <span class="nn">gncpy.dynamics.basic</span> <span class="kn">import</span> <span class="n">IRobotCreate</span>
+<span class="linenos">  4</span>    <span class="kn">import</span><span class="w"> </span><span class="nn">gncpy.plotting</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gplot</span>
+<span class="linenos">  5</span>    <span class="kn">import</span><span class="w"> </span><span class="nn">gncpy.control</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gctrl</span>
+<span class="linenos">  6</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">gncpy.dynamics.basic</span><span class="w"> </span><span class="kn">import</span> <span class="n">IRobotCreate</span>
 <span class="linenos">  7</span>
 <span class="linenos">  8</span>    <span class="n">tt</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># starting time when calculating control</span>
 <span class="linenos">  9</span>    <span class="n">dt</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">6</span>
@@ -611,7 +606,7 @@ used as a motion plan. This version does modifies the quadratization process.</p
 <span class="linenos"> 52</span>    <span class="n">scale_factor</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="linenos"> 53</span>    <span class="n">cost_args</span> <span class="o">=</span> <span class="p">(</span><span class="n">obstacles</span><span class="p">,</span> <span class="n">obs_factor</span><span class="p">,</span> <span class="n">scale_factor</span><span class="p">,</span> <span class="n">bottom_left</span><span class="p">,</span> <span class="n">top_right</span><span class="p">)</span>
 <span class="linenos"> 54</span>
-<span class="linenos"> 55</span>    <span class="k">def</span> <span class="nf">non_quadratic_cost</span><span class="p">(</span>
+<span class="linenos"> 55</span>    <span class="k">def</span><span class="w"> </span><span class="nf">non_quadratic_cost</span><span class="p">(</span>
 <span class="linenos"> 56</span>        <span class="n">tt</span><span class="p">,</span>
 <span class="linenos"> 57</span>        <span class="n">state</span><span class="p">,</span>
 <span class="linenos"> 58</span>        <span class="n">ctrl_input</span><span class="p">,</span>
@@ -647,7 +642,7 @@ used as a motion plan. This version does modifies the quadratization process.</p
 <span class="linenos"> 88</span>        <span class="k">return</span> <span class="n">cost</span>
 <span class="linenos"> 89</span>
 <span class="linenos"> 90</span>    <span class="c1"># define modifications for quadratizing the cost function</span>
-<span class="linenos"> 91</span>    <span class="k">def</span> <span class="nf">quad_modifier</span><span class="p">(</span><span class="n">itr</span><span class="p">,</span> <span class="n">tt</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
+<span class="linenos"> 91</span>    <span class="k">def</span><span class="w"> </span><span class="nf">quad_modifier</span><span class="p">(</span><span class="n">itr</span><span class="p">,</span> <span class="n">tt</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
 <span class="linenos"> 92</span>        <span class="n">rot_cost</span> <span class="o">=</span> <span class="mf">0.4</span>
 <span class="linenos"> 93</span>        <span class="c1"># only modify if within the first 2 iterations</span>
 <span class="linenos"> 94</span>        <span class="k">if</span> <span class="n">itr</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
@@ -703,12 +698,12 @@ used as a motion plan. This version does modifies the quadratization process.</p
 a non-quadratic cost with the following. Note the state trajectory output can be
 used as a motion plan. This version uses dynamics with a constraint on the states
 in addition to the obstacles in the environment.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="k">def</span> <span class="nf">linear</span><span class="p">():</span>
-<span class="linenos">  2</span>    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="k">def</span><span class="w"> </span><span class="nf">linear</span><span class="p">():</span>
+<span class="linenos">  2</span>    <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="linenos">  3</span>
-<span class="linenos">  4</span>    <span class="kn">import</span> <span class="nn">gncpy.plotting</span> <span class="k">as</span> <span class="nn">gplot</span>
-<span class="linenos">  5</span>    <span class="kn">import</span> <span class="nn">gncpy.control</span> <span class="k">as</span> <span class="nn">gctrl</span>
-<span class="linenos">  6</span>    <span class="kn">from</span> <span class="nn">gncpy.dynamics.basic</span> <span class="kn">import</span> <span class="n">DoubleIntegrator</span>
+<span class="linenos">  4</span>    <span class="kn">import</span><span class="w"> </span><span class="nn">gncpy.plotting</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gplot</span>
+<span class="linenos">  5</span>    <span class="kn">import</span><span class="w"> </span><span class="nn">gncpy.control</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gctrl</span>
+<span class="linenos">  6</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">gncpy.dynamics.basic</span><span class="w"> </span><span class="kn">import</span> <span class="n">DoubleIntegrator</span>
 <span class="linenos">  7</span>
 <span class="linenos">  8</span>    <span class="n">tt</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># starting time when calculating control</span>
 <span class="linenos">  9</span>    <span class="n">dt</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">6</span>
@@ -771,7 +766,7 @@ in addition to the obstacles in the environment.</p>
 <span class="linenos"> 66</span>    <span class="n">scale_factor</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="linenos"> 67</span>    <span class="n">cost_args</span> <span class="o">=</span> <span class="p">(</span><span class="n">obstacles</span><span class="p">,</span> <span class="n">obs_factor</span><span class="p">,</span> <span class="n">scale_factor</span><span class="p">,</span> <span class="n">bottom_left</span><span class="p">,</span> <span class="n">top_right</span><span class="p">)</span>
 <span class="linenos"> 68</span>
-<span class="linenos"> 69</span>    <span class="k">def</span> <span class="nf">non_quadratic_cost</span><span class="p">(</span>
+<span class="linenos"> 69</span>    <span class="k">def</span><span class="w"> </span><span class="nf">non_quadratic_cost</span><span class="p">(</span>
 <span class="linenos"> 70</span>        <span class="n">tt</span><span class="p">,</span>
 <span class="linenos"> 71</span>        <span class="n">state</span><span class="p">,</span>
 <span class="linenos"> 72</span>        <span class="n">ctrl_input</span><span class="p">,</span>

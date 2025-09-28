@@ -1,26 +1,24 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gncpy.games.SimpleUAV2d &mdash; GNCPy 2.0.4.dev0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+  <title>gncpy.games.SimpleUAV2d &mdash; GNCPy 2.0.5.dev0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
 
   
     <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_modules/gncpy/games/SimpleUAV2d.html" />
-  <!--[if lt IE 9]>
-    <script src="../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=354a3d29"></script>
-        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
-        <script src="../../../_static/copybutton.js?v=cbcfbdad"></script>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=aa08a9b3"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../../_static/copybutton.js?v=cbcfbdad"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -38,9 +36,6 @@
             GNCPy
               <img src="../../../_static/logo.svg" class="logo" alt="Logo"/>
           </a>
-              <div class="version">
-                2.0.4.dev0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -271,13 +266,13 @@
 <span class="sd">    * SimpleUAVHazards2d.yaml</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">enum</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
 
-<span class="kn">import</span> <span class="nn">gncpy.dynamics.basic</span> <span class="k">as</span> <span class="nn">gdyn</span>
-<span class="kn">import</span> <span class="nn">gncpy.game_engine.physics2d</span> <span class="k">as</span> <span class="nn">gphysics</span>
-<span class="kn">import</span> <span class="nn">gncpy.game_engine.components</span> <span class="k">as</span> <span class="nn">gcomp</span>
-<span class="kn">from</span> <span class="nn">gncpy.game_engine.base_game</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">gncpy.dynamics.basic</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gdyn</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">gncpy.game_engine.physics2d</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gphysics</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">gncpy.game_engine.components</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gcomp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">gncpy.game_engine.base_game</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">BaseGame2d</span><span class="p">,</span>
     <span class="n">Base2dParams</span><span class="p">,</span>
     <span class="n">Shape2dParams</span><span class="p">,</span>
@@ -287,7 +282,7 @@
 
 <div class="viewcode-block" id="BirthModelParams">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.BirthModelParams.html#gncpy.games.SimpleUAV2d.BirthModelParams">[docs]</a>
-<span class="k">class</span> <span class="nc">BirthModelParams</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BirthModelParams</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Parameters for the birth model to be parsed by the yaml parser.</span>
 
 <span class="sd">    The types defined in this class determine what type the parser uses.</span>
@@ -318,7 +313,7 @@
 
 <div class="viewcode-block" id="BirthModelParams.__init__">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.BirthModelParams.html#gncpy.games.SimpleUAV2d.BirthModelParams.__init__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">extra_params</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -334,7 +329,7 @@
 
 <div class="viewcode-block" id="ControlModelParams">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.ControlModelParams.html#gncpy.games.SimpleUAV2d.ControlModelParams">[docs]</a>
-<span class="k">class</span> <span class="nc">ControlModelParams</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ControlModelParams</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Parameters for the birth model to be parsed by the yaml parser.</span>
 
 <span class="sd">    The types defined in this class determine what type the parser uses.</span>
@@ -361,7 +356,7 @@
 
 <div class="viewcode-block" id="ControlModelParams.__init__">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.ControlModelParams.html#gncpy.games.SimpleUAV2d.ControlModelParams.__init__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_vel</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_vel_x</span> <span class="o">=</span> <span class="kc">None</span>
@@ -373,7 +368,7 @@
 
 <div class="viewcode-block" id="StateConstraintParams">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.StateConstraintParams.html#gncpy.games.SimpleUAV2d.StateConstraintParams">[docs]</a>
-<span class="k">class</span> <span class="nc">StateConstraintParams</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">StateConstraintParams</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Parameters for the state constraints to be parsed by the yaml parser.</span>
 
 <span class="sd">    The types defined in this class determine what type the parser uses.</span>
@@ -391,7 +386,7 @@
 
 <div class="viewcode-block" id="StateConstraintParams.__init__">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.StateConstraintParams.html#gncpy.games.SimpleUAV2d.StateConstraintParams.__init__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">min_vels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_vels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span></div>
@@ -401,7 +396,7 @@
 
 <div class="viewcode-block" id="DynamicsParams">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.DynamicsParams.html#gncpy.games.SimpleUAV2d.DynamicsParams">[docs]</a>
-<span class="k">class</span> <span class="nc">DynamicsParams</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DynamicsParams</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Parameters for the state constraints to be parsed by the yaml parser.</span>
 
 <span class="sd">    The types defined in this class determine what type the parser uses.</span>
@@ -422,7 +417,7 @@
 
 <div class="viewcode-block" id="DynamicsParams.__init__">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.DynamicsParams.html#gncpy.games.SimpleUAV2d.DynamicsParams.__init__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">extra_params</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">controlModel</span> <span class="o">=</span> <span class="n">ControlModelParams</span><span class="p">()</span>
@@ -433,7 +428,7 @@
 
 <div class="viewcode-block" id="PlayerParams">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.PlayerParams.html#gncpy.games.SimpleUAV2d.PlayerParams">[docs]</a>
-<span class="k">class</span> <span class="nc">PlayerParams</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PlayerParams</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Parameters for a player object to be parsed by the yaml parser.</span>
 
 <span class="sd">    The types defined in this class determine what type the parser uses.</span>
@@ -456,7 +451,7 @@
 
 <div class="viewcode-block" id="PlayerParams.__init__">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.PlayerParams.html#gncpy.games.SimpleUAV2d.PlayerParams.__init__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">birth</span> <span class="o">=</span> <span class="n">BirthModelParams</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dynamics</span> <span class="o">=</span> <span class="n">DynamicsParams</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">Shape2dParams</span><span class="p">()</span>
@@ -468,7 +463,7 @@
 
 <div class="viewcode-block" id="ObstacleParams">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.ObstacleParams.html#gncpy.games.SimpleUAV2d.ObstacleParams">[docs]</a>
-<span class="k">class</span> <span class="nc">ObstacleParams</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ObstacleParams</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Parameters for an obstacle object to be parsed by the yaml parser.</span>
 
 <span class="sd">    The types defined in this class determine what type the parser uses.</span>
@@ -487,7 +482,7 @@
 
 <div class="viewcode-block" id="ObstacleParams.__init__">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.ObstacleParams.html#gncpy.games.SimpleUAV2d.ObstacleParams.__init__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">loc_x</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">loc_y</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">Shape2dParams</span><span class="p">()</span>
@@ -498,7 +493,7 @@
 
 <div class="viewcode-block" id="TargetParams">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.TargetParams.html#gncpy.games.SimpleUAV2d.TargetParams">[docs]</a>
-<span class="k">class</span> <span class="nc">TargetParams</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TargetParams</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Parameters for a target object to be parsed by the yaml parser.</span>
 
 <span class="sd">    The types defined in this class determine what type the parser uses.</span>
@@ -526,7 +521,7 @@
 
 <div class="viewcode-block" id="TargetParams.__init__">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.TargetParams.html#gncpy.games.SimpleUAV2d.TargetParams.__init__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">loc_x</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">loc_y</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">Shape2dParams</span><span class="p">()</span>
@@ -540,7 +535,7 @@
 
 <div class="viewcode-block" id="HazardParams">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.HazardParams.html#gncpy.games.SimpleUAV2d.HazardParams">[docs]</a>
-<span class="k">class</span> <span class="nc">HazardParams</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">HazardParams</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Parameters for a hazard object to be parsed by the yaml parser.</span>
 
 <span class="sd">    The types defined in this class determine what type the parser uses.</span>
@@ -562,7 +557,7 @@
 
 <div class="viewcode-block" id="HazardParams.__init__">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.HazardParams.html#gncpy.games.SimpleUAV2d.HazardParams.__init__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">loc_x</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">loc_y</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">Shape2dParams</span><span class="p">()</span>
@@ -574,7 +569,7 @@
 
 <div class="viewcode-block" id="ScoreParams">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.ScoreParams.html#gncpy.games.SimpleUAV2d.ScoreParams">[docs]</a>
-<span class="k">class</span> <span class="nc">ScoreParams</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ScoreParams</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Parameters for the score system to be parsed by the yaml parser.</span>
 
 <span class="sd">    The types defined in this class determine what type the parser uses.</span>
@@ -608,7 +603,7 @@
 
 <div class="viewcode-block" id="ScoreParams.__init__">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.ScoreParams.html#gncpy.games.SimpleUAV2d.ScoreParams.__init__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s2">&quot;basic&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">hazard_multiplier</span> <span class="o">=</span> <span class="mi">2</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">death_scale</span> <span class="o">=</span> <span class="mi">0</span>
@@ -626,7 +621,7 @@
 
 <div class="viewcode-block" id="Params">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.Params.html#gncpy.games.SimpleUAV2d.Params">[docs]</a>
-<span class="k">class</span> <span class="nc">Params</span><span class="p">(</span><span class="n">Base2dParams</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Params</span><span class="p">(</span><span class="n">Base2dParams</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Main set of parameters to be parsed by the yaml parser.</span>
 
 <span class="sd">    The types defined in this class determine what type the parser uses.</span>
@@ -647,7 +642,7 @@
 
 <div class="viewcode-block" id="Params.__init__">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.Params.html#gncpy.games.SimpleUAV2d.Params.__init__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">players</span> <span class="o">=</span> <span class="p">[]</span>
@@ -662,7 +657,7 @@
 <div class="viewcode-block" id="EventType">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.EventType.html#gncpy.games.SimpleUAV2d.EventType">[docs]</a>
 <span class="nd">@enum</span><span class="o">.</span><span class="n">unique</span>
-<span class="k">class</span> <span class="nc">EventType</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">EventType</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Define the different types of events in the game.&quot;&quot;&quot;</span>
 
     <span class="n">HAZARD</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>
@@ -671,7 +666,7 @@
     <span class="n">OBSTACLE</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>
     <span class="n">COL_PLAYER</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the enum name for strings.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span></div>
 
@@ -679,7 +674,7 @@
 
 <div class="viewcode-block" id="SimpleUAV2d">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.SimpleUAV2d.html#gncpy.games.SimpleUAV2d.SimpleUAV2d">[docs]</a>
-<span class="k">class</span> <span class="nc">SimpleUAV2d</span><span class="p">(</span><span class="n">BaseGame2d</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SimpleUAV2d</span><span class="p">(</span><span class="n">BaseGame2d</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Simple 2D UAV game.</span>
 
 <span class="sd">    Assumes obstacles and hazards are static, and all players have the same</span>
@@ -703,7 +698,7 @@
 
 <div class="viewcode-block" id="SimpleUAV2d.__init__">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.SimpleUAV2d.html#gncpy.games.SimpleUAV2d.SimpleUAV2d.__init__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">,</span> <span class="n">render_mode</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">,</span> <span class="n">render_mode</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize an object.</span>
 
 <span class="sd">        Parameters</span>
@@ -729,7 +724,7 @@
 
 <div class="viewcode-block" id="SimpleUAV2d.register_params">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.SimpleUAV2d.html#gncpy.games.SimpleUAV2d.SimpleUAV2d.register_params">[docs]</a>
-    <span class="k">def</span> <span class="nf">register_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">yaml</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">register_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">yaml</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Register custom classes for this game with the yaml parser.</span>
 
 <span class="sd">        Parameters</span>
@@ -753,7 +748,7 @@
 
 <div class="viewcode-block" id="SimpleUAV2d.create_obstacles">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.SimpleUAV2d.html#gncpy.games.SimpleUAV2d.SimpleUAV2d.create_obstacles">[docs]</a>
-    <span class="k">def</span> <span class="nf">create_obstacles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_obstacles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates all obstacles based on config values.&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">params</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">obstacles</span><span class="p">:</span>
             <span class="n">e</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">entityManager</span><span class="o">.</span><span class="n">add_entity</span><span class="p">(</span><span class="s2">&quot;obstacle&quot;</span><span class="p">)</span>
@@ -797,7 +792,7 @@
 
 <div class="viewcode-block" id="SimpleUAV2d.create_hazards">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.SimpleUAV2d.html#gncpy.games.SimpleUAV2d.SimpleUAV2d.create_hazards">[docs]</a>
-    <span class="k">def</span> <span class="nf">create_hazards</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_hazards</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates all hazards based on config values.&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">params</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">hazards</span><span class="p">:</span>
             <span class="n">e</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">entityManager</span><span class="o">.</span><span class="n">add_entity</span><span class="p">(</span><span class="s2">&quot;hazard&quot;</span><span class="p">)</span>
@@ -846,7 +841,7 @@
 
 <div class="viewcode-block" id="SimpleUAV2d.create_targets">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.SimpleUAV2d.html#gncpy.games.SimpleUAV2d.SimpleUAV2d.create_targets">[docs]</a>
-    <span class="k">def</span> <span class="nf">create_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates current targets based on config values.</span>
 
 <span class="sd">        Returns</span>
@@ -918,7 +913,7 @@
 
 <div class="viewcode-block" id="SimpleUAV2d.get_player_pos_vel_inds">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.SimpleUAV2d.html#gncpy.games.SimpleUAV2d.SimpleUAV2d.get_player_pos_vel_inds">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_player_pos_vel_inds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_player_pos_vel_inds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Determines the position and velocity indices in the state vector.</span>
 
 <span class="sd">        Note, this assumes all players have the same state bounds when params is</span>
@@ -951,7 +946,7 @@
 
 <div class="viewcode-block" id="SimpleUAV2d.get_player_state_bounds">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.SimpleUAV2d.html#gncpy.games.SimpleUAV2d.SimpleUAV2d.get_player_state_bounds">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_player_state_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_player_state_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the bounds on the player state.</span>
 
 <span class="sd">        Note, this assumes all players have the same state bounds when params is</span>
@@ -1025,7 +1020,7 @@
 
 <div class="viewcode-block" id="SimpleUAV2d.get_players_state">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.SimpleUAV2d.html#gncpy.games.SimpleUAV2d.SimpleUAV2d.get_players_state">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_players_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_players_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns current dynamic state of all players.</span>
 
 <span class="sd">        Returns</span>
@@ -1043,7 +1038,7 @@
 
 <div class="viewcode-block" id="SimpleUAV2d.create_dynamics">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.SimpleUAV2d.html#gncpy.games.SimpleUAV2d.SimpleUAV2d.create_dynamics">[docs]</a>
-    <span class="k">def</span> <span class="nf">create_dynamics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">cBirth</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_dynamics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">cBirth</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create the dynamics system for a player.</span>
 
 <span class="sd">        Parameters</span>
@@ -1090,7 +1085,7 @@
             <span class="k">if</span> <span class="n">cParams</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;velocity&quot;</span><span class="p">:</span>
                 <span class="n">ctrl_args</span> <span class="o">=</span> <span class="p">()</span>
 
-                <span class="k">def</span> <span class="nf">_ctrl_mod</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+                <span class="k">def</span><span class="w"> </span><span class="nf">_ctrl_mod</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
                     <span class="k">if</span> <span class="n">cParams</span><span class="o">.</span><span class="n">max_vel_x</span> <span class="ow">and</span> <span class="n">cParams</span><span class="o">.</span><span class="n">max_vel_y</span><span class="p">:</span>
                         <span class="n">mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span>
                             <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">cParams</span><span class="o">.</span><span class="n">max_vel_x</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">cParams</span><span class="o">.</span><span class="n">max_vel_y</span><span class="p">))</span>
@@ -1114,7 +1109,7 @@
             <span class="k">if</span> <span class="n">sParams</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;none&quot;</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">sParams</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;velocity&quot;</span><span class="p">:</span>
 
-                    <span class="k">def</span> <span class="nf">_state_constraint</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+                    <span class="k">def</span><span class="w"> </span><span class="nf">_state_constraint</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
                         <span class="n">x</span><span class="p">[</span><span class="n">vel_inds</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span>
                             <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">x</span><span class="p">[</span><span class="n">vel_inds</span><span class="p">]</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">sParams</span><span class="o">.</span><span class="n">max_vels</span><span class="p">)),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                         <span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">vel_inds</span><span class="p">),</span> <span class="mi">1</span><span class="p">))</span>
@@ -1137,19 +1132,19 @@
             <span class="k">if</span> <span class="n">cParams</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;velocity_turn&quot;</span><span class="p">:</span>
                 <span class="n">ctrl_args</span> <span class="o">=</span> <span class="p">()</span>
 
-                <span class="k">def</span> <span class="nf">_g1</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+                <span class="k">def</span><span class="w"> </span><span class="nf">_g1</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
                     <span class="k">return</span> <span class="n">cParams</span><span class="o">.</span><span class="n">max_vel</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">())</span> <span class="o">*</span> <span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
 
-                <span class="k">def</span> <span class="nf">_g0</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+                <span class="k">def</span><span class="w"> </span><span class="nf">_g0</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
                     <span class="k">return</span> <span class="mi">0</span>
 
-                <span class="k">def</span> <span class="nf">_g3</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+                <span class="k">def</span><span class="w"> </span><span class="nf">_g3</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
                     <span class="k">return</span> <span class="n">cParams</span><span class="o">.</span><span class="n">max_vel</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">())</span> <span class="o">*</span> <span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
 
-                <span class="k">def</span> <span class="nf">_g2</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+                <span class="k">def</span><span class="w"> </span><span class="nf">_g2</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
                     <span class="k">return</span> <span class="mi">0</span>
 
-                <span class="k">def</span> <span class="nf">_g4</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+                <span class="k">def</span><span class="w"> </span><span class="nf">_g4</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
                     <span class="k">return</span> <span class="n">cParams</span><span class="o">.</span><span class="n">max_turn_rate</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span> <span class="o">*</span> <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
 
             <span class="k">else</span><span class="p">:</span>
@@ -1163,7 +1158,7 @@
             <span class="k">if</span> <span class="n">sParams</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;none&quot;</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">sParams</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;velocity&quot;</span><span class="p">:</span>
 
-                    <span class="k">def</span> <span class="nf">_state_constraint</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+                    <span class="k">def</span><span class="w"> </span><span class="nf">_state_constraint</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
                         <span class="n">x</span><span class="p">[</span><span class="n">vel_inds</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span>
                             <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">x</span><span class="p">[</span><span class="n">vel_inds</span><span class="p">]</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">sParams</span><span class="o">.</span><span class="n">max_vels</span><span class="p">)),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                         <span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
@@ -1216,7 +1211,7 @@
 
 <div class="viewcode-block" id="SimpleUAV2d.create_player">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.SimpleUAV2d.html#gncpy.games.SimpleUAV2d.SimpleUAV2d.create_player">[docs]</a>
-    <span class="k">def</span> <span class="nf">create_player</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_player</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a player entity.</span>
 
 <span class="sd">        Parameters</span>
@@ -1304,7 +1299,7 @@
 
 <div class="viewcode-block" id="SimpleUAV2d.spawn_players">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.SimpleUAV2d.html#gncpy.games.SimpleUAV2d.SimpleUAV2d.spawn_players">[docs]</a>
-    <span class="k">def</span> <span class="nf">spawn_players</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">spawn_players</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Spawns a new player if needed.&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">params</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">players</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">create_player</span><span class="p">(</span><span class="n">params</span><span class="p">)</span></div>
@@ -1312,7 +1307,7 @@
 
 <div class="viewcode-block" id="SimpleUAV2d.propagate_dynamics">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.SimpleUAV2d.html#gncpy.games.SimpleUAV2d.SimpleUAV2d.propagate_dynamics">[docs]</a>
-    <span class="k">def</span> <span class="nf">propagate_dynamics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eDyn</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">propagate_dynamics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eDyn</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Propagates the dynamics with the given action.</span>
 
 <span class="sd">        Parameters</span>
@@ -1333,7 +1328,7 @@
 
 <div class="viewcode-block" id="SimpleUAV2d.get_player_ids">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.SimpleUAV2d.html#gncpy.games.SimpleUAV2d.SimpleUAV2d.get_player_ids">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_player_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_player_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the entity ids of all players.</span>
 
 <span class="sd">        Returns</span>
@@ -1346,7 +1341,7 @@
 
 <div class="viewcode-block" id="SimpleUAV2d.reset">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.SimpleUAV2d.html#gncpy.games.SimpleUAV2d.SimpleUAV2d.reset">[docs]</a>
-    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Resets the game to the base state.</span>
 
 <span class="sd">        Parameters</span>
@@ -1397,7 +1392,7 @@
 
 <div class="viewcode-block" id="SimpleUAV2d.s_collision">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.SimpleUAV2d.html#gncpy.games.SimpleUAV2d.SimpleUAV2d.s_collision">[docs]</a>
-    <span class="k">def</span> <span class="nf">s_collision</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">s_collision</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check for collisions between entities.</span>
 
 <span class="sd">        This also handles player death if a hazard destroys a player, and</span>
@@ -1526,7 +1521,7 @@
 
 <div class="viewcode-block" id="SimpleUAV2d.s_input">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.SimpleUAV2d.html#gncpy.games.SimpleUAV2d.SimpleUAV2d.s_input">[docs]</a>
-    <span class="k">def</span> <span class="nf">s_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_input</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">s_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_input</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate user input.</span>
 
 <span class="sd">        Only allows actions that correspond to a current entity.</span>
@@ -1552,7 +1547,7 @@
 
 <div class="viewcode-block" id="SimpleUAV2d.s_game_over">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.SimpleUAV2d.html#gncpy.games.SimpleUAV2d.SimpleUAV2d.s_game_over">[docs]</a>
-    <span class="k">def</span> <span class="nf">s_game_over</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">s_game_over</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Determines if the game has met the end conditions.</span>
 
 <span class="sd">        End conditions are if all players are dead and no random births, or</span>
@@ -1573,7 +1568,7 @@
 
 <div class="viewcode-block" id="SimpleUAV2d.s_movement">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.SimpleUAV2d.html#gncpy.games.SimpleUAV2d.SimpleUAV2d.s_movement">[docs]</a>
-    <span class="k">def</span> <span class="nf">s_movement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">s_movement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Move entities according to their dynamics.</span>
 
 <span class="sd">        Parameters</span>
@@ -1610,7 +1605,7 @@
 
 <div class="viewcode-block" id="SimpleUAV2d.basic_reward">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.SimpleUAV2d.html#gncpy.games.SimpleUAV2d.SimpleUAV2d.basic_reward">[docs]</a>
-    <span class="k">def</span> <span class="nf">basic_reward</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">basic_reward</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the reward for a timestep for the basic reward type.</span>
 
 <span class="sd">        Returns</span>
@@ -1621,7 +1616,7 @@
 <span class="sd">            extra info useful for debugging.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">def</span> <span class="nf">_match_function</span><span class="p">(</span><span class="n">test_cap</span><span class="p">,</span> <span class="n">req_cap</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">_match_function</span><span class="p">(</span><span class="n">test_cap</span><span class="p">,</span> <span class="n">req_cap</span><span class="p">):</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">req_cap</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">return</span> <span class="nb">sum</span><span class="p">([</span><span class="mi">1</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">test_cap</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">req_cap</span><span class="p">])</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">req_cap</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -1738,7 +1733,7 @@
 
 <div class="viewcode-block" id="SimpleUAV2d.s_score">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.SimpleUAV2d.html#gncpy.games.SimpleUAV2d.SimpleUAV2d.s_score">[docs]</a>
-    <span class="k">def</span> <span class="nf">s_score</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">s_score</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Determines the total score for the timestep.</span>
 
 <span class="sd">        Raises</span>
@@ -1764,7 +1759,7 @@
 
 <div class="viewcode-block" id="SimpleUAV2d.step">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/games/SimpleUAV2d/gncpy.games.SimpleUAV2d.SimpleUAV2d.html#gncpy.games.SimpleUAV2d.SimpleUAV2d.step">[docs]</a>
-    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_input</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_input</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Perform one iteration of the game loop.</span>
 
 <span class="sd">        Multiple physics updates can be made between rendering calls. Also</span>

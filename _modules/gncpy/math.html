@@ -1,26 +1,24 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gncpy.math &mdash; GNCPy 2.0.4.dev0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+  <title>gncpy.math &mdash; GNCPy 2.0.5.dev0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
 
   
     <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_modules/gncpy/math.html" />
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=354a3d29"></script>
-        <script src="../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
-        <script src="../../_static/copybutton.js?v=cbcfbdad"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=aa08a9b3"></script>
+      <script src="../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=cbcfbdad"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -38,9 +36,6 @@
             GNCPy
               <img src="../../_static/logo.svg" class="logo" alt="Logo"/>
           </a>
-              <div class="version">
-                2.0.4.dev0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -264,15 +259,15 @@
              
   <h1>Source code for gncpy.math</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Useful math utility functions.&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
 
 
 <div class="viewcode-block" id="get_jacobian">
 <a class="viewcode-back" href="../../_autosummary/gncpy/math/gncpy.math.get_jacobian.html#gncpy.math.get_jacobian">[docs]</a>
-<span class="k">def</span> <span class="nf">get_jacobian</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">fnc</span><span class="p">,</span> <span class="n">f_args</span><span class="o">=</span><span class="p">(),</span> <span class="n">step_size</span><span class="o">=</span><span class="mi">10</span><span class="o">**-</span><span class="mi">7</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_jacobian</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">fnc</span><span class="p">,</span> <span class="n">f_args</span><span class="o">=</span><span class="p">(),</span> <span class="n">step_size</span><span class="o">=</span><span class="mi">10</span><span class="o">**-</span><span class="mi">7</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculates the jacobian of a function.</span>
 
 <span class="sd">    Numerically calculates the jacobian using the central difference method.</span>
@@ -309,7 +304,7 @@
 
 <div class="viewcode-block" id="get_hessian">
 <a class="viewcode-back" href="../../_autosummary/gncpy/math/gncpy.math.get_hessian.html#gncpy.math.get_hessian">[docs]</a>
-<span class="k">def</span> <span class="nf">get_hessian</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">fnc</span><span class="p">,</span> <span class="n">f_args</span><span class="o">=</span><span class="p">(),</span> <span class="n">step_size</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_hessian</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">fnc</span><span class="p">,</span> <span class="n">f_args</span><span class="o">=</span><span class="p">(),</span> <span class="n">step_size</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculates the hessian of a function.</span>
 
 <span class="sd">    Numerically calculates the hessian using the central difference method.</span>
@@ -367,7 +362,7 @@
 
 <div class="viewcode-block" id="get_state_jacobian">
 <a class="viewcode-back" href="../../_autosummary/gncpy/math/gncpy.math.get_state_jacobian.html#gncpy.math.get_state_jacobian">[docs]</a>
-<span class="k">def</span> <span class="nf">get_state_jacobian</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">fncs</span><span class="p">,</span> <span class="n">f_args</span><span class="p">,</span> <span class="n">u</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_state_jacobian</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">fncs</span><span class="p">,</span> <span class="n">f_args</span><span class="p">,</span> <span class="n">u</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculates the jacobian matrix for the state of a state space model.</span>
 
 <span class="sd">    Notes</span>
@@ -421,7 +416,7 @@
 
 <div class="viewcode-block" id="get_input_jacobian">
 <a class="viewcode-back" href="../../_autosummary/gncpy/math/gncpy.math.get_input_jacobian.html#gncpy.math.get_input_jacobian">[docs]</a>
-<span class="k">def</span> <span class="nf">get_input_jacobian</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">fncs</span><span class="p">,</span> <span class="n">f_args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_input_jacobian</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">fncs</span><span class="p">,</span> <span class="n">f_args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculates the jacobian matrix for the input of a state space model.</span>
 
 <span class="sd">    Notes</span>
@@ -470,7 +465,7 @@
 
 <div class="viewcode-block" id="rk4">
 <a class="viewcode-back" href="../../_autosummary/gncpy/math/gncpy.math.rk4.html#gncpy.math.rk4">[docs]</a>
-<span class="k">def</span> <span class="nf">rk4</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">rk4</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Implements a classic Runge-Kutta integration RK4.</span>
 
 <span class="sd">    Parameters</span>
@@ -498,7 +493,7 @@
 
 <div class="viewcode-block" id="rk4_backward">
 <a class="viewcode-back" href="../../_autosummary/gncpy/math/gncpy.math.rk4_backward.html#gncpy.math.rk4_backward">[docs]</a>
-<span class="k">def</span> <span class="nf">rk4_backward</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">rk4_backward</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Implements a backwards classic Runge-Kutta integration RK4.</span>
 
 <span class="sd">    Parameters</span>
@@ -526,7 +521,7 @@
 
 <div class="viewcode-block" id="log_sum_exp">
 <a class="viewcode-back" href="../../_autosummary/gncpy/math/gncpy.math.log_sum_exp.html#gncpy.math.log_sum_exp">[docs]</a>
-<span class="k">def</span> <span class="nf">log_sum_exp</span><span class="p">(</span><span class="n">lst</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">log_sum_exp</span><span class="p">(</span><span class="n">lst</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Utility function for a log-sum-exponential trick.</span>
 
 <span class="sd">    Parameters</span>
@@ -552,7 +547,7 @@
 
 <div class="viewcode-block" id="gamma_fnc">
 <a class="viewcode-back" href="../../_autosummary/gncpy/math/gncpy.math.gamma_fnc.html#gncpy.math.gamma_fnc">[docs]</a>
-<span class="k">def</span> <span class="nf">gamma_fnc</span><span class="p">(</span><span class="n">alpha</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">gamma_fnc</span><span class="p">(</span><span class="n">alpha</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Implements a gamma function.</span>
 
 <span class="sd">    Notes</span>
@@ -583,7 +578,7 @@
 
 <div class="viewcode-block" id="get_elem_sym_fnc">
 <a class="viewcode-back" href="../../_autosummary/gncpy/math/gncpy.math.get_elem_sym_fnc.html#gncpy.math.get_elem_sym_fnc">[docs]</a>
-<span class="k">def</span> <span class="nf">get_elem_sym_fnc</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_elem_sym_fnc</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">z</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">esf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">]])</span>
     <span class="k">else</span><span class="p">:</span>
@@ -623,7 +618,7 @@
 
 <div class="viewcode-block" id="weighted_sum_vec">
 <a class="viewcode-back" href="../../_autosummary/gncpy/math/gncpy.math.weighted_sum_vec.html#gncpy.math.weighted_sum_vec">[docs]</a>
-<span class="k">def</span> <span class="nf">weighted_sum_vec</span><span class="p">(</span><span class="n">w_lst</span><span class="p">,</span> <span class="n">x_lst</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">weighted_sum_vec</span><span class="p">(</span><span class="n">w_lst</span><span class="p">,</span> <span class="n">x_lst</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculates the weighted sum of a list of vectors.</span>
 
 <span class="sd">    Parameters</span>
@@ -652,7 +647,7 @@
 
 <div class="viewcode-block" id="weighted_sum_mat">
 <a class="viewcode-back" href="../../_autosummary/gncpy/math/gncpy.math.weighted_sum_mat.html#gncpy.math.weighted_sum_mat">[docs]</a>
-<span class="k">def</span> <span class="nf">weighted_sum_mat</span><span class="p">(</span><span class="n">w_lst</span><span class="p">,</span> <span class="n">P_lst</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">weighted_sum_mat</span><span class="p">(</span><span class="n">w_lst</span><span class="p">,</span> <span class="n">P_lst</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculates the weighted sum of a list of matrices.</span>
 
 <span class="sd">    Parameters</span>
@@ -681,7 +676,7 @@
 
 <div class="viewcode-block" id="gaussian_kernel">
 <a class="viewcode-back" href="../../_autosummary/gncpy/math/gncpy.math.gaussian_kernel.html#gncpy.math.gaussian_kernel">[docs]</a>
-<span class="k">def</span> <span class="nf">gaussian_kernel</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">sig</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">gaussian_kernel</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">sig</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Implements a Gaussian Kernel.</span>
 
 <span class="sd">    Parameters</span>
@@ -703,7 +698,7 @@
 
 <div class="viewcode-block" id="epanechnikov_kernel">
 <a class="viewcode-back" href="../../_autosummary/gncpy/math/gncpy.math.epanechnikov_kernel.html#gncpy.math.epanechnikov_kernel">[docs]</a>
-<span class="k">def</span> <span class="nf">epanechnikov_kernel</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">epanechnikov_kernel</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Implements the Epanechnikov kernel.</span>
 
 <span class="sd">    Parameters</span>
@@ -716,7 +711,7 @@
 <span class="sd">    val : float</span>
 <span class="sd">        kernal value</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">calc_vn</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calc_vn</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">return</span> <span class="mi">2</span>
         <span class="k">elif</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>

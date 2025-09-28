@@ -1,26 +1,24 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gncpy.game_engine.base_game &mdash; GNCPy 2.0.4.dev0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+  <title>gncpy.game_engine.base_game &mdash; GNCPy 2.0.5.dev0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
 
   
     <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_modules/gncpy/game_engine/base_game.html" />
-  <!--[if lt IE 9]>
-    <script src="../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=354a3d29"></script>
-        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
-        <script src="../../../_static/copybutton.js?v=cbcfbdad"></script>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=aa08a9b3"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../../_static/copybutton.js?v=cbcfbdad"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -38,9 +36,6 @@
             GNCPy
               <img src="../../../_static/logo.svg" class="logo" alt="Logo"/>
           </a>
-              <div class="version">
-                2.0.4.dev0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -267,17 +262,17 @@
 
 <span class="sd">These define common functions, properties, and interfaces for all games.</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">pathlib</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">ruamel.yaml</span> <span class="kn">import</span> <span class="n">YAML</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ruamel.yaml</span><span class="w"> </span><span class="kn">import</span> <span class="n">YAML</span>
 
-<span class="kn">import</span> <span class="nn">gncpy.game_engine.rendering2d</span> <span class="k">as</span> <span class="nn">grender2d</span>
-<span class="kn">import</span> <span class="nn">gncpy.game_engine.components</span> <span class="k">as</span> <span class="nn">gcomp</span>
-<span class="kn">from</span> <span class="nn">gncpy.game_engine.rendering2d</span> <span class="kn">import</span> <span class="n">Shape2dParams</span>
-<span class="kn">from</span> <span class="nn">gncpy.game_engine.physics2d</span> <span class="kn">import</span> <span class="n">Physics2dParams</span><span class="p">,</span> <span class="n">Collision2dParams</span>
-<span class="kn">from</span> <span class="nn">gncpy.game_engine.entities</span> <span class="kn">import</span> <span class="n">EntityManager</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">gncpy.game_engine.rendering2d</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">grender2d</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">gncpy.game_engine.components</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gcomp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">gncpy.game_engine.rendering2d</span><span class="w"> </span><span class="kn">import</span> <span class="n">Shape2dParams</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">gncpy.game_engine.physics2d</span><span class="w"> </span><span class="kn">import</span> <span class="n">Physics2dParams</span><span class="p">,</span> <span class="n">Collision2dParams</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">gncpy.game_engine.entities</span><span class="w"> </span><span class="kn">import</span> <span class="n">EntityManager</span>
 
 
 <span class="n">yaml</span> <span class="o">=</span> <span class="n">YAML</span><span class="p">()</span>
@@ -286,14 +281,14 @@
 
 <div class="viewcode-block" id="ndarray_representer">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/base_game/gncpy.game_engine.base_game.ndarray_representer.html#gncpy.game_engine.base_game.ndarray_representer">[docs]</a>
-<span class="k">def</span> <span class="nf">ndarray_representer</span><span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ndarray_representer</span><span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">dumper</span><span class="o">.</span><span class="n">represent_list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span></div>
 
 
 
 <div class="viewcode-block" id="WindowParams">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/base_game/gncpy.game_engine.base_game.WindowParams.html#gncpy.game_engine.base_game.WindowParams">[docs]</a>
-<span class="k">class</span> <span class="nc">WindowParams</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">WindowParams</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Parameters of the game window to be parsed by the yaml parser.</span>
 
 <span class="sd">    The types defined in this class determine what type the parser uses.</span>
@@ -308,7 +303,7 @@
 
 <div class="viewcode-block" id="WindowParams.__init__">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/base_game/gncpy.game_engine.base_game.WindowParams.html#gncpy.game_engine.base_game.WindowParams.__init__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="mi">0</span></div>
@@ -318,7 +313,7 @@
 
 <div class="viewcode-block" id="BaseParams">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/base_game/gncpy.game_engine.base_game.BaseParams.html#gncpy.game_engine.base_game.BaseParams">[docs]</a>
-<span class="k">class</span> <span class="nc">BaseParams</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BaseParams</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Main parameter class, may be inherited from to add custom attributes.</span>
 
 <span class="sd">    Attributes</span>
@@ -329,7 +324,7 @@
 
 <div class="viewcode-block" id="BaseParams.__init__">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/base_game/gncpy.game_engine.base_game.BaseParams.html#gncpy.game_engine.base_game.BaseParams.__init__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">window</span> <span class="o">=</span> <span class="n">WindowParams</span><span class="p">()</span></div>
 </div>
@@ -338,7 +333,7 @@
 
 <div class="viewcode-block" id="Base2dParams">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/base_game/gncpy.game_engine.base_game.Base2dParams.html#gncpy.game_engine.base_game.Base2dParams">[docs]</a>
-<span class="k">class</span> <span class="nc">Base2dParams</span><span class="p">(</span><span class="n">BaseParams</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Base2dParams</span><span class="p">(</span><span class="n">BaseParams</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base parameters for 2d games, can be inherited from.</span>
 
 <span class="sd">    Attributes</span>
@@ -355,7 +350,7 @@
 
 <div class="viewcode-block" id="Base2dParams.__init__">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/base_game/gncpy.game_engine.base_game.Base2dParams.html#gncpy.game_engine.base_game.Base2dParams.__init__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">physics</span> <span class="o">=</span> <span class="n">Physics2dParams</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span> <span class="o">=</span> <span class="mf">0.0</span>
@@ -366,7 +361,7 @@
 
 <div class="viewcode-block" id="BaseGame">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/base_game/gncpy.game_engine.base_game.BaseGame.html#gncpy.game_engine.base_game.BaseGame">[docs]</a>
-<span class="k">class</span> <span class="nc">BaseGame</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BaseGame</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for defining games.</span>
 
 <span class="sd">    This should implement all the necessary systems (i.e. game logic) by operating</span>
@@ -403,7 +398,7 @@
 
 <div class="viewcode-block" id="BaseGame.__init__">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/base_game/gncpy.game_engine.base_game.BaseGame.html#gncpy.game_engine.base_game.BaseGame.__init__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">config_file</span><span class="p">,</span>
         <span class="n">render_mode</span><span class="p">,</span>
@@ -469,7 +464,7 @@
 
 <div class="viewcode-block" id="BaseGame.setup">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/base_game/gncpy.game_engine.base_game.BaseGame.html#gncpy.game_engine.base_game.BaseGame.setup">[docs]</a>
-    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets up the game by parsing the config file and checking max time.</span>
 
 <span class="sd">        This should be called before any other game functions. It should be</span>
@@ -487,7 +482,7 @@
 
 <div class="viewcode-block" id="BaseGame.register_params">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/base_game/gncpy.game_engine.base_game.BaseGame.html#gncpy.game_engine.base_game.BaseGame.register_params">[docs]</a>
-    <span class="k">def</span> <span class="nf">register_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">yaml</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">register_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">yaml</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Register classes with the yaml parser.</span>
 
 <span class="sd">        This should be extended by inherited classes.</span>
@@ -504,7 +499,7 @@
 
 <div class="viewcode-block" id="BaseGame.validate_config_file">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/base_game/gncpy.game_engine.base_game.BaseGame.html#gncpy.game_engine.base_game.BaseGame.validate_config_file">[docs]</a>
-    <span class="k">def</span> <span class="nf">validate_config_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">,</span> <span class="n">use_library</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate_config_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">,</span> <span class="n">use_library</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate that the config file exists.</span>
 
 <span class="sd">        First checks if the file exists as provided, then checks the library</span>
@@ -543,11 +538,11 @@
 
 <div class="viewcode-block" id="BaseGame.parse_config_file">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/base_game/gncpy.game_engine.base_game.BaseGame.html#gncpy.game_engine.base_game.BaseGame.parse_config_file">[docs]</a>
-    <span class="k">def</span> <span class="nf">parse_config_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">parse_config_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Parses the config file and saves the parameters.&quot;&quot;&quot;</span>
         <span class="n">builtins</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
 
-        <span class="k">def</span> <span class="nf">helper</span><span class="p">(</span><span class="n">item</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">helper</span><span class="p">(</span><span class="n">item</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Set default class values before being overriding from file.&quot;&quot;&quot;</span>
             <span class="n">item_cls</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">item_cls</span> <span class="ow">in</span> <span class="n">builtins</span> <span class="ow">or</span> <span class="n">item_cls</span> <span class="o">==</span> <span class="nb">tuple</span><span class="p">:</span>
@@ -602,7 +597,7 @@
 
 <div class="viewcode-block" id="BaseGame.reset">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/base_game/gncpy.game_engine.base_game.BaseGame.html#gncpy.game_engine.base_game.BaseGame.reset">[docs]</a>
-    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Resets to the base state.</span>
 
 <span class="sd">        If a random generator is provided then that is used. Otherwise the seed</span>
@@ -637,7 +632,7 @@
 <div class="viewcode-block" id="BaseGame.s_movement">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/base_game/gncpy.game_engine.base_game.BaseGame.html#gncpy.game_engine.base_game.BaseGame.s_movement">[docs]</a>
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">s_movement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">s_movement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Abstract method for moving entities according to their dynamics.</span>
 
 <span class="sd">        Parameters</span>
@@ -651,7 +646,7 @@
 <div class="viewcode-block" id="BaseGame.s_collision">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/base_game/gncpy.game_engine.base_game.BaseGame.html#gncpy.game_engine.base_game.BaseGame.s_collision">[docs]</a>
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">s_collision</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">s_collision</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Abstract method to check for collisions between entities.</span>
 
 <span class="sd">        May return extra info useful by the step function.</span>
@@ -662,7 +657,7 @@
 <div class="viewcode-block" id="BaseGame.s_game_over">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/base_game/gncpy.game_engine.base_game.BaseGame.html#gncpy.game_engine.base_game.BaseGame.s_game_over">[docs]</a>
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">s_game_over</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">s_game_over</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Abstract method to check for game over conditions.&quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
 
@@ -670,7 +665,7 @@
 <div class="viewcode-block" id="BaseGame.s_score">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/base_game/gncpy.game_engine.base_game.BaseGame.html#gncpy.game_engine.base_game.BaseGame.s_score">[docs]</a>
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">s_score</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">s_score</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Abstact method to calculate the score.</span>
 
 <span class="sd">        Returns</span>
@@ -684,7 +679,7 @@
 <div class="viewcode-block" id="BaseGame.s_input">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/base_game/gncpy.game_engine.base_game.BaseGame.html#gncpy.game_engine.base_game.BaseGame.s_input">[docs]</a>
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">s_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">s_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Abstract method to turn user inputs into game actions.&quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
 
@@ -692,7 +687,7 @@
 <div class="viewcode-block" id="BaseGame.step">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/base_game/gncpy.game_engine.base_game.BaseGame.html#gncpy.game_engine.base_game.BaseGame.step">[docs]</a>
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Abstract method defining what to do each frame.</span>
 
 <span class="sd">        Returns</span>
@@ -707,7 +702,7 @@
 
 <div class="viewcode-block" id="BaseGame2d">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/base_game/gncpy.game_engine.base_game.BaseGame2d.html#gncpy.game_engine.base_game.BaseGame2d">[docs]</a>
-<span class="k">class</span> <span class="nc">BaseGame2d</span><span class="p">(</span><span class="n">BaseGame</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BaseGame2d</span><span class="p">(</span><span class="n">BaseGame</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for defining 2d games.</span>
 
 <span class="sd">    This should implement all the necessary systems (i.e. game logic) by operating</span>
@@ -730,7 +725,7 @@
 
 <div class="viewcode-block" id="BaseGame2d.__init__">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/base_game/gncpy.game_engine.base_game.BaseGame2d.html#gncpy.game_engine.base_game.BaseGame2d.__init__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">,</span> <span class="n">render_mode</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">,</span> <span class="n">render_mode</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">config_file</span><span class="p">,</span> <span class="n">render_mode</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">clock</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">window</span> <span class="o">=</span> <span class="kc">None</span>
@@ -740,18 +735,18 @@
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">current_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">current_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Current time in real units.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">elapsed_time</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">start_time</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">elapsed_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">elapsed_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Amount of time elapsed in game in real units.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">physics</span><span class="o">.</span><span class="n">update_dt</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_update_count</span>
 
 <div class="viewcode-block" id="BaseGame2d.setup">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/base_game/gncpy.game_engine.base_game.BaseGame2d.html#gncpy.game_engine.base_game.BaseGame2d.setup">[docs]</a>
-    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets up the game and should be called before any game functions.</span>
 
 <span class="sd">        Sets up the physics and rendering system and resets to the base state.</span>
@@ -779,7 +774,7 @@
 
 <div class="viewcode-block" id="BaseGame2d.register_params">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/base_game/gncpy.game_engine.base_game.BaseGame2d.html#gncpy.game_engine.base_game.BaseGame2d.register_params">[docs]</a>
-    <span class="k">def</span> <span class="nf">register_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">yaml</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">register_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">yaml</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Register custom classes for this game with the yaml parser.</span>
 
 <span class="sd">        Parameters</span>
@@ -796,7 +791,7 @@
 
 <div class="viewcode-block" id="BaseGame2d.get_image_size">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/base_game/gncpy.game_engine.base_game.BaseGame2d.html#gncpy.game_engine.base_game.BaseGame2d.get_image_size">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_image_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_image_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets the size of the window.</span>
 
 <span class="sd">        Returns</span>
@@ -810,7 +805,7 @@
 
 <div class="viewcode-block" id="BaseGame2d.append_name_to_keys">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/base_game/gncpy.game_engine.base_game.BaseGame2d.html#gncpy.game_engine.base_game.BaseGame2d.append_name_to_keys">[docs]</a>
-    <span class="k">def</span> <span class="nf">append_name_to_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_dict</span><span class="p">,</span> <span class="n">prefix</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">append_name_to_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_dict</span><span class="p">,</span> <span class="n">prefix</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Append a prefix to every key in a dictionary.</span>
 
 <span class="sd">        A dot is placed between the prefix and the original key.</span>
@@ -836,7 +831,7 @@
 
 <div class="viewcode-block" id="BaseGame2d.reset">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/base_game/gncpy.game_engine.base_game.BaseGame2d.html#gncpy.game_engine.base_game.BaseGame2d.reset">[docs]</a>
-    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Resets to the base state.&quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">img</span> <span class="o">=</span> <span class="mi">255</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">get_image_size</span><span class="p">(),</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
@@ -845,7 +840,7 @@
 
 <div class="viewcode-block" id="BaseGame2d.step">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/base_game/gncpy.game_engine.base_game.BaseGame2d.html#gncpy.game_engine.base_game.BaseGame2d.step">[docs]</a>
-    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_input</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_input</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Perform one iteration of the game loop.</span>
 
 <span class="sd">        Multiple physics updates can be made between rendering calls.</span>
@@ -895,7 +890,7 @@
 
 <div class="viewcode-block" id="BaseGame2d.s_render">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/base_game/gncpy.game_engine.base_game.BaseGame2d.html#gncpy.game_engine.base_game.BaseGame2d.s_render">[docs]</a>
-    <span class="k">def</span> <span class="nf">s_render</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">s_render</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Render a frame of the game.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">img</span> <span class="o">=</span> <span class="n">grender2d</span><span class="o">.</span><span class="n">render</span><span class="p">(</span>
             <span class="n">grender2d</span><span class="o">.</span><span class="n">get_drawable_entities</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">entityManager</span><span class="o">.</span><span class="n">get_entities</span><span class="p">()),</span>
@@ -908,7 +903,7 @@
 
 <div class="viewcode-block" id="BaseGame2d.close">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/game_engine/base_game/gncpy.game_engine.base_game.BaseGame2d.html#gncpy.game_engine.base_game.BaseGame2d.close">[docs]</a>
-    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Shutdown the rendering system.&quot;&quot;&quot;</span>
         <span class="n">grender2d</span><span class="o">.</span><span class="n">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">)</span></div>
 </div>

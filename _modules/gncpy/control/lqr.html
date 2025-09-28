@@ -1,26 +1,24 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gncpy.control.lqr &mdash; GNCPy 2.0.4.dev0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+  <title>gncpy.control.lqr &mdash; GNCPy 2.0.5.dev0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
 
   
     <link rel="canonical" href="https://drjdlarson.github.io/gncpy/_modules/gncpy/control/lqr.html" />
-  <!--[if lt IE 9]>
-    <script src="../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=354a3d29"></script>
-        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
-        <script src="../../../_static/copybutton.js?v=cbcfbdad"></script>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=aa08a9b3"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../../_static/copybutton.js?v=cbcfbdad"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -38,9 +36,6 @@
             GNCPy
               <img src="../../../_static/logo.svg" class="logo" alt="Logo"/>
           </a>
-              <div class="version">
-                2.0.4.dev0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -263,15 +258,15 @@
            <div itemprop="articleBody">
              
   <h1>Source code for gncpy.control.lqr</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">scipy.linalg</span> <span class="k">as</span> <span class="nn">la</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipy.linalg</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">la</span>
 
-<span class="kn">import</span> <span class="nn">gncpy.dynamics.basic</span> <span class="k">as</span> <span class="nn">gdyn</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">gncpy.dynamics.basic</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gdyn</span>
 
 
 <div class="viewcode-block" id="LQR">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/control/lqr/gncpy.control.lqr.LQR.html#gncpy.control.lqr.LQR">[docs]</a>
-<span class="k">class</span> <span class="nc">LQR</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">LQR</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Implements a Linear Quadratic Regulator (LQR) controller.</span>
 
 <span class="sd">    Notes</span>
@@ -320,7 +315,7 @@
 
 <div class="viewcode-block" id="LQR.__init__">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/control/lqr/gncpy.control.lqr.LQR.html#gncpy.control.lqr.LQR.__init__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_horizon</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">),</span> <span class="n">hard_constraints</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_horizon</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">),</span> <span class="n">hard_constraints</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize an object.</span>
 
 <span class="sd">        Parameters</span>
@@ -354,7 +349,7 @@
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">dt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Timestep.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynObj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">dynObj</span><span class="p">,</span> <span class="n">gdyn</span><span class="o">.</span><span class="n">NonlinearDynamicsBase</span>
@@ -364,7 +359,7 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dt</span>
 
     <span class="nd">@dt</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">dt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynObj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">dynObj</span><span class="p">,</span> <span class="n">gdyn</span><span class="o">.</span><span class="n">NonlinearDynamicsBase</span>
         <span class="p">):</span>
@@ -373,18 +368,18 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_dt</span> <span class="o">=</span> <span class="n">val</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">Q</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">Q</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read only state penalty matrix.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Q</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">R</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">R</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read only control penalty matrix.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_R</span>
 
 <div class="viewcode-block" id="LQR.set_state_model">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/control/lqr/gncpy.control.lqr.LQR.html#gncpy.control.lqr.LQR.set_state_model">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_state_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">u_nom</span><span class="p">,</span> <span class="n">control_constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dynObj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_state_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">u_nom</span><span class="p">,</span> <span class="n">control_constraints</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dynObj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the state/dynamics model.</span>
 
 <span class="sd">        Parameters</span>
@@ -410,7 +405,7 @@
 
 <div class="viewcode-block" id="LQR.set_cost_model">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/control/lqr/gncpy.control.lqr.LQR.html#gncpy.control.lqr.LQR.set_cost_model">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_cost_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">P</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_cost_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">P</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Sets the cost model used.</span>
 
 <span class="sd">        Notes</span>
@@ -446,7 +441,7 @@
 
 <div class="viewcode-block" id="LQR.prop_state">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/control/lqr/gncpy.control.lqr.LQR.html#gncpy.control.lqr.LQR.prop_state">[docs]</a>
-    <span class="k">def</span> <span class="nf">prop_state</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">prop_state</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">tt</span><span class="p">,</span>
         <span class="n">x_hat</span><span class="p">,</span>
@@ -495,7 +490,7 @@
 
 <div class="viewcode-block" id="LQR.get_state_space">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/control/lqr/gncpy.control.lqr.LQR.html#gncpy.control.lqr.LQR.get_state_space">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_state_space</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tt</span><span class="p">,</span> <span class="n">x_hat</span><span class="p">,</span> <span class="n">u_hat</span><span class="p">,</span> <span class="n">state_args</span><span class="p">,</span> <span class="n">ctrl_args</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_state_space</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tt</span><span class="p">,</span> <span class="n">x_hat</span><span class="p">,</span> <span class="n">u_hat</span><span class="p">,</span> <span class="n">state_args</span><span class="p">,</span> <span class="n">ctrl_args</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the :math:`A, B` matrices.</span>
 
 <span class="sd">        Parameters</span>
@@ -547,7 +542,7 @@
 
 <div class="viewcode-block" id="LQR.prop_state_backward">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/control/lqr/gncpy.control.lqr.LQR.html#gncpy.control.lqr.LQR.prop_state_backward">[docs]</a>
-    <span class="k">def</span> <span class="nf">prop_state_backward</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">prop_state_backward</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">tt</span><span class="p">,</span> <span class="n">x_hat</span><span class="p">,</span> <span class="n">u_hat</span><span class="p">,</span> <span class="n">state_args</span><span class="p">,</span> <span class="n">ctrl_args</span><span class="p">,</span> <span class="n">inv_state_args</span><span class="p">,</span> <span class="n">inv_ctrl_args</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Propagate the state backward and get the forward state space.</span>
@@ -597,7 +592,7 @@
         <span class="k">return</span> <span class="n">x_hat_p</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">c</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_determine_cost_matrices</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_determine_cost_matrices</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">tt</span><span class="p">,</span> <span class="n">itr</span><span class="p">,</span> <span class="n">x_hat</span><span class="p">,</span> <span class="n">u_hat</span><span class="p">,</span> <span class="n">is_initial</span><span class="p">,</span> <span class="n">is_final</span><span class="p">,</span> <span class="n">cost_args</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the cost matrices.&quot;&quot;&quot;</span>
@@ -620,11 +615,11 @@
                 <span class="n">r</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">R</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">u_nom</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">P</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">r</span>
 
-    <span class="k">def</span> <span class="nf">_back_pass_update_traj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_hat_p</span><span class="p">,</span> <span class="n">kk</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_back_pass_update_traj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_hat_p</span><span class="p">,</span> <span class="n">kk</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the next state for backward pass, helpful for inherited classes.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">x_hat_p</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">backward_pass_step</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">backward_pass_step</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">itr</span><span class="p">,</span>
         <span class="n">kk</span><span class="p">,</span>
@@ -683,7 +678,7 @@
 
 <div class="viewcode-block" id="LQR.backward_pass">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/control/lqr/gncpy.control.lqr.LQR.html#gncpy.control.lqr.LQR.backward_pass">[docs]</a>
-    <span class="k">def</span> <span class="nf">backward_pass</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">backward_pass</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">itr</span><span class="p">,</span>
         <span class="n">num_timesteps</span><span class="p">,</span>
@@ -741,7 +736,7 @@
 
 <div class="viewcode-block" id="LQR.cost_function">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/control/lqr/gncpy.control.lqr.LQR.html#gncpy.control.lqr.LQR.cost_function">[docs]</a>
-    <span class="k">def</span> <span class="nf">cost_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tt</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">ctrl_input</span><span class="p">,</span> <span class="n">is_initial</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">is_final</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cost_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tt</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">ctrl_input</span><span class="p">,</span> <span class="n">is_initial</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">is_final</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates the cost for the state and control input.</span>
 
 <span class="sd">        Parameters</span>
@@ -779,7 +774,7 @@
 
 <div class="viewcode-block" id="LQR.solve_dare">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/control/lqr/gncpy.control.lqr.LQR.html#gncpy.control.lqr.LQR.solve_dare">[docs]</a>
-    <span class="k">def</span> <span class="nf">solve_dare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cur_time</span><span class="p">,</span> <span class="n">cur_state</span><span class="p">,</span> <span class="n">state_args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ctrl_args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">solve_dare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cur_time</span><span class="p">,</span> <span class="n">cur_state</span><span class="p">,</span> <span class="n">state_args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ctrl_args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Solve the discrete algebraic ricatti equation.</span>
 
 <span class="sd">        Parameters</span>
@@ -817,7 +812,7 @@
 
 <div class="viewcode-block" id="LQR.calculate_control">
 <a class="viewcode-back" href="../../../_autosummary/gncpy/control/lqr/gncpy.control.lqr.LQR.html#gncpy.control.lqr.LQR.calculate_control">[docs]</a>
-    <span class="k">def</span> <span class="nf">calculate_control</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_control</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">cur_time</span><span class="p">,</span>
         <span class="n">cur_state</span><span class="p">,</span>
