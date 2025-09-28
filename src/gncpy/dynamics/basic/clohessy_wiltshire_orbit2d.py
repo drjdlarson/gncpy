@@ -30,13 +30,13 @@ class ClohessyWiltshireOrbit2d(LinearDynamicsBase):
         super().__init__(**kwargs)
         self.__controlParams = cpp_control.ControlParams()
         self.__stateTransParams = cpp_bindings.StateTransParams()
-        
+
         if self.mean_motion is not None:
             self.__model = cpp_bindings.ClohessyWiltshire2D(0.01, mean_motion)
         else:
             self.__model = cpp_bindings.ClohessyWiltshire2D(0.01, 0.0)
         if "control_model" in kwargs and kwargs["control_model"] is not None:
-            self.__model.set_control_model(kwargs("control_model"))
+            self.__model.set_control_model(kwargs["control_model"])
 
     @property
     def allow_cpp(self):

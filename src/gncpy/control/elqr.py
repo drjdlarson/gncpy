@@ -832,6 +832,7 @@ class ELQR(LQR):
             print("Starting ELQR optimization loop...")
 
         for ii in range(self.max_iters):
+            print(f"Loop Iteration : {ii}")
             # forward pass
             traj = self.forward_pass(
                 ii,
@@ -844,12 +845,13 @@ class ELQR(LQR):
                 inv_state_args,
                 inv_ctrl_args,
             )
-
+            print("Quadratizing final cost")
             # quadratize final cost
             traj = self.quadratize_final_cost(
                 ii, num_timesteps, traj, time_vec, cost_args
             )
 
+            print("Starting Backward Pass")
             # backward pass
             traj = self.backward_pass(
                 ii,

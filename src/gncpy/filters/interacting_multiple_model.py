@@ -211,15 +211,16 @@ class InteractingMultipleModel:
                 self.cov_list[ii] = filt.cov.copy()
             new_weight_list[ii] = meas_fit_prob_list[ii] * self.filt_weights[ii]
         out_meas_fit_prob = np.sum(new_weight_list)
-        if np.sum(new_weight_list) == 0:
-            new_weight_list = new_weight_list * 0
-        else:
+        if np.sum(new_weight_list) != 0:
             new_weight_list = new_weight_list / np.sum(new_weight_list)
-        self.filt_weights = new_weight_list
+            self.filt_weights = new_weight_list
+        else:
+            self.filt_weights = np.array([1/len(new_weight_list) for x in range(1, len(new_weight_list))])
 
         out_state = np.zeros(self.mean_list[0].shape)
         for ii in range(len(self.in_filt_list)):
-            out_state += new_weight_list[ii] * self.mean_list[ii]
+            out_state += self.filt_weights[ii] * self.mean_list[ii]
+            # out_state += new_weight_list[ii] * self.mean_list[ii]
 
         self.cur_out_state = out_state
         return (out_state, out_meas_fit_prob)

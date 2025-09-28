@@ -10,6 +10,14 @@ import gncpy.filters._filters as cpp_bindings
 from gncpy.filters.kalman_filter import KalmanFilter
 
 
+# def _cont_dyn(self, t, x, *args):
+#         """Used in integrator if an ode list is specified."""
+#         out = np.zeros(x.shape)
+
+#         for ii, f in enumerate(self._ode_lst):
+#             out[ii] = f(t, x, *args)
+#         return out
+
 class ExtendedKalmanFilter(KalmanFilter):
     """Implementation of a continuous-discrete time Extended Kalman Filter.
 
@@ -127,8 +135,10 @@ class ExtendedKalmanFilter(KalmanFilter):
             msg = "Invalid state model specified. Check arguments"
             raise RuntimeError(msg)
 
+    # @staticmethod
     def _cont_dyn(self, t, x, *args):
         """Used in integrator if an ode list is specified."""
+
         out = np.zeros(x.shape)
 
         for ii, f in enumerate(self._ode_lst):

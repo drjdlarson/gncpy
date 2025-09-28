@@ -449,13 +449,13 @@ if __name__ == "__main__":
 
         plt.close("all")
 
-    test_double_integrator_mat()
-    test_double_integrator_prop()
-    test_double_integrator_control()
+    # test_double_integrator_mat()
+    # test_double_integrator_prop()
+    # test_double_integrator_control()
 
-    test_clohessy_wiltshire2d_mat()
-    test_clohessy_wiltshire2d_prop()
-    test_clohessy_wiltshire2d_control()
+    # test_clohessy_wiltshire2d_mat()
+    # test_clohessy_wiltshire2d_prop()
+    # test_clohessy_wiltshire2d_control()
 
     test_clohessy_wiltshire_mat()
     test_clohessy_wiltshire_prop()

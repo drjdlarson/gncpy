@@ -235,12 +235,15 @@ def test_elqrrrtstar():
 # %% Debugging entry point
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
+    import matplotlib
+
+    matplotlib.use("WebAgg")
 
     DEBUG_PLOTS = True
 
     plt.close("all")
 
-    # test_lin_lqrrrtstar()
-    test_elqrrrtstar()
+    test_lin_lqrrrtstar()
+    # test_elqrrrtstar()
 
     plt.show()
