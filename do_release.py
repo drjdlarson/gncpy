@@ -19,7 +19,8 @@ def get_active_branch_name():
             return line.partition("refs/heads/")[2]
 
 
-def define_parser() -> argparse.ArgumentParser:
+# def define_parser() -> argparse.ArgumentParser:
+def define_parser():
     p = argparse.ArgumentParser(
         description="Automatically create and push tag so CI/CD pipeline publishes a release"
     )
