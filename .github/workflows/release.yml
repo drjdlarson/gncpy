@@ -23,7 +23,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -84,7 +84,7 @@ jobs:
       packages: write
     steps:
       - name: Checkout (GitHub)
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -118,7 +118,7 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -137,7 +137,7 @@ jobs:
         run: |
           tox -e docs_html
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: documentation-artifact
           path: docs/build
@@ -149,7 +149,7 @@ jobs:
     needs: build-documentation
     permissions: write-all
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           # unpacks into documentation-artifact/
           # if `name: documentation-artifact` is omitted, the action will create extra parent dir
@@ -157,7 +157,7 @@ jobs:
           path: docs/build
       
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: docs/build/html
@@ -178,7 +178,7 @@ jobs:
     needs: [build_package, publish]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           # unpacks default artifact into dist/
           # if `name: artifact` is omitted, the action will create extra parent dir
