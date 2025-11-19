@@ -340,6 +340,7 @@ def get_elem_sym_fnc(z):
                                 F[i_nminus - 1, k - 1]
                                 + z_loc[n - 1] * F[i_nminus - 1, k - 1 - 1]
                             )
+
                         except RuntimeWarning:
                             F[i_n - 1, k - 1] = np.finfo(float).max
             tmp = i_n
