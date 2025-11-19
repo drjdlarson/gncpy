@@ -1,4 +1,5 @@
 """Useful math utility functions."""
+
 import warnings
 
 import numpy as np
@@ -35,11 +36,11 @@ def get_jacobian(x, fnc, f_args=(), step_size=10**-7):
         x_l = x.copy().astype(float)
         x_r[ii] += step_size
         x_l[ii] -= step_size
-        J[ii] = (fnc(x_r, *f_args) - fnc(x_l, *f_args))
+        J[ii] = fnc(x_r, *f_args) - fnc(x_l, *f_args)
     return J * inv_step2
 
 
-def get_hessian(x, fnc, f_args=(), step_size=np.finfo(float).eps**(1 / 4)):
+def get_hessian(x, fnc, f_args=(), step_size=np.finfo(float).eps ** (1 / 4)):
     """Calculates the hessian of a function.
 
     Numerically calculates the hessian using the central difference method.
@@ -82,8 +83,12 @@ def get_hessian(x, fnc, f_args=(), step_size=np.finfo(float).eps**(1 / 4)):
             x_im_jm = x_im - delta_j
             x_im_jp = x_im + delta_j
 
-            H[ii, jj] = (fnc(x_ip_jp, *f_args) - fnc(x_ip_jm, *f_args)
-                         - fnc(x_im_jp, *f_args) + fnc(x_im_jm, *f_args)) * den
+            H[ii, jj] = (
+                fnc(x_ip_jp, *f_args)
+                - fnc(x_ip_jm, *f_args)
+                - fnc(x_im_jp, *f_args)
+                + fnc(x_im_jm, *f_args)
+            ) * den
 
     # fill full H matrix from upper triangle
     for ii in range(n_vars):
@@ -133,13 +138,19 @@ def get_state_jacobian(t, x, fncs, f_args, u=None, **kwargs):
     A = np.zeros((n_states, n_states))
     for row in range(0, n_states):
         if u is not None:
-            res = get_jacobian(x.copy(),
-                               lambda _x, *_f_args: fncs[row](t, _x, u, *_f_args),
-                               f_args=f_args, **kwargs)
+            res = get_jacobian(
+                x.copy(),
+                lambda _x, *_f_args: fncs[row](t, _x, u, *_f_args),
+                f_args=f_args,
+                **kwargs,
+            )
         else:
-            res = get_jacobian(x.copy(),
-                               lambda _x, *_f_args: fncs[row](t, _x, *_f_args),
-                               f_args=f_args, **kwargs)
+            res = get_jacobian(
+                x.copy(),
+                lambda _x, *_f_args: fncs[row](t, _x, *_f_args),
+                f_args=f_args,
+                **kwargs,
+            )
 
         A[[row], :] = res.T
     return A
@@ -184,9 +195,9 @@ def get_input_jacobian(t, x, u, fncs, f_args, **kwargs):
     n_inputs = u.size
     B = np.zeros((n_states, n_inputs))
     for row in range(0, n_states):
-        res = get_jacobian(u.copy(),
-                           lambda _u, *_f_args: fncs[row](t, x, _u, *_f_args),
-                           **kwargs)
+        res = get_jacobian(
+            u.copy(), lambda _u, *_f_args: fncs[row](t, x, _u, *_f_args), **kwargs
+        )
         B[[row], :] = res.T
     return B
 
@@ -308,17 +319,27 @@ def get_elem_sym_fnc(z):
             for k in range(2, n + 1):
                 if k == n:
                     with warnings.catch_warnings():
-                        warnings.filterwarnings("error", message=".*overflow encountered in double_scalars.*")
+                        warnings.filterwarnings(
+                            "error",
+                            message=".*overflow encountered in double_scalars.*",
+                        )
                         try:
-                            F[i_n - 1, k - 1] = z_loc[n - 1] * F[i_nminus - 1, k - 1 - 1]
+                            F[i_n - 1, k - 1] = (
+                                z_loc[n - 1] * F[i_nminus - 1, k - 1 - 1]
+                            )
                         except RuntimeWarning:
                             F[i_n - 1, k - 1] = np.finfo(float).max
                 else:
                     with warnings.catch_warnings():
-                        warnings.filterwarnings("error", message=".*overflow encountered in double_scalars.*")
+                        warnings.filterwarnings(
+                            "error",
+                            message=".*overflow encountered in double_scalars.*",
+                        )
                         try:
-                            F[i_n - 1, k - 1] = F[i_nminus - 1, k - 1] \
+                            F[i_n - 1, k - 1] = (
+                                F[i_nminus - 1, k - 1]
                                 + z_loc[n - 1] * F[i_nminus - 1, k - 1 - 1]
+                            )
                         except RuntimeWarning:
                             F[i_n - 1, k - 1] = np.finfo(float).max
             tmp = i_n
@@ -378,7 +399,7 @@ def weighted_sum_mat(w_lst, P_lst):
         w = np.array(w_lst)
     else:
         w = w_lst
-    return np.sum(w.reshape((-1,) + (1,)*(cov.ndim - 1)) * cov, axis=0)
+    return np.sum(w.reshape((-1,) + (1,) * (cov.ndim - 1)) * cov, axis=0)
 
 
 def gaussian_kernel(x, sig):
@@ -397,7 +418,7 @@ def gaussian_kernel(x, sig):
         kernel value.
 
     """
-    return np.exp(-x**2 / (2 * sig**2))
+    return np.exp(-(x**2) / (2 * sig**2))
 
 
 def epanechnikov_kernel(x):
@@ -413,6 +434,7 @@ def epanechnikov_kernel(x):
     val : float
         kernal value
     """
+
     def calc_vn(n):
         if n == 1:
             return 2
@@ -431,3 +453,302 @@ def epanechnikov_kernel(x):
     else:
         val = 0
     return val
+
+
+def quat_normalize(q):
+    """Normalize a quaternion to unit length.
+
+    Parameters
+    ----------
+    q : numpy array
+        Quaternion [qx, qy, qz, qw] (scalar last, Hamilton convention)
+
+    Returns
+    -------
+    numpy array
+        Normalized quaternion
+    """
+    mag = np.linalg.norm(q)
+    if mag < np.finfo(float).eps:
+        return np.array([0.0, 0.0, 0.0, 1.0])
+    return q / mag
+
+
+def quat_multiply(q1, q2):
+    """Multiply two quaternions using Hamilton convention.
+
+    Computes q1 * q2 in scalar-last format [qx, qy, qz, qw].
+
+    Parameters
+    ----------
+    q1 : numpy array
+        First quaternion [qx, qy, qz, qw]
+    q2 : numpy array
+        Second quaternion [qx, qy, qz, qw]
+
+    Returns
+    -------
+    numpy array
+        Product quaternion q1 * q2
+    """
+    qx1, qy1, qz1, qw1 = q1
+    qx2, qy2, qz2, qw2 = q2
+
+    return np.array(
+        [
+            qw1 * qx2 + qx1 * qw2 + qy1 * qz2 - qz1 * qy2,
+            qw1 * qy2 - qx1 * qz2 + qy1 * qw2 + qz1 * qx2,
+            qw1 * qz2 + qx1 * qy2 - qy1 * qx2 + qz1 * qw2,
+            qw1 * qw2 - qx1 * qx2 - qy1 * qy2 - qz1 * qz2,
+        ]
+    )
+
+
+def quat_conjugate(q):
+    """Compute the conjugate of a quaternion.
+
+    Parameters
+    ----------
+    q : numpy array
+        Quaternion [qx, qy, qz, qw]
+
+    Returns
+    -------
+    numpy array
+        Conjugate quaternion [-qx, -qy, -qz, qw]
+    """
+    return np.array([-q[0], -q[1], -q[2], q[3]])
+
+
+def quat_inverse(q):
+    """Compute the inverse of a quaternion.
+
+    For unit quaternions, this is equivalent to the conjugate.
+
+    Parameters
+    ----------
+    q : numpy array
+        Quaternion [qx, qy, qz, qw]
+
+    Returns
+    -------
+    numpy array
+        Inverse quaternion
+    """
+    mag_sq = np.sum(q**2)
+    if mag_sq < np.finfo(float).eps:
+        raise ValueError("Cannot compute inverse of zero quaternion")
+    return quat_conjugate(q) / mag_sq
+
+
+def quat_rotate_vector(q, v):
+    """Rotate a 3D vector by a quaternion.
+
+    Computes v' = q * v * q^(-1) where v is treated as a pure quaternion.
+
+    Parameters
+    ----------
+    q : numpy array
+        Quaternion [qx, qy, qz, qw]
+    v : numpy array
+        3D vector to rotate
+
+    Returns
+    -------
+    numpy array
+        Rotated 3D vector
+    """
+    # Convert vector to pure quaternion [vx, vy, vz, 0]
+    v_quat = np.array([v[0], v[1], v[2], 0.0])
+
+    # Perform rotation: q * v * q_conj
+    q_conj = quat_conjugate(q)
+    result = quat_multiply(quat_multiply(q, v_quat), q_conj)
+
+    return result[0:3]
+
+
+def quat_to_dcm(q):
+    """Convert quaternion to direction cosine matrix (DCM).
+
+    Parameters
+    ----------
+    q : numpy array
+        Quaternion [qx, qy, qz, qw] (scalar last, Hamilton convention)
+
+    Returns
+    -------
+    numpy array
+        3x3 DCM for rotation from reference frame to body frame
+    """
+    qx, qy, qz, qw = q
+
+    # DCM from quaternion
+    dcm = np.array(
+        [
+            [1 - 2 * (qy**2 + qz**2), 2 * (qx * qy + qw * qz), 2 * (qx * qz - qw * qy)],
+            [2 * (qx * qy - qw * qz), 1 - 2 * (qx**2 + qz**2), 2 * (qy * qz + qw * qx)],
+            [2 * (qx * qz + qw * qy), 2 * (qy * qz - qw * qx), 1 - 2 * (qx**2 + qy**2)],
+        ]
+    )
+    return dcm
+
+
+def dcm_to_quat(dcm):
+    """Convert direction cosine matrix (DCM) to quaternion.
+
+    Uses Shepperd's method for numerical stability.
+
+    Parameters
+    ----------
+    dcm : numpy array
+        3x3 direction cosine matrix
+
+    Returns
+    -------
+    numpy array
+        Quaternion [qx, qy, qz, qw] (scalar last)
+    """
+    trace = np.trace(dcm)
+
+    if trace > 0:
+        s = 0.5 / np.sqrt(trace + 1.0)
+        qw = 0.25 / s
+        qx = (dcm[2, 1] - dcm[1, 2]) * s
+        qy = (dcm[0, 2] - dcm[2, 0]) * s
+        qz = (dcm[1, 0] - dcm[0, 1]) * s
+    elif dcm[0, 0] > dcm[1, 1] and dcm[0, 0] > dcm[2, 2]:
+        s = 2.0 * np.sqrt(1.0 + dcm[0, 0] - dcm[1, 1] - dcm[2, 2])
+        qw = (dcm[2, 1] - dcm[1, 2]) / s
+        qx = 0.25 * s
+        qy = (dcm[0, 1] + dcm[1, 0]) / s
+        qz = (dcm[0, 2] + dcm[2, 0]) / s
+    elif dcm[1, 1] > dcm[2, 2]:
+        s = 2.0 * np.sqrt(1.0 + dcm[1, 1] - dcm[0, 0] - dcm[2, 2])
+        qw = (dcm[0, 2] - dcm[2, 0]) / s
+        qx = (dcm[0, 1] + dcm[1, 0]) / s
+        qy = 0.25 * s
+        qz = (dcm[1, 2] + dcm[2, 1]) / s
+    else:
+        s = 2.0 * np.sqrt(1.0 + dcm[2, 2] - dcm[0, 0] - dcm[1, 1])
+        qw = (dcm[1, 0] - dcm[0, 1]) / s
+        qx = (dcm[0, 2] + dcm[2, 0]) / s
+        qy = (dcm[1, 2] + dcm[2, 1]) / s
+        qz = 0.25 * s
+
+    return np.array([qx, qy, qz, qw])
+
+
+def quat_to_euler(q):
+    """Convert quaternion to Euler angles (3-2-1 sequence: yaw-pitch-roll).
+
+    Parameters
+    ----------
+    q : numpy array
+        Quaternion [qx, qy, qz, qw] (scalar last)
+
+    Returns
+    -------
+    roll : float
+        Roll angle in radians (rotation about x-axis)
+    pitch : float
+        Pitch angle in radians (rotation about y-axis)
+    yaw : float
+        Yaw angle in radians (rotation about z-axis)
+    """
+    qx, qy, qz, qw = q
+
+    # Roll (x-axis rotation)
+    sinr_cosp = 2 * (qw * qx + qy * qz)
+    cosr_cosp = 1 - 2 * (qx**2 + qy**2)
+    roll = np.arctan2(sinr_cosp, cosr_cosp)
+
+    # Pitch (y-axis rotation)
+    sinp = 2 * (qw * qy - qz * qx)
+    if np.abs(sinp) >= 1:
+        pitch = np.sign(sinp) * np.pi / 2  # Use 90 degrees if out of range
+    else:
+        pitch = np.arcsin(sinp)
+
+    # Yaw (z-axis rotation)
+    siny_cosp = 2 * (qw * qz + qx * qy)
+    cosy_cosp = 1 - 2 * (qy**2 + qz**2)
+    yaw = np.arctan2(siny_cosp, cosy_cosp)
+
+    return roll, pitch, yaw
+
+
+def euler_to_quat(roll, pitch, yaw):
+    """Convert Euler angles (3-2-1 sequence) to quaternion.
+
+    Parameters
+    ----------
+    roll : float
+        Roll angle in radians (rotation about x-axis)
+    pitch : float
+        Pitch angle in radians (rotation about y-axis)
+    yaw : float
+        Yaw angle in radians (rotation about z-axis)
+
+    Returns
+    -------
+    numpy array
+        Quaternion [qx, qy, qz, qw] (scalar last)
+    """
+    cy = np.cos(yaw * 0.5)
+    sy = np.sin(yaw * 0.5)
+    cp = np.cos(pitch * 0.5)
+    sp = np.sin(pitch * 0.5)
+    cr = np.cos(roll * 0.5)
+    sr = np.sin(roll * 0.5)
+
+    qw = cr * cp * cy + sr * sp * sy
+    qx = sr * cp * cy - cr * sp * sy
+    qy = cr * sp * cy + sr * cp * sy
+    qz = cr * cp * sy - sr * sp * cy
+
+    return np.array([qx, qy, qz, qw])
+
+
+def quat_slerp(q1, q2, t):
+    """Spherical linear interpolation between two quaternions.
+
+    Parameters
+    ----------
+    q1 : numpy array
+        Start quaternion [qx, qy, qz, qw]
+    q2 : numpy array
+        End quaternion [qx, qy, qz, qw]
+    t : float
+        Interpolation parameter in [0, 1]
+
+    Returns
+    -------
+    numpy array
+        Interpolated quaternion
+    """
+    # Ensure unit quaternions
+    q1 = quat_normalize(q1)
+    q2 = quat_normalize(q2)
+
+    # Compute dot product
+    dot = np.dot(q1, q2)
+
+    # If dot product is negative, negate one quaternion to take shorter path
+    if dot < 0.0:
+        q2 = -q2
+        dot = -dot
+
+    # If quaternions are very close, use linear interpolation
+    if dot > 0.9995:
+        result = q1 + t * (q2 - q1)
+        return quat_normalize(result)
+
+    # Perform slerp
+    theta = np.arccos(np.clip(dot, -1.0, 1.0))
+    sin_theta = np.sin(theta)
+
+    w1 = np.sin((1.0 - t) * theta) / sin_theta
+    w2 = np.sin(t * theta) / sin_theta
+
+    return w1 * q1 + w2 * q2
