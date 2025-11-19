@@ -99,7 +99,7 @@ class v_smap_quat(ListEnum):
 
     This state map replaces the Euler angles (roll, pitch, yaw) and DCM with
     a quaternion representation to avoid gimbal lock. The quaternion is stored
-    in scalar-last format: [qx, qy, qz, qw] where qw is the scalar component.
+    in scalar-first format: [qw, qx, qy, qz] where qw is the scalar component.
     """
 
     lat = (0, "rad")
@@ -110,7 +110,7 @@ class v_smap_quat(ListEnum):
     ned_pos = ([4, 5, 6], "m")
     ned_vel = ([7, 8, 9], "m/s")
     ned_accel = ([10, 11, 12], "m/s^2")
-    quat = ([13, 14, 15, 16], "")  # [qx, qy, qz, qw] - scalar last
+    quat = ([13, 14, 15, 16], "")  # [qw, qx, qy, qz] - scalar first
     body_vel = ([17, 18, 19], "m/s")
     body_accel = ([20, 21, 22], "m/s^2")
     body_rot_rate = ([23, 24, 25], "rad/s")
@@ -142,7 +142,7 @@ class v_smap_quat(ListEnum):
                 name = getattr(attr, key)
                 if append_ind:
                     if is_quat:
-                        quat_names = ["qx", "qy", "qz", "qw"]
+                        quat_names = ["qw", "qx", "qy", "qz"]
                         name += "_" + quat_names[ii]
                     elif multi:
                         name += "_{:d}".format(ii)
@@ -315,7 +315,7 @@ class ComplexVehicle(SimpleVehicle):
             State vector x:
             [0:3]   NED position (m)
             [3:6]   Body velocity (m/s)
-            [6:10]  Quaternion [qx, qy, qz, qw]
+            [6:10]  Quaternion [qw, qx, qy, qz] (scalar first)
             [10:13] Body angular rates (rad/s)
             """
             # Extract state components
@@ -340,14 +340,14 @@ class ComplexVehicle(SimpleVehicle):
             xdot[3:6] = f / self.params.mass.mass_kg + np.cross(omega, body_vel)
 
             # Quaternion derivative (kinematics)
-            # qdot = 0.5 * Omega(omega) * q, where Omega is the skew-symmetric matrix
-            qx, qy, qz, qw = quat
+            # qdot = 0.5 * Omega(omega) * q for scalar-first [qw, qx, qy, qz]
+            qw, qx, qy, qz = quat
             wx, wy, wz = omega
 
-            xdot[6] = 0.5 * (-wx * qx - wy * qy - wz * qz)  # qx_dot
-            xdot[7] = 0.5 * (wx * qw + wz * qx - wy * qz)  # qy_dot
-            xdot[8] = 0.5 * (wy * qw - wz * qy + wx * qz)  # qz_dot
-            xdot[9] = 0.5 * (wz * qw + wy * qx - wx * qy)  # qw_dot
+            xdot[6] = 0.5 * (-wx * qx - wy * qy - wz * qz)  # qw_dot
+            xdot[7] = 0.5 * (wx * qw + wz * qy - wy * qz)  # qx_dot
+            xdot[8] = 0.5 * (wy * qw - wz * qx + wx * qz)  # qy_dot
+            xdot[9] = 0.5 * (wz * qw + wy * qx - wx * qy)  # qz_dot
 
             # Angular velocity derivative (Euler's equation)
             J = np.array(self.params.mass.inertia_kgm2)

@@ -462,7 +462,7 @@ def quat_normalize(q):
     Parameters
     ----------
     q : numpy array
-        Quaternion [qx, qy, qz, qw] (scalar last, Hamilton convention)
+        Quaternion [qw, qx, qy, qz] (scalar first)
 
     Returns
     -------
@@ -471,36 +471,36 @@ def quat_normalize(q):
     """
     mag = np.linalg.norm(q)
     if mag < np.finfo(float).eps:
-        return np.array([0.0, 0.0, 0.0, 1.0])
+        return np.array([1.0, 0.0, 0.0, 0.0])
     return q / mag
 
 
 def quat_multiply(q1, q2):
     """Multiply two quaternions using Hamilton convention.
 
-    Computes q1 * q2 in scalar-last format [qx, qy, qz, qw].
+    Computes q1 * q2 in scalar-first format [qw, qx, qy, qz].
 
     Parameters
     ----------
     q1 : numpy array
-        First quaternion [qx, qy, qz, qw]
+        First quaternion [qw, qx, qy, qz]
     q2 : numpy array
-        Second quaternion [qx, qy, qz, qw]
+        Second quaternion [qw, qx, qy, qz]
 
     Returns
     -------
     numpy array
         Product quaternion q1 * q2
     """
-    qx1, qy1, qz1, qw1 = q1
-    qx2, qy2, qz2, qw2 = q2
+    qw1, qx1, qy1, qz1 = q1
+    qw2, qx2, qy2, qz2 = q2
 
     return np.array(
         [
+            qw1 * qw2 - qx1 * qx2 - qy1 * qy2 - qz1 * qz2,
             qw1 * qx2 + qx1 * qw2 + qy1 * qz2 - qz1 * qy2,
             qw1 * qy2 - qx1 * qz2 + qy1 * qw2 + qz1 * qx2,
             qw1 * qz2 + qx1 * qy2 - qy1 * qx2 + qz1 * qw2,
-            qw1 * qw2 - qx1 * qx2 - qy1 * qy2 - qz1 * qz2,
         ]
     )
 
@@ -511,14 +511,14 @@ def quat_conjugate(q):
     Parameters
     ----------
     q : numpy array
-        Quaternion [qx, qy, qz, qw]
+        Quaternion [qw, qx, qy, qz]
 
     Returns
     -------
     numpy array
-        Conjugate quaternion [-qx, -qy, -qz, qw]
+        Conjugate quaternion [qw, -qx, -qy, -qz]
     """
-    return np.array([-q[0], -q[1], -q[2], q[3]])
+    return np.array([q[0], -q[1], -q[2], -q[3]])
 
 
 def quat_inverse(q):
@@ -529,7 +529,7 @@ def quat_inverse(q):
     Parameters
     ----------
     q : numpy array
-        Quaternion [qx, qy, qz, qw]
+        Quaternion [qw, qx, qy, qz]
 
     Returns
     -------
@@ -550,7 +550,7 @@ def quat_rotate_vector(q, v):
     Parameters
     ----------
     q : numpy array
-        Quaternion [qx, qy, qz, qw]
+        Quaternion [qw, qx, qy, qz]
     v : numpy array
         3D vector to rotate
 
@@ -559,37 +559,51 @@ def quat_rotate_vector(q, v):
     numpy array
         Rotated 3D vector
     """
-    # Convert vector to pure quaternion [vx, vy, vz, 0]
-    v_quat = np.array([v[0], v[1], v[2], 0.0])
+    # Convert vector to pure quaternion [0, vx, vy, vz]
+    v_quat = np.array([0.0, v[0], v[1], v[2]])
 
     # Perform rotation: q * v * q_conj
     q_conj = quat_conjugate(q)
     result = quat_multiply(quat_multiply(q, v_quat), q_conj)
 
-    return result[0:3]
+    return result[1:4]
 
 
 def quat_to_dcm(q):
     """Convert quaternion to direction cosine matrix (DCM).
 
+    Implements equation (6.79) from the textbook.
+
     Parameters
     ----------
     q : numpy array
-        Quaternion [qx, qy, qz, qw] (scalar last, Hamilton convention)
+        Quaternion [qw, qx, qy, qz]
 
     Returns
     -------
     numpy array
         3x3 DCM for rotation from reference frame to body frame
     """
-    qx, qy, qz, qw = q
+    qw, qx, qy, qz = q
 
-    # DCM from quaternion
+    # DCM from quaternion (equation 6.79)
     dcm = np.array(
         [
-            [1 - 2 * (qy**2 + qz**2), 2 * (qx * qy + qw * qz), 2 * (qx * qz - qw * qy)],
-            [2 * (qx * qy - qw * qz), 1 - 2 * (qx**2 + qz**2), 2 * (qy * qz + qw * qx)],
-            [2 * (qx * qz + qw * qy), 2 * (qy * qz - qw * qx), 1 - 2 * (qx**2 + qy**2)],
+            [
+                qw**2 + qx**2 - qy**2 - qz**2,
+                2 * (qx * qy + qw * qz),
+                2 * (qx * qz - qw * qy),
+            ],
+            [
+                2 * (qx * qy - qw * qz),
+                qw**2 - qx**2 + qy**2 - qz**2,
+                2 * (qy * qz + qw * qx),
+            ],
+            [
+                2 * (qx * qz + qw * qy),
+                2 * (qy * qz - qw * qx),
+                qw**2 - qx**2 - qy**2 + qz**2,
+            ],
         ]
     )
     return dcm
@@ -608,7 +622,7 @@ def dcm_to_quat(dcm):
     Returns
     -------
     numpy array
-        Quaternion [qx, qy, qz, qw] (scalar last)
+        Quaternion [qw, qx, qy, qz]
     """
     trace = np.trace(dcm)
 
@@ -637,7 +651,7 @@ def dcm_to_quat(dcm):
         qy = (dcm[1, 2] + dcm[2, 1]) / s
         qz = 0.25 * s
 
-    return np.array([qx, qy, qz, qw])
+    return np.array([qw, qx, qy, qz])
 
 
 def quat_to_euler(q):
@@ -646,7 +660,7 @@ def quat_to_euler(q):
     Parameters
     ----------
     q : numpy array
-        Quaternion [qx, qy, qz, qw] (scalar last)
+        Quaternion [qw, qx, qy, qz]
 
     Returns
     -------
@@ -657,7 +671,7 @@ def quat_to_euler(q):
     yaw : float
         Yaw angle in radians (rotation about z-axis)
     """
-    qx, qy, qz, qw = q
+    qw, qx, qy, qz = q
 
     # Roll (x-axis rotation)
     sinr_cosp = 2 * (qw * qx + qy * qz)
@@ -694,7 +708,7 @@ def euler_to_quat(roll, pitch, yaw):
     Returns
     -------
     numpy array
-        Quaternion [qx, qy, qz, qw] (scalar last)
+        Quaternion [qw, qx, qy, qz]
     """
     cy = np.cos(yaw * 0.5)
     sy = np.sin(yaw * 0.5)
@@ -708,7 +722,7 @@ def euler_to_quat(roll, pitch, yaw):
     qy = cr * sp * cy + sr * cp * sy
     qz = cr * cp * sy - sr * sp * cy
 
-    return np.array([qx, qy, qz, qw])
+    return np.array([qw, qx, qy, qz])
 
 
 def quat_slerp(q1, q2, t):
@@ -717,9 +731,9 @@ def quat_slerp(q1, q2, t):
     Parameters
     ----------
     q1 : numpy array
-        Start quaternion [qx, qy, qz, qw]
+        Start quaternion [qw, qx, qy, qz]
     q2 : numpy array
-        End quaternion [qx, qy, qz, qw]
+        End quaternion [qw, qx, qy, qz]
     t : float
         Interpolation parameter in [0, 1]
 
