@@ -99,6 +99,69 @@ def get_hessian(x, fnc, f_args=(), step_size=np.finfo(float).eps ** (1 / 4)):
     return H
 
 
+def linearize_dynamics(state_derivative_fnc, trim_state, trim_input, step_size=1e-7):
+    """Linearize a nonlinear dynamics model about a trim point.
+
+    Computes the state and input Jacobians (A and B matrices) using central
+    finite differences. The dynamics function should have the form:
+    x_dot = f(x, u, t) where x is state, u is input, t is time.
+
+    Parameters
+    ----------
+    state_derivative_fnc : callable
+        Dynamics function with signature f(x, u, t) returning x_dot.
+    trim_state : numpy array
+        Trim state vector (n_states,).
+    trim_input : numpy array
+        Trim input vector (n_inputs,).
+    step_size : float, optional
+        Step size for finite differences. Default is 1e-7.
+
+    Returns
+    -------
+    A : numpy array
+        State Jacobian matrix (n_states, n_states).
+    B : numpy array
+        Input Jacobian matrix (n_states, n_inputs).
+
+    Examples
+    --------
+    >>> def f(x, u, t):
+    ...     return np.array([x[1], u[0]])  # simple double integrator
+    >>> x_trim = np.array([0.0, 0.0])
+    >>> u_trim = np.array([0.0])
+    >>> A, B = linearize_dynamics(f, x_trim, u_trim)
+    """
+    trim_state = np.asarray(trim_state).flatten()
+    trim_input = np.asarray(trim_input).flatten()
+    n_states = len(trim_state)
+    n_inputs = len(trim_input)
+
+    # State Jacobian: A = del f/del x
+    A = np.zeros((n_states, n_states))
+    for i in range(n_states):
+        x_plus = trim_state.copy()
+        x_minus = trim_state.copy()
+        x_plus[i] += step_size
+        x_minus[i] -= step_size
+        f_plus = state_derivative_fnc(x_plus, trim_input, 0)
+        f_minus = state_derivative_fnc(x_minus, trim_input, 0)
+        A[:, i] = (f_plus - f_minus) / (2 * step_size)
+
+    # Input Jacobian: B = del f/del u
+    B = np.zeros((n_states, n_inputs))
+    for i in range(n_inputs):
+        u_plus = trim_input.copy()
+        u_minus = trim_input.copy()
+        u_plus[i] += step_size
+        u_minus[i] -= step_size
+        f_plus = state_derivative_fnc(trim_state, u_plus, 0)
+        f_minus = state_derivative_fnc(trim_state, u_minus, 0)
+        B[:, i] = (f_plus - f_minus) / (2 * step_size)
+
+    return A, B
+
+
 def get_state_jacobian(t, x, fncs, f_args, u=None, **kwargs):
     r"""Calculates the jacobian matrix for the state of a state space model.
 
