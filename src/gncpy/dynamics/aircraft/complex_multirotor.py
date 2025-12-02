@@ -24,7 +24,9 @@ class ComplexMotorParams(SimpleMotorParams):
         Each element is a list of the position of the motor in meters (body frame).
     dir : list
         Each element is +/-1 indicating the direction the motor spins (sigma).
-        Positive means CCW rotation about the thrust axis, negative means CW.
+        Positive (+1) means CCW rotation about the thrust axis when viewed from the
+        direction the thrust vector points. Negative (-1) means CW rotation.
+        This follows right-hand rule: thumb along thrust axis, fingers show rotation.
     thrust_dir : list
         Each element is a 3-element list representing the unit vector direction
         of the motor thrust in the body frame. Will be normalized if not already unit length.
@@ -226,10 +228,11 @@ class ComplexVehicle(SimpleVehicle):
         that can point in arbitrary directions.
 
         For each motor:
-        - Thrust magnitude is computed from motor command using polynomial
+        - Thrust magnitude is computed from motor command using polynomial (positive value)
         - Thrust force vector = magnitude * thrust_direction_unit_vector
         - Moment from thrust = (motor_pos - cg) x thrust_force
         - Reaction torque = -sigma * torque_magnitude * thrust_direction_unit_vector
+          (negative sign because body experiences opposite torque to rotor spin)
 
         Parameters
         ----------
@@ -243,11 +246,11 @@ class ComplexVehicle(SimpleVehicle):
         motor_mom : numpy array
             Total moment in body frame (3x1).
         """
-        # Motor model - compute thrust and torque magnitudes
-        m_thrust_mag = -np.polynomial.Polynomial(self.params.prop.poly_thrust[-1::-1])(
+        # Motor model - compute thrust and torque magnitudes (positive values)
+        m_thrust_mag = np.polynomial.Polynomial(self.params.prop.poly_thrust[-1::-1])(
             motor_cmds
         )
-        m_torque_mag = -np.polynomial.Polynomial(self.params.prop.poly_torque[-1::-1])(
+        m_torque_mag = np.polynomial.Polynomial(self.params.prop.poly_torque[-1::-1])(
             motor_cmds
         )
 
