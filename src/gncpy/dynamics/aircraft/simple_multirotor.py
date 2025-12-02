@@ -1,4 +1,5 @@
 """Implements a multi-rotor dynamics model."""
+
 import numpy as np
 from scipy import integrate
 import enum
@@ -8,6 +9,7 @@ from ruamel.yaml import YAML
 
 import gncpy.wgs84 as wgs84
 from gncpy.dynamics.basic import DynamicsBase
+from gncpy.dynamics.basic.nonlinear_dynamics_base import NonlinearDynamicsBase
 from gncpy.coordinate_transforms import ned_to_LLA
 
 
@@ -73,6 +75,9 @@ class MotorParams:
         Each element is a list of the position of the motor in meters.
     dir : list
         Each element is +/-1 indicating the direction the motor spins.
+        dir=+1: Rotor spins CCW when viewed from above (same as motor spins CCW about the direction of thrust)
+        dir=-1: Rotor spins CW when viewed from above (same as motor spins CW about the direction of thrust)
+        In NED body frame (Z-down), CCW rotor (dir=+1) means the motor torque applied on the body is positive about the +Z axis.
     """
 
     def __init__(self):
@@ -132,11 +137,19 @@ yaml.register_class(GeoParams)
 yaml.register_class(AircraftParams)
 
 
+# TODO: consider adding effector stuff to the vehicle yaml
 class Effector:
-    """Defines an effector."""
+    """Defines an effector base class. children implement step to model a specific actuator."""
 
-    def step(self, input_cmds):
+    def step(self, input_cmds, dt=None):
         """Converts input commands to effector commands.
+
+        Parameters
+        ----------
+        input_cmds : numpy array
+            Desired commands.
+        dt : float, optional
+            Timestep in seconds (ignored in base class).
 
         Returns
         -------
@@ -366,11 +379,15 @@ class Vehicle:
         return force.ravel(), mom
 
     def _calc_prop_force_mom(self, motor_cmds):
-        # motor model
+        # Motor model
+        # Thrust polynomial gives positive value, negative sign makes thrust point up (-Z in body frame)
         m_thrust = -np.polynomial.Polynomial(self.params.prop.poly_thrust[-1::-1])(
             motor_cmds
         )
-        m_torque = -np.polynomial.Polynomial(self.params.prop.poly_torque[-1::-1])(
+        # Torque polynomial gives positive value, multiply by dir for correct sign
+        # dir=+1 (CCW rotor) produces positive reaction torque on body
+        # dir=-1 (CW rotor) produces negative reaction torque on body
+        m_torque = np.polynomial.Polynomial(self.params.prop.poly_torque[-1::-1])(
             motor_cmds
         )
         m_torque = np.sum(m_torque * np.array(self.params.motor.dir))
@@ -820,7 +837,7 @@ class Environment:
         self.state[e_smap.gravity] = gravity
 
 
-class SimpleMultirotor(DynamicsBase):
+class SimpleMultirotor(NonlinearDynamicsBase):
     """Implements functions for a generic multi-rotor.
 
     Attributes
@@ -843,7 +860,14 @@ class SimpleMultirotor(DynamicsBase):
     """Map of states to indices with units."""
 
     def __init__(
-        self, params_file, env=None, effector=None, egm_bin_file=None, library_dir=None, **kwargs
+        self,
+        params_file,
+        env=None,
+        effector=None,
+        egm_bin_file=None,
+        library_dir=None,
+        dt=0.01,
+        **kwargs,
     ):
         """Initialize an object.
 
@@ -862,12 +886,16 @@ class SimpleMultirotor(DynamicsBase):
             This is useful when extending this class outside of the gncpy
             package to provide a new default search location. The default of
             None is good for most other cases.
+        dt : float, optional
+            Timestep for integration. The default is 0.01.
         **kwargs : dict
             Additional arguments for the parent class.
         """
-        super().__init__(**kwargs)
+        super().__init__(dt=dt, **kwargs)
         if library_dir is None:
-            self.library_config_dir = os.path.join(pathlib.Path(__file__).parent.resolve(),)
+            self.library_config_dir = os.path.join(
+                pathlib.Path(__file__).parent.resolve(),
+            )
         else:
             self.library_config_dir = library_dir
 
@@ -926,30 +954,57 @@ class SimpleMultirotor(DynamicsBase):
 
         return cf
 
-    def propagate_state(self, desired_motor_cmds, dt):
-        """Propagates all internal states forward 1 timestep.
+    @property
+    def cont_fnc_lst(self):
+        """Continuous function list (not implemented).
+
+        We use finite difference via propagate_state instead.
+        """
+        raise NotImplementedError("Using finite difference via propagate_state instead")
+
+    def propagate_state(self, timestep, state, u=None, state_args=None, ctrl_args=None):
+        """Propagates the state forward 1 timestep.
+
+        This overrides the base class to use our custom vehicle dynamics.
 
         Parameters
         ----------
-        desired_motor_cmds : numpy array
-            The desired commands for the motors. Depending on the effectors
-            these may not be fully realized.
-        dt : float
-            Time change since the last update (seconds).
+        timestep : float
+            Timestep to use for propagation. If None, uses self.dt.
+        state : numpy array
+            Full vehicle state vector.
+        u : numpy array, optional
+            Motor commands. The default is None.
+        state_args : tuple, optional
+            Not used. The default is None.
+        ctrl_args : tuple, optional
+            Not used. The default is None.
 
         Returns
         -------
         numpy array
-            Copy of the internal vehicle state.
+            Next state as column vector.
         """
-        motor_cmds = self.effector.step(desired_motor_cmds)
+        # Use provided timestep or default
+        dt = self.dt if timestep is None else timestep
 
+        # Set the vehicle state from input
+        self.vehicle.state = state.ravel().copy()
+
+        # Get motor commands
+        if u is None:
+            raise ValueError("Motor commands (u) must be provided")
+        motor_cmds = self.effector.step(u.ravel(), dt)
+
+        # Update environment
         self.env.step(
             self.vehicle.state[v_smap.lat],
             self.vehicle.state[v_smap.lon],
             self.vehicle.state[v_smap.alt_wgs84],
             self.vehicle.state[v_smap.alt_msl],
         )
+
+        # Step vehicle dynamics
         self.vehicle.step(
             dt,
             self.env.state[e_smap.terrain_alt_wgs84],
@@ -971,6 +1026,8 @@ class SimpleMultirotor(DynamicsBase):
         ref_lon_deg,
         terrain_alt_wgs84,
         ned_mag_field,
+        body_accel=None,
+        body_rot_accel=None,
     ):
         """Sets the initial conditions for the state based on a few inputs.
 
@@ -993,45 +1050,47 @@ class SimpleMultirotor(DynamicsBase):
             home altitude for the starting NED positioin.
         ned_mag_field : numpy array
             Local magnetic field vector in NED frame and uT.
+        body_accel : numpy array, optional
+            Initial body acceleration in m/s^2. Default is zeros.
+        body_rot_accel : numpy array, optional
+            Initial body rotational acceleration in rad/s^2. Default is zeros.
         """
-        # self.vehicle.state[v_smap.lat] = ref_lat_deg * d2r
-        # self.vehicle.state[v_smap.lon] = ref_lon_deg * d2r
-        # self.vehicle.state[v_smap.alt_wgs84] = terrain_alt_wgs84
-        # self.vehicle.state[v_smap.alt_msl] = wgs84.convert_wgs_to_msl(
-        #     ref_lat_deg * d2r, ref_lon_deg * d2r, self.vehicle.state[v_smap.alt_wgs84]
-        # )
-        self.vehicle.state[v_smap.ned_pos] = ned_pos.flatten()
-        self.vehicle.state[v_smap.body_vel] = body_vel.flatten()
-        self.vehicle.state[v_smap.body_rot_rate] = body_rot_rate.flatten()
-        eul_inds = v_smap.yaw + v_smap.pitch + v_smap.roll
-        self.vehicle.state[eul_inds] = eul_deg.flatten() * d2r
-
-        if self._env_req_init:
-            self.env.state[e_smap.mag_field] = ned_mag_field.flatten()
-            self.env.state[e_smap.terrain_alt_wgs84] = terrain_alt_wgs84
-
-        # self.vehicle.state[v_smap.ned_pos] = ned_pos.flatten()
-        # self.vehicle.state[v_smap.body_vel] = body_vel.flatten()
-        # eul_rad = eul_deg * d2r
-        # self.vehicle.state[v_smap.roll] = eul_rad[2]
-        # self.vehicle.state[v_smap.pitch] = eul_rad[1]
-        # self.vehicle.state[v_smap.yaw] = eul_rad[0]
-        # dcm_earth2body = self.vehicle.eul_to_dcm(eul_deg[0]* d2r, eul_deg[1]* d2r, eul_deg[2]* d2r)
-        # self.vehicle.state[v_smap.ned_vel] = (
-        #     dcm_earth2body.T @ body_vel.reshape((3, 1))
-        # ).flatten()
-        # self.vehicle.set_dcm_earth2body(dcm_earth2body)
-        # self.vehicle.state[v_smap.body_rot_rate] = body_rot_rate.flatten()
-        # self.vehicle.state[v_smap.body_rot_accel] = np.zeros(3)
-        # self.vehicle.state[v_smap.body_accel] = np.zeros(3)
-        # self.vehicle.state[v_smap.ned_accel] = np.zeros(3)
+        # Set reference frame
         self.vehicle.ref_lat = ref_lat_deg * d2r
         self.vehicle.ref_lon = ref_lon_deg * d2r
 
+        # Set position, velocity, and attitude
+        self.vehicle.state[v_smap.ned_pos] = ned_pos.flatten()
+        self.vehicle.state[v_smap.body_vel] = body_vel.flatten()
+        self.vehicle.state[v_smap.body_rot_rate] = body_rot_rate.flatten()
+        eul_rad = eul_deg.flatten() * d2r
+        self.vehicle.state[v_smap.roll] = eul_rad[2]
+        self.vehicle.state[v_smap.pitch] = eul_rad[1]
+        self.vehicle.state[v_smap.yaw] = eul_rad[0]
+
+        # Compute DCM and derived velocities
+        dcm_earth2body = self.vehicle.eul_to_dcm(eul_rad[0], eul_rad[1], eul_rad[2])
+        self.vehicle.set_dcm_earth2body(dcm_earth2body)
+        self.vehicle.state[v_smap.ned_vel] = (
+            dcm_earth2body.T @ body_vel.reshape((3, 1))
+        ).flatten()
+
+        # Set accelerations (default to zeros if not provided)
+        if body_accel is None:
+            body_accel = np.zeros(3)
+        if body_rot_accel is None:
+            body_rot_accel = np.zeros(3)
+        self.vehicle.state[v_smap.body_accel] = body_accel.flatten()
+        self.vehicle.state[v_smap.body_rot_accel] = body_rot_accel.flatten()
+        self.vehicle.state[v_smap.ned_accel] = (
+            dcm_earth2body.T @ body_accel.reshape((3, 1))
+        ).flatten()
+
+        # Compute LLA from NED
         lla = ned_to_LLA(
             ned_pos.reshape((3, 1)),
-            ref_lat_deg * d2r,
-            ref_lon_deg * d2r,
+            self.vehicle.ref_lat,
+            self.vehicle.ref_lon,
             terrain_alt_wgs84,
         )
         self.vehicle.state[v_smap.lat] = lla[0]
@@ -1040,96 +1099,59 @@ class SimpleMultirotor(DynamicsBase):
         self.vehicle.state[v_smap.alt_msl] = wgs84.convert_wgs_to_msl(
             lla[0],
             lla[1],
-            lla[2]
-            # ref_lat_deg * d2r,
-            # ref_lon_deg * d2r,
-            # terrain_alt_wgs84,
+            lla[2],
         )
 
-        # initialize the remaining environment state by calling step
-        # if self._env_req_init:
-        #     self.env.step(
-        #         self.vehicle.state[v_smap.lat],
-        #         self.vehicle.state[v_smap.lon],
-        #         self.vehicle.state[v_smap.alt_wgs84],
-        #         self.vehicle.state[v_smap.alt_msl],
-        #     )
+        # Initialize environment state
+        if self._env_req_init:
+            self.env.state[e_smap.mag_field] = ned_mag_field.flatten()
+            self.env.state[e_smap.terrain_alt_wgs84] = terrain_alt_wgs84
 
-        # get remaining vehicle derived states
-        # (
-        #     gnd_trk,
-        #     gnd_speed,
-        #     fp_ang,
-        #     dyn_pres,
-        #     aoa,
-        #     airspeed,
-        #     sideslip_ang,
-        #     _,
-        #     _,
-        #     mach,
-        #     _,
-        #     _,
-        #     _,
-        #     alt_agl,
-        #     _,
-        # ) = self.vehicle.calc_derived_states(
-        #     1,
-        #     terrain_alt_wgs84,
-        #     self.env.state[e_smap.density],
-        #     self.env.state[e_smap.speed_of_sound],
-        #     self.vehicle.state[v_smap.ned_vel],
-        #     ned_pos,
-        #     body_vel,
-        # )
+        # Step environment to compute atmosphere/gravity
+        self.env.step(
+            self.vehicle.state[v_smap.lat],
+            self.vehicle.state[v_smap.lon],
+            self.vehicle.state[v_smap.alt_wgs84],
+            self.vehicle.state[v_smap.alt_msl],
+        )
 
-        # self.vehicle.state[v_smap.gnd_trk] = gnd_trk
-        # self.vehicle.state[v_smap.gnd_speed] = gnd_speed
-        # self.vehicle.state[v_smap.fp_ang] = fp_ang
-        # self.vehicle.state[v_smap.dyn_pres] = dyn_pres
-        # self.vehicle.state[v_smap.aoa] = aoa
-        # self.vehicle.state[v_smap.aoa_rate] = 0
-        # self.vehicle.state[v_smap.airspeed] = airspeed
-        # self.vehicle.state[v_smap.sideslip_ang] = sideslip_ang
-        # self.vehicle.state[v_smap.sideslip_rate] = 0
-        # self.vehicle.state[v_smap.mach] = mach
-        # self.vehicle.state[v_smap.alt_agl] = alt_agl
+        # Compute all derived states
+        (
+            gnd_trk,
+            gnd_speed,
+            fp_ang,
+            dyn_pres,
+            aoa,
+            airspeed,
+            sideslip_ang,
+            _,
+            _,
+            mach,
+            _,
+            _,
+            _,
+            alt_agl,
+            _,
+        ) = self.vehicle.calc_derived_states(
+            1,
+            terrain_alt_wgs84,
+            self.env.state[e_smap.density],
+            self.env.state[e_smap.speed_of_sound],
+            self.vehicle.state[v_smap.ned_vel],
+            ned_pos,
+            body_vel,
+        )
+
+        self.vehicle.state[v_smap.gnd_trk] = gnd_trk
+        self.vehicle.state[v_smap.gnd_speed] = gnd_speed
+        self.vehicle.state[v_smap.fp_ang] = fp_ang
+        self.vehicle.state[v_smap.dyn_pres] = dyn_pres
+        self.vehicle.state[v_smap.aoa] = aoa
+        self.vehicle.state[v_smap.aoa_rate] = 0
+        self.vehicle.state[v_smap.airspeed] = airspeed
+        self.vehicle.state[v_smap.sideslip_ang] = sideslip_ang
+        self.vehicle.state[v_smap.sideslip_rate] = 0
+        self.vehicle.state[v_smap.mach] = mach
+        self.vehicle.state[v_smap.alt_agl] = alt_agl
 
         self._env_req_init = False
-
-    def get_state_mat(self, timestep, *args, **kwargs):
-        """Gets the state matrix, should not be used.
-
-        Parameters
-        ----------
-        timestep : float
-            Current time.
-        *args : tuple
-            Additional arguments.
-        **kwargs : dict
-            Additional arguments.
-
-        Raises
-        ------
-        RuntimeError
-            This function should not be used.
-        """
-        raise RuntimeError("get_state_mat should not be used by this class!")
-
-    def get_input_mat(self, timestep, *args, **kwargs):
-        """Gets the input matrix, should not be used.
-
-        Parameters
-        ----------
-        timestep : float
-            Current time.
-        *args : tuple
-            Additional arguments.
-        **kwargs : dict
-            Additional arguments.
-
-        Raises
-        ------
-        RuntimeError
-            This function should not be used.
-        """
-        raise RuntimeError("get_input_mat should not be used by this class!")
