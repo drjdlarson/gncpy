@@ -1,0 +1,64 @@
+# Complex quadcopter with TILTED motors (15° outward)
+# Tests ComplexMultirotor with arbitrary thrust directions
+# Motors tilt outward from center, creating a "splayed" configuration
+
+!ComplexAircraftParams
+aero: !AeroParams
+  cd: 0.5  # Drag coefficient
+
+mass: !MassParams
+  mass_kg: 0.5  # 500g total mass (small racing quad)
+  cg_m: [0.0, 0.0, 0.0]  # Center of mass at origin
+  inertia_kgm2:  # Moment of inertia matrix (small quad, approximately spherical)
+    - [0.002, 0.0, 0.0]     # Ixx
+    - [0.0, 0.002, 0.0]     # Iyy
+    - [0.0, 0.0, 0.003]     # Izz
+
+geo: !GeoParams
+  front_area_m2: [0.01, 0.01, 0.01, 0.01]  # Small frontal area at different angles
+
+prop: !PropParams
+  # Polynomial coefficients for thrust: T = c0*cmd^2 + c1*cmd + c2
+  # DESCENDING ORDER: [c2, c1, c0] where T = c2*x^2 + c1*x + c0
+  # For ComplexMultirotor: handles bidirectional thrust with sign preservation
+  # sign(cmd) * polynomial(|cmd|) allows thrust reversal
+  poly_thrust: [2.5, 0.0, 0.0]  # Quadratic: T = 2.5*cmd^2, ~2.5N at cmd=1.0 per motor
+  
+  # Polynomial coefficients for torque: Q = c0*cmd^2 + c1*cmd + c2  
+  # DESCENDING ORDER: [c2, c1, c0]
+  # Reaction torque in N-m (uses |cmd| for magnitude)
+  poly_torque: [0.05, 0.0, 0.0]  # Quadratic: Q = 0.05*cmd^2, ~0.05 N-m at cmd=1.0
+
+motor: !ComplexMotorParams
+  # X configuration: motors at 45 degrees from body axes
+  # Arm length: 0.1m (small 200mm frame)
+  pos_m:
+    - [0.0707, 0.0707, 0.0]   # Front-right motor (45°)
+    - [-0.0707, 0.0707, 0.0]  # Front-left motor (135°)
+    - [-0.0707, -0.0707, 0.0] # Rear-left motor (225°)
+    - [0.0707, -0.0707, 0.0]  # Rear-right motor (315°)
+  
+  # Direction (sigma): +1 = CCW, -1 = CW (viewed along thrust axis)
+  # Standard X configuration: FR(CW), FL(CCW), RL(CW), RR(CCW)
+  dir: [-1, 1, -1, 1]
+  
+  # Thrust direction vectors (unit vectors in body frame)
+  # Each motor tilted OUTWARD by 15° from vertical
+  # Front-right: tilted toward +X, +Y (outward from center)
+  # Front-left: tilted toward -X, +Y
+  # Rear-left: tilted toward -X, -Y
+  # Rear-right: tilted toward +X, -Y
+  #
+  # Tilt calculation:
+  # - 15° tilt from vertical (-Z axis)
+  # - Tilt direction: radially outward from center
+  # - cos(15°) ≈ 0.9659, sin(15°) ≈ 0.2588
+  # - Outward unit vector in XY: [cos(45°), sin(45°)] = [0.7071, 0.7071] for FR
+  # - Final: [sin(15°)*cos(45°), sin(15°)*sin(45°), -cos(15°)]
+  #        = [0.2588*0.7071, 0.2588*0.7071, -0.9659]
+  #        = [0.1830, 0.1830, -0.9659]
+  thrust_dir:
+    - [0.1830, 0.1830, -0.9659]   # Front-right: tilted outward at 45° azimuth
+    - [-0.1830, 0.1830, -0.9659]  # Front-left: tilted outward at 135° azimuth
+    - [-0.1830, -0.1830, -0.9659] # Rear-left: tilted outward at 225° azimuth
+    - [0.1830, -0.1830, -0.9659]  # Rear-right: tilted outward at 315° azimuth
