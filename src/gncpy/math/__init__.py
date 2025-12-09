@@ -554,6 +554,17 @@ def quat_multiply(q1, q2):
     -------
     numpy array
         Product quaternion q1 * q2
+
+    Notes
+    -----
+    For passive rotation quaternions (body-to-NED convention):
+
+    The product q1 * q2 applies q2 first, then q1:
+        quat_rotate_vector(quat_multiply(q1, q2), v) = quat_rotate_vector(q1, quat_rotate_vector(q2, v))
+
+    When converting to DCM (NED-to-body), the order reverses:
+        quat_to_dcm(quat_multiply(q1, q2)) about quat_to_dcm(q2) @ quat_to_dcm(q1)
+        (Because DCM is the transpose of the quaternion rotation)
     """
     qw1, qx1, qy1, qz1 = q1
     qw2, qx2, qy2, qz2 = q2
@@ -580,6 +591,14 @@ def quat_conjugate(q):
     -------
     numpy array
         Conjugate quaternion [qw, -qx, -qy, -qz]
+
+    Notes
+    -----
+    For unit quaternions (passive rotation quaternions), the conjugate
+    reverses the rotation direction:
+
+    - If q represents body-to-NED, then quat_conjugate(q) represents NED-to-body
+    - For rotation: quat_rotate_vector(quat_conjugate(q), v) applies inverse rotation
     """
     return np.array([q[0], -q[1], -q[2], -q[3]])
 
@@ -606,21 +625,44 @@ def quat_inverse(q):
 
 
 def quat_rotate_vector(q, v):
-    """Rotate a 3D vector by a quaternion.
+    """Rotate a 3D vector by a quaternion using Hamilton convention.
 
     Computes v' = q * v * q^(-1) where v is treated as a pure quaternion.
+    This applies the rotation that q represents.
 
     Parameters
     ----------
     q : numpy array
-        Quaternion [qw, qx, qy, qz]
+        Quaternion [qw, qx, qy, qz] in scalar-first Hamilton convention.
+        **If q is a passive rotation quaternion from euler_to_quat, it
+        represents body-to-NED rotation.**
     v : numpy array
-        3D vector to rotate
+        3D vector to rotate (must be in the same frame as q's input frame)
 
     Returns
     -------
     numpy array
-        Rotated 3D vector
+        Rotated 3D vector in q's output frame.
+
+    Notes
+    -----
+    **USAGE WITH PASSIVE ROTATION QUATERNION (BODY-TO-NED):**
+
+    If q is from euler_to_quat (passive rotation quaternion):
+
+    - Body to NED: v_ned = quat_rotate_vector(q, v_body)
+      Direct use rotates FROM body TO NED frame
+
+    - NED to body: v_body = quat_rotate_vector(quat_conjugate(q), v_ned)
+      Use conjugate to reverse the rotation direction
+
+    - NED to body (alternative): v_body = quat_to_dcm(q) @ v_ned
+      The DCM from quat_to_dcm directly gives NED-to-body transformation
+
+    Example:
+        q = euler_to_quat(roll, pitch, yaw)  # passive rotation (body-to-NED)
+        v_body = np.array([1, 0, 0])  # forward in body frame
+        v_ned = quat_rotate_vector(q, v_body)  # rotates to NED frame
     """
     # Convert vector to pure quaternion [0, vx, vy, vz]
     v_quat = np.array([0.0, v[0], v[1], v[2]])
@@ -635,17 +677,37 @@ def quat_rotate_vector(q, v):
 def quat_to_dcm(q):
     """Convert quaternion to direction cosine matrix (DCM).
 
-    Implements equation (6.79) from the textbook.
+    Implements equation (6.79) from the textbook. Takes a "passive rotation
+    quaternion" (body-to-NED) and produces a NED-to-body DCM.
 
     Parameters
     ----------
     q : numpy array
-        Quaternion [qw, qx, qy, qz]
+        Quaternion [qw, qx, qy, qz] in scalar-first Hamilton convention.
+        **Must be a passive rotation quaternion (body-to-NED) from euler_to_quat.**
 
     Returns
     -------
     numpy array
-        3x3 DCM for rotation from reference frame to body frame
+        3x3 **NED-to-body DCM**. Transforms vectors FROM NED TO body frame:
+        v_body = DCM @ v_ned
+
+    Notes
+    -----
+    **CRITICAL: Quaternion vs DCM Frame Convention**
+
+    This function produces the TRANSPOSE/INVERSE of what the quaternion represents:
+
+    - Input q: passive rotation quaternion (body-to-NED)
+      quat_rotate_vector(q, v_body) rotates TO NED frame
+
+    - Output DCM: NED-to-body transformation matrix
+      DCM @ v_ned transforms TO body frame
+
+    This is intentional per textbook equation 6.79. The DCM is the transpose
+    of the rotation matrix that q represents via q*v*q_conj.
+
+    To get a body-to-NED DCM instead: use DCM.T
     """
     qw, qx, qy, qz = q
 
@@ -675,17 +737,36 @@ def quat_to_dcm(q):
 def dcm_to_quat(dcm):
     """Convert direction cosine matrix (DCM) to quaternion.
 
-    Uses Shepperd's method for numerical stability.
+    Uses Shepperd's method (equations 6.80-6.83) for numerical stability.
+    This function inverts quat_to_dcm by taking a NED-to-body DCM and
+    producing a body-to-NED passive rotation quaternion.
 
     Parameters
     ----------
     dcm : numpy array
-        3x3 direction cosine matrix
+        3x3 **NED-to-body DCM** (transforms vectors FROM NED TO body frame):
+        v_body = dcm @ v_ned
 
     Returns
     -------
     numpy array
-        Quaternion [qw, qx, qy, qz]
+        **Passive rotation quaternion** [qw, qx, qy, qz] representing
+        body-to-NED rotation. Matches the convention of euler_to_quat.
+
+    Notes
+    -----
+    **INVERTING THE FRAME CONVENTION:**
+
+    This function properly inverts quat_to_dcm:
+    - Input: NED-to-body DCM
+    - Output: body-to-NED passive rotation quaternion
+
+    The raw Shepperd's equations (6.80-6.83) extract a quaternion matching
+    the DCM's frame convention (NED-to-body), so this function returns the
+    conjugate to produce the body-to-NED passive rotation quaternion that
+    matches euler_to_quat convention.
+
+    Round-trip guarantee: dcm_to_quat(quat_to_dcm(q)) about q
     """
     trace = np.trace(dcm)
 
@@ -695,7 +776,7 @@ def dcm_to_quat(dcm):
         qx = (dcm[2, 1] - dcm[1, 2]) * s
         qy = (dcm[0, 2] - dcm[2, 0]) * s
         qz = (dcm[1, 0] - dcm[0, 1]) * s
-    elif dcm[0, 0] > dcm[1, 1] and dcm[0, 0] > dcm[2, 2]:
+    elif dcm[0, 0] > dcm[1, 1] and dcm[0, 0] > dcm[1, 2]:
         s = 2.0 * np.sqrt(1.0 + dcm[0, 0] - dcm[1, 1] - dcm[2, 2])
         qw = (dcm[2, 1] - dcm[1, 2]) / s
         qx = 0.25 * s
@@ -714,25 +795,38 @@ def dcm_to_quat(dcm):
         qy = (dcm[1, 2] + dcm[2, 1]) / s
         qz = 0.25 * s
 
-    return np.array([qw, qx, qy, qz])
+    # Return conjugate to match euler_to_quat convention (body-to-NED)
+    # The raw calculation gives NED-to-body quaternion, but we want body-to-NED
+    return np.array([qw, -qx, -qy, -qz])
 
 
 def quat_to_euler(q):
-    """Convert quaternion to Euler angles (3-2-1 sequence: yaw-pitch-roll).
+    """Convert quaternion to Euler angles (3-2-1 sequence).
+
+    Implements equation (6.84) from the textbook. Extracts Euler angles
+    from a "passive rotation quaternion" (body-to-NED).
 
     Parameters
     ----------
     q : numpy array
-        Quaternion [qw, qx, qy, qz]
+        Quaternion [qw, qx, qy, qz] representing body-to-NED rotation.
+        **Must be a passive rotation quaternion matching euler_to_quat convention.**
 
     Returns
     -------
     roll : float
-        Roll angle in radians (rotation about x-axis)
+        Roll angle in radians (rotation about x-axis, θx)
     pitch : float
-        Pitch angle in radians (rotation about y-axis)
+        Pitch angle in radians (rotation about y-axis, θy)
     yaw : float
-        Yaw angle in radians (rotation about z-axis)
+        Yaw angle in radians (rotation about z-axis, θz)
+
+    Notes
+    -----
+    Round-trip guarantee: quat_to_euler(euler_to_quat(r, p, y)) about (r, p, y)
+
+    This function expects a passive rotation quaternion (body-to-NED) as
+    produced by euler_to_quat or dcm_to_quat.
     """
     qw, qx, qy, qz = q
 
@@ -759,19 +853,42 @@ def quat_to_euler(q):
 def euler_to_quat(roll, pitch, yaw):
     """Convert Euler angles (3-2-1 sequence) to quaternion.
 
+    Implements equation (6.85) from the textbook. Produces a "passive rotation
+    quaternion" (body-to-NED) as described in the textbook.
+
     Parameters
     ----------
     roll : float
-        Roll angle in radians (rotation about x-axis)
+        Roll angle in radians (rotation about x-axis, θx in textbook)
     pitch : float
-        Pitch angle in radians (rotation about y-axis)
+        Pitch angle in radians (rotation about y-axis, θy in textbook)
     yaw : float
-        Yaw angle in radians (rotation about z-axis)
+        Yaw angle in radians (rotation about z-axis, θz in textbook)
 
     Returns
     -------
     numpy array
-        Quaternion [qw, qx, qy, qz]
+        Quaternion [qw, qx, qy, qz] in scalar-first Hamilton convention.
+        **Passive rotation quaternion: represents body-to-NED transformation.**
+
+    Notes
+    -----
+    **PASSIVE ROTATION QUATERNION CONVENTION (BODY-TO-NED):**
+
+    The quaternion q returned by this function is a "passive rotation quaternion"
+    (textbook terminology) representing body-to-NED transformation:
+
+    - Direct rotation: quat_rotate_vector(q, v_body)  to  v_ned
+      Rotates body-frame vectors TO NED frame using q*v*q_conj
+
+    - DCM conversion: quat_to_dcm(q)  to  NED-to-body DCM
+      Produces the TRANSPOSE/INVERSE of the rotation (NED to body)
+      This is intentional per textbook equation 6.79
+
+    - Inverse rotation: quat_rotate_vector(quat_conjugate(q), v_ned)  to  v_body
+      Use q_conj for NED to body vector transformations
+
+    Summary: Quaternion is body-to-NED, but quat_to_dcm gives NED-to-body DCM.
     """
     cy = np.cos(yaw * 0.5)
     sy = np.sin(yaw * 0.5)
