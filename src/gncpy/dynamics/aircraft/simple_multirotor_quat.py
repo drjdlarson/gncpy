@@ -223,8 +223,9 @@ class VehicleQuat(SimpleVehicle):
             # The quaternion represents body-to-NED rotation
             xdot[0:3] = gmath.quat_rotate_vector(quat, body_vel)
 
-            # Body velocity derivative (specific force)
-            xdot[3:6] = f / self.params.mass.mass_kg + np.cross(omega, body_vel)
+            # Body velocity derivative (specific force + Coriolis term in rotating frame)
+            # Correct sign: -omega x v_B for rotating frame transport theorem
+            xdot[3:6] = f / self.params.mass.mass_kg - np.cross(omega, body_vel)
 
             # Quaternion derivative (kinematics)
             # qdot = 0.5 * Omega(omega) * q for scalar-first [qw, qx, qy, qz]
