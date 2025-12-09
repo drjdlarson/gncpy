@@ -20,7 +20,7 @@ prop: !PropParams
   # Polynomial coefficients for thrust: T = c0*cmd^2 + c1*cmd + c2
   # DESCENDING ORDER: [c2, c1, c0] where T = c2*x^2 + c1*x + c0
   # Normalized motor command [0, 1] -> thrust in Newtons
-  # For hover: 4 motors * thrust ≈ 0.5kg * 9.81 ≈ 4.9N total, ~1.23N per motor
+  # For hover: 4 motors * thrust about 0.5kg * 9.81 about 4.9N total, ~1.23N per motor
   poly_thrust: [2.5, 0.0, 0.0]  # Quadratic: T = 2.5*cmd^2, ~2.5N at cmd=1.0 per motor
   
   # Polynomial coefficients for torque: Q = c0*cmd^2 + c1*cmd + c2  

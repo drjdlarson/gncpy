@@ -1,4 +1,22 @@
-"""Implements a complex multi-rotor dynamics model with arbitrary motor orientations."""
+"""Implements a complex multi-rotor dynamics model with arbitrary motor orientations.
+
+This module provides a comprehensive multirotor dynamics model supporting:
+- Arbitrary motor thrust directions (not limited to vertical)
+- Bidirectional thrust control (-1 to +1 command range)
+- Quaternion-based attitude representation (avoids gimbal lock)
+- Proper reaction torque modeling with sigma (rotation direction)
+
+Key Features:
+- Motors can be tilted, vectored, or point in any direction
+- Thrust can reverse along thrust_dir vector (useful for tilting rotors)
+- Uses passive rotation quaternion convention (body-to-NED)
+- Body-frame accelerations and angular accelerations available in state vector
+
+Frame Conventions:
+- Quaternion q: passive rotation (body-to-NED), use with q*v*q_conj
+- For NED-to-body: use quat_conjugate(q) or quat_to_dcm(q)
+- State vector contains both NED and body-frame quantities
+"""
 
 import numpy as np
 from scipy import integrate
@@ -217,41 +235,97 @@ class ComplexVehicle(SimpleVehicle):
         Parameters
         ----------
         q : numpy array
-            Quaternion [qx, qy, qz, qw] to assign
+            Quaternion [qw, qx, qy, qz] to assign
         """
         self.state[v_smap_quat.quat] = gmath.quat_normalize(q)
+
+    def _calc_force_mom(self, gravity, motor_cmds):
+        """Calculate forces and moments using quaternion-based gravity transformation.
+
+        This overrides the parent method to use quaternion rotation directly
+        with arbitrary motor thrust directions.
+
+        Parameters
+        ----------
+        gravity : numpy array
+            Gravity vector in NED frame (m/s^2)
+        motor_cmds : numpy array
+            Motor commands in normalized range [-1, 1] for bidirectional thrust
+
+        Returns
+        -------
+        tuple
+            (total_force, total_moment) in body frame
+        """
+        # Get aerodynamic forces
+        a_f, a_m = self._calc_aero_force_mom(
+            self.state[v_smap_quat.dyn_pres], self.state[v_smap_quat.body_vel]
+        )
+
+        # Transform gravity from NED to body frame using quaternion
+        # Note: The quaternion represents body-to-NED rotation (passive rotation),
+        # so we use its conjugate to rotate from NED to body
+        q = self.state[v_smap_quat.quat]
+        q_inv = gmath.quat_conjugate(q)  # NED-to-body rotation
+        gravity_ned = gravity * self.params.mass.mass_kg
+        gravity_body = gmath.quat_rotate_vector(q_inv, gravity_ned)
+        g_f = gravity_body
+        g_m = np.zeros(3)  # Gravity produces no moment about CG
+
+        # Get propulsion forces with arbitrary thrust directions
+        p_f, p_m = self._calc_prop_force_mom(motor_cmds)
+
+        if not self.takenoff:
+            # Check if upward thrust exceeds gravity
+            self.takenoff = np.linalg.norm(p_f) > np.linalg.norm(g_f)
+
+        if self.takenoff:
+            return (a_f + g_f + p_f, a_m + g_m + p_m)
+        else:
+            return np.zeros(a_f.shape), np.zeros(a_m.shape)
 
     def _calc_prop_force_mom(self, motor_cmds):
         """Calculate propulsion forces and moments with arbitrary motor orientations.
 
         This overrides the simple multirotor implementation to handle motors
-        that can point in arbitrary directions.
+        that can point in arbitrary directions and support bidirectional thrust.
+
+        Bidirectional Thrust Support:
+        - Motor commands range from -1 (full reverse) to +1 (full forward)
+        - Thrust magnitude: sign(cmd) x polynomial(|cmd|)
+        - This allows thrust reversal along the thrust_dir vector
+        - Useful for tilting rotors, vectored thrust, or reversible propellers
 
         For each motor:
-        - Thrust magnitude is computed from motor command using polynomial (positive value)
-        - Thrust force vector = magnitude * thrust_direction_unit_vector
+        - Thrust magnitude preserves sign: can be positive or negative
+        - Thrust force vector = thrust_magnitude x thrust_dir (direction reverses with sign)
         - Moment from thrust = (motor_pos - cg) x thrust_force
-        - Reaction torque = -sigma * torque_magnitude * thrust_direction_unit_vector
-          (negative sign because body experiences opposite torque to rotor spin)
+        - Reaction torque = -sigma x |torque_magnitude| x thrust_dir
+          * Sigma +1 (CCW about thrust axis): body experiences -thrust_dir torque
+          * Sigma -1 (CW about thrust axis): body experiences +thrust_dir torque
 
         Parameters
         ----------
         motor_cmds : numpy array
-            Commands to the motors in normalized range.
+            Commands to motors, range [-1, 1] for bidirectional thrust.
+            Simple multirotor uses [0, 1] for upward-only thrust.
 
         Returns
         -------
         force : numpy array
-            Total force in body frame (3x1).
+            Total force in body frame (3,).
         motor_mom : numpy array
-            Total moment in body frame (3x1).
+            Total moment in body frame (3,).
         """
-        # Motor model - compute thrust and torque magnitudes (positive values)
-        m_thrust_mag = np.polynomial.Polynomial(self.params.prop.poly_thrust[-1::-1])(
-            motor_cmds
-        )
+        # Motor model - compute thrust with sign preservation for bidirectional thrust
+        # Thrust: sign(cmd) x polynomial(|cmd|) allows reversal along thrust_dir
+        m_thrust_mag = np.sign(motor_cmds) * np.polynomial.Polynomial(
+            self.params.prop.poly_thrust[-1::-1]
+        )(np.abs(motor_cmds))
+
+        # Torque: uses absolute value since direction is determined by sigma
         m_torque_mag = np.polynomial.Polynomial(self.params.prop.poly_torque[-1::-1])(
-            motor_cmds
+            np.abs(motor_cmds)
         )
 
         # Initialize force and moment
@@ -330,14 +404,12 @@ class ComplexVehicle(SimpleVehicle):
             # Normalize quaternion
             quat = gmath.quat_normalize(quat)
 
-            # Get DCM from quaternion
-            dcm_e2b = gmath.quat_to_dcm(quat)
-
             # State derivatives
             xdot = np.zeros(13)
 
-            # NED position derivative
-            xdot[0:3] = dcm_e2b.T @ body_vel
+            # NED position derivative (rotate body velocity to NED frame)
+            # Passive rotation quaternion (body-to-NED) convention
+            xdot[0:3] = gmath.quat_rotate_vector(quat, body_vel)
 
             # Body velocity derivative (specific force)
             xdot[3:6] = f / self.params.mass.mass_kg + np.cross(omega, body_vel)
@@ -383,17 +455,15 @@ class ComplexVehicle(SimpleVehicle):
         quat = gmath.quat_normalize(y[6:10])
         body_rot_rate = y[10:13]
 
-        # Get DCM from final quaternion
-        dcm_earth2body = gmath.quat_to_dcm(quat)
-
-        # NED velocity
-        ned_vel = dcm_earth2body.T @ body_vel
+        # NED velocity (rotate body velocity to NED frame)
+        # Passive rotation quaternion (body-to-NED) convention
+        ned_vel = gmath.quat_rotate_vector(quat, body_vel)
 
         # Compute accelerations from derivatives
         xdot = ode_quat(dt, y, force, mom)
         body_accel = xdot[3:6]
         body_rot_accel = xdot[10:13]
-        ned_accel = dcm_earth2body.T @ body_accel
+        ned_accel = gmath.quat_rotate_vector(quat, body_accel)
 
         return (
             ned_vel,
@@ -591,6 +661,8 @@ class ComplexMultirotor(SimpleMultirotor):
         ref_lon_deg,
         terrain_alt_wgs84,
         ned_mag_field,
+        body_accel=None,
+        body_rot_accel=None,
     ):
         """Set initial conditions for the state using quaternion representation.
 
@@ -612,8 +684,13 @@ class ComplexMultirotor(SimpleMultirotor):
             Altitude of the terrain relative to WGS-84 model in meters.
         ned_mag_field : numpy array
             Local magnetic field vector in NED frame and uT.
+        body_accel : numpy array, optional
+            Initial body acceleration in m/s^2. Default is zeros.
+        body_rot_accel : numpy array, optional
+            Initial body rotational acceleration in rad/s^2. Default is zeros.
         """
         from gncpy.coordinate_transforms import ned_to_LLA
+        from gncpy.dynamics.aircraft.simple_multirotor import e_smap
         import gncpy.wgs84 as wgs84
 
         d2r = np.pi / 180.0
@@ -630,21 +707,32 @@ class ComplexMultirotor(SimpleMultirotor):
         self.vehicle.state[v_smap_quat.quat] = quat
         self.vehicle.state[v_smap_quat.body_rot_rate] = body_rot_rate.flatten()
 
-        if self._env_req_init:
-            from gncpy.dynamics.aircraft.simple_multirotor import e_smap
-
-            self.env.state[e_smap.mag_field] = ned_mag_field.flatten()
-            self.env.state[e_smap.terrain_alt_wgs84] = terrain_alt_wgs84
-
         # Set reference location
         self.vehicle.ref_lat = ref_lat_deg * d2r
         self.vehicle.ref_lon = ref_lon_deg * d2r
 
-        # Convert NED to LLA
+        # Set accelerations (default to zeros if not provided)
+        if body_accel is None:
+            body_accel = np.zeros(3)
+        if body_rot_accel is None:
+            body_rot_accel = np.zeros(3)
+        self.vehicle.state[v_smap_quat.body_accel] = body_accel.flatten()
+        self.vehicle.state[v_smap_quat.body_rot_accel] = body_rot_accel.flatten()
+
+        # Compute NED velocity and acceleration from body frame using quaternion
+        # The quaternion represents body-to-NED rotation (passive rotation)
+        self.vehicle.state[v_smap_quat.ned_vel] = gmath.quat_rotate_vector(
+            quat, body_vel
+        )
+        self.vehicle.state[v_smap_quat.ned_accel] = gmath.quat_rotate_vector(
+            quat, body_accel
+        )
+
+        # Compute LLA from NED
         lla = ned_to_LLA(
             ned_pos.reshape((3, 1)),
-            ref_lat_deg * d2r,
-            ref_lon_deg * d2r,
+            self.vehicle.ref_lat,
+            self.vehicle.ref_lon,
             terrain_alt_wgs84,
         )
         self.vehicle.state[v_smap_quat.lat] = lla[0]
@@ -654,4 +742,113 @@ class ComplexMultirotor(SimpleMultirotor):
             lla[0], lla[1], lla[2]
         )
 
+        # Initialize environment state
+        if self._env_req_init:
+            self.env.state[e_smap.mag_field] = ned_mag_field.flatten()
+            self.env.state[e_smap.terrain_alt_wgs84] = terrain_alt_wgs84
+
+        # Step environment to compute atmosphere/gravity
+        self.env.step(
+            self.vehicle.state[v_smap_quat.lat],
+            self.vehicle.state[v_smap_quat.lon],
+            self.vehicle.state[v_smap_quat.alt_wgs84],
+            self.vehicle.state[v_smap_quat.alt_msl],
+        )
+
+        # Compute all derived states
+        (
+            gnd_trk,
+            gnd_speed,
+            fp_ang,
+            dyn_pres,
+            aoa,
+            airspeed,
+            sideslip_ang,
+            _,
+            _,
+            mach,
+            _,
+            _,
+            _,
+            alt_agl,
+            _,
+        ) = self.vehicle.calc_derived_states(
+            1,
+            terrain_alt_wgs84,
+            self.env.state[e_smap.density],
+            self.env.state[e_smap.speed_of_sound],
+            self.vehicle.state[v_smap_quat.ned_vel],
+            ned_pos,
+            body_vel,
+        )
+
+        self.vehicle.state[v_smap_quat.gnd_trk] = gnd_trk
+        self.vehicle.state[v_smap_quat.gnd_speed] = gnd_speed
+        self.vehicle.state[v_smap_quat.fp_ang] = fp_ang
+        self.vehicle.state[v_smap_quat.dyn_pres] = dyn_pres
+        self.vehicle.state[v_smap_quat.aoa] = aoa
+        self.vehicle.state[v_smap_quat.aoa_rate] = 0
+        self.vehicle.state[v_smap_quat.airspeed] = airspeed
+        self.vehicle.state[v_smap_quat.sideslip_ang] = sideslip_ang
+        self.vehicle.state[v_smap_quat.sideslip_rate] = 0
+        self.vehicle.state[v_smap_quat.mach] = mach
+        self.vehicle.state[v_smap_quat.alt_agl] = alt_agl
+
         self._env_req_init = False
+
+    def propagate_state(self, timestep, state, u=None, state_args=None, ctrl_args=None):
+        """Propagates the state forward 1 timestep.
+
+        This overrides the base class to use quaternion-based vehicle dynamics.
+
+        Parameters
+        ----------
+        timestep : float
+            Timestep to use for propagation. If None, uses self.dt.
+        state : numpy array
+            Full vehicle state vector.
+        u : numpy array, optional
+            Motor commands in range [-1, 1] for bidirectional thrust.
+            The default is None.
+        state_args : tuple, optional
+            Not used. The default is None.
+        ctrl_args : tuple, optional
+            Not used. The default is None.
+
+        Returns
+        -------
+        numpy array
+            Next state as column vector.
+        """
+        from gncpy.dynamics.aircraft.simple_multirotor import e_smap
+
+        # Use provided timestep or default
+        dt = self.dt if timestep is None else timestep
+
+        # Set the vehicle state from input
+        self.vehicle.state = state.ravel().copy()
+
+        # Get motor commands
+        if u is None:
+            raise ValueError("Motor commands (u) must be provided")
+        motor_cmds = self.effector.step(u.ravel(), dt)
+
+        # Update environment
+        self.env.step(
+            self.vehicle.state[v_smap_quat.lat],
+            self.vehicle.state[v_smap_quat.lon],
+            self.vehicle.state[v_smap_quat.alt_wgs84],
+            self.vehicle.state[v_smap_quat.alt_msl],
+        )
+
+        # Step vehicle dynamics
+        self.vehicle.step(
+            dt,
+            self.env.state[e_smap.terrain_alt_wgs84],
+            self.env.state[e_smap.gravity],
+            self.env.state[e_smap.density],
+            self.env.state[e_smap.speed_of_sound],
+            motor_cmds,
+        )
+
+        return self.vehicle.state.copy().reshape((-1, 1))

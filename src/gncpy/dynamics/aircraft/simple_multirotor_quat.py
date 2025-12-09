@@ -133,6 +133,50 @@ class VehicleQuat(SimpleVehicle):
         """
         self.state[v_smap_quat.quat] = gmath.quat_normalize(q)
 
+    def _calc_force_mom(self, gravity, motor_cmds):
+        """Calculate forces and moments using quaternion-based gravity transformation.
+
+        This overrides the parent method to use quaternion rotation directly
+        instead of converting to DCM first.
+
+        Parameters
+        ----------
+        gravity : numpy array
+            Gravity vector in NED frame (m/s^2)
+        motor_cmds : numpy array
+            Motor commands in normalized range
+
+        Returns
+        -------
+        tuple
+            (total_force, total_moment) in body frame
+        """
+        # Get aerodynamic forces (zero for simple multirotor)
+        a_f, a_m = self._calc_aero_force_mom(
+            self.state[v_smap_quat.dyn_pres], self.state[v_smap_quat.body_vel]
+        )
+
+        # Transform gravity from NED to body frame using quaternion
+        # Note: The quaternion from euler_to_quat represents body-to-NED rotation,
+        # so we use its conjugate to rotate from NED to body (matching DCM convention)
+        q = self.state[v_smap_quat.quat]
+        q_inv = gmath.quat_conjugate(q)  # NED-to-body rotation
+        gravity_ned = gravity * self.params.mass.mass_kg
+        gravity_body = gmath.quat_rotate_vector(q_inv, gravity_ned)
+        g_f = gravity_body
+        g_m = np.zeros(3)  # Gravity produces no moment about CG
+
+        # Get propulsion forces
+        p_f, p_m = self._calc_prop_force_mom(motor_cmds)
+
+        if not self.takenoff:
+            self.takenoff = -p_f[2] > g_f[2]
+
+        if self.takenoff:
+            return (a_f + g_f + p_f, a_m + g_m + p_m)
+        else:
+            return np.zeros(a_f.shape), np.zeros(a_m.shape)
+
     def _six_dof_model(self, force, mom, dt):
         """Six degree of freedom model using quaternion dynamics.
 
@@ -172,14 +216,12 @@ class VehicleQuat(SimpleVehicle):
             # Normalize quaternion
             quat = gmath.quat_normalize(quat)
 
-            # Get DCM from quaternion
-            dcm_e2b = gmath.quat_to_dcm(quat)
-
             # State derivatives
             xdot = np.zeros(13)
 
-            # NED position derivative
-            xdot[0:3] = dcm_e2b.T @ body_vel
+            # NED position derivative (rotate body velocity to NED frame)
+            # The quaternion represents body-to-NED rotation
+            xdot[0:3] = gmath.quat_rotate_vector(quat, body_vel)
 
             # Body velocity derivative (specific force)
             xdot[3:6] = f / self.params.mass.mass_kg + np.cross(omega, body_vel)
@@ -225,17 +267,15 @@ class VehicleQuat(SimpleVehicle):
         quat = gmath.quat_normalize(y[6:10])
         body_rot_rate = y[10:13]
 
-        # Get DCM from final quaternion
-        dcm_earth2body = gmath.quat_to_dcm(quat)
-
-        # NED velocity
-        ned_vel = dcm_earth2body.T @ body_vel
+        # NED velocity (rotate body velocity to NED frame)
+        # The quaternion represents body-to-NED rotation
+        ned_vel = gmath.quat_rotate_vector(quat, body_vel)
 
         # Compute accelerations from derivatives
         xdot = ode_quat(dt, y, force, mom)
         body_accel = xdot[3:6]
         body_rot_accel = xdot[10:13]
-        ned_accel = dcm_earth2body.T @ body_accel
+        ned_accel = gmath.quat_rotate_vector(quat, body_accel)
 
         return (
             ned_vel,
@@ -483,14 +523,14 @@ class SimpleMultirotorQuat(SimpleMultirotor):
         self.vehicle.state[v_smap_quat.body_accel] = body_accel.flatten()
         self.vehicle.state[v_smap_quat.body_rot_accel] = body_rot_accel.flatten()
 
-        # Compute NED velocity from body velocity and quaternion
-        dcm_earth2body = gmath.quat_to_dcm(quat)
-        self.vehicle.state[v_smap_quat.ned_vel] = (
-            dcm_earth2body.T @ body_vel.reshape((3, 1))
-        ).flatten()
-        self.vehicle.state[v_smap_quat.ned_accel] = (
-            dcm_earth2body.T @ body_accel.reshape((3, 1))
-        ).flatten()
+        # Compute NED velocity and acceleration from body frame using quaternion
+        # The quaternion represents body-to-NED rotation
+        self.vehicle.state[v_smap_quat.ned_vel] = gmath.quat_rotate_vector(
+            quat, body_vel
+        )
+        self.vehicle.state[v_smap_quat.ned_accel] = gmath.quat_rotate_vector(
+            quat, body_accel
+        )
 
         # Compute LLA from NED
         lla = ned_to_LLA(
