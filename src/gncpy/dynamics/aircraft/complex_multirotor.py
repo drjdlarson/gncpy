@@ -323,10 +323,11 @@ class ComplexVehicle(SimpleVehicle):
             self.params.prop.poly_thrust[-1::-1]
         )(np.abs(motor_cmds))
 
-        # Torque: uses absolute value since direction is determined by sigma
-        m_torque_mag = np.polynomial.Polynomial(self.params.prop.poly_torque[-1::-1])(
-            np.abs(motor_cmds)
-        )
+        # Torque: sign(cmd) x polynomial(|cmd|) - sign preserves spin direction
+        # When command reverses, motor spins opposite direction, so reaction torque reverses
+        m_torque_mag = np.sign(motor_cmds) * np.polynomial.Polynomial(
+            self.params.prop.poly_torque[-1::-1]
+        )(np.abs(motor_cmds))
 
         # Initialize force and moment
         total_force = np.zeros(3)
@@ -529,6 +530,11 @@ class ComplexVehicle(SimpleVehicle):
         ) = self.calc_derived_states(
             dt, terrain_alt_wgs84, density, speed_of_sound, ned_vel, ned_pos, body_vel
         )
+
+        # debugs
+        # print(
+        #     f"Body Vel: {body_vel}, Body Omega: {body_rot_rate}, Thrust Cmds: {motor_cmds}"
+        # )
 
         # Update state with quaternion
         self.state[v_smap_quat.ned_vel] = ned_vel
