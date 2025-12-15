@@ -41,7 +41,7 @@ prop: !PropParams
   
   # Reaction torque: Q = Q_max * u^2 = 0.07 * u^2
   # With all same-direction sigma, reaction torques cancel (since sum(N)=0)
-  poly_torque: [0.09, 0.0, 0.0]  # Quadratic: Q = 0.07 * u^2 (N-m)
+  poly_torque: [0.09, 0.0, 0.0]  # Quadratic: Q = 0.09 * u^2 (N-m)
 
 motor: !ComplexMotorParams
   # 8 motors at cube corners
@@ -64,7 +64,7 @@ motor: !ComplexMotorParams
   # Rotation direction (sigma): ALL SAME for balanced reaction torques
   # Since sum(N) = [0,0,0], constant sigma gives sum(sigma*N) = 0
   # This ensures reaction torques cancel at hover
-  dir: [-1, -1, -1, -1, -1, -1, -1, -1] # TODO: determine the correct configuration of these values
+  dir: [1, 1, 1, 1, -1, -1, -1, -1] # TODO: determine the correct configuration of these values
   
   # N matrix columns (thrust directions, unit vectors)
   # a = 0.78867513, b = 0.21132487, c = 0.57735027
