@@ -30,10 +30,10 @@ class MotorDynamicsEffector(Effector):
     """First-order motor dynamics model.
 
     Models motor response as a first-order lag:
-        Ω̇_i = (1/τ_mot) * (Ω_cmd,i - Ω_i)
+        omega_dot_i = (1/tau) * (omega_cmd,i - omega_i)
 
     This gives exponential convergence of motor speed to commanded speed
-    with time constant τ_mot.
+    with time constant tau.
 
     Parameters
     ----------
@@ -69,7 +69,7 @@ class MotorDynamicsEffector(Effector):
         """Propagate motor dynamics one timestep.
 
         Uses exact solution of first-order ODE:
-            Ω(t+dt) = Ω_cmd + (Ω(t) - Ω_cmd) * exp(-dt/τ)
+            omega(t+dt) = omega_cmd + (omega(t) - omega_cmd) * exp(-dt/tau)
 
         Parameters
         ----------
@@ -275,9 +275,9 @@ print(f"Thrust match: {np.allclose(lofi_thrust, hifi_thrust_check)}")
 # ============================================================================
 # Create HiFi dynamics with motor dynamics effector
 # ============================================================================
-# Motor time constant from paper: τ_mot = 0.032 seconds
+# Motor time constant from paper: tau_mot = 0.032 seconds
 TAU_MOT = 0.032
-print(f"\nCreating motor dynamics effector with τ_mot = {TAU_MOT} s")
+print(f"\nCreating motor dynamics effector with tau_mot = {TAU_MOT} s")
 
 # Create motor effector with initial state at hover commands
 motor_effector = MotorDynamicsEffector(
@@ -321,7 +321,7 @@ print(f"HiFi Body Omega after 1 step: {body_omega}")
 # print("=" * 60)
 # print(f"Motor time constant: {TAU_MOT} s")
 # print(f"DT: {DT} s")
-# print(f"Expected decay per step: exp(-DT/τ) = {np.exp(-DT/TAU_MOT):.6f}")
+# print(f"Expected decay per step: exp(-DT/tau) = {np.exp(-DT/TAU_MOT):.6f}")
 
 # # Reset motor to hover state
 # motor_effector.set_initial_state(hover_cmds_hifi)
