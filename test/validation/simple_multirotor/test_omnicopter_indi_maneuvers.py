@@ -4,6 +4,28 @@ This script tests INDI control with:
     Test 1: Circular velocity tracking (zero angular rates)
     Test 2: 360 degree roll maneuver (zero velocity)
     Test 3: Velocity + attitude maneuver
+
+Realistic Sensor Model:
+    The simulation uses a realistic sensor configuration that mimics
+    actual multirotor hardware:
+
+    - Velocity: Simulates output from a state estimator (e.g., EKF fusing
+      GPS and IMU), with realistic noise characteristics
+
+    - Accelerometer: Direct body-frame acceleration measurement with
+      typical IMU noise (SIGMA_ACCEL = 0.1 m/s²)
+
+    - Gyroscope: Direct body-frame angular rate measurement with
+      typical IMU noise (SIGMA_OMEGA = 0.01 rad/s)
+
+    - Angular Acceleration: Computed via numerical differentiation of
+      filtered gyroscope measurements (backward difference). This is
+      realistic as most systems don't directly measure angular acceleration.
+      An aggressive low-pass filter (5 Hz) is applied to mitigate noise
+      amplification from the differentiation.
+
+    All sensor measurements are low-pass filtered before use in the INDI
+    controller to reduce noise amplification in the control loop.
 """
 
 import numpy as np
@@ -73,17 +95,22 @@ REF_LAT, REF_LON, TERRAIN_ALT = 34.0, -86.0, 0.0
 K_VEL = 5.0
 K_OMEGA = 10.0
 
-# Measurement noise (set to 0 for perfect measurements)
-SIGMA_VEL = 0.05  # m/s (IMU-derived velocity noise)
-SIGMA_OMEGA = 0.01  # rad/s (gyroscope noise)
+# Measurement noise - realistic sensor specifications
+# These values simulate what actual sensors provide
+SIGMA_VEL = 0.05  # m/s (velocity from state estimator/GPS)
+SIGMA_ACCEL = 0.1  # m/s^2 (accelerometer noise - typical IMU spec)
+SIGMA_OMEGA = 0.01  # rad/s (gyroscope noise - typical IMU spec)
 
 # Optional measurement bias (set to 0 for no bias)
 BIAS_VEL = np.array([0.0, 0.0, 0.0])  # m/s
+BIAS_ACCEL = np.array([0.0, 0.0, 0.0])  # m/s^2
 BIAS_OMEGA = np.array([0.0, 0.0, 0.0])  # rad/s
 
 # Low-pass filter for measurements (reduces noise amplification in INDI)
 FC_VEL = 5.0  # Hz (velocity filter cutoff)
-FC_OMEGA = 10.0  # Hz (angular rate filter cutoff)
+FC_ACCEL = 20.0  # Hz (accelerometer filter cutoff)
+FC_OMEGA = 20.0  # Hz (angular rate filter cutoff)
+FC_ALPHA = 5.0  # Hz (angular acceleration derivative filter - aggressive to handle differentiation noise)
 
 np.random.seed(42)  # For reproducible noise
 
@@ -222,39 +249,74 @@ cmd_hist_1 = np.zeros((num_steps_1, num_motors))
 cur_state = hifi_dyn.vehicle.state.copy()
 cur_input = hover_cmds_hifi.copy()
 
-# Initialize low-pass filter states
+# Initialize low-pass filter states for sensor measurements
 vel_filt = np.zeros(3)
+accel_filt = np.zeros(3)
 omega_filt = np.zeros(3)
+alpha_filt = np.zeros(3)
+
+# Filter coefficients (first-order discrete low-pass)
 alpha_vel = DT / (DT + 1.0 / (2.0 * np.pi * FC_VEL))
+alpha_accel = DT / (DT + 1.0 / (2.0 * np.pi * FC_ACCEL))
 alpha_omega = DT / (DT + 1.0 / (2.0 * np.pi * FC_OMEGA))
+alpha_alpha = DT / (DT + 1.0 / (2.0 * np.pi * FC_ALPHA))
+
+# Previous omega measurement for numerical differentiation
+omega_prev = np.zeros(3)
 
 print("Running Test 1 simulation...")
 for ii in range(num_steps_1):
     tt = ii * DT
     time_hist_1[ii] = tt
 
-    # Current state (true)
+    # Current true state
     body_vel_true = cur_state[v_smap_quat.body_vel].flatten()
+    body_accel_true = cur_state[v_smap_quat.body_accel].flatten()
     body_omega_true = cur_state[v_smap_quat.body_rot_rate].flatten()
     quat = cur_state[v_smap_quat.quat].flatten()
 
-    # Add measurement noise and bias
-    vel_noise = np.random.normal(0, SIGMA_VEL, 3)
-    omega_noise = np.random.normal(0, SIGMA_OMEGA, 3)
-    body_vel_meas = body_vel_true + vel_noise + BIAS_VEL
-    body_omega_meas = body_omega_true + omega_noise + BIAS_OMEGA
+    # ====================================================================
+    # REALISTIC SENSOR MODEL:
+    # - Velocity: from state estimator (e.g., GPS + IMU fusion)
+    # - Accelerometer: direct measurement with noise
+    # - Gyroscope: direct measurement with noise
+    # - Angular acceleration: numerically differentiated from gyro
+    # ====================================================================
 
-    # Low-pass filter measurements (first-order discrete filter)
+    # 1. Velocity measurement (simulates output from state estimator)
+    vel_noise = np.random.normal(0, SIGMA_VEL, 3)
+    body_vel_meas = body_vel_true + vel_noise + BIAS_VEL
     vel_filt = alpha_vel * body_vel_meas + (1.0 - alpha_vel) * vel_filt
+
+    # 2. Accelerometer measurement (direct sensor reading)
+    accel_noise = np.random.normal(0, SIGMA_ACCEL, 3)
+    body_accel_meas = body_accel_true + accel_noise + BIAS_ACCEL
+    accel_filt = alpha_accel * body_accel_meas + (1.0 - alpha_accel) * accel_filt
+
+    # 3. Gyroscope measurement (direct sensor reading)
+    omega_noise = np.random.normal(0, SIGMA_OMEGA, 3)
+    body_omega_meas = body_omega_true + omega_noise + BIAS_OMEGA
     omega_filt = alpha_omega * body_omega_meas + (1.0 - alpha_omega) * omega_filt
 
-    # Filtered state for controller
-    x = np.concatenate([vel_filt, omega_filt])
+    # 4. Angular acceleration via numerical differentiation
+    # Using filtered omega to reduce noise amplification
+    # Backward difference: alpha[k] = (omega[k] - omega[k-1]) / dt
+    if ii == 0:
+        # First timestep: use zero (or could use true value)
+        alpha_meas = np.zeros(3)
+    else:
+        alpha_meas = (omega_filt - omega_prev) / DT
 
-    # State derivatives
-    body_accel = cur_state[v_smap_quat.body_accel].flatten()
-    body_rot_accel = cur_state[v_smap_quat.body_rot_accel].flatten()
-    x_dot = np.concatenate([body_accel, body_rot_accel])
+    # Apply aggressive low-pass filter to angular acceleration
+    # (differentiation amplifies high-frequency noise)
+    alpha_filt = alpha_alpha * alpha_meas + (1.0 - alpha_alpha) * alpha_filt
+
+    # Store current omega for next differentiation step
+    omega_prev = omega_filt.copy()
+
+    # State and derivatives for INDI controller (what sensors provide)
+    x = np.concatenate([vel_filt, omega_filt])
+    x_dot = np.concatenate([accel_filt, alpha_filt])
 
     # Reference: circular velocity in body frame, zero angular rates
     vb_ref = np.array(
@@ -428,37 +490,49 @@ cmd_hist_2 = np.zeros((num_steps_2, num_motors))
 cur_state = hifi_dyn.vehicle.state.copy()
 cur_input = hover_cmds_hifi.copy()
 
-# Initialize low-pass filter states
+# Initialize low-pass filter states for sensor measurements
 vel_filt = np.zeros(3)
+accel_filt = np.zeros(3)
 omega_filt = np.zeros(3)
+alpha_filt = np.zeros(3)
+
+# Previous omega measurement for numerical differentiation
+omega_prev = np.zeros(3)
 
 print("Running Test 2 simulation...")
 for ii in range(num_steps_2):
     tt = ii * DT
     time_hist_2[ii] = tt
 
-    # Current state (true)
+    # Current true state
     body_vel_true = cur_state[v_smap_quat.body_vel].flatten()
+    body_accel_true = cur_state[v_smap_quat.body_accel].flatten()
     body_omega_true = cur_state[v_smap_quat.body_rot_rate].flatten()
     quat = cur_state[v_smap_quat.quat].flatten()
 
-    # Add measurement noise and bias
+    # Realistic sensor model (same as Test 1)
     vel_noise = np.random.normal(0, SIGMA_VEL, 3)
-    omega_noise = np.random.normal(0, SIGMA_OMEGA, 3)
     body_vel_meas = body_vel_true + vel_noise + BIAS_VEL
-    body_omega_meas = body_omega_true + omega_noise + BIAS_OMEGA
-
-    # Low-pass filter measurements
     vel_filt = alpha_vel * body_vel_meas + (1.0 - alpha_vel) * vel_filt
+
+    accel_noise = np.random.normal(0, SIGMA_ACCEL, 3)
+    body_accel_meas = body_accel_true + accel_noise + BIAS_ACCEL
+    accel_filt = alpha_accel * body_accel_meas + (1.0 - alpha_accel) * accel_filt
+
+    omega_noise = np.random.normal(0, SIGMA_OMEGA, 3)
+    body_omega_meas = body_omega_true + omega_noise + BIAS_OMEGA
     omega_filt = alpha_omega * body_omega_meas + (1.0 - alpha_omega) * omega_filt
 
-    # Filtered state for controller
-    x = np.concatenate([vel_filt, omega_filt])
+    if ii == 0:
+        alpha_meas = np.zeros(3)
+    else:
+        alpha_meas = (omega_filt - omega_prev) / DT
+    alpha_filt = alpha_alpha * alpha_meas + (1.0 - alpha_alpha) * alpha_filt
+    omega_prev = omega_filt.copy()
 
-    # State derivatives
-    body_accel = cur_state[v_smap_quat.body_accel].flatten()
-    body_rot_accel = cur_state[v_smap_quat.body_rot_accel].flatten()
-    x_dot = np.concatenate([body_accel, body_rot_accel])
+    # State and derivatives for INDI controller
+    x = np.concatenate([vel_filt, omega_filt])
+    x_dot = np.concatenate([accel_filt, alpha_filt])
 
     # Reference: zero velocity, constant roll rate during maneuver
     vb_ref = np.zeros(3)
@@ -625,37 +699,49 @@ cmd_hist_3 = np.zeros((num_steps_3, num_motors))
 cur_state = hifi_dyn.vehicle.state.copy()
 cur_input = hover_cmds_hifi.copy()
 
-# Initialize low-pass filter states
+# Initialize low-pass filter states for sensor measurements
 vel_filt = np.zeros(3)
+accel_filt = np.zeros(3)
 omega_filt = np.zeros(3)
+alpha_filt = np.zeros(3)
+
+# Previous omega measurement for numerical differentiation
+omega_prev = np.zeros(3)
 
 print("Running Test 3 simulation...")
 for ii in range(num_steps_3):
     tt = ii * DT
     time_hist_3[ii] = tt
 
-    # Current state (true)
+    # Current true state
     body_vel_true = cur_state[v_smap_quat.body_vel].flatten()
+    body_accel_true = cur_state[v_smap_quat.body_accel].flatten()
     body_omega_true = cur_state[v_smap_quat.body_rot_rate].flatten()
     quat = cur_state[v_smap_quat.quat].flatten()
 
-    # Add measurement noise and bias
+    # Realistic sensor model (same as Test 1 and 2)
     vel_noise = np.random.normal(0, SIGMA_VEL, 3)
-    omega_noise = np.random.normal(0, SIGMA_OMEGA, 3)
     body_vel_meas = body_vel_true + vel_noise + BIAS_VEL
-    body_omega_meas = body_omega_true + omega_noise + BIAS_OMEGA
-
-    # Low-pass filter measurements
     vel_filt = alpha_vel * body_vel_meas + (1.0 - alpha_vel) * vel_filt
+
+    accel_noise = np.random.normal(0, SIGMA_ACCEL, 3)
+    body_accel_meas = body_accel_true + accel_noise + BIAS_ACCEL
+    accel_filt = alpha_accel * body_accel_meas + (1.0 - alpha_accel) * accel_filt
+
+    omega_noise = np.random.normal(0, SIGMA_OMEGA, 3)
+    body_omega_meas = body_omega_true + omega_noise + BIAS_OMEGA
     omega_filt = alpha_omega * body_omega_meas + (1.0 - alpha_omega) * omega_filt
 
-    # Filtered state for controller
-    x = np.concatenate([vel_filt, omega_filt])
+    if ii == 0:
+        alpha_meas = np.zeros(3)
+    else:
+        alpha_meas = (omega_filt - omega_prev) / DT
+    alpha_filt = alpha_alpha * alpha_meas + (1.0 - alpha_alpha) * alpha_filt
+    omega_prev = omega_filt.copy()
 
-    # State derivatives
-    body_accel = cur_state[v_smap_quat.body_accel].flatten()
-    body_rot_accel = cur_state[v_smap_quat.body_rot_accel].flatten()
-    x_dot = np.concatenate([body_accel, body_rot_accel])
+    # State and derivatives for INDI controller
+    x = np.concatenate([vel_filt, omega_filt])
+    x_dot = np.concatenate([accel_filt, alpha_filt])
 
     # Reference: circular velocity + roll maneuver (both active simultaneously)
     vb_ref = np.array(
@@ -853,37 +939,49 @@ cmd_hist_4 = np.zeros((num_steps_4, num_motors))
 cur_state = hifi_dyn.vehicle.state.copy()
 cur_input = hover_cmds_hifi.copy()
 
-# Initialize low-pass filter states
+# Initialize low-pass filter states for sensor measurements
 vel_filt = np.zeros(3)
+accel_filt = np.zeros(3)
 omega_filt = np.zeros(3)
+alpha_filt = np.zeros(3)
+
+# Previous omega measurement for numerical differentiation
+omega_prev = np.zeros(3)
 
 print("Running Test 4 simulation...")
 for ii in range(num_steps_4):
     tt = ii * DT
     time_hist_4[ii] = tt
 
-    # Current state (true)
+    # Current true state
     body_vel_true = cur_state[v_smap_quat.body_vel].flatten()
+    body_accel_true = cur_state[v_smap_quat.body_accel].flatten()
     body_omega_true = cur_state[v_smap_quat.body_rot_rate].flatten()
     quat = cur_state[v_smap_quat.quat].flatten()
 
-    # Add measurement noise and bias
+    # Realistic sensor model (same as other tests)
     vel_noise = np.random.normal(0, SIGMA_VEL, 3)
-    omega_noise = np.random.normal(0, SIGMA_OMEGA, 3)
     body_vel_meas = body_vel_true + vel_noise + BIAS_VEL
-    body_omega_meas = body_omega_true + omega_noise + BIAS_OMEGA
-
-    # Low-pass filter measurements
     vel_filt = alpha_vel * body_vel_meas + (1.0 - alpha_vel) * vel_filt
+
+    accel_noise = np.random.normal(0, SIGMA_ACCEL, 3)
+    body_accel_meas = body_accel_true + accel_noise + BIAS_ACCEL
+    accel_filt = alpha_accel * body_accel_meas + (1.0 - alpha_accel) * accel_filt
+
+    omega_noise = np.random.normal(0, SIGMA_OMEGA, 3)
+    body_omega_meas = body_omega_true + omega_noise + BIAS_OMEGA
     omega_filt = alpha_omega * body_omega_meas + (1.0 - alpha_omega) * omega_filt
 
-    # Filtered state for controller
-    x = np.concatenate([vel_filt, omega_filt])
+    if ii == 0:
+        alpha_meas = np.zeros(3)
+    else:
+        alpha_meas = (omega_filt - omega_prev) / DT
+    alpha_filt = alpha_alpha * alpha_meas + (1.0 - alpha_alpha) * alpha_filt
+    omega_prev = omega_filt.copy()
 
-    # State derivatives
-    body_accel = cur_state[v_smap_quat.body_accel].flatten()
-    body_rot_accel = cur_state[v_smap_quat.body_rot_accel].flatten()
-    x_dot = np.concatenate([body_accel, body_rot_accel])
+    # State and derivatives for INDI controller
+    x = np.concatenate([vel_filt, omega_filt])
+    x_dot = np.concatenate([accel_filt, alpha_filt])
 
     # Helix velocity reference: horizontal circle + vertical oscillation
     vb_ref = np.array(
