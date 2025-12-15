@@ -141,3 +141,6 @@ dmypy.json
 
 # Autosave files
 *.asv
+
+# validation plot results
+ValidationResults/

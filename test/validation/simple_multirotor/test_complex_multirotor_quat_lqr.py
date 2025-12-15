@@ -366,7 +366,7 @@ ax3d.legend()
 ax3d.set_title("3D Trajectory")
 
 plt.tight_layout()
-output_file = Path(__file__).parent / "lqr_complex_quat_results.png"
+output_file = Path(__file__).parent / "ValidationResults/lqr_complex_quat_results.png"
 plt.savefig(output_file, dpi=150)
 print(f"Plot saved: {output_file}")
 

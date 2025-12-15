@@ -127,7 +127,7 @@ def test_pure_rate_tracking():
     # INDI gains - MUST BE LOW to avoid saturation!
     # B0 has large entries (~140-194 rad/s² per unit input)
     # K_omega = 1.0 means: 1 rad/s error -> 1 rad/s² desired acceleration
-    K_vel = 0.5   # Reduced from 2.0
+    K_vel = 0.5  # Reduced from 2.0
     K_omega = 1.0  # Reduced from 5.0 - avoids saturation
     K = np.diag([K_vel, K_vel, K_vel, K_omega, K_omega, K_omega])
 
@@ -301,7 +301,7 @@ def test_pure_rate_tracking():
     print(f"Final yaw: {np.rad2deg(euler_hist[-1, 2]):.2f}° (should be ~0)")
 
     # Save figures
-    results_dir = Path(__file__).parent / "results"
+    results_dir = Path(__file__).parent / "ValidationResults"
     results_dir.mkdir(exist_ok=True)
 
     # Figure: Angular Rate Tracking
@@ -436,7 +436,7 @@ def test_circular_flight_with_roll():
     roll_rate = np.deg2rad(36)  # 36 deg/s = one full rotation in 10s
 
     # INDI gains - MUST BE LOW to avoid saturation!
-    K_vel = 0.5   # Reduced from 2.0
+    K_vel = 0.5  # Reduced from 2.0
     K_omega = 1.0  # Reduced from 5.0
     K = np.diag([K_vel, K_vel, K_vel, K_omega, K_omega, K_omega])
 
@@ -609,7 +609,7 @@ def test_circular_flight_with_roll():
     )
 
     # Save figures
-    results_dir = Path(__file__).parent / "results"
+    results_dir = Path(__file__).parent / "ValidationResults"
     results_dir.mkdir(exist_ok=True)
 
     # Figure 1: NED Velocity Tracking
@@ -809,7 +809,7 @@ def test_flight_path():
     SIM_TIME = 30.0
 
     # INDI gains - MUST BE LOW to avoid saturation!
-    K_vel = 0.5   # Reduced from 2.0
+    K_vel = 0.5  # Reduced from 2.0
     K_omega = 1.0  # Reduced from 5.0
     K = np.diag([K_vel, K_vel, K_vel, K_omega, K_omega, K_omega])
 
@@ -1011,7 +1011,7 @@ def test_flight_path():
     )
 
     # Save figures
-    results_dir = Path(__file__).parent / "results"
+    results_dir = Path(__file__).parent / "ValidationResults"
     results_dir.mkdir(exist_ok=True)
 
     # Figure 1: NED Velocity Tracking
