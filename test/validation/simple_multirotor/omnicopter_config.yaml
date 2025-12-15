@@ -1,0 +1,87 @@
+# Omnicopter configuration - 8-motor fully actuated vehicle
+# Based on cube-corner motor placement from reference paper
+#
+# LOW FIDELITY MODEL for INDI control design:
+# - Linear thrust: T = T_max * u, where u in [-1, 1]
+# - No aerodynamic forces/moments
+# - No reaction torques from rotor spin (torques only from thrust moment arms)
+# - No motor dynamics (direct command pass-through)
+#
+# Motor positions from P matrix (scaled by 0.184m):
+#   P = (1/sqrt(3)) * [pattern matrix] * 0.184m
+#   Each motor at corner of cube, 0.184m from CG
+#
+# Thrust directions from N matrix:
+#   a = 1/2 + 1/sqrt(12) = 0.7887
+#   b = 1/2 - 1/sqrt(12) = 0.2113
+#   c = 1/sqrt(3) = 0.5774
+#
+# sigma (rotation direction): [-1, -1, 1, 1, 1, 1, -1, -1]
+#   Not used for torque (poly_torque = 0) but kept for completeness
+
+!ComplexAircraftParams
+aero: !AeroParams
+  cd: 0.0  # No aerodynamic drag in low-fidelity model
+
+mass: !MassParams
+  mass_kg: 0.886  # Total vehicle mass
+  cg_m: [0.0, 0.0, 0.0]  # Center of mass at origin
+  inertia_kgm2:  # Estimated for 0.886 kg, centered mass, ~0.45m edge cube
+    # Small inertia since mass is centered (electronics/battery at center)
+    # Rough estimate: I ~ 0.1 * m * r^2 where r ~ 0.184m
+    # I ~ 0.1 * 0.886 * 0.184^2 ~ 0.003 kg*m^2
+    - [0.0116, 0.0, 0.0]     # Ixx
+    - [0.0, 0.0113, 0.0]     # Iyy
+    - [0.0, 0.0, 0.0113]     # Izz
+
+geo: !GeoParams
+  front_area_m2: [0.01, 0.01, 0.01, 0.01]  # Not used (cd=0)
+
+prop: !PropParams
+  # LINEAR thrust model: T = T_max * u = 6.7 * u
+  # For numpy.polynomial.Polynomial with coeffs [c0, c1]: T = c0 + c1*u
+  # YAML is in DESCENDING order [c1, c0], so poly_thrust: [6.7, 0.0]
+  # This gives T = 6.7*u + 0.0
+  poly_thrust: [6.7, 0.0]  # Linear: T = 6.7 * u (N), u in [-1, 1]
+  
+  # No reaction torque in low-fidelity model
+  poly_torque: [0.0, 0.0]  # Q = 0 (torques only from thrust moment arms)
+
+motor: !ComplexMotorParams
+  # 8 motors at cube corners
+  # P matrix columns (scaled by 0.184/sqrt(3) = 0.106232 m):
+  #   Motor i: P[:,i] = 0.106232 * [±1, ±1, ±1]
+  # Pattern: [+,+,+], [-,+,+], [+,-,+], [-,-,+], [+,+,-], [-,+,-], [+,-,-], [-,-,-]
+  pos_m:
+    - [0.1400, 0.1400, 0.1400]
+    - [-0.1400, 0.1400, 0.1400]
+    - [0.1400, -0.1400, 0.1400]
+    - [-0.1400, -0.1400, 0.1400]
+    - [0.1400, 0.1400, -0.1400]
+    - [-0.1400, 0.1400, -0.1400]
+    - [0.1400, -0.1400, -0.1400]
+    - [-0.1400, -0.1400, -0.1400]
+
+
+      
+  
+  # Rotation direction (sigma): ALL SAME for balanced reaction torques
+  # Since sum(N) = [0,0,0], constant sigma gives sum(sigma*N) = 0
+  # This ensures reaction torques cancel at hover
+  dir: [-1, -1, -1, -1, -1, -1, -1, -1] # Unsure if this is right
+  
+  # N matrix columns (thrust directions, unit vectors)
+  # a = 0.78867513, b = 0.21132487, c = 0.57735027
+  # N = [[-a, b, -b, a, a, -b, b, -a],
+  #      [b, a, -a, -b, -b, -a, a, b],
+  #      [c, -c, -c, c, c, -c, -c, c]]
+  thrust_dir:
+    - [-0.78867513, 0.21132487, 0.57735027]   # Motor 0: N col 1 = [-a, b, c]
+    - [0.21132487, 0.78867513, -0.57735027]   # Motor 1: N col 2 = [b, a, -c]
+    - [-0.21132487, -0.78867513, -0.57735027] # Motor 2: N col 3 = [-b, -a, -c]
+    - [0.78867513, -0.21132487, 0.57735027]   # Motor 3: N col 4 = [a, -b, c]
+    - [0.78867513, -0.21132487, 0.57735027]   # Motor 4: N col 5 = [a, -b, c]
+    - [-0.21132487, -0.78867513, -0.57735027] # Motor 5: N col 6 = [-b, -a, -c]
+    - [0.21132487, 0.78867513, -0.57735027]   # Motor 6: N col 7 = [b, a, -c]
+    - [-0.78867513, 0.21132487, 0.57735027]   # Motor 7: N col 8 = [-a, b, c]
+
