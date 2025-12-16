@@ -330,13 +330,169 @@ def construct_B_hat(eta_F, eta_M):
     return np.vstack([B_F_hat, B_M_hat])
 
 
+# def run_test(test_name, sim_time, ref_func, use_eta_learning=False):
+#     """Run a single test with either baseline or η-learning INDI."""
+#     np.random.seed(42)
+
+#     num_steps = int(sim_time / DT)
+
+#     # Reset dynamics
+#     motor_effector.set_initial_state(hover_cmds_hifi)
+#     hifi_dyn.set_initial_conditions(
+#         INITIAL_POSITION,
+#         INITIAL_VELOCITY,
+#         INITIAL_ATTITUDE,
+#         INITIAL_ANGULAR_VELOCITY,
+#         REF_LAT,
+#         REF_LON,
+#         TERRAIN_ALT,
+#         ned_mag,
+#     )
+#     hifi_dyn.vehicle.takenoff = True
+
+#     # Storage
+#     time_hist = np.zeros(num_steps)
+#     vel_hist = np.zeros((num_steps, 3))
+#     vel_ref_hist = np.zeros((num_steps, 3))
+#     omega_hist = np.zeros((num_steps, 3))
+#     omega_ref_hist = np.zeros((num_steps, 3))
+#     cmd_hist = np.zeros((num_steps, num_motors))
+#     euler_hist = np.zeros((num_steps, 3))
+#     eta_F_hist = np.zeros((num_steps, num_motors))
+#     eta_M_hist = np.zeros((num_steps, num_motors))
+
+#     # State
+#     cur_state = hifi_dyn.vehicle.state.copy()
+#     cur_input = hover_cmds_hifi.copy()
+#     u_cmd = hover_cmds_hifi.copy()
+
+#     # Filters
+#     vel_filt = np.zeros(3)
+#     accel_filt = np.zeros(3)
+#     omega_filt = np.zeros(3)
+#     alpha_filt = np.zeros(3)
+#     omega_prev = np.zeros(3)
+
+#     for ii in range(num_steps):
+#         tt = ii * DT
+#         time_hist[ii] = tt
+
+#         # True state
+#         body_vel_true = cur_state[v_smap_quat.body_vel].flatten()
+#         body_accel_true = cur_state[v_smap_quat.body_accel].flatten()
+#         body_omega_true = cur_state[v_smap_quat.body_rot_rate].flatten()
+#         quat = cur_state[v_smap_quat.quat].flatten()
+#         ned_vel = cur_state[v_smap_quat.ned_vel].flatten()
+
+#         # Wind
+#         wind_gust = WIND_GUST_AMP * np.sin(2.0 * np.pi * WIND_GUST_FREQ * tt)
+#         wind_total = WIND_VELOCITY + wind_gust
+#         wind_force = compute_wind_force(wind_total, ned_vel, quat, cd, frontal_area)
+
+#         # Sensor model
+#         vel_filt = (
+#             alpha_vel * (body_vel_true + np.random.normal(0, SIGMA_VEL, 3) + BIAS_VEL)
+#             + (1 - alpha_vel) * vel_filt
+#         )
+#         accel_filt = (
+#             alpha_accel
+#             * (body_accel_true + np.random.normal(0, SIGMA_ACCEL, 3) + BIAS_ACCEL)
+#             + (1 - alpha_accel) * accel_filt
+#         )
+#         omega_filt = (
+#             alpha_omega
+#             * (body_omega_true + np.random.normal(0, SIGMA_OMEGA, 3) + BIAS_OMEGA)
+#             + (1 - alpha_omega) * omega_filt
+#         )
+
+#         if ii == 0:
+#             alpha_meas = np.zeros(3)
+#         else:
+#             alpha_meas = (omega_filt - omega_prev) / DT
+#         alpha_filt = alpha_alpha * alpha_meas + (1 - alpha_alpha) * alpha_filt
+#         omega_prev = omega_filt.copy()
+
+#         # Control update (100 Hz)
+#         if ii % CONTROL_SUBSAMPLE == 0:
+#             x = np.concatenate([vel_filt, omega_filt])
+#             x_dot = np.concatenate([accel_filt, alpha_filt])
+
+#             vb_ref, vb_ref_dot, omega_ref, omega_ref_dot = ref_func(tt)
+#             ref = np.concatenate([vb_ref, omega_ref])
+#             ref_dot = np.concatenate([vb_ref_dot, omega_ref_dot])
+
+#             if use_eta_learning and HAS_MODEL:
+#                 # η-Learning INDI: Construct B_hat from predicted scalings
+#                 eta_F, eta_M = predict_eta_scalings(
+#                     vel_filt, omega_filt, quat, cur_input
+#                 )
+#                 B_hat = construct_B_hat(eta_F, eta_M)
+#                 # Update INDI controller with structured B
+#                 indi_ctrl.set_state_model(dt=DT, K=K, B0=B_hat)
+#                 eta_F_hist[ii] = eta_F
+#                 eta_M_hist[ii] = eta_M
+#             else:
+#                 eta_F_hist[ii] = 1.0
+#                 eta_M_hist[ii] = 1.0
+
+#             u_cmd = indi_ctrl.calculate_control(
+#                 cur_time=tt,
+#                 cur_state=x,
+#                 cur_state_dot=x_dot,
+#                 cur_input=cur_input,
+#                 ref=ref,
+#                 ref_dot=ref_dot,
+#             )
+#             u_cmd = np.clip(u_cmd, -1.0, 1.0)
+
+#             if use_eta_learning and HAS_MODEL:
+#                 # Reset to B0 for next iteration
+#                 indi_ctrl.set_state_model(dt=DT, K=K, B0=B0)
+
+#         # Get reference for storage
+#         vb_ref, _, omega_ref, _ = ref_func(tt)
+
+#         # Store
+#         vel_hist[ii] = body_vel_true
+#         vel_ref_hist[ii] = vb_ref
+#         omega_hist[ii] = body_omega_true
+#         omega_ref_hist[ii] = omega_ref
+#         cmd_hist[ii] = u_cmd
+#         roll, pitch, yaw = gmath.quat_to_euler(quat)
+#         euler_hist[ii] = np.rad2deg([roll, pitch, yaw])
+
+#         # Propagate
+#         next_state = hifi_dyn.propagate_state(DT, cur_state, u_cmd).flatten()
+#         next_state[v_smap_quat.body_vel] += (wind_force / mass) * DT
+#         cur_state = next_state
+#         cur_input = motor_effector.state.copy()
+
+#     # Metrics
+#     vel_error = np.linalg.norm(vel_hist - vel_ref_hist, axis=1)
+#     omega_error = np.linalg.norm(omega_hist - omega_ref_hist, axis=1)
+
+#     return {
+#         "time": time_hist,
+#         "vel": vel_hist,
+#         "vel_ref": vel_ref_hist,
+#         "omega": omega_hist,
+#         "omega_ref": omega_ref_hist,
+#         "cmd": cmd_hist,
+#         "euler": euler_hist,
+#         "eta_F": eta_F_hist,
+#         "eta_M": eta_M_hist,
+#         "vel_error_mean": vel_error.mean(),
+#         "vel_error_max": vel_error.max(),
+#         "omega_error_mean": omega_error.mean(),
+#         "omega_error_max": omega_error.max(),
+#     }
+
+
 def run_test(test_name, sim_time, ref_func, use_eta_learning=False):
-    """Run a single test with either baseline or η-learning INDI."""
     np.random.seed(42)
 
     num_steps = int(sim_time / DT)
 
-    # Reset dynamics
     motor_effector.set_initial_state(hover_cmds_hifi)
     hifi_dyn.set_initial_conditions(
         INITIAL_POSITION,
@@ -350,8 +506,8 @@ def run_test(test_name, sim_time, ref_func, use_eta_learning=False):
     )
     hifi_dyn.vehicle.takenoff = True
 
-    # Storage
     time_hist = np.zeros(num_steps)
+    pos_hist = np.zeros((num_steps, 3))
     vel_hist = np.zeros((num_steps, 3))
     vel_ref_hist = np.zeros((num_steps, 3))
     omega_hist = np.zeros((num_steps, 3))
@@ -361,12 +517,10 @@ def run_test(test_name, sim_time, ref_func, use_eta_learning=False):
     eta_F_hist = np.zeros((num_steps, num_motors))
     eta_M_hist = np.zeros((num_steps, num_motors))
 
-    # State
     cur_state = hifi_dyn.vehicle.state.copy()
     cur_input = hover_cmds_hifi.copy()
     u_cmd = hover_cmds_hifi.copy()
 
-    # Filters
     vel_filt = np.zeros(3)
     accel_filt = np.zeros(3)
     omega_filt = np.zeros(3)
@@ -377,19 +531,17 @@ def run_test(test_name, sim_time, ref_func, use_eta_learning=False):
         tt = ii * DT
         time_hist[ii] = tt
 
-        # True state
+        ned_pos = cur_state[v_smap_quat.ned_pos].flatten()
         body_vel_true = cur_state[v_smap_quat.body_vel].flatten()
         body_accel_true = cur_state[v_smap_quat.body_accel].flatten()
         body_omega_true = cur_state[v_smap_quat.body_rot_rate].flatten()
         quat = cur_state[v_smap_quat.quat].flatten()
         ned_vel = cur_state[v_smap_quat.ned_vel].flatten()
 
-        # Wind
         wind_gust = WIND_GUST_AMP * np.sin(2.0 * np.pi * WIND_GUST_FREQ * tt)
         wind_total = WIND_VELOCITY + wind_gust
         wind_force = compute_wind_force(wind_total, ned_vel, quat, cd, frontal_area)
 
-        # Sensor model
         vel_filt = (
             alpha_vel * (body_vel_true + np.random.normal(0, SIGMA_VEL, 3) + BIAS_VEL)
             + (1 - alpha_vel) * vel_filt
@@ -412,7 +564,6 @@ def run_test(test_name, sim_time, ref_func, use_eta_learning=False):
         alpha_filt = alpha_alpha * alpha_meas + (1 - alpha_alpha) * alpha_filt
         omega_prev = omega_filt.copy()
 
-        # Control update (100 Hz)
         if ii % CONTROL_SUBSAMPLE == 0:
             x = np.concatenate([vel_filt, omega_filt])
             x_dot = np.concatenate([accel_filt, alpha_filt])
@@ -422,12 +573,10 @@ def run_test(test_name, sim_time, ref_func, use_eta_learning=False):
             ref_dot = np.concatenate([vb_ref_dot, omega_ref_dot])
 
             if use_eta_learning and HAS_MODEL:
-                # η-Learning INDI: Construct B_hat from predicted scalings
                 eta_F, eta_M = predict_eta_scalings(
                     vel_filt, omega_filt, quat, cur_input
                 )
                 B_hat = construct_B_hat(eta_F, eta_M)
-                # Update INDI controller with structured B
                 indi_ctrl.set_state_model(dt=DT, K=K, B0=B_hat)
                 eta_F_hist[ii] = eta_F
                 eta_M_hist[ii] = eta_M
@@ -446,13 +595,11 @@ def run_test(test_name, sim_time, ref_func, use_eta_learning=False):
             u_cmd = np.clip(u_cmd, -1.0, 1.0)
 
             if use_eta_learning and HAS_MODEL:
-                # Reset to B0 for next iteration
                 indi_ctrl.set_state_model(dt=DT, K=K, B0=B0)
 
-        # Get reference for storage
         vb_ref, _, omega_ref, _ = ref_func(tt)
 
-        # Store
+        pos_hist[ii] = ned_pos
         vel_hist[ii] = body_vel_true
         vel_ref_hist[ii] = vb_ref
         omega_hist[ii] = body_omega_true
@@ -461,18 +608,17 @@ def run_test(test_name, sim_time, ref_func, use_eta_learning=False):
         roll, pitch, yaw = gmath.quat_to_euler(quat)
         euler_hist[ii] = np.rad2deg([roll, pitch, yaw])
 
-        # Propagate
         next_state = hifi_dyn.propagate_state(DT, cur_state, u_cmd).flatten()
         next_state[v_smap_quat.body_vel] += (wind_force / mass) * DT
         cur_state = next_state
         cur_input = motor_effector.state.copy()
 
-    # Metrics
     vel_error = np.linalg.norm(vel_hist - vel_ref_hist, axis=1)
     omega_error = np.linalg.norm(omega_hist - omega_ref_hist, axis=1)
 
     return {
         "time": time_hist,
+        "pos": pos_hist,
         "vel": vel_hist,
         "vel_ref": vel_ref_hist,
         "omega": omega_hist,
@@ -896,11 +1042,57 @@ output_dir = Path(__file__).parent / "Final_Results"
 output_dir.mkdir(exist_ok=True)
 
 
+# def save_csv(res_dict, fname):
+#     """Save run data (baseline or eta) to CSV for later plotting."""
+#     data = np.column_stack(
+#         [
+#             res_dict["time"],
+#             res_dict["vel"],
+#             res_dict["vel_ref"],
+#             res_dict["omega"],
+#             res_dict["omega_ref"],
+#             res_dict["euler"],
+#             res_dict["cmd"],
+#             res_dict["eta_F"],
+#             res_dict["eta_M"],
+#         ]
+#     )
+#     num_motors = res_dict["cmd"].shape[1]
+#     header_parts = [
+#         "t",
+#         "vb_x",
+#         "vb_y",
+#         "vb_z",
+#         "vb_ref_x",
+#         "vb_ref_y",
+#         "vb_ref_z",
+#         "omega_x",
+#         "omega_y",
+#         "omega_z",
+#         "omega_ref_x",
+#         "omega_ref_y",
+#         "omega_ref_z",
+#         "roll_deg",
+#         "pitch_deg",
+#         "yaw_deg",
+#     ]
+#     header_parts.extend([f"u{i}" for i in range(num_motors)])
+#     header_parts.extend([f"eta_F_{i}" for i in range(num_motors)])
+#     header_parts.extend([f"eta_M_{i}" for i in range(num_motors)])
+#     np.savetxt(
+#         fname,
+#         data,
+#         delimiter=",",
+#         header=",".join(header_parts),
+#         comments="",
+#     )
+
+
 def save_csv(res_dict, fname):
-    """Save run data (baseline or eta) to CSV for later plotting."""
     data = np.column_stack(
         [
             res_dict["time"],
+            res_dict["pos"],
             res_dict["vel"],
             res_dict["vel_ref"],
             res_dict["omega"],
@@ -914,6 +1106,9 @@ def save_csv(res_dict, fname):
     num_motors = res_dict["cmd"].shape[1]
     header_parts = [
         "t",
+        "pn_x",
+        "pn_y",
+        "pn_z",
         "vb_x",
         "vb_y",
         "vb_z",
@@ -992,7 +1187,7 @@ for test_name, sim_time, ref_func, plot_name in test_scenarios:
         print(f"    Improvement: vel={vel_improve:+.1f}%, omega={omega_improve:+.1f}%")
 
     # Create detailed plots for this test
-    plot_test_results(test_name, plot_name, baseline, eta_indi, output_dir)
+    # plot_test_results(test_name, plot_name, baseline, eta_indi, output_dir)
 
     # Save CSVs
     save_csv(baseline, output_dir / f"{plot_name}_baseline.csv")
