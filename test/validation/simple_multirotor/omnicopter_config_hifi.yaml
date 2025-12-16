@@ -25,23 +25,23 @@ aero: !AeroParams
   cd: 0.3  # Aerodynamic drag coefficient #TODO: not sure if this value is good or not
 
 mass: !MassParams
-  mass_kg: 0.892  # Total vehicle mass
-  cg_m: [0.0, 0.0, 0.0]  # Center of mass at origin
-  inertia_kgm2:  # Estimated for 0.886 kg, centered mass
-    - [0.0116, 0.0, 0.0]     # Ixx
-    - [0.0, 0.0113, 0.0]     # Iyy
-    - [0.0, 0.0, 0.0113]     # Izz
+  mass_kg: 0.870  # Total vehicle mass (lighter than LoFi: 0.892 -> 0.870, -2.5%)
+  cg_m: [0.002, 0.001, -0.001]  # CG offset from origin (very small)
+  inertia_kgm2:  # Slightly different from LoFi (±1.5% variation)
+    - [0.0118, 0.0, 0.0]     # Ixx (+1.7% from LoFi)
+    - [0.0, 0.0111, 0.0]     # Iyy (-1.8% from LoFi)
+    - [0.0, 0.0, 0.0115]     # Izz (+1.8% from LoFi)
 
 geo: !GeoParams
   front_area_m2: [0.01, 0.01, 0.01, 0.01]  # Frontal areas for drag
 
 prop: !PropParams
-  # QUADRATIC thrust model: T = T_max * u^2 = 6.25 * u^2
-  poly_thrust: [6.25, 0.0, 0.0]  # Quadratic: T = 6.25 * u^2 (N)
+  # QUADRATIC thrust model: T = T_max * u^2 = 9.375 * u^2 (50% more than before)
+  poly_thrust: [9.375, 0.0, 0.0]  # Quadratic: T = 9.375 * u^2 (N)
   
-  # Reaction torque: Q = Q_max * u^2 = 0.07 * u^2
+  # Reaction torque: Q = Q_max * u^2 = 0.135 * u^2 (scaled with thrust)
   # With all same-direction sigma, reaction torques cancel (since sum(N)=0)
-  poly_torque: [0.09, 0.0, 0.0]  # Quadratic: Q = 0.09 * u^2 (N-m)
+  poly_torque: [0.135, 0.0, 0.0]  # Quadratic: Q = 0.135 * u^2 (N-m)
 
 motor: !ComplexMotorParams
   # 8 motors at cube corners

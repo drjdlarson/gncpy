@@ -23,7 +23,7 @@ class MotorDynamicsEffector(Effector):
     """First-order motor dynamics model.
 
     Models motor response as a first-order lag:
-        omegȧ_i = (1/tau_mot) * (omega_cmd,i - omega_i)
+        omega_i = (1/tau_mot) * (omega_cmd,i - omega_i)
     """
 
     def __init__(self, num_motors, tau_mot, initial_state=None):
@@ -246,7 +246,9 @@ class OmnicopterINDITrajectorySim:
             initial_state=hover_cmds_hifi,
         )
 
-        hifi_dyn = ComplexMultirotor(str(self.hifi_config_file), effector=motor_effector)
+        hifi_dyn = ComplexMultirotor(
+            str(self.hifi_config_file), effector=motor_effector
+        )
 
         # INDI controller
         K = np.diag(
@@ -379,11 +381,15 @@ class OmnicopterINDITrajectorySim:
 
             accel_noise = np.random.normal(0, self.SIGMA_ACCEL, 3)
             body_accel_meas = body_accel_true + accel_noise + self.BIAS_ACCEL
-            accel_filt = alpha_accel * body_accel_meas + (1.0 - alpha_accel) * accel_filt
+            accel_filt = (
+                alpha_accel * body_accel_meas + (1.0 - alpha_accel) * accel_filt
+            )
 
             omega_noise = np.random.normal(0, self.SIGMA_OMEGA, 3)
             body_omega_meas = body_omega_true + omega_noise + self.BIAS_OMEGA
-            omega_filt = alpha_omega * body_omega_meas + (1.0 - alpha_omega) * omega_filt
+            omega_filt = (
+                alpha_omega * body_omega_meas + (1.0 - alpha_omega) * omega_filt
+            )
 
             if ii == 0:
                 alpha_meas = np.zeros(3)
@@ -576,5 +582,3 @@ if __name__ == "__main__":
     sim = OmnicopterINDITrajectorySim(duration=8.0, sim_time=8.0)
     results = sim.run(make_plots=True)
     plt.show()
-
-

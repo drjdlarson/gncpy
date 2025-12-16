@@ -47,14 +47,31 @@ from gncpy.control.INDI import INDI
 
 
 # ============================================================================
-# First-order motor dynamics effector
+# First-order motor dynamics effector with efficiency variation
 # ============================================================================
 class MotorDynamicsEffector(Effector):
-    """First-order motor dynamics model.
+    """First-order motor dynamics model with per-motor efficiency variation.
 
     Models motor response as a first-order lag:
-        omegȧ_i = (1/tau_mot) * (omega_cmd,i - omega_i)
+        omega_dot_i = (1/tau_mot) * (omega_cmd,i - omega_i)
+
+    Additionally applies per-motor efficiency scaling to simulate
+    manufacturing variation and wear. This creates B-matrix mismatch
+    between the LoFi model (used for control design) and HiFi truth.
+
+    Motor efficiencies (hardcoded ±2% variation):
+        Motor 0: 0.99 (-1%)
+        Motor 1: 1.01 (+1%)
+        Motor 2: 0.98 (-2%)
+        Motor 3: 1.02 (+2%)
+        Motor 4: 1.01 (+1%)
+        Motor 5: 0.99 (-1%)
+        Motor 6: 1.00 (0%)
+        Motor 7: 0.98 (-2%)
     """
+
+    # Hardcoded motor efficiency variation (±2% range)
+    MOTOR_EFFICIENCY = np.array([0.99, 1.01, 0.98, 1.02, 1.01, 0.99, 1.00, 0.98])
 
     def __init__(self, num_motors, tau_mot, initial_state=None):
         self.num_motors = num_motors
@@ -70,10 +87,17 @@ class MotorDynamicsEffector(Effector):
         self.state = np.array(initial_state).flatten().copy()
 
     def step(self, input_cmds, dt):
-        """Propagate motor dynamics one timestep using exact solution."""
+        """Propagate motor dynamics one timestep using exact solution.
+
+        Applies motor efficiency scaling to simulate thrust variation.
+        """
         input_cmds = np.array(input_cmds).flatten()
+
+        # Apply per-motor efficiency scaling (simulates manufacturing variation)
+        scaled_cmds = input_cmds * self.MOTOR_EFFICIENCY[: self.num_motors]
+
         alpha = np.exp(-dt / self.tau_mot)
-        self.state = input_cmds + (self.state - input_cmds) * alpha
+        self.state = scaled_cmds + (self.state - scaled_cmds) * alpha
         return self.state.copy()
 
 
@@ -395,7 +419,7 @@ ax.plot(time_hist_1, body_vel_ref_hist_1[:, 1], "g--", alpha=0.7, label="vb_y re
 ax.plot(time_hist_1, body_vel_hist_1[:, 2], "b-", label="vb_z")
 ax.axhline(0, color="k", linestyle="--", alpha=0.3)
 ax.set_ylabel("Body Velocity (m/s)")
-ax.set_ylim([-1.0, 1.0])
+ax.set_ylim([-1.3, 1.3])
 ax.legend(loc="upper right", ncol=3, fontsize=8)
 ax.grid(True, alpha=0.3)
 
@@ -406,7 +430,7 @@ ax.plot(time_hist_1, np.rad2deg(body_omega_hist_1[:, 1]), "g-", label="q")
 ax.plot(time_hist_1, np.rad2deg(body_omega_hist_1[:, 2]), "b-", label="r")
 ax.axhline(0, color="k", linestyle="--", alpha=0.3)
 ax.set_ylabel("Body Angular Rate (deg/s)")
-ax.set_ylim([-50, 50])
+ax.set_ylim([-65, 65])
 ax.legend(loc="upper right")
 ax.grid(True, alpha=0.3)
 
@@ -417,7 +441,7 @@ ax.plot(time_hist_1, euler_hist_1[:, 1], "g-", label="Pitch")
 ax.plot(time_hist_1, euler_hist_1[:, 2], "b-", label="Yaw")
 ax.axhline(0, color="k", linestyle="--", alpha=0.3)
 ax.set_ylabel("Euler Angles (deg)")
-ax.set_ylim([-5, 5])
+ax.set_ylim([-180, 180])
 ax.set_xlabel("Time (s)")
 ax.legend(loc="upper right")
 ax.grid(True, alpha=0.3)
@@ -597,7 +621,7 @@ ax.plot(time_hist_2, body_vel_hist_2[:, 1], "g-", label="vb_y")
 ax.plot(time_hist_2, body_vel_hist_2[:, 2], "b-", label="vb_z")
 ax.axhline(0, color="k", linestyle="--", alpha=0.3)
 ax.set_ylabel("Body Velocity (m/s)")
-ax.set_ylim([-1.0, 1.0])
+ax.set_ylim([-1.3, 1.3])
 ax.legend(loc="upper right")
 ax.grid(True, alpha=0.3)
 
@@ -615,7 +639,7 @@ ax.plot(time_hist_2, np.rad2deg(body_omega_hist_2[:, 1]), "g-", label="q")
 ax.plot(time_hist_2, np.rad2deg(body_omega_hist_2[:, 2]), "b-", label="r")
 ax.axhline(0, color="k", linestyle="--", alpha=0.3)
 ax.set_ylabel("Body Angular Rate (deg/s)")
-ax.set_ylim([-50, 50])
+ax.set_ylim([-65, 65])
 ax.legend(loc="upper right", fontsize=8)
 ax.grid(True, alpha=0.3)
 
@@ -626,6 +650,7 @@ ax.plot(time_hist_2, euler_hist_2[:, 1], "g-", label="Pitch")
 ax.plot(time_hist_2, euler_hist_2[:, 2], "b-", label="Yaw")
 ax.axhline(0, color="k", linestyle="--", alpha=0.3)
 ax.set_ylabel("Euler Angles (deg)")
+ax.set_ylim([-180, 180])
 ax.set_xlabel("Time (s)")
 ax.legend(loc="upper right")
 ax.grid(True, alpha=0.3)
@@ -826,7 +851,7 @@ ax.plot(time_hist_3, body_vel_ref_hist_3[:, 1], "g--", alpha=0.7, label="vb_y re
 ax.plot(time_hist_3, body_vel_hist_3[:, 2], "b-", label="vb_z")
 ax.axhline(0, color="k", linestyle="--", alpha=0.3)
 ax.set_ylabel("Body Velocity (m/s)")
-ax.set_ylim([-1.0, 1.0])
+ax.set_ylim([-1.3, 1.3])
 ax.legend(loc="upper right", ncol=3, fontsize=8)
 ax.grid(True, alpha=0.3)
 
@@ -844,7 +869,7 @@ ax.plot(time_hist_3, np.rad2deg(body_omega_hist_3[:, 1]), "g-", label="q")
 ax.plot(time_hist_3, np.rad2deg(body_omega_hist_3[:, 2]), "b-", label="r")
 ax.axhline(0, color="k", linestyle="--", alpha=0.3)
 ax.set_ylabel("Body Angular Rate (deg/s)")
-ax.set_ylim([-50, 50])
+ax.set_ylim([-65, 65])
 ax.legend(loc="upper right", fontsize=8)
 ax.grid(True, alpha=0.3)
 
@@ -855,6 +880,7 @@ ax.plot(time_hist_3, euler_hist_3[:, 1], "g-", label="Pitch")
 ax.plot(time_hist_3, euler_hist_3[:, 2], "b-", label="Yaw")
 ax.axhline(0, color="k", linestyle="--", alpha=0.3)
 ax.set_ylabel("Euler Angles (deg)")
+ax.set_ylim([-180, 180])
 ax.set_xlabel("Time (s)")
 ax.legend(loc="upper right")
 ax.grid(True, alpha=0.3)
@@ -1071,7 +1097,7 @@ ax.plot(time_hist_4, body_vel_hist_4[:, 2], "b-", label="vb_z")
 ax.plot(time_hist_4, body_vel_ref_hist_4[:, 2], "b--", alpha=0.7, label="vb_z ref")
 ax.axhline(0, color="k", linestyle="--", alpha=0.3)
 ax.set_ylabel("Body Velocity (m/s)")
-ax.set_ylim([-1.0, 1.0])
+ax.set_ylim([-1.3, 1.3])
 ax.legend(loc="upper right", ncol=3, fontsize=7)
 ax.grid(True, alpha=0.3)
 
@@ -1103,7 +1129,7 @@ ax.plot(
 )
 ax.axhline(0, color="k", linestyle="--", alpha=0.3)
 ax.set_ylabel("Body Angular Rate (deg/s)")
-ax.set_ylim([-50, 50])
+ax.set_ylim([-65, 65])
 ax.legend(loc="upper right", ncol=3, fontsize=7)
 ax.grid(True, alpha=0.3)
 
@@ -1114,6 +1140,7 @@ ax.plot(time_hist_4, euler_hist_4[:, 1], "g-", label="Pitch", linewidth=1.5)
 ax.plot(time_hist_4, euler_hist_4[:, 2], "b-", label="Yaw", linewidth=1.5)
 ax.axhline(0, color="k", linestyle="--", alpha=0.3)
 ax.set_ylabel("Euler Angles (deg)")
+ax.set_ylim([-180, 180])
 ax.set_xlabel("Time (s)")
 ax.legend(loc="upper right")
 ax.grid(True, alpha=0.3)

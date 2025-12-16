@@ -53,14 +53,31 @@ from gncpy.control.INDI import INDI
 
 
 # ============================================================================
-# First-order motor dynamics effector
+# First-order motor dynamics effector with efficiency variation
 # ============================================================================
 class MotorDynamicsEffector(Effector):
-    """First-order motor dynamics model.
+    """First-order motor dynamics model with per-motor efficiency variation.
 
     Models motor response as a first-order lag:
-        omegȧ_i = (1/tau_mot) * (omega_cmd,i - omega_i)
+        omega_dot_i = (1/tau_mot) * (omega_cmd,i - omega_i)
+
+    Additionally applies per-motor efficiency scaling to simulate
+    manufacturing variation and wear. This creates B-matrix mismatch
+    between the LoFi model (used for control design) and HiFi truth.
+
+    Motor efficiencies (hardcoded ±2% variation):
+        Motor 0: 0.99 (-1%)
+        Motor 1: 1.01 (+1%)
+        Motor 2: 0.98 (-2%)
+        Motor 3: 1.02 (+2%)
+        Motor 4: 1.01 (+1%)
+        Motor 5: 0.99 (-1%)
+        Motor 6: 1.00 (0%)
+        Motor 7: 0.98 (-2%)
     """
+
+    # Hardcoded motor efficiency variation (±2% range)
+    MOTOR_EFFICIENCY = np.array([0.99, 1.01, 0.98, 1.02, 1.01, 0.99, 1.00, 0.98])
 
     def __init__(self, num_motors, tau_mot, initial_state=None):
         self.num_motors = num_motors
@@ -76,10 +93,17 @@ class MotorDynamicsEffector(Effector):
         self.state = np.array(initial_state).flatten().copy()
 
     def step(self, input_cmds, dt):
-        """Propagate motor dynamics one timestep using exact solution."""
+        """Propagate motor dynamics one timestep using exact solution.
+
+        Applies motor efficiency scaling to simulate thrust variation.
+        """
         input_cmds = np.array(input_cmds).flatten()
+
+        # Apply per-motor efficiency scaling (simulates manufacturing variation)
+        scaled_cmds = input_cmds * self.MOTOR_EFFICIENCY[: self.num_motors]
+
         alpha = np.exp(-dt / self.tau_mot)
-        self.state = input_cmds + (self.state - input_cmds) * alpha
+        self.state = scaled_cmds + (self.state - scaled_cmds) * alpha
         return self.state.copy()
 
 
@@ -118,9 +142,9 @@ FC_ACCEL = 20.0  # Hz (accelerometer filter cutoff)
 FC_OMEGA = 20.0  # Hz (angular rate filter cutoff)
 FC_ALPHA = 5.0  # Hz (angular acceleration derivative filter - aggressive to handle differentiation noise)
 
-# Wind parameters (NED frame) - increased significantly to show wind rejection
-WIND_VELOCITY = np.array([5.0, 3.0, 0.5])  # m/s (constant wind in NED)
-WIND_GUST_AMP = np.array([2.0, 1.5, 0.5])  # m/s (gust amplitude)
+# Wind parameters (NED frame) - strong wind to test rejection
+WIND_VELOCITY = np.array([8.0, 5.0, 1.0])  # m/s (constant wind in NED)
+WIND_GUST_AMP = np.array([4.0, 3.0, 1.0])  # m/s (gust amplitude)
 WIND_GUST_FREQ = np.array([0.3, 0.4, 0.5])  # Hz (gust frequencies)
 
 np.random.seed(42)  # For reproducible noise
@@ -160,7 +184,7 @@ def compute_wind_force(wind_ned, vel_ned, quat, cd, frontal_area, air_density=1.
 
     # Scale up frontal area for visibility (real frontal area is too small)
     # Using 10x the actual area to make wind effects visible
-    effective_area = frontal_area[:3] * 10.0
+    effective_area = frontal_area[:3]
 
     # Drag force in body frame: F = 0.5 * rho * cd * A * v^2 * sign(v)
     force_body = np.zeros(3)
@@ -483,7 +507,7 @@ ax.plot(time_hist_1, body_vel_ref_hist_1[:, 1], "g--", alpha=0.7, label="vb_y re
 ax.plot(time_hist_1, body_vel_hist_1[:, 2], "b-", label="vb_z")
 ax.axhline(0, color="k", linestyle="--", alpha=0.3)
 ax.set_ylabel("Body Velocity (m/s)")
-ax.set_ylim([-1.0, 1.0])
+ax.set_ylim([-1.3, 1.3])
 ax.legend(loc="upper right", ncol=3, fontsize=8)
 ax.grid(True, alpha=0.3)
 
@@ -494,7 +518,7 @@ ax.plot(time_hist_1, np.rad2deg(body_omega_hist_1[:, 1]), "g-", label="q")
 ax.plot(time_hist_1, np.rad2deg(body_omega_hist_1[:, 2]), "b-", label="r")
 ax.axhline(0, color="k", linestyle="--", alpha=0.3)
 ax.set_ylabel("Body Angular Rate (deg/s)")
-ax.set_ylim([-50, 50])
+ax.set_ylim([-65, 65])
 ax.legend(loc="upper right")
 ax.grid(True, alpha=0.3)
 
@@ -505,7 +529,7 @@ ax.plot(time_hist_1, euler_hist_1[:, 1], "g-", label="Pitch")
 ax.plot(time_hist_1, euler_hist_1[:, 2], "b-", label="Yaw")
 ax.axhline(0, color="k", linestyle="--", alpha=0.3)
 ax.set_ylabel("Euler Angles (deg)")
-ax.set_ylim([-5, 5])
+ax.set_ylim([-180, 180])
 ax.set_xlabel("Time (s)")
 ax.legend(loc="upper right")
 ax.grid(True, alpha=0.3)
@@ -699,7 +723,7 @@ ax.plot(time_hist_2, body_vel_hist_2[:, 1], "g-", label="vb_y")
 ax.plot(time_hist_2, body_vel_hist_2[:, 2], "b-", label="vb_z")
 ax.axhline(0, color="k", linestyle="--", alpha=0.3)
 ax.set_ylabel("Body Velocity (m/s)")
-ax.set_ylim([-1.0, 1.0])
+ax.set_ylim([-1.3, 1.3])
 ax.legend(loc="upper right")
 ax.grid(True, alpha=0.3)
 
@@ -717,7 +741,7 @@ ax.plot(time_hist_2, np.rad2deg(body_omega_hist_2[:, 1]), "g-", label="q")
 ax.plot(time_hist_2, np.rad2deg(body_omega_hist_2[:, 2]), "b-", label="r")
 ax.axhline(0, color="k", linestyle="--", alpha=0.3)
 ax.set_ylabel("Body Angular Rate (deg/s)")
-ax.set_ylim([-50, 50])
+ax.set_ylim([-65, 65])
 ax.legend(loc="upper right", fontsize=8)
 ax.grid(True, alpha=0.3)
 
@@ -728,6 +752,7 @@ ax.plot(time_hist_2, euler_hist_2[:, 1], "g-", label="Pitch")
 ax.plot(time_hist_2, euler_hist_2[:, 2], "b-", label="Yaw")
 ax.axhline(0, color="k", linestyle="--", alpha=0.3)
 ax.set_ylabel("Euler Angles (deg)")
+ax.set_ylim([-180, 180])
 ax.set_xlabel("Time (s)")
 ax.legend(loc="upper right")
 ax.grid(True, alpha=0.3)
@@ -751,10 +776,10 @@ print(f"Test 2 figure saved to: {output_file_2}")
 
 
 # ============================================================================
-# Test 3: Combined velocity + attitude maneuver
+# Test 3: Combined velocity + attitude maneuver (with wind)
 # ============================================================================
 print("\n" + "=" * 70)
-print("TEST 3: Combined Velocity + Attitude Maneuver")
+print("TEST 3: Combined Velocity + Attitude Maneuver (with wind)")
 print("=" * 70)
 
 # Reset dynamics to hover
@@ -810,7 +835,7 @@ alpha_filt = np.zeros(3)
 # Previous omega measurement for numerical differentiation
 omega_prev = np.zeros(3)
 
-print("Running Test 3 simulation...")
+print("Running Test 3 simulation with wind...")
 for ii in range(num_steps_3):
     tt = ii * DT
     time_hist_3[ii] = tt
@@ -820,6 +845,14 @@ for ii in range(num_steps_3):
     body_accel_true = cur_state[v_smap_quat.body_accel].flatten()
     body_omega_true = cur_state[v_smap_quat.body_rot_rate].flatten()
     quat = cur_state[v_smap_quat.quat].flatten()
+    ned_vel = cur_state[v_smap_quat.ned_vel].flatten()
+
+    # Compute wind with gusts
+    wind_gust = WIND_GUST_AMP * np.sin(2.0 * np.pi * WIND_GUST_FREQ * tt)
+    wind_total = WIND_VELOCITY + wind_gust
+
+    # Compute wind drag force in body frame
+    wind_force_body = compute_wind_force(wind_total, ned_vel, quat, cd, frontal_area)
 
     # Realistic sensor model (same as Test 1 and 2)
     vel_noise = np.random.normal(0, SIGMA_VEL, 3)
@@ -895,8 +928,14 @@ for ii in range(num_steps_3):
     roll, pitch, yaw = gmath.quat_to_euler(quat)
     euler_hist_3[ii, :] = np.rad2deg([roll, pitch, yaw])
 
-    # Propagate dynamics
-    cur_state = hifi_dyn.propagate_state(DT, cur_state, u_cmd).flatten()
+    # Propagate dynamics with wind disturbance
+    next_state = hifi_dyn.propagate_state(DT, cur_state, u_cmd).flatten()
+
+    # Add wind force as external acceleration
+    wind_accel_body = wind_force_body / mass
+    next_state[v_smap_quat.body_vel] += wind_accel_body * DT
+
+    cur_state = next_state
     cur_input = motor_effector.state.copy()
 
 print("Test 3 complete!")
@@ -905,6 +944,353 @@ print(
 )
 print(f"Final roll angle: {euler_hist_3[-1, 0]:.2f} deg")
 print(f"Final angular rate: {np.linalg.norm(body_omega_hist_3[-1, :]):.6f} rad/s\n")
+
+
+# ============================================================================
+# Plot Test 3 results
+# ============================================================================
+print("Plotting Test 3 results...")
+
+fig3, axes3 = plt.subplots(2, 2, figsize=(14, 8), sharex=True)
+fig3.suptitle(
+    "Test 3: Combined Velocity + Attitude Maneuver (with wind)",
+    fontsize=14,
+    fontweight="bold",
+)
+
+# Body velocity tracking
+ax = axes3[0, 0]
+ax.plot(time_hist_3, body_vel_hist_3[:, 0], "r-", label="vb_x")
+ax.plot(time_hist_3, body_vel_ref_hist_3[:, 0], "r--", alpha=0.7, label="vb_x ref")
+ax.plot(time_hist_3, body_vel_hist_3[:, 1], "g-", label="vb_y")
+ax.plot(time_hist_3, body_vel_ref_hist_3[:, 1], "g--", alpha=0.7, label="vb_y ref")
+ax.plot(time_hist_3, body_vel_hist_3[:, 2], "b-", label="vb_z")
+ax.axhline(0, color="k", linestyle="--", alpha=0.3)
+ax.set_ylabel("Body Velocity (m/s)")
+ax.set_ylim([-1.3, 1.3])
+ax.legend(loc="upper right", ncol=3, fontsize=8)
+ax.grid(True, alpha=0.3)
+
+# Body angular rate
+ax = axes3[0, 1]
+ax.plot(time_hist_3, np.rad2deg(body_omega_hist_3[:, 0]), "r-", label="p")
+ax.plot(
+    time_hist_3,
+    np.rad2deg(body_omega_ref_hist_3[:, 0]),
+    "r--",
+    alpha=0.7,
+    label="p ref",
+)
+ax.plot(time_hist_3, np.rad2deg(body_omega_hist_3[:, 1]), "g-", label="q")
+ax.plot(time_hist_3, np.rad2deg(body_omega_hist_3[:, 2]), "b-", label="r")
+ax.axhline(0, color="k", linestyle="--", alpha=0.3)
+ax.set_ylabel("Body Angular Rate (deg/s)")
+ax.set_ylim([-65, 65])
+ax.legend(loc="upper right", fontsize=8)
+ax.grid(True, alpha=0.3)
+
+# Euler angles
+ax = axes3[1, 0]
+ax.plot(time_hist_3, euler_hist_3[:, 0], "r-", label="Roll", linewidth=2)
+ax.plot(time_hist_3, euler_hist_3[:, 1], "g-", label="Pitch")
+ax.plot(time_hist_3, euler_hist_3[:, 2], "b-", label="Yaw")
+ax.axhline(0, color="k", linestyle="--", alpha=0.3)
+ax.set_ylabel("Euler Angles (deg)")
+ax.set_ylim([-180, 180])
+ax.set_xlabel("Time (s)")
+ax.legend(loc="upper right")
+ax.grid(True, alpha=0.3)
+
+# Motor commands
+ax = axes3[1, 1]
+for ii in range(num_motors):
+    ax.plot(time_hist_3, cmd_hist_3[:, ii], alpha=0.7, label=f"u{ii}")
+ax.axhline(0, color="k", linestyle="--", alpha=0.3)
+ax.set_xlabel("Time (s)")
+ax.set_ylabel("Motor Commands")
+ax.set_ylim([-1.0, 1.0])
+ax.legend(loc="upper right", ncol=4, fontsize=7)
+ax.grid(True, alpha=0.3)
+
+plt.tight_layout()
+
+output_file_3 = output_dir / "indi_test3_combined_wind.png"
+plt.savefig(output_file_3, dpi=150)
+print(f"Test 3 figure saved to: {output_file_3}")
+
+
+# ============================================================================
+# Test 4: Helix trajectory with 3-axis tumble (with wind)
+# ============================================================================
+print("\n" + "=" * 70)
+print("TEST 4: Helix Trajectory with 3-Axis Tumble (with wind)")
+print("=" * 70)
+
+# Reset dynamics to hover
+motor_effector.set_initial_state(hover_cmds_hifi)
+hifi_dyn.set_initial_conditions(
+    INITIAL_POSITION,
+    INITIAL_VELOCITY,
+    INITIAL_ATTITUDE,
+    INITIAL_ANGULAR_VELOCITY,
+    REF_LAT,
+    REF_LON,
+    TERRAIN_ALT,
+    ned_mag,
+)
+hifi_dyn.vehicle.takenoff = True
+
+# Simulation parameters for Test 4
+SIM_TIME_4 = 12.0  # seconds
+num_steps_4 = int(SIM_TIME_4 / DT)
+
+# Helix trajectory parameters
+V_CIRCLE_4 = 0.6  # m/s horizontal circle velocity
+OMEGA_CIRCLE_4 = 2.0 * np.pi / 10.0  # rad/s (10 second period for horizontal circle)
+V_VERT_AMP = 0.3  # m/s vertical velocity amplitude
+OMEGA_VERT = 2.0 * np.pi / 6.0  # rad/s (6 second period for vertical oscillation)
+
+# Tumble parameters (all axes active - full rotations on all axes!)
+ROLL_RATE_4 = 2.0 * np.pi / 8.0  # rad/s (360degrees roll in 8 seconds)
+PITCH_RATE_4 = 2.0 * np.pi / 10.0  # rad/s (360degrees pitch flip in 10 seconds)
+TUMBLE_TIME = 10.0  # Time for tumble maneuver
+YAW_RATE_4 = 2.0 * np.pi / 12.0  # rad/s (360degrees yaw in 12 seconds)
+
+print(
+    f"Helix - Horizontal circle: {V_CIRCLE_4} m/s, period: {2*np.pi/OMEGA_CIRCLE_4:.1f} s"
+)
+print(
+    f"Helix - Vertical oscillation: ±{V_VERT_AMP} m/s, period: {2*np.pi/OMEGA_VERT:.1f} s"
+)
+print(f"Tumble - Roll rate: {np.rad2deg(ROLL_RATE_4):.1f} deg/s")
+print(f"Tumble - Pitch rate: {np.rad2deg(PITCH_RATE_4):.1f} deg/s")
+print(f"Tumble - Yaw rate: {np.rad2deg(YAW_RATE_4):.1f} deg/s")
+print(f"Simulation time: {SIM_TIME_4} s")
+
+# Storage
+time_hist_4 = np.zeros(num_steps_4)
+body_vel_hist_4 = np.zeros((num_steps_4, 3))
+body_vel_ref_hist_4 = np.zeros((num_steps_4, 3))
+body_omega_hist_4 = np.zeros((num_steps_4, 3))
+body_omega_ref_hist_4 = np.zeros((num_steps_4, 3))
+ned_pos_hist_4 = np.zeros((num_steps_4, 3))
+euler_hist_4 = np.zeros((num_steps_4, 3))
+cmd_hist_4 = np.zeros((num_steps_4, num_motors))
+
+# Initial conditions
+cur_state = hifi_dyn.vehicle.state.copy()
+cur_input = hover_cmds_hifi.copy()
+
+# Initialize low-pass filter states for sensor measurements
+vel_filt = np.zeros(3)
+accel_filt = np.zeros(3)
+omega_filt = np.zeros(3)
+alpha_filt = np.zeros(3)
+
+# Previous omega measurement for numerical differentiation
+omega_prev = np.zeros(3)
+
+print("Running Test 4 simulation with wind...")
+for ii in range(num_steps_4):
+    tt = ii * DT
+    time_hist_4[ii] = tt
+
+    # Current true state
+    body_vel_true = cur_state[v_smap_quat.body_vel].flatten()
+    body_accel_true = cur_state[v_smap_quat.body_accel].flatten()
+    body_omega_true = cur_state[v_smap_quat.body_rot_rate].flatten()
+    quat = cur_state[v_smap_quat.quat].flatten()
+    ned_vel = cur_state[v_smap_quat.ned_vel].flatten()
+
+    # Compute wind with gusts
+    wind_gust = WIND_GUST_AMP * np.sin(2.0 * np.pi * WIND_GUST_FREQ * tt)
+    wind_total = WIND_VELOCITY + wind_gust
+
+    # Compute wind drag force in body frame
+    wind_force_body = compute_wind_force(wind_total, ned_vel, quat, cd, frontal_area)
+
+    # Realistic sensor model (same as other tests)
+    vel_noise = np.random.normal(0, SIGMA_VEL, 3)
+    body_vel_meas = body_vel_true + vel_noise + BIAS_VEL
+    vel_filt = alpha_vel * body_vel_meas + (1.0 - alpha_vel) * vel_filt
+
+    accel_noise = np.random.normal(0, SIGMA_ACCEL, 3)
+    body_accel_meas = body_accel_true + accel_noise + BIAS_ACCEL
+    accel_filt = alpha_accel * body_accel_meas + (1.0 - alpha_accel) * accel_filt
+
+    omega_noise = np.random.normal(0, SIGMA_OMEGA, 3)
+    body_omega_meas = body_omega_true + omega_noise + BIAS_OMEGA
+    omega_filt = alpha_omega * body_omega_meas + (1.0 - alpha_omega) * omega_filt
+
+    if ii == 0:
+        alpha_meas = np.zeros(3)
+    else:
+        alpha_meas = (omega_filt - omega_prev) / DT
+    alpha_filt = alpha_alpha * alpha_meas + (1.0 - alpha_alpha) * alpha_filt
+    omega_prev = omega_filt.copy()
+
+    # State and derivatives for INDI controller
+    x = np.concatenate([vel_filt, omega_filt])
+    x_dot = np.concatenate([accel_filt, alpha_filt])
+
+    # Helix velocity reference: horizontal circle + vertical oscillation
+    vb_ref = np.array(
+        [
+            V_CIRCLE_4 * np.cos(OMEGA_CIRCLE_4 * tt),
+            V_CIRCLE_4 * np.sin(OMEGA_CIRCLE_4 * tt),
+            V_VERT_AMP * np.sin(OMEGA_VERT * tt),
+        ]
+    )
+
+    # Tumble angular rate reference: constant rates on all axes
+    if tt < TUMBLE_TIME:
+        omega_ref = np.array([ROLL_RATE_4, PITCH_RATE_4, YAW_RATE_4])
+    else:
+        omega_ref = np.array([0.0, 0.0, 0.0])  # Stop tumble after some time
+
+    ref = np.concatenate([vb_ref, omega_ref])
+
+    # Reference derivatives
+    vb_ref_dot = np.array(
+        [
+            -V_CIRCLE_4 * OMEGA_CIRCLE_4 * np.sin(OMEGA_CIRCLE_4 * tt),
+            V_CIRCLE_4 * OMEGA_CIRCLE_4 * np.cos(OMEGA_CIRCLE_4 * tt),
+            V_VERT_AMP * OMEGA_VERT * np.cos(OMEGA_VERT * tt),
+        ]
+    )
+    omega_ref_dot = np.zeros(3)  # Constant rates have zero derivative
+    ref_dot = np.concatenate([vb_ref_dot, omega_ref_dot])
+
+    # INDI control
+    u_cmd = indi_ctrl.calculate_control(
+        cur_time=tt,
+        cur_state=x,
+        cur_state_dot=x_dot,
+        cur_input=cur_input,
+        ref=ref,
+        ref_dot=ref_dot,
+    )
+    u_cmd = np.clip(u_cmd, -1.0, 1.0)
+
+    # Store data
+    body_vel_hist_4[ii, :] = body_vel_true
+    body_vel_ref_hist_4[ii, :] = vb_ref
+    body_omega_hist_4[ii, :] = body_omega_true
+    body_omega_ref_hist_4[ii, :] = omega_ref
+    ned_pos_hist_4[ii, :] = cur_state[v_smap_quat.ned_pos].flatten()
+    cmd_hist_4[ii, :] = u_cmd
+
+    # Convert quaternion to Euler angles for plotting
+    roll, pitch, yaw = gmath.quat_to_euler(quat)
+    euler_hist_4[ii, :] = np.rad2deg([roll, pitch, yaw])
+
+    # Propagate dynamics with wind disturbance
+    next_state = hifi_dyn.propagate_state(DT, cur_state, u_cmd).flatten()
+
+    # Add wind force as external acceleration
+    wind_accel_body = wind_force_body / mass
+    next_state[v_smap_quat.body_vel] += wind_accel_body * DT
+
+    cur_state = next_state
+    cur_input = motor_effector.state.copy()
+
+print("Test 4 complete!")
+print(
+    f"Final velocity error: {np.linalg.norm(body_vel_hist_4[-1, :] - body_vel_ref_hist_4[-1, :]):.4f} m/s"
+)
+print(f"Final altitude change: {ned_pos_hist_4[-1, 2] - ned_pos_hist_4[0, 2]:.2f} m")
+print(
+    f"Max altitude change: {(ned_pos_hist_4[:, 2] - ned_pos_hist_4[0, 2]).max():.2f} m"
+)
+print(f"Final angular rate: {np.linalg.norm(body_omega_hist_4[-1, :]):.6f} rad/s\n")
+
+
+# ============================================================================
+# Plot Test 4 results
+# ============================================================================
+print("Plotting Test 4 results...")
+
+fig4, axes4 = plt.subplots(2, 2, figsize=(14, 8), sharex=True)
+fig4.suptitle(
+    "Test 4: Helix Trajectory with 3-Axis Tumble (with wind)",
+    fontsize=14,
+    fontweight="bold",
+)
+
+# Body velocity tracking (helix)
+ax = axes4[0, 0]
+ax.plot(time_hist_4, body_vel_hist_4[:, 0], "r-", label="vb_x")
+ax.plot(time_hist_4, body_vel_ref_hist_4[:, 0], "r--", alpha=0.7, label="vb_x ref")
+ax.plot(time_hist_4, body_vel_hist_4[:, 1], "g-", label="vb_y")
+ax.plot(time_hist_4, body_vel_ref_hist_4[:, 1], "g--", alpha=0.7, label="vb_y ref")
+ax.plot(time_hist_4, body_vel_hist_4[:, 2], "b-", label="vb_z")
+ax.plot(time_hist_4, body_vel_ref_hist_4[:, 2], "b--", alpha=0.7, label="vb_z ref")
+ax.axhline(0, color="k", linestyle="--", alpha=0.3)
+ax.set_ylabel("Body Velocity (m/s)")
+ax.set_ylim([-1.3, 1.3])
+ax.legend(loc="upper right", ncol=3, fontsize=7)
+ax.grid(True, alpha=0.3)
+
+# Body angular rate (tumble on all axes)
+ax = axes4[0, 1]
+ax.plot(time_hist_4, np.rad2deg(body_omega_hist_4[:, 0]), "r-", label="p")
+ax.plot(
+    time_hist_4,
+    np.rad2deg(body_omega_ref_hist_4[:, 0]),
+    "r--",
+    alpha=0.5,
+    label="p ref",
+)
+ax.plot(time_hist_4, np.rad2deg(body_omega_hist_4[:, 1]), "g-", label="q")
+ax.plot(
+    time_hist_4,
+    np.rad2deg(body_omega_ref_hist_4[:, 1]),
+    "g--",
+    alpha=0.5,
+    label="q ref",
+)
+ax.plot(time_hist_4, np.rad2deg(body_omega_hist_4[:, 2]), "b-", label="r")
+ax.plot(
+    time_hist_4,
+    np.rad2deg(body_omega_ref_hist_4[:, 2]),
+    "b--",
+    alpha=0.5,
+    label="r ref",
+)
+ax.axhline(0, color="k", linestyle="--", alpha=0.3)
+ax.set_ylabel("Body Angular Rate (deg/s)")
+ax.set_ylim([-65, 65])
+ax.legend(loc="upper right", ncol=3, fontsize=7)
+ax.grid(True, alpha=0.3)
+
+# Euler angles (tumbling on all axes)
+ax = axes4[1, 0]
+ax.plot(time_hist_4, euler_hist_4[:, 0], "r-", label="Roll", linewidth=1.5)
+ax.plot(time_hist_4, euler_hist_4[:, 1], "g-", label="Pitch", linewidth=1.5)
+ax.plot(time_hist_4, euler_hist_4[:, 2], "b-", label="Yaw", linewidth=1.5)
+ax.axhline(0, color="k", linestyle="--", alpha=0.3)
+ax.set_ylabel("Euler Angles (deg)")
+ax.set_ylim([-180, 180])
+ax.set_xlabel("Time (s)")
+ax.legend(loc="upper right")
+ax.grid(True, alpha=0.3)
+
+# Motor commands
+ax = axes4[1, 1]
+for ii in range(num_motors):
+    ax.plot(time_hist_4, cmd_hist_4[:, ii], alpha=0.7, label=f"u{ii}")
+ax.axhline(0, color="k", linestyle="--", alpha=0.3)
+ax.set_xlabel("Time (s)")
+ax.set_ylabel("Motor Commands")
+ax.set_ylim([-1.0, 1.0])
+ax.legend(loc="upper right", ncol=4, fontsize=7)
+ax.grid(True, alpha=0.3)
+
+plt.tight_layout()
+
+output_file_4 = output_dir / "indi_test4_helix_tumble_wind.png"
+plt.savefig(output_file_4, dpi=150)
+print(f"Test 4 figure saved to: {output_file_4}")
 
 
 plt.show()

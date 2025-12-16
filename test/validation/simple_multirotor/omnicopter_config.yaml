@@ -38,11 +38,11 @@ geo: !GeoParams
   front_area_m2: [0.01, 0.01, 0.01, 0.01]  # Not used (cd=0)
 
 prop: !PropParams
-  # LINEAR thrust model: T = T_max * u = 6.7 * u
+  # LINEAR thrust model: T = T_max * u = 9.375 * u (50% more than before)
   # For numpy.polynomial.Polynomial with coeffs [c0, c1]: T = c0 + c1*u
-  # YAML is in DESCENDING order [c1, c0], so poly_thrust: [6.7, 0.0]
-  # This gives T = 6.7*u + 0.0
-  poly_thrust: [6.25, 0.0]  # Linear: T = 6.7 * u (N), u in [-1, 1]
+  # YAML is in DESCENDING order [c1, c0], so poly_thrust: [9.375, 0.0]
+  # This gives T = 9.375*u + 0.0
+  poly_thrust: [9.375, 0.0]  # Linear: T = 9.375 * u (N), u in [-1, 1]
   
   # No reaction torque in low-fidelity model
   poly_torque: [0.0, 0.0]  # Q = 0 (torques only from thrust moment arms)
