@@ -51,7 +51,7 @@ from gncpy.control.INDI import INDI
 class MotorDynamicsEffector(Effector):
     """First-order motor dynamics with per-motor efficiency variation."""
 
-    MOTOR_EFFICIENCY = np.array([0.99, 1.01, 0.98, 1.02, 1.01, 0.99, 1.00, 0.98])
+    MOTOR_EFFICIENCY = np.array([0.99, 1.01, 0.98, 1.02, 1.01, 0.97, 1.00, 0.98])
 
     def __init__(self, num_motors, tau_mot, initial_state=None):
         self.num_motors = num_motors
@@ -66,10 +66,10 @@ class MotorDynamicsEffector(Effector):
 
     def step(self, input_cmds, dt):
         input_cmds = np.array(input_cmds).flatten()
-        scaled_cmds = input_cmds * self.MOTOR_EFFICIENCY[: self.num_motors]
+        scaled_cmds = input_cmds
         alpha = np.exp(-dt / self.tau_mot)
         self.state = scaled_cmds + (self.state - scaled_cmds) * alpha
-        return self.state.copy()
+        return self.state.copy() * self.MOTOR_EFFICIENCY[: self.num_motors]
 
 
 # ============================================================================
@@ -341,8 +341,8 @@ def main():
     FC_ALPHA = 5.0
 
     # Wind parameters
-    WIND_VELOCITY = np.array([8.0, 5.0, 1.0])
-    WIND_GUST_AMP = np.array([4.0, 3.0, 1.0])
+    WIND_VELOCITY = np.array([8.0, 12.0, 1.0])
+    WIND_GUST_AMP = np.array([4.0, 5.0, 1.0])
     WIND_GUST_FREQ = np.array([0.3, 0.4, 0.5])
 
     # Random seed for reproducibility

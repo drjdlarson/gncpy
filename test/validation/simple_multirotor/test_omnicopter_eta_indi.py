@@ -63,29 +63,33 @@ class EtaScalingMLP(nn.Module):
 # ============================================================================
 # Motor Dynamics Effector
 # ============================================================================
-class MotorDynamicsEffector(Effector):
-    """First-order motor dynamics with per-motor efficiency variation."""
+# class MotorDynamicsEffector(Effector):
+#     """First-order motor dynamics with per-motor efficiency variation."""
 
-    MOTOR_EFFICIENCY = np.array([0.99, 1.01, 0.98, 1.02, 1.01, 0.99, 1.00, 0.98])
+#     MOTOR_EFFICIENCY = np.array([0.99, 1.01, 0.98, 1.02, 1.01, 0.99, 1.00, 0.98])
 
-    def __init__(self, num_motors, tau_mot, initial_state=None):
-        self.num_motors = num_motors
-        self.tau_mot = tau_mot
-        self.state = (
-            np.array(initial_state).flatten().copy()
-            if initial_state is not None
-            else np.zeros(num_motors)
-        )
+#     def __init__(self, num_motors, tau_mot, initial_state=None):
+#         self.num_motors = num_motors
+#         self.tau_mot = tau_mot
+#         self.state = (
+#             np.array(initial_state).flatten().copy()
+#             if initial_state is not None
+#             else np.zeros(num_motors)
+#         )
 
-    def set_initial_state(self, initial_state):
-        self.state = np.array(initial_state).flatten().copy()
+#     def set_initial_state(self, initial_state):
+#         self.state = np.array(initial_state).flatten().copy()
 
-    def step(self, input_cmds, dt):
-        input_cmds = np.array(input_cmds).flatten()
-        scaled_cmds = input_cmds * self.MOTOR_EFFICIENCY[: self.num_motors]
-        alpha = np.exp(-dt / self.tau_mot)
-        self.state = scaled_cmds + (self.state - scaled_cmds) * alpha
-        return self.state.copy()
+#     def step(self, input_cmds, dt):
+#         input_cmds = np.array(input_cmds).flatten()
+#         scaled_cmds = input_cmds * self.MOTOR_EFFICIENCY[: self.num_motors]
+#         alpha = np.exp(-dt / self.tau_mot)
+#         self.state = scaled_cmds + (self.state - scaled_cmds) * alpha
+#         return self.state.copy()
+
+from generate_indi_training_data_v4 import (
+    MotorDynamicsEffector,
+)
 
 
 # ============================================================================

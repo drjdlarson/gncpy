@@ -16,10 +16,10 @@ FC_ACCEL (Hz),20.0
 FC_OMEGA (Hz),20.0
 FC_ALPHA (Hz),5.0
 Wind velocity N (m/s),8.0
-Wind velocity E (m/s),5.0
+Wind velocity E (m/s),12.0
 Wind velocity D (m/s),1.0
 Wind gust amplitude N (m/s),4.0
-Wind gust amplitude E (m/s),3.0
+Wind gust amplitude E (m/s),5.0
 Wind gust amplitude D (m/s),1.0
 Random seed,42
-Generation timestamp,2025-12-16 01:16:33
+Generation timestamp,2025-12-16 07:17:49

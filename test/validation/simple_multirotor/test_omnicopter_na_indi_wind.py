@@ -68,29 +68,31 @@ class ResidualMLP(nn.Module):
 # ============================================================================
 # Motor Dynamics Effector (same as training)
 # ============================================================================
-class MotorDynamicsEffector(Effector):
-    """First-order motor dynamics with per-motor efficiency variation."""
+# class MotorDynamicsEffector(Effector):
+#     """First-order motor dynamics with per-motor efficiency variation."""
 
-    MOTOR_EFFICIENCY = np.array([0.99, 1.01, 0.98, 1.02, 1.01, 0.99, 1.00, 0.98])
+#     MOTOR_EFFICIENCY = np.array([0.99, 1.01, 0.98, 1.02, 1.01, 0.99, 1.00, 0.98])
 
-    def __init__(self, num_motors, tau_mot, initial_state=None):
-        self.num_motors = num_motors
-        self.tau_mot = tau_mot
-        self.state = (
-            np.array(initial_state).flatten().copy()
-            if initial_state is not None
-            else np.zeros(num_motors)
-        )
+#     def __init__(self, num_motors, tau_mot, initial_state=None):
+#         self.num_motors = num_motors
+#         self.tau_mot = tau_mot
+#         self.state = (
+#             np.array(initial_state).flatten().copy()
+#             if initial_state is not None
+#             else np.zeros(num_motors)
+#         )
 
-    def set_initial_state(self, initial_state):
-        self.state = np.array(initial_state).flatten().copy()
+#     def set_initial_state(self, initial_state):
+#         self.state = np.array(initial_state).flatten().copy()
 
-    def step(self, input_cmds, dt):
-        input_cmds = np.array(input_cmds).flatten()
-        scaled_cmds = input_cmds * self.MOTOR_EFFICIENCY[: self.num_motors]
-        alpha = np.exp(-dt / self.tau_mot)
-        self.state = scaled_cmds + (self.state - scaled_cmds) * alpha
-        return self.state.copy()
+#     def step(self, input_cmds, dt):
+#         input_cmds = np.array(input_cmds).flatten()
+#         scaled_cmds = input_cmds * self.MOTOR_EFFICIENCY[: self.num_motors]
+#         alpha = np.exp(-dt / self.tau_mot)
+#         self.state = scaled_cmds + (self.state - scaled_cmds) * alpha
+#         return self.state.copy()
+
+from generate_indi_training_data import MotorDynamicsEffector
 
 
 # ============================================================================
@@ -124,8 +126,8 @@ FC_OMEGA = 20.0
 FC_ALPHA = 5.0
 
 # Wind (MUST match training)
-WIND_VELOCITY = np.array([8.0, 5.0, 1.0])
-WIND_GUST_AMP = np.array([4.0, 3.0, 1.0])
+WIND_VELOCITY = np.array([8.0, 12.0, 1.0])
+WIND_GUST_AMP = np.array([4.0, 5.0, 1.0])
 WIND_GUST_FREQ = np.array([0.3, 0.4, 0.5])
 
 np.random.seed(42)
@@ -398,7 +400,7 @@ def run_test(test_name, sim_time, ref_func, use_nn=False):
                 residual = predict_residual(
                     vel_filt, omega_filt, accel_filt, alpha_filt, quat, cur_input
                 )
-                x_dot_corrected = x_dot - residual
+                x_dot_corrected = x_dot + residual
             else:
                 # Baseline INDI: use measured x_dot directly
                 x_dot_corrected = x_dot
