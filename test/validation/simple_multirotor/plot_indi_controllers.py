@@ -5,6 +5,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+NEW_METHOD_NAME = "eta"
+
+
 def load_csv(path: Path):
     return np.loadtxt(path, delimiter=",", skiprows=1)
 
@@ -170,20 +173,22 @@ def plot_error_magnitudes(
 
     t = common_time(t_b, t_e)
 
-    vb_b = interp_matrix(t_b, vb_b, t)
-    vb_ref_b = interp_matrix(t_b, vb_ref_b, t)
-    om_b = interp_matrix(t_b, om_b, t)
-    om_ref_b = interp_matrix(t_b, om_ref_b, t)
+    if t.size != t_b.size or not np.allclose(t, t_b, rtol=0, atol=1e-12):
+        vb_b = interp_matrix(t_b, vb_b, t)
+        vb_ref_b = interp_matrix(t_b, vb_ref_b, t)
+        om_b = interp_matrix(t_b, om_b, t)
+        om_ref_b = interp_matrix(t_b, om_ref_b, t)
 
-    vb_e = interp_matrix(t_e, vb_e, t)
-    vb_ref_e = interp_matrix(t_e, vb_ref_e, t)
-    om_e = interp_matrix(t_e, om_e, t)
-    om_ref_e = interp_matrix(t_e, om_ref_e, t)
+    if t.size != t_e.size or not np.allclose(t, t_e, rtol=0, atol=1e-12):
+        vb_e = interp_matrix(t_e, vb_e, t)
+        vb_ref_e = interp_matrix(t_e, vb_ref_e, t)
+        om_e = interp_matrix(t_e, om_e, t)
+        om_ref_e = interp_matrix(t_e, om_ref_e, t)
 
-    e_vb_base = vb_b - vb_ref_b
-    e_vb_eta = vb_e - vb_ref_e
-    e_om_base = np.rad2deg(om_b - om_ref_b)
-    e_om_eta = np.rad2deg(om_e - om_ref_e)
+    e_vb_base = np.abs(vb_b - vb_ref_b)
+    e_vb_eta = np.abs(vb_e - vb_ref_e)
+    e_om_base = np.abs(np.rad2deg(om_b - om_ref_b))
+    e_om_eta = np.abs(np.rad2deg(om_e - om_ref_e))
 
     fig, axes = plt.subplots(2, 2, figsize=(12, 6.5), sharex=True)
 
