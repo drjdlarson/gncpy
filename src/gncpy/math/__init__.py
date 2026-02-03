@@ -905,6 +905,30 @@ def euler_to_quat(roll, pitch, yaw):
     return np.array([qw, qx, qy, qz])
 
 
+def quat_unique_axis(theta, axis):
+    """Create a quaternion representing a rotation about a unique axis.
+
+    Parameters
+    ----------
+    theta : float
+        Rotation angle in radians.
+    axis : numpy array
+        3D unit vector representing the axis of rotation.
+
+    Returns
+    -------
+    numpy array
+        Quaternion [qw, qx, qy, qz] representing the rotation.
+    """
+    half_theta = theta / 2.0
+    qw = np.cos(half_theta)
+    sin_half_theta = np.sin(half_theta)
+    qx = axis[0] * sin_half_theta
+    qy = axis[1] * sin_half_theta
+    qz = axis[2] * sin_half_theta
+    return np.array([qw, qx, qy, qz])
+
+
 def quat_slerp(q1, q2, t):
     """Spherical linear interpolation between two quaternions.
 
