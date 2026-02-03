@@ -22,6 +22,22 @@ def unpack_columns(data: np.ndarray):
     return t, vb, vb_ref, omega, omega_ref, motors
 
 
+def unpack_columns_no_degradation(data: np.ndarray):
+    """Unpack columns from csv_files format (no motor degradation tests).
+
+    Column order: t, pn_x, pn_y, pn_z, vb_x, vb_y, vb_z, vb_ref_x, vb_ref_y, vb_ref_z,
+                  omega_x, omega_y, omega_z, omega_ref_x, omega_ref_y, omega_ref_z,
+                  roll_deg, pitch_deg, yaw_deg, u0-u7, eta_F_0-eta_F_7, eta_M_0-eta_M_7
+    """
+    t = data[:, 0]
+    vb = data[:, 4:7]
+    vb_ref = data[:, 7:10]
+    omega = data[:, 10:13]
+    omega_ref = data[:, 13:16]
+    motors = data[:, 19:27]
+    return t, vb, vb_ref, omega, omega_ref, motors
+
+
 def interp_matrix(t_src: np.ndarray, X_src: np.ndarray, t_dst: np.ndarray):
     out = np.empty((t_dst.size, X_src.shape[1]))
     for i in range(X_src.shape[1]):
@@ -302,9 +318,69 @@ def plot_motor_commands(
     plt.close(fig)
 
 
+def plot_tracking_single_test(test_name: str, csv_path: Path, output_dir: Path):
+    """Figure 1 for single test (no degradation): Tracking with references (2 subplots, 1x2)"""
+    data = load_csv(csv_path)
+    t, vb, vb_ref, om, om_ref, _ = unpack_columns_no_degradation(data)
+
+    # Convert omega to deg/s
+    om = np.rad2deg(om)
+    om_ref = np.rad2deg(om_ref)
+
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5), sharex=True)
+
+    colors = ["r", "g", "b"]
+    vb_labels = ["x", "y", "z"]
+    omega_labels = ["p", "q", "r"]
+
+    # Left: vb tracking
+    ax = axes[0]
+    for i in range(3):
+        ax.plot(
+            t,
+            vb_ref[:, i],
+            "--",
+            color=colors[i],
+            alpha=0.7,
+            label=f"$v_{{b,{vb_labels[i]}}}$ ref",
+        )
+        ax.plot(t, vb[:, i], "-", color=colors[i], label=f"$v_{{b,{vb_labels[i]}}}$")
+    ax.set_ylabel("Body velocity (m/s)")
+    ax.set_xlabel("Time (s)")
+    ax.set_ylim([-1.3, 1.3])
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc="best", fontsize=8)
+
+    # Right: omega tracking
+    ax = axes[1]
+    for i in range(3):
+        ax.plot(
+            t,
+            om_ref[:, i],
+            "--",
+            color=colors[i],
+            alpha=0.7,
+            label=f"$\\omega_{{{omega_labels[i]}}}$ ref",
+        )
+        ax.plot(
+            t, om[:, i], "-", color=colors[i], label=f"$\\omega_{{{omega_labels[i]}}}$"
+        )
+    ax.set_ylabel("Angular rate (deg/s)")
+    ax.set_xlabel("Time (s)")
+    ax.set_ylim([-80, 80])
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc="best", fontsize=8)
+
+    add_panel_labels(axes)
+    fig.tight_layout()
+    fig.savefig(output_dir / f"{test_name}_no_degradation_fig1.png", dpi=150)
+    plt.close(fig)
+
+
 def main():
     base_dir = Path(__file__).parent
     results_dir = base_dir / "Final_Results"
+    csv_files_dir = base_dir / "csv_files"
     output_dir = base_dir / "pretty_data"
 
     if not results_dir.exists():
@@ -312,6 +388,7 @@ def main():
 
     output_dir.mkdir(exist_ok=True)
 
+    # Process Final_Results (motor degradation tests: baseline vs eta)
     csv_files = sorted(results_dir.glob("*.csv"))
     if not csv_files:
         raise FileNotFoundError(f"No CSV files found in {results_dir}")
@@ -331,7 +408,7 @@ def main():
     for base, d in sorted(groups.items()):
         if "baseline" not in d or "eta" not in d:
             continue
-        print(f"Plotting {base}...")
+        print(f"Plotting {base} (with motor degradation)...")
         plot_tracking_comparison(base, d["baseline"], d["eta"], output_dir)
         plot_error_magnitudes(base, d["baseline"], d["eta"], output_dir)
         plot_motor_commands(base, d["baseline"], d["eta"], output_dir)
@@ -340,7 +417,20 @@ def main():
     if not made_any:
         raise FileNotFoundError("No matched baseline/eta CSV pairs found.")
 
-    print(f"All plots saved in: {output_dir}")
+    # Process csv_files (no motor degradation tests: single INDI runs)
+    if csv_files_dir.exists():
+        single_csv_files = sorted(csv_files_dir.glob("indi_test*.csv"))
+        if single_csv_files:
+            print("\nProcessing tests without motor degradation...")
+            for csv_path in single_csv_files:
+                # Extract test name from filename (e.g., "indi_test1_circular_velocity_wind.csv" -> "test1")
+                stem = csv_path.stem
+                if stem.startswith("indi_test"):
+                    test_num = stem.split("_")[1]  # Extract "test1", "test2", etc.
+                    print(f"Plotting {test_num} (no motor degradation)...")
+                    plot_tracking_single_test(test_num, csv_path, output_dir)
+
+    print(f"\nAll plots saved in: {output_dir}")
 
 
 if __name__ == "__main__":
