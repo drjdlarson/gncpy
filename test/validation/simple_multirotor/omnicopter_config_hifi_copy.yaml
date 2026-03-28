@@ -80,3 +80,15 @@ motor: !ComplexMotorParams
     - [-0.21132487, -0.78867513, -0.57735027] # Motor 5: N col 6 = [-b, -a, -c]
     - [0.21132487, 0.78867513, -0.57735027]   # Motor 6: N col 7 = [b, a, -c]
     - [-0.78867513, 0.21132487, 0.57735027]   # Motor 7: N col 8 = [-a, b, c]
+
+
+
+# px4 cofiguration:
+# M1 pos: [1, -1 ,-1], rot: [0.79, 0.21, 0.58] pos spin: Clockwise
+# M2 pos: [-1, -1, -1], rot: [-0.21, 0.79, -0.58] pos spin: Clockwise
+# M3 pos: [1, 1, -1], rot: [-0.21, 0.79, 0.58] pos spin: CounterClockwise
+# M4 pos: [-1, 1, -1], rot: [0.79, 0.21, -0.58] pos spin: Clockwise
+# M5 pos: [1, -1, 1], rot: [0.79, 0.21, -0.58] pos spin: CounterClockwise
+# M6 pos: [-1, -1, 1], rot: [-0.21, 0.79, 0.58] pos spin: Clockwise
+# M7 pos: [1, 1, 1], rot: [-0.21, 0.79, -0.58] pos spin: Clockwise
+# M8 pos: [-1, 1, 1], rot: [0.79, 0.21, 0.58] pos spin: CounterClockwise
