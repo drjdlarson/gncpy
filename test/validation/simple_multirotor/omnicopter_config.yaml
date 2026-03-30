@@ -48,40 +48,31 @@ prop: !PropParams
   poly_torque: [0.0, 0.0]  # Q = 0 (torques only from thrust moment arms)
 
 motor: !ComplexMotorParams
-  # 8 motors at cube corners
-  # P matrix columns (scaled by 0.184/sqrt(3) = 0.106232 m):
-  #   Motor i: P[:,i] = 0.106232 * [±1, ±1, ±1]
-  # Pattern: [+,+,+], [-,+,+], [+,-,+], [-,-,+], [+,+,-], [-,+,-], [+,-,-], [-,-,-]
+  # 8 motors at cube corners using the PX4 omnicopter convention.
+  # Signs follow the PX4 layout, with each coordinate magnitude scaled to 0.14 m.
   pos_m:
-    - [0.1400, 0.1400, 0.1400]
-    - [-0.1400, 0.1400, 0.1400]
-    - [0.1400, -0.1400, 0.1400]
-    - [-0.1400, -0.1400, 0.1400]
-    - [0.1400, 0.1400, -0.1400]
-    - [-0.1400, 0.1400, -0.1400]
-    - [0.1400, -0.1400, -0.1400]
-    - [-0.1400, -0.1400, -0.1400]
+    - [0.1400, -0.1400, -0.1400]   # M1
+    - [-0.1400, -0.1400, -0.1400]  # M2
+    - [0.1400, 0.1400, -0.1400]    # M3
+    - [-0.1400, 0.1400, -0.1400]   # M4
+    - [0.1400, -0.1400, 0.1400]    # M5
+    - [-0.1400, -0.1400, 0.1400]   # M6
+    - [0.1400, 0.1400, 0.1400]     # M7
+    - [-0.1400, 0.1400, 0.1400]    # M8
 
+  # Rotation direction (sigma) using the existing convention:
+  #   +1 = counterclockwise about the thrust axis
+  #   -1 = clockwise about the thrust axis
+  dir: [-1, -1, 1, -1, 1, -1, -1, 1]
 
-      
-  
-  # Rotation direction (sigma): ALL SAME for balanced reaction torques
-  # Since sum(N) = [0,0,0], constant sigma gives sum(sigma*N) = 0
-  # This ensures reaction torques cancel at hover
-  dir: [1, 1, 1, 1, -1, -1, -1, -1] # Unsure if this is right
-  
-  # N matrix columns (thrust directions, unit vectors)
-  # a = 0.78867513, b = 0.21132487, c = 0.57735027
-  # N = [[-a, b, -b, a, a, -b, b, -a],
-  #      [b, a, -a, -b, -b, -a, a, b],
-  #      [c, -c, -c, c, c, -c, -c, c]]
+  # PX4 omnicopter rotor axis directions.
+  # These are normalized in code on load.
   thrust_dir:
-    - [-0.78867513, 0.21132487, 0.57735027]   # Motor 0: N col 1 = [-a, b, c]
-    - [0.21132487, 0.78867513, -0.57735027]   # Motor 1: N col 2 = [b, a, -c]
-    - [-0.21132487, -0.78867513, -0.57735027] # Motor 2: N col 3 = [-b, -a, -c]
-    - [0.78867513, -0.21132487, 0.57735027]   # Motor 3: N col 4 = [a, -b, c]
-    - [0.78867513, -0.21132487, 0.57735027]   # Motor 4: N col 5 = [a, -b, c]
-    - [-0.21132487, -0.78867513, -0.57735027] # Motor 5: N col 6 = [-b, -a, -c]
-    - [0.21132487, 0.78867513, -0.57735027]   # Motor 6: N col 7 = [b, a, -c]
-    - [-0.78867513, 0.21132487, 0.57735027]   # Motor 7: N col 8 = [-a, b, c]
-
+    - [0.79, 0.21, 0.58]    # M1
+    - [-0.21, 0.79, -0.58]  # M2
+    - [-0.21, 0.79, 0.58]   # M3
+    - [0.79, 0.21, -0.58]   # M4
+    - [0.79, 0.21, -0.58]   # M5
+    - [-0.21, 0.79, 0.58]   # M6
+    - [-0.21, 0.79, -0.58]  # M7
+    - [0.79, 0.21, 0.58]    # M8
