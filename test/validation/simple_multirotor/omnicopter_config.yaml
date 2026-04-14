@@ -63,7 +63,7 @@ motor: !ComplexMotorParams
   # Rotation direction (sigma) using the existing convention:
   #   +1 = counterclockwise about the thrust axis
   #   -1 = clockwise about the thrust axis
-  dir: [-1, -1, 1, -1, 1, -1, -1, 1]
+  dir: [1, 1, 1, 1, -1, -1, -1, -1]
 
   # PX4 omnicopter rotor axis directions.
   # These are normalized in code on load.
