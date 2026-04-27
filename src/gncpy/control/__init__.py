@@ -7,3 +7,4 @@ from gncpy.control._control import StateControl, StateControlParams
 from .lqr import LQR
 from .elqr import ELQR
 from .INDI import INDI
+from .pid import PID
