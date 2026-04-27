@@ -1,0 +1,71 @@
+mass:
+  mass_kg: 1.959
+  inertia_kgm2:
+    - [0.07151, 0.0, 0.014]
+    - [0.0, 0.08636, 0.0]
+    - [-0.014, 0.0, 0.15364]
+
+geometry:
+  wing_area_m2: 0.3097
+  wing_span_m: 1.27
+  mean_chord_m: 0.25
+  aero_center_m: [0.2175, 0.0, 0.046]
+
+environment:
+  density_kgpm3: 1.225
+  gravity_mps2: 9.80665
+
+propulsion:
+  pos_m: [-0.075, 0.0, 0.0]
+  thrust_axis: [0.9986295348, -0.0523359562, 0.0]
+  poly_ct: [-0.4314, 1.08, -0.896, 0.1089, 0.0604]
+  poly_cp: [0.5054, -0.5304, 0.0412, 0.01664, 0.0223]
+  prop_radius_m: 0.1524
+  omega_max_rad_s: 1256.0
+  omega_min_rad_s: 1.0
+  include_reaction_torque: false
+  rotation_dir: 1.0
+
+aero:
+  CL0: 0.1086
+  CL_alpha: 4.58
+  CL_delta_f: 0.7400
+  CL_delta_a: 0.4751
+  CL_delta_e: 0.0983
+  CL_alpha_dot: 1.9724
+  CL_q: 6.1639
+
+  CL_minD: 0.23
+  CD_min: 0.0434
+  CD_delta_f: 0.1467
+  CD_delta_e: 0.0135
+  CD_delta_a: 0.0302
+  CD_delta_r: 0.0303
+  oswald_eff: 0.75
+
+  CY_beta: -0.4889
+  CY_delta_a: 0.0
+  CY_delta_r: 0.1913
+  CY_p: -0.0375
+  CY_r: 0.1500
+
+  Cl_beta: -0.0545
+  Cl_delta_a: -0.1646
+  Cl_delta_f: -0.0692
+  Cl_delta_r: 0.0115
+  Cl_p: -0.4496
+  Cl_r: 0.1086
+
+  Cm0: -0.0278
+  Cm_alpha: -0.7230
+  Cm_delta_f: 0.0467
+  Cm_delta_a: 0.0467
+  Cm_delta_e: -0.8488
+  Cm_q: -13.5664
+
+  Cn_beta: 0.0723
+  Cn_delta_f: 0.0214
+  Cn_delta_a: 0.0574
+  Cn_delta_r: -0.1811
+  Cn_p: 0.1180
+  Cn_r: -0.1833
